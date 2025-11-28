@@ -273,7 +273,10 @@ function MainLayout() {
                 />
               } 
             />
-            <Route 
+            <Route path="/incidents/:id" element={<IncidentDetailsPage />} />
+
+
+            {/* <Route 
               path="/incidents/:id" 
               element={
                 selectedIncident ? (
@@ -285,7 +288,7 @@ function MainLayout() {
                   <div className="text-center p-8">Incident not found</div>
                 )
               } 
-            />
+            /> */}
             <Route 
               path="/alarms" 
               element={

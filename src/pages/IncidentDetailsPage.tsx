@@ -5,13 +5,26 @@ import { Badge } from "../components/ui/badge";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Separator } from "../components/ui/separator";
+import { useNavigate, useParams } from "react-router-dom";
+import { useGetIncidentByIdQuery } from "../apis/incidentsApi";
 
-interface IncidentDetailsPageProps {
-  incident: any;
-  onBack: () => void;
-}
 
-export default function IncidentDetailsPage({ incident, onBack }: IncidentDetailsPageProps) {
+export default function IncidentDetailsPage() {
+  const navigate = useNavigate();
+    const { id } = useParams<{ id: string }>();
+
+      // Fetch guard details from API
+      const { data: incidentResponse, isLoading, isError, error } = useGetIncidentByIdQuery(id || "", {
+        skip: !id, // Skip query if no id is provided
+      });
+    
+  const incident = incidentResponse?.data;
+  console.log("Incident Data:", incident);
+
+  const onBack = () => {
+    navigate("/incidents");
+  };
+  
   if (!incident) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -33,14 +46,7 @@ export default function IncidentDetailsPage({ incident, onBack }: IncidentDetail
     }
   };
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity.toLowerCase()) {
-      case "high": return "bg-red-100 text-red-800 border-red-200";
-      case "medium": return "bg-orange-100 text-orange-800 border-orange-200";
-      case "low": return "bg-gray-100 text-gray-800 border-gray-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
+
 
   const getReporterIcon = (reportedBy: string) => {
     switch (reportedBy.toLowerCase()) {
@@ -50,6 +56,17 @@ export default function IncidentDetailsPage({ incident, onBack }: IncidentDetail
       default: return <User className="h-5 w-5 text-gray-600" />;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+          <p className="mt-4 text-gray-600">Loading Incident Details...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -111,30 +128,16 @@ export default function IncidentDetailsPage({ incident, onBack }: IncidentDetail
                   <Label className="text-sm font-medium text-gray-600">Incident ID</Label>
                   <div className="text-2xl font-bold text-blue-600 mt-1">{incident.id}</div>
                 </div>
-                <div>
+                {/* <div>
                   <Label className="text-sm font-medium text-gray-600">Type</Label>
                   <div className="mt-1">
                     <Badge variant="outline" className="text-base px-3 py-1">
                       {incident.type}
                     </Badge>
                   </div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-600">Severity Level</Label>
-                  <div className="mt-1">
-                    <Badge className={`text-base px-3 py-1 ${getSeverityColor(incident.severity)}`}>
-                      {incident.severity}
-                    </Badge>
-                  </div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-600">Priority</Label>
-                  <div className="mt-1">
-                    <Badge variant="outline" className="text-base px-3 py-1">
-                      Level {incident.priorityLevel}
-                    </Badge>
-                  </div>
-                </div>
+                </div> */}
+                
+                
               </div>
 
               <Separator />
@@ -148,9 +151,9 @@ export default function IncidentDetailsPage({ incident, onBack }: IncidentDetail
                     <div className="flex-1">
                       <div className="font-medium text-lg">{incident.site}</div>
                       <div className="text-gray-600 mt-1">{incident.location?.name}</div>
-                      {incident.location?.coordinates && (
+                      {incident.location?.coordinates && typeof incident.location.coordinates === 'object' && (
                         <div className="text-sm text-gray-500 mt-2 font-mono">
-                          GPS: {incident.location.coordinates.lat.toFixed(6)}, {incident.location.coordinates.lng.toFixed(6)}
+                          GPS: {(incident.location.coordinates as any).lat?.toFixed(6)}, {(incident.location.coordinates as any).lng?.toFixed(6)}
                         </div>
                       )}
                     </div>
@@ -280,14 +283,8 @@ export default function IncidentDetailsPage({ incident, onBack }: IncidentDetail
               </div>
               
               <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="p-3 bg-white rounded border">
-                  <div className="text-xs text-gray-500">Severity</div>
-                  <div className="font-medium mt-1">{incident.severity}</div>
-                </div>
-                <div className="p-3 bg-white rounded border">
-                  <div className="text-xs text-gray-500">Priority</div>
-                  <div className="font-medium mt-1">Level {incident.priorityLevel}</div>
-                </div>
+                
+                
               </div>
             </CardContent>
           </Card>

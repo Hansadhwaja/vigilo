@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from "react";
+
+
+import React, { useState, useMemo, useEffect } from "react";
 import { Plus, Calendar as CalendarIcon, Clock, User, MapPin, Edit, Trash2, Eye, Bell, Repeat, Filter, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -13,6 +15,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Checkbox } from "../components/ui/checkbox";
 import { Calendar } from "../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
+import { useGetAllGuardsQuery } from "../apis/guardsApi";
+import { useCreateScheduleMutation, useGetAllSchedulesQuery } from "../apis/schedulingAPI";
+import { useGetAllOrdersQuery } from "../apis/ordersApi";
+import { toast } from "sonner";
 
 // Helper to get current week dates
 const getCurrentWeekDates = () => {
@@ -30,303 +36,10 @@ const getCurrentWeekDates = () => {
   
   return dates;
 };
-
 const currentWeek = getCurrentWeekDates();
 
-// Order list (previously clientList)
-const orderList = [
-  { id: "o1", name: "Metropolitan Bank Security", type: "Corporate" },
-  { id: "o2", name: "Shopping Mall Patrol", type: "Retail" },
-  { id: "o3", name: "Tech Park Security", type: "Corporate" },
-  { id: "o4", name: "Industrial Site Protection", type: "Industrial" },
-  { id: "o5", name: "University Campus Guard", type: "Education" },
-  { id: "o6", name: "Medical Center Security", type: "Healthcare" }
-];
 
-// Sample schedule data for current week
-const sampleScheduleData = [
-  {
-    id: "SCH-001",
-    date: currentWeek[0], // Sunday
-    guards: [
-      { 
-        id: "g1", 
-        name: "A. Khan", 
-        role: "Static", 
-        time: "06:00-14:00", 
-        orderId: "o1",
-        orderName: "Metropolitan Bank Security",
-        description: "Main entrance security duty",
-        status: "Scheduled"
-      },
-      { 
-        id: "g2", 
-        name: "S. Singh", 
-        role: "Patrol", 
-        time: "08:00-16:00", 
-        orderId: "o2",
-        orderName: "Shopping Mall Patrol",
-        description: "Regular patrol rounds",
-        status: "Scheduled"
-      },
-      { 
-        id: "g5", 
-        name: "L. Rodriguez", 
-        role: "Static", 
-        time: "14:00-22:00", 
-        orderId: "o1",
-        orderName: "Metropolitan Bank Security",
-        description: "Evening shift coverage",
-        status: "Scheduled"
-      }
-    ]
-  },
-  {
-    id: "SCH-002",
-    date: currentWeek[1], // Monday
-    guards: [
-      { 
-        id: "g1", 
-        name: "A. Khan", 
-        role: "Static", 
-        time: "06:00-14:00", 
-        orderId: "o1",
-        orderName: "Metropolitan Bank Security",
-        description: "Morning security operations",
-        status: "Scheduled"
-      },
-      { 
-        id: "g4", 
-        name: "J. Ali", 
-        role: "Patrol", 
-        time: "06:00-14:00", 
-        orderId: "o4",
-        orderName: "Industrial Site Protection",
-        description: "Site perimeter patrol",
-        status: "Scheduled"
-      },
-      { 
-        id: "g2", 
-        name: "S. Singh", 
-        role: "Static", 
-        time: "10:00-18:00", 
-        orderId: "o2",
-        orderName: "Shopping Mall Patrol",
-        description: "Day shift monitoring",
-        status: "Scheduled"
-      },
-      { 
-        id: "g5", 
-        name: "L. Rodriguez", 
-        role: "Static", 
-        time: "14:00-22:00", 
-        orderId: "o1",
-        orderName: "Metropolitan Bank Security",
-        description: "Afternoon security duty",
-        status: "Scheduled"
-      },
-      { 
-        id: "g3", 
-        name: "M. Chen", 
-        role: "Static", 
-        time: "22:00-06:00", 
-        orderId: "o3",
-        orderName: "Tech Park Security",
-        description: "Night security operations",
-        status: "Scheduled"
-      }
-    ]
-  },
-  {
-    id: "SCH-003", 
-    date: currentWeek[2], // Tuesday
-    guards: [
-      { 
-        id: "g1", 
-        name: "A. Khan", 
-        role: "Static", 
-        time: "06:00-14:00", 
-        orderId: "o1",
-        orderName: "Metropolitan Bank Security",
-        description: "Morning shift",
-        status: "Active"
-      },
-      { 
-        id: "g2", 
-        name: "S. Singh", 
-        role: "Patrol", 
-        time: "08:00-16:00", 
-        orderId: "o2",
-        orderName: "Shopping Mall Patrol",
-        description: "Patrol duties",
-        status: "Active"
-      },
-      { 
-        id: "g4", 
-        name: "J. Ali", 
-        role: "Patrol", 
-        time: "10:00-18:00", 
-        orderId: "o6",
-        orderName: "Medical Center Security",
-        description: "Hospital perimeter patrol",
-        status: "Scheduled"
-      },
-      { 
-        id: "g5", 
-        name: "L. Rodriguez", 
-        role: "Static", 
-        time: "14:00-22:00", 
-        orderId: "o1",
-        orderName: "Metropolitan Bank Security",
-        description: "Evening shift",
-        status: "Scheduled"
-      }
-    ]
-  },
-  {
-    id: "SCH-004", 
-    date: currentWeek[3], // Wednesday
-    guards: [
-      { 
-        id: "g2", 
-        name: "S. Singh", 
-        role: "Static", 
-        time: "06:00-14:00", 
-        orderId: "o1",
-        orderName: "Metropolitan Bank Security",
-        description: "Morning operations",
-        status: "Scheduled"
-      },
-      { 
-        id: "g1", 
-        name: "A. Khan", 
-        role: "Patrol", 
-        time: "08:00-16:00", 
-        orderId: "o4",
-        orderName: "Industrial Site Protection",
-        description: "Industrial site patrol",
-        status: "Scheduled"
-      },
-      { 
-        id: "g4", 
-        name: "J. Ali", 
-        role: "Patrol", 
-        time: "14:00-22:00", 
-        orderId: "o5",
-        orderName: "University Campus Guard",
-        description: "Campus security patrol",
-        status: "Scheduled"
-      }
-    ]
-  },
-  {
-    id: "SCH-005", 
-    date: currentWeek[4], // Thursday
-    guards: [
-      { 
-        id: "g1", 
-        name: "A. Khan", 
-        role: "Static", 
-        time: "06:00-14:00", 
-        orderId: "o3",
-        orderName: "Tech Park Security",
-        description: "Tech park entrance security",
-        status: "Scheduled"
-      },
-      { 
-        id: "g3", 
-        name: "M. Chen", 
-        role: "Static", 
-        time: "08:00-16:00", 
-        orderId: "o6",
-        orderName: "Medical Center Security",
-        description: "Hospital main entrance",
-        status: "Scheduled"
-      },
-      { 
-        id: "g2", 
-        name: "S. Singh", 
-        role: "Patrol", 
-        time: "10:00-18:00", 
-        orderId: "o2",
-        orderName: "Shopping Mall Patrol",
-        description: "Mall security patrol",
-        status: "Scheduled"
-      }
-    ]
-  },
-  {
-    id: "SCH-006", 
-    date: currentWeek[5], // Friday
-    guards: [
-      { 
-        id: "g1", 
-        name: "A. Khan", 
-        role: "Static", 
-        time: "06:00-14:00", 
-        orderId: "o1",
-        orderName: "Metropolitan Bank Security",
-        description: "Morning security",
-        status: "Scheduled"
-      },
-      { 
-        id: "g2", 
-        name: "S. Singh", 
-        role: "Static", 
-        time: "06:00-14:00", 
-        orderId: "o2",
-        orderName: "Shopping Mall Patrol",
-        description: "Shopping center security",
-        status: "Scheduled"
-      },
-      { 
-        id: "g4", 
-        name: "J. Ali", 
-        role: "Patrol", 
-        time: "10:00-18:00", 
-        orderId: "o6",
-        orderName: "Medical Center Security",
-        description: "Medical facility patrol",
-        status: "Scheduled"
-      }
-    ]
-  },
-  {
-    id: "SCH-007", 
-    date: currentWeek[6], // Saturday
-    guards: [
-      { 
-        id: "g1", 
-        name: "A. Khan", 
-        role: "Patrol", 
-        time: "06:00-14:00", 
-        orderId: "o2",
-        orderName: "Shopping Mall Patrol",
-        description: "Weekend patrol",
-        status: "Scheduled"
-      },
-      { 
-        id: "g2", 
-        name: "S. Singh", 
-        role: "Static", 
-        time: "08:00-16:00", 
-        orderId: "o3",
-        orderName: "Tech Park Security",
-        description: "Tech park security",
-        status: "Scheduled"
-      }
-    ]
-  }
-];
 
-const availableGuards = [
-  { id: "g1", name: "A. Khan", roles: ["Static", "Patrol"], licences: ["VIC Sec", "First Aid"] },
-  { id: "g2", name: "S. Singh", roles: ["Static", "Patrol"], licences: ["VIC Sec"] },
-  { id: "g3", name: "M. Chen", roles: ["Static"], licences: ["VIC Sec", "WWCC"] },
-  { id: "g4", name: "J. Ali", roles: ["Patrol"], licences: ["NSW Sec"] },
-  { id: "g5", name: "Lisa Rodriguez", roles: ["Static", "Patrol"], licences: ["VIC Sec", "First Aid"] },
-  { id: "g6", name: "David Wilson", roles: ["Patrol"], licences: ["VIC Sec"] }
-];
 
 const upcomingReminders = [
   {
@@ -347,7 +60,7 @@ const upcomingReminders = [
 
 export default function SchedulingPage() {
   const today = new Date();
-  const [scheduleData, setScheduleData] = useState(sampleScheduleData);
+  // const [scheduleData, setScheduleData] = useState(sampleScheduleData);
   const [selectedDate, setSelectedDate] = useState<Date>(today);
   const [currentMonth, setCurrentMonth] = useState<Date>(today);
   const [reminders] = useState(upcomingReminders);
@@ -356,12 +69,52 @@ export default function SchedulingPage() {
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
   const [showAlertsDialog, setShowAlertsDialog] = useState(false);
   const [viewMode, setViewMode] = useState<"weekly" | "daily">("weekly");
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const itemsPerPage = 5;
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+    
   
   // Filter states
   const [filterOrder, setFilterOrder] = useState("all");
   const [filterGuard, setFilterGuard] = useState("all");
   const [filterRole, setFilterRole] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [createSchedule, { isLoading: isCreating }] = useCreateScheduleMutation();
+
+// Convert JS Date + Time to ISO or backend-friendly "YYYY-MM-DD HH:mm"
+const combineDateAndTime = (date: Date, time: string) => {
+  const [hours, minutes] = time.split(":");
+  const newDate = new Date(date);
+  newDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+  return newDate.toISOString();
+};
+
+const handleCreateSchedule = async () => {
+  try {
+    const payload = {
+      description: formData.description,
+      date: formData.date.toISOString(),               // convert JS Date → string
+      orderId: formData.orderId,                          // because API expects "site"
+      guardIds: formData.guardIds,               // string[]
+      startTime:  formData.startTime,
+      endTime:formData.endTime,
+    };
+
+    console.log("Sending payload:", payload);
+
+    const res = await createSchedule(payload).unwrap();
+
+    toast.success("Schedule created successfully!");
+    setShowCreateDialog(false);
+  } catch (err: any) {
+    console.error(err);
+    toast.error(err?.data?.message || "Failed to create schedule");
+  }
+};
+
+
+  
 
   // Form states
   const [formData, setFormData] = useState({
@@ -375,20 +128,74 @@ export default function SchedulingPage() {
     recurring: "none"
   });
 
-  // Calculate metrics
-  const metrics = useMemo(() => {
-    const allAssignments = scheduleData.flatMap(day => day.guards);
-    const todayAssignments = scheduleData.find(day => 
-      day.date.toDateString() === today.toDateString()
-    )?.guards || [];
+    const { data: schedulingResponse } = useGetAllSchedulesQuery(
+     );
+   
+     // Extract schedule data from API response
+     const schedule = schedulingResponse?.data || [];
+     console.log("Fetched Schedules:", schedule);
+  
+
+  // Debounce search input
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setDebouncedSearch(searchTerm);
+        if (currentPage !== 1) {
+          setCurrentPage(1); // Reset to first page only when search changes, not on mount
+        }
+      }, 500); // 500ms delay
+  
+      return () => clearTimeout(timer);
+    }, [searchTerm]); // Removed currentPage from dependencies
+  
+    // Fetch guards from API with pagination and search
+    const { data: guardsResponse, isLoading, isError, error, isFetching } = useGetAllGuardsQuery(
+      {
+        limit: itemsPerPage,
+        page: currentPage,
+        search: debouncedSearch || undefined,
+      },
+      {
+        // Refetch when any parameter changes
+        refetchOnMountOrArgChange: true,
+      }
+    );
+  
+    // Extract guards data from API response
+    const guards = guardsResponse?.data || [];
+
+    //fetch orders from API
+    const { data: ordersResponse } = useGetAllOrdersQuery();
+    const orders = ordersResponse?.data || [];
+
+    const scheduleData = useMemo(() => {
+  return (schedule || []).map(item => ({
+    ...item,
+    date: new Date(item.startTime),  // derive date from startTime
+    start: new Date(item.startTime),
+    end: new Date(item.endTime)
+  }));
+}, [schedule]);
+
+
     
-    return {
-      activeShifts: todayAssignments.filter(g => g.status === "Active").length,
-      scheduledToday: todayAssignments.length,
-      totalThisWeek: allAssignments.length,
-      patrolsActive: allAssignments.filter(g => g.role === "Patrol" && g.status === "Active").length
-    };
-  }, [scheduleData]);
+
+  // Calculate metrics
+ const metrics = useMemo(() => {
+  const allAssignments = scheduleData.flatMap(s => s.guards);
+
+  const todayAssignments = scheduleData.filter(s =>
+    s.date.toDateString() === today.toDateString()
+  ).flatMap(s => s.guards);
+
+  return {
+    activeShifts: todayAssignments.filter(g => g.StaticGuards?.status === "active").length,
+    scheduledToday: todayAssignments.length,
+    totalThisWeek: allAssignments.length,
+     patrolsActive: allAssignments.filter(g => g.role === "Patrol" && g.StaticGuards?.status === "active").length,
+  };
+}, [scheduleData]);
+
 
   // Get assignments for selected date with filters
   const getFilteredAssignments = (date: Date) => {
@@ -452,65 +259,65 @@ export default function SchedulingPage() {
     setShowEditDialog(true);
   };
 
-  const handleSaveAssignment = () => {
-    const order = orderList.find(o => o.id === formData.orderId);
+  // const handleSaveAssignment = () => {
+  //   const order = orders.find(o => o.id === formData.orderId);
     
-    if (formData.guardIds.length === 0 || !order) return;
+  //   if (formData.guardIds.length === 0 || !order) return;
 
     // Create assignments for each selected guard
-    const newAssignments = formData.guardIds
-      .map(guardId => {
-        const guard = availableGuards.find(g => g.id === guardId);
-        if (!guard) return null;
+  //   const newAssignments = formData.guardIds
+  //     .map(guardId => {
+  //       const guard = guards.find(g => g.id === guardId);
+  //       if (!guard) return null;
 
-        return {
-          id: guardId,
-          name: guard.name,
-          role: formData.role,
-          time: `${formData.startTime}-${formData.endTime}`,
-          orderId: formData.orderId,
-          orderName: order.name,
-          description: formData.description,
-          status: "Scheduled"
-        };
-      })
-      .filter((assignment): assignment is NonNullable<typeof assignment> => assignment !== null);
+  //       return {
+  //         id: guardId,
+  //         name: guard.name,
+  //         role: formData.role,
+  //         time: `${formData.startTime}-${formData.endTime}`,
+  //         orderId: formData.orderId,
+  //         orderName: order.locationAddress,
+  //         description: formData.description,
+  //         status: "Scheduled"
+  //       };
+  //     })
+  //     .filter((assignment): assignment is NonNullable<typeof assignment> => assignment !== null);
 
-    setScheduleData(prev => {
-      const dateKey = formData.date.toDateString();
-      const existingDayIndex = prev.findIndex(day => day.date.toDateString() === dateKey);
+  //   setScheduleData(prev => {
+  //     const dateKey = formData.date.toDateString();
+  //     const existingDayIndex = prev.findIndex(day => day.date.toDateString() === dateKey);
       
-      if (existingDayIndex >= 0) {
-        const updatedDay = { ...prev[existingDayIndex] };
-        updatedDay.guards = [...updatedDay.guards, ...newAssignments];
-        const newData = [...prev];
-        newData[existingDayIndex] = updatedDay;
-        return newData;
-      } else {
-        return [...prev, {
-          id: `SCH-${Date.now()}`,
-          date: new Date(formData.date),
-          guards: newAssignments
-        }];
-      }
-    });
+  //     if (existingDayIndex >= 0) {
+  //       const updatedDay = { ...prev[existingDayIndex] };
+  //       updatedDay.guards = [...updatedDay.guards, ...newAssignments];
+  //       const newData = [...prev];
+  //       newData[existingDayIndex] = updatedDay;
+  //       return newData;
+  //     } else {
+  //       return [...prev, {
+  //         id: `SCH-${Date.now()}`,
+  //         date: new Date(formData.date),
+  //         guards: newAssignments
+  //       }];
+  //     }
+  //   });
 
-    setShowCreateDialog(false);
-  };
+  //   setShowCreateDialog(false);
+  // };
 
-  const handleDeleteAssignment = (assignmentId: string, date: Date) => {
-    setScheduleData(prev => {
-      return prev.map(day => {
-        if (day.date.toDateString() === date.toDateString()) {
-          return {
-            ...day,
-            guards: day.guards.filter(g => g.id !== assignmentId || g.time !== selectedAssignment?.time)
-          };
-        }
-        return day;
-      }).filter(day => day.guards.length > 0);
-    });
-  };
+  // const handleDeleteAssignment = (assignmentId: string, date: Date) => {
+  //   setScheduleData(prev => {
+  //     return prev.map(day => {
+  //       if (day.date.toDateString() === date.toDateString()) {
+  //         return {
+  //           ...day,
+  //           guards: day.guards.filter(g => g.id !== assignmentId || g.time !== selectedAssignment?.time)
+  //         };
+  //       }
+  //       return day;
+  //     }).filter(day => day.guards.length > 0);
+  //   });
+  // };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -565,18 +372,23 @@ export default function SchedulingPage() {
   ];
   
   // Helper function to get assignments for a specific day and time
-  const getAssignmentsForSlot = (date: Date, timeSlot: string) => {
-    const dayData = scheduleData.find(day => 
-      day.date.toDateString() === date.toDateString()
-    );
-    
-    if (!dayData) return [];
-    
-    return dayData.guards.filter(assignment => {
-      const [startTime] = assignment.time.split('-');
-      return startTime === timeSlot;
-    });
-  };
+ const getAssignmentsForSlot = (date: Date, timeSlot: string) => {
+  const dayData = scheduleData.find(day => 
+    new Date(day.date).toDateString() === date.toDateString()
+  );
+
+  if (!dayData) return [];
+
+  return dayData.guards.filter(assignment => {
+    //  backend returns ISO strings:
+    // "startTime": "2025-11-28T11:25:00.000Z"
+    const assignmentStart = new Date(dayData.startTime)
+      .toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+
+    return assignmentStart === timeSlot;
+  });
+};
+
 
   // Navigation helpers
   const navigateWeek = (direction: number) => {
@@ -653,8 +465,8 @@ export default function SchedulingPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Orders</SelectItem>
-              {orderList.map(order => (
-                <SelectItem key={order.id} value={order.id}>{order.name}</SelectItem>
+              {orders.map(order => (
+                <SelectItem key={order.id} value={order.id}>{order.locationAddress}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -664,7 +476,7 @@ export default function SchedulingPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Guards</SelectItem>
-              {availableGuards.map(guard => (
+              {guards.map(guard => (
                 <SelectItem key={guard.id} value={guard.id}>{guard.name}</SelectItem>
               ))}
             </SelectContent>
@@ -890,7 +702,7 @@ export default function SchedulingPage() {
                                               'bg-teal-200 text-teal-900'
                                             }
                                           `}>
-                                            {assignment.orderName}
+                                            {assignment.description}
                                           </div>
                                         </div>
                                       </div>
@@ -900,7 +712,7 @@ export default function SchedulingPage() {
                                   <div className="flex items-center justify-between pt-2">
                                     <Badge 
                                       variant="outline" 
-                                      className={`text-xs ${getStatusColor(assignment.status)}`}
+                                      className={`text-xs ${getStatusColor(assignment.StaticGuards.status)}`}
                                     >
                                       {assignment.status}
                                     </Badge>
@@ -920,10 +732,10 @@ export default function SchedulingPage() {
                                         variant="ghost"
                                         size="sm"
                                         className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
-                                        onClick={(e:any) => {
-                                          e.stopPropagation();
-                                          handleDeleteAssignment(assignment.id, selectedDate);
-                                        }}
+                                        // onClick={(e:any) => {
+                                        //   e.stopPropagation();
+                                        //   handleDeleteAssignment(assignment.id, selectedDate);
+                                        // }}
                                       >
                                         <Trash2 className="h-3 w-3" />
                                       </Button>
@@ -970,7 +782,7 @@ export default function SchedulingPage() {
                               }
                             `}
                           >
-                            {assignment?.orderName}
+                            {assignment?.description || orderId}
                           </div>
                         );
                       })}
@@ -1113,14 +925,14 @@ export default function SchedulingPage() {
                                   e.stopPropagation();
                                   handleEditAssignment(assignment);
                                 }}
-                                title={`${assignment.name} - ${assignment.orderName}`}
+                                title={`${assignment.name} - ${assignment.description || ''}`}
                               >
                                 <div className="font-medium truncate">{assignment.name}</div>
-                                <div className="text-xs opacity-80 truncate">{assignment.orderName}</div>
+                                <div className="text-xs opacity-80 truncate">{assignment.description}</div>
                                 <div className="flex items-center gap-1 mt-1">
                                   <Badge 
                                     variant="outline" 
-                                    className={`text-xs px-1 py-0 ${getStatusColor(assignment.status)}`}
+                                    className={`text-xs px-1 py-0 ${getStatusColor(assignment.StaticGuards.status)}`}
                                   >
                                     {assignment.status}
                                   </Badge>
@@ -1174,9 +986,9 @@ export default function SchedulingPage() {
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="h-4 w-4 text-green-500" />
-                    <span className="text-gray-600">
-                      {getFilteredAssignments(selectedDate).filter(a => a.status === 'Active').length} active
-                    </span>
+                    {/* <span className="text-gray-600">
+                      {getFilteredAssignments(selectedDate).filter(a => a.StaticGuards.status === 'Active').length} active
+                    </span> */}
                   </div>
                 </div>
               </div>
@@ -1293,9 +1105,9 @@ export default function SchedulingPage() {
                   <SelectValue placeholder="Select order" />
                 </SelectTrigger>
                 <SelectContent>
-                  {orderList.map(order => (
+                  {orders.map(order => (
                     <SelectItem key={order.id} value={order.id}>
-                      {order.name}
+                      {order.locationAddress}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1305,10 +1117,10 @@ export default function SchedulingPage() {
             <div className="col-span-2">
               <Label>Select Guards (Multiple)</Label>
               <div className="border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto bg-gray-50">
-                {availableGuards.map(guard => (
+                {guards.map(guard => (
                   <div key={guard.id} className="flex items-center space-x-2">
                     <Checkbox
-                      id={`guard-${guard.id}`}
+                      id={`${guard.id}`}
                       checked={formData.guardIds.includes(guard.id)}
                       onCheckedChange={(checked:any) => {
                         if (checked) {
@@ -1328,7 +1140,7 @@ export default function SchedulingPage() {
                       htmlFor={`edit-guard-${guard.id}`}
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                     >
-                      {guard.name} - {guard.roles.join(", ")} ({guard.licences.join(", ")})
+                      {guard.name} - {Array.isArray((guard as any).roles) ? (guard as any).roles.join(", ") : ((guard as any).role ?? "N/A")} ({Array.isArray((guard as any).licences) ? (guard as any).licences.join(", ") : ((guard as any).licence ?? "N/A")})
                     </label>
                   </div>
                 ))}
@@ -1368,12 +1180,12 @@ export default function SchedulingPage() {
           <div className="flex justify-between pt-4">
             <Button 
               variant="destructive" 
-              onClick={() => {
-                if (selectedAssignment) {
-                  handleDeleteAssignment(selectedAssignment.id, selectedDate);
-                  setShowEditDialog(false);
-                }
-              }}
+              // onClick={() => {
+              //   if (selectedAssignment) {
+              //     handleDeleteAssignment(selectedAssignment.id, selectedDate);
+              //     setShowEditDialog(false);
+              //   }
+              // }}
             >
               Delete Assignment
             </Button>
@@ -1381,12 +1193,10 @@ export default function SchedulingPage() {
               <Button variant="outline" onClick={() => setShowEditDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => {
-                // Handle update logic here
-                setShowEditDialog(false);
-              }}>
-                Update Assignment
-              </Button>
+              <Button onClick={handleCreateSchedule} disabled={isCreating}>
+  {isCreating ? "Saving..." : "Create Assignment"}
+</Button>
+
             </div>
           </div>
         </DialogContent>

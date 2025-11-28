@@ -7,6 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
+import { useGetAllIncidentsQuery } from "../apis/incidentsApi";
+import { useNavigate } from "react-router-dom";
+
 
 interface IncidentsPageProps {
   list: any[];
@@ -19,8 +22,25 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
   const [searchTerm, setSearchTerm] = React.useState("");
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 5;
+  const navigate = useNavigate();
+
+  //fetch incidents from api
+  const { data: incidentsResponse, isLoading, isError, error, isFetching } = useGetAllIncidentsQuery(
+      {
+        limit: itemsPerPage,
+        page: currentPage,
+        status: filter === "all" ? undefined : filter,
+      },
+      {
+        // Refetch when any parameter changes
+        refetchOnMountOrArgChange: true,
+      }
+    );
+  const incident = incidentsResponse?.data || [];
+  console.log("Fetched Incidents:", incident);
+  console.log("Incidents Name:", incident[0]?.location?.name);
   
-  const filtered = list.filter((i: any) => {
+  const filtered = incident.filter((i: any) => {
     const matchesFilter = filter === "all" ? true : i.status.toLowerCase() === filter.toLowerCase();
     const matchesSearch = searchTerm === "" ? true : 
       i.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -30,13 +50,18 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
     return matchesFilter && matchesSearch;
   });
 
+  const handleViewDetails = (incidentId: string) => {
+    navigate(`/incidents/${incidentId}`);
+  };
+
   // Pagination logic
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentIncidents = filtered.slice(startIndex, endIndex);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status?: string) => {
+  if (!status) return "bg-gray-100 text-gray-800";
     switch (status.toLowerCase()) {
       case "pending": return "bg-yellow-100 text-yellow-800";
       case "resolved": return "bg-green-100 text-green-800";
@@ -45,14 +70,16 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
     }
   };
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity.toLowerCase()) {
-      case "high": return "bg-red-100 text-red-800";
-      case "medium": return "bg-orange-100 text-orange-800";
-      case "low": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
-    }
-  };
+  const getSeverityColor = (severity?: string) => {
+  if (!severity) return "bg-gray-100 text-gray-800";
+  switch (severity.toLowerCase()) {
+    case "high": return "bg-red-100 text-red-800";
+    case "medium": return "bg-orange-100 text-orange-800";
+    case "low": return "bg-gray-100 text-gray-800";
+    default: return "bg-gray-100 text-gray-800";
+  }
+};
+
 
   const getReporterIcon = (reportedBy: string) => {
     switch (reportedBy.toLowerCase()) {
@@ -62,6 +89,18 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
       default: return <User className="h-4 w-4 text-gray-600" />;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+          <p className="mt-4 text-gray-600">Loading Incidents...</p>
+        </div>
+      </div>
+    );
+  }
+  
   
   return (
     <div className="space-y-4">
@@ -78,7 +117,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
         <div className="flex items-center gap-2 bg-yellow-50 px-3 py-2 rounded-lg border border-yellow-200">
           <Clock className="h-5 w-5 text-yellow-600" />
           <div>
-            <div className="font-bold text-yellow-700">{list.filter(i => i.status === "Pending").length}</div>
+            <div className="font-bold text-yellow-700">{incident.filter(i => i.status === "Pending").length}</div>
             <div className="text-xs text-yellow-600">Pending</div>
           </div>
         </div>
@@ -86,7 +125,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
         <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
           <CheckCircle className="h-5 w-5 text-green-600" />
           <div>
-            <div className="font-bold text-green-700">{list.filter(i => i.status === "Resolved").length}</div>
+            <div className="font-bold text-green-700">{incident.filter(i => i.status === "Resolved").length}</div>
             <div className="text-xs text-green-600">Resolved</div>
           </div>
         </div>
@@ -94,7 +133,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
         <div className="flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
           <AlertTriangle className="h-5 w-5 text-red-600" />
           <div>
-            <div className="font-bold text-red-700">{list.filter(i => i.severity === "High").length}</div>
+            <div className="font-bold text-red-700">{incident.filter(i => i.severity === "High").length}</div>
             <div className="text-xs text-red-600">High Priority</div>
           </div>
         </div>
@@ -102,7 +141,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
         <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
           <Calendar className="h-5 w-5 text-blue-600" />
           <div>
-            <div className="font-bold text-blue-700">{list.filter(i => {
+            <div className="font-bold text-blue-700">{incident.filter(i => {
               const today = new Date();
               const incidentDate = new Date(i.time);
               return incidentDate.toDateString() === today.toDateString();
@@ -153,8 +192,6 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                 <TableRow className="bg-gray-50 border-b border-gray-200">
                   {/* <TableHead className="text-sm text-gray-700">Incident ID</TableHead> */}
                   <TableHead className="text-sm text-gray-700">Location</TableHead>
-                  <TableHead className="text-sm text-gray-700">Type</TableHead>
-                  <TableHead className="text-sm text-gray-700">Severity</TableHead>
                   <TableHead className="text-sm text-gray-700">Status</TableHead>
                   <TableHead className="text-sm text-gray-700">Assigned Guard</TableHead>
                   <TableHead className="text-sm text-gray-700">Date/Time</TableHead>
@@ -176,17 +213,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                           {incident.location?.name}
                         </div>
                       </div>
-                    </TableCell>
-                    
-                    <TableCell className="py-4">
-                      <span className="text-sm text-gray-700">{incident.type}</span>
-                    </TableCell>
-                    
-                    <TableCell className="py-4">
-                      <Badge className={`${getSeverityColor(incident.severity)} px-3 py-1 text-sm font-medium rounded-full`}>
-                        {incident.severity}
-                      </Badge>
-                    </TableCell>
+                    </TableCell>             
                     
                     <TableCell className="py-4">
                       <Badge className={`${getStatusColor(incident.status)} px-3 py-1 text-sm font-medium rounded-full`}>
@@ -197,11 +224,17 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                     <TableCell className="py-4">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                          <span className="text-white font-medium text-xs">
-                            {incident.assigned.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                           <span className="text-white font-medium text-xs">
+                            {incident.assigned
+                              ? incident.assigned
+                                  .split(" ")
+                                  .map((n: string) => n[0])
+                                  .join("")
+                                  .slice(0, 2)
+                              : "NA"}
                           </span>
                         </div>
-                        <span className="text-sm text-gray-700">{incident.assigned}</span>
+                        <span className="text-sm text-gray-700">{incident.assigned || "Not Assigned"}</span>
                       </div>
                     </TableCell>
                     
@@ -227,7 +260,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        onClick={() => onOpen(incident)}
+                        onClick={() => handleViewDetails(incident.id)}
                         className="h-8 px-3 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                       >
                         <Eye className="h-4 w-4" />
