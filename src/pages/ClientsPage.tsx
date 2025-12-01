@@ -179,8 +179,8 @@ export default function ClientsPage() {
       {/* Tabs for Directory and Personal Details */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="directory">Order Directory</TabsTrigger>
-          <TabsTrigger value="personal">Order Details</TabsTrigger>
+          <TabsTrigger value="directory">Order Management</TabsTrigger>
+          <TabsTrigger value="personal">Clients Details</TabsTrigger>
         </TabsList>
 
         {/* Order Directory Tab */}
@@ -438,7 +438,7 @@ export default function ClientsPage() {
           </Card>
         </TabsContent>
 
-        {/* Order Details Tab */}
+        {/* Client Details Tab */}
         <TabsContent value="personal" className="space-y-3">
           <div className="flex flex-wrap gap-2 items-center bg-white p-3 rounded-lg border">
             <Filter className="h-4 w-4 text-gray-500" />

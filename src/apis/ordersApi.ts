@@ -134,6 +134,29 @@ export const ordersApi = baseApi.injectEndpoints({
         { type: "Orders", id: "LIST" },
       ],
     }),
+
+    // Get all clients
+getAllClients: builder.query<
+  {
+    success: boolean;
+    message: string;
+    data: {
+      id: string;
+      name: string;
+      email: string;
+      mobile: string;
+      address: string;
+    };
+  },
+  void
+>({
+  query: () => ({
+    url: `/users/getAllClients`,
+    method: "GET",
+  }),
+  providesTags: [{ type: "Clients", id: "LIST" }],
+}),
+
   }),
 });
 
@@ -142,4 +165,5 @@ export const {
   useGetAdminOrderByIdQuery,
   useCancelOrderMutation,
   useAcceptOrderMutation,
+   useGetAllClientsQuery,
 } = ordersApi;
