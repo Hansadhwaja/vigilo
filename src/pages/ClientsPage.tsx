@@ -5,13 +5,14 @@ import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
 import { useGetAllOrdersQuery, useCancelOrderMutation, useAcceptOrderMutation } from "../apis/ordersApi";
 import { AlertCircle } from "lucide-react";
+import { useGetAllClientsQuery } from "../apis/ordersApi";
 
 export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,6 +27,9 @@ export default function ClientsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("directory");
   const itemsPerPage = 10;
+const [showClientDialog, setShowClientDialog] = useState(false);
+const [selectedClient, setSelectedClient] = useState<any>(null);
+
 
   // Debounce search
   useEffect(() => {
@@ -59,6 +63,12 @@ export default function ClientsPage() {
 
   const orders = ordersResponse?.data || [];
   const apiPagination = ordersResponse?.pagination;
+
+const { data } = useGetAllClientsQuery();
+
+const clients = data?.data; 
+const clientsList = clients ? (Array.isArray(clients) ? clients : [clients]) : [];
+
 
   // Calculate metrics
   const totalOrders = apiPagination?.total || 0;
@@ -466,105 +476,112 @@ export default function ClientsPage() {
           
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Detailed Order Information</CardTitle>
+              <CardTitle className="text-lg">Detailed Client Information</CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              {!isLoading && !isError && orders.length > 0 && (
+              {!isLoading && !isError  && clientsList.length>0 && (
                 <div className="space-y-3">
-                  {orders.map((order) => (
-                    <Card key={order.id} className="border border-gray-200">
-                      <CardContent className="p-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {/* Service Information */}
-                          <div className="space-y-3">
-                            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                              <Building className="h-4 w-4" />
-                              Service Information
-                            </h3>
-                            <div className="space-y-2 pl-6">
-                              <div className="flex items-center gap-2">
-                                <FileText className="h-4 w-4 text-gray-400" />
-                                <span className="text-sm capitalize">
-                                  {order.serviceType.replace(/([A-Z])/g, ' $1').trim()}
-                                </span>
-                              </div>
-                              <div className="flex items-start gap-2">
-                                <MapPin className="h-4 w-4 text-gray-400 mt-0.5" />
-                                <span className="text-sm">{order.locationAddress}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-gray-400" />
-                                <span className="text-sm">{order.guardsRequired} Guards Required</span>
-                              </div>
-                              <div className="text-sm text-gray-600 mt-2">
-                                <strong>Description:</strong>
-                                <p className="mt-1">{order.description}</p>
-                              </div>
-                            </div>
-                          </div>
+                  {clientsList.map((client) => (
+                      <Card key={client.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
+                                          <CardContent className="p-4">
+                                            <div className="flex items-center justify-between">
+                                              <div className="flex flex-wrap md:flex-nowrap items-center justify-between w-full gap-4">
+                                                {/* Guard Info */}
+                                                <div className="flex-1 min-w-0">
+                                                  <div className="font-medium text-gray-900">{client.name}</div>
+                                                  <div className="flex items-center gap-1 mt-0.5">
+                                                    <Mail className="h-3 w-3 text-gray-400" />
+                                                    <span className="text-xs text-gray-600 truncate">{client.email}</span>
+                                                  </div>
+                                                  <div className="flex items-center gap-1 mt-1">
+                                                    <Phone className="h-3 w-3 text-gray-400" />
+                                                    <span className="text-xs text-gray-600">{client.mobile}</span>
+                                                  </div>
+                                                  {client.address && (
+                                                    <div className="text-xs text-gray-500 mt-1 truncate">{client.address}</div>
+                                                  )}
+                                                </div>
+                                                
+                                                {/* Actions */}
+                                                <div className="flex gap-1">
+                                                  <Button 
+                                                    variant="outline"
+                                                    onClick={() => {
+                                                      setSelectedClient(client);
+                                                      setShowClientDialog(true);
+                                                    }}
+                                                  >
+                                                    <Eye className="h-3 w-3" />
 
-                          {/* Schedule & Status */}
-                          <div className="space-y-3">
-                            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                              <Calendar className="h-4 w-4" />
-                              Schedule & Status
-                            </h3>
-                            <div className="space-y-2 pl-6">
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-600">Status:</span>
-                                <Badge className={getStatusColor(order.status)}>
-                                  {order.status}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-600">Start Date:</span>
-                                <span className="text-sm font-medium">{formatDate(order.startDate)}</span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-600">End Date:</span>
-                                <span className="text-sm font-medium">{formatDate(order.endDate)}</span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-600">Time:</span>
-                                <span className="text-sm font-medium">
-                                  {formatTime(order.startTime)} - {formatTime(order.endTime)}
-                                </span>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-600">Created:</span>
-                                <span className="text-sm font-medium">{formatDate(order.createdAt)}</span>
-                              </div>
-                              <div className="flex gap-2 mt-4">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleViewDetails(order)}
-                                  className="flex-1"
-                                >
-                                  <Eye className="h-3 w-3 mr-1" />
-                                  View Full
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="flex-1"
-                                >
-                                  <Edit className="h-3 w-3 mr-1" />
-                                  Edit
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                                                  </Button>
+
+                                                  {/* <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="h-8 w-8 p-0"
+                                                  >
+                                                    <Edit className="h-3 w-3" />
+                                                  </Button>
+                                                  <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                                  >
+                                                    <Trash2 className="h-3 w-3" />
+                                                  </Button> */}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </CardContent>
+                                        </Card>
+
+                                      ))}
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Client Details Dialog */}
+      <Dialog open={showClientDialog} onOpenChange={setShowClientDialog}>
+  <DialogContent className="max-w-md">
+    <DialogHeader>
+      <DialogTitle>Client Details</DialogTitle>
+    </DialogHeader>
+
+    {selectedClient && (
+      <div className="space-y-3 mt-2">
+        
+        <div className="flex justify-between">
+          <span className="font-medium">Name:</span>
+          <span>{selectedClient.name}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="font-medium">Email:</span>
+          <span>{selectedClient.email}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="font-medium">Mobile:</span>
+          <span>{selectedClient.mobile}</span>
+        </div>
+
+        <div className="flex justify-between">
+          <span className="font-medium">Address:</span>
+          <span className="text-right">{selectedClient.address}</span>
+        </div>
+
+      </div>
+    )}
+
+    <DialogFooter className="mt-4">
+      <Button onClick={() => setShowClientDialog(false)}>Close</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
 
       {/* Order Details Dialog */}
       <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
@@ -655,6 +672,8 @@ export default function ClientsPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      
 
       {/* Action Dialog */}
       <Dialog open={showActionDialog} onOpenChange={setShowActionDialog}>
