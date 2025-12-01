@@ -157,6 +157,23 @@ getAllClients: builder.query<
   providesTags: [{ type: "Clients", id: "LIST" }],
 }),
 
+ 
+// Delete client
+deleteClient: builder.mutation<
+  { success: boolean; message: string },
+  { id: string }
+>({
+  query: (body) => ({
+    url: `/users/deleteClient`,
+    method: "POST",
+    body, // contains { id }
+  }),
+  invalidatesTags: [
+    { type: "Clients", id: "LIST" }
+  ],
+}),
+
+
   }),
 });
 
@@ -166,4 +183,5 @@ export const {
   useCancelOrderMutation,
   useAcceptOrderMutation,
    useGetAllClientsQuery,
+   useDeleteClientMutation,
 } = ordersApi;

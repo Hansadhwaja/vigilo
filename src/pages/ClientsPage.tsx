@@ -10,9 +10,10 @@ import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
-import { useGetAllOrdersQuery, useCancelOrderMutation, useAcceptOrderMutation } from "../apis/ordersApi";
+import { useGetAllOrdersQuery, useCancelOrderMutation, useAcceptOrderMutation, useDeleteClientMutation } from "../apis/ordersApi";
 import { AlertCircle } from "lucide-react";
 import { useGetAllClientsQuery } from "../apis/ordersApi";
+import { toast } from "react-hot-toast";
 
 export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -68,6 +69,27 @@ const { data } = useGetAllClientsQuery();
 
 const clients = data?.data; 
 const clientsList = clients ? (Array.isArray(clients) ? clients : [clients]) : [];
+console.log("Clients List:", clientsList);
+console.log("Raw Clients Data:", data);
+
+const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
+
+const handleDeleteClient = async (clientId: string) => {
+  if (!clientId) return;
+
+  const confirmDelete = window.confirm("Are you sure you want to delete this client?");
+  if (!confirmDelete) return;
+
+  try {
+    const response = await deleteClient({ id: clientId }).unwrap();
+    console.log(response);
+
+    toast.success("Client deleted successfully");
+  } catch (error) {
+    toast.error("Failed to delete client");
+  }
+};
+
 
 
   // Calculate metrics
@@ -514,21 +536,22 @@ const clientsList = clients ? (Array.isArray(clients) ? clients : [clients]) : [
                                                     <Eye className="h-3 w-3" />
 
                                                   </Button>
-
-                                                  {/* <Button
+{/* 
+                                                  <Button
                                                     size="sm"
                                                     variant="outline"
                                                     className="h-8 w-8 p-0"
                                                   >
                                                     <Edit className="h-3 w-3" />
-                                                  </Button>
+                                                  </Button> */}
                                                   <Button
                                                     size="sm"
                                                     variant="outline"
                                                     className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                                     onClick={() => handleDeleteClient(client.id)}
                                                   >
                                                     <Trash2 className="h-3 w-3" />
-                                                  </Button> */}
+                                                  </Button>
                                                 </div>
                                               </div>
                                             </div>
