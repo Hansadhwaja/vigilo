@@ -293,54 +293,64 @@ export default function HRPage() {
                       <Card key={guard.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between">
-                            <div className="flex flex-wrap md:flex-nowrap items-center justify-between w-full gap-4">
-                              {/* Guard Info */}
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium text-gray-900">{guard.name}</div>
-                                <div className="flex items-center gap-1 mt-0.5">
-                                  <Mail className="h-3 w-3 text-gray-400" />
-                                  <span className="text-xs text-gray-600 truncate">{guard.email}</span>
-                                </div>
-                                <div className="flex items-center gap-1 mt-1">
-                                  <Phone className="h-3 w-3 text-gray-400" />
-                                  <span className="text-xs text-gray-600">{guard.mobile}</span>
-                                </div>
-                                {guard.address && (
-                                  <div className="text-xs text-gray-500 mt-1 truncate">{guard.address}</div>
-                                )}
-                              </div>
+                            <div className="flex items-center justify-between w-full gap-6">
 
-                              {/* Date Info */}
-                              <div className="text-xs text-gray-500">
-                                Joined: {formatDate(guard.createdAt)}
-                              </div>
-                              
-                              {/* Actions */}
-                              <div className="flex gap-1">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handleViewDetails(guard.id)}
-                                  className="h-8 w-8 p-0"
-                                >
-                                  <Eye className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-8 w-8 p-0"
-                                >
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
+                            {/* Name */}
+                            <div className="w-40 font-medium text-gray-900 truncate">
+                              {guard.name}
                             </div>
+
+                            {/* Email */}
+                            <div className="w-52 flex items-center gap-1 truncate">
+                              <Mail className="h-3 w-3 text-gray-400" />
+                              <span className="text-xs text-gray-600 truncate">{guard.email}</span>
+                            </div>
+
+                            {/* Mobile */}
+                            <div className="w-32 flex items-center gap-1">
+                              <Phone className="h-3 w-3 text-gray-400" />
+                              <span className="text-xs text-gray-600">{guard.mobile}</span>
+                            </div>
+
+                            {/* Address */}
+                            <div className="w-60 text-xs text-gray-600 truncate">
+                              {guard.address || "—"}
+                            </div>
+
+                            {/* Joined Date */}
+                            <div className="w-32 text-xs text-gray-500">
+                              {formatDate(guard.createdAt)}
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex gap-2 w-32 justify-end">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleViewDetails(guard.id)}
+                                className="h-8 w-8 p-0"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 w-8 p-0"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+
                           </div>
                         </CardContent>
                       </Card>
