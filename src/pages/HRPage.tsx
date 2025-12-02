@@ -10,7 +10,7 @@ import { Label } from "../components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { useNavigate } from "react-router-dom";
-import { useGetAllGuardsQuery } from "../apis/guardsApi";
+import { useCreateGuardByAdminMutation, useGetAllGuardsQuery } from "../apis/guardsApi";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
 
 // Sample compliance data (keep this as it's not coming from API yet)
@@ -66,6 +66,54 @@ export default function HRPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  const [createGuardByAdmin] =
+        useCreateGuardByAdminMutation();
+
+
+  const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        mobile: "",
+        address: "",
+        password: "",
+      });
+
+      const handleChange = (
+        field: string,
+        value: string
+      ) => {
+        setFormData((prev) => ({
+          ...prev,
+          [field]: value,
+        }));
+      };
+
+       const handleAddingGuard = async () => {
+        if (!formData.name || !formData.email || !formData.password) {
+          alert("Name, Email & Password are required!");
+          return;
+        }
+
+        try {
+          const res = await createGuardByAdmin(formData).unwrap();
+          console.log("Guard created:", res);
+          setShowAddDialog(false);
+
+          // Reset form
+          setFormData({
+            name: "",
+            email: "",
+            mobile: "",
+            address: "",
+            password: "",
+          });
+
+        } catch (err) {
+          console.error("Error creating guard:", err);
+          alert("Failed to create guard");
+        }
+      };
 
   // Debounce search input
   useEffect(() => {
@@ -517,28 +565,63 @@ export default function HRPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="guardName">Full Name</Label>
-              <Input id="guardName" placeholder="Enter guard name" />
-            </div>
-            <div>
-              <Label htmlFor="guardPhone">Phone</Label>
-              <Input id="guardPhone" placeholder="+1 555-0123" />
-            </div>
-            <div>
-              <Label htmlFor="guardEmail">Email</Label>
-              <Input id="guardEmail" type="email" placeholder="guard@vigilo.com" />
-            </div>
-            <div>
-              <Label htmlFor="guardAddress">Address</Label>
-              <Input id="guardAddress" placeholder="Enter address" />
-            </div>
-          </div>
+  <div className="space-y-1">
+    <Label htmlFor="guardName">Full Name</Label>
+    <Input
+      id="guardName"
+      placeholder="Enter guard name"
+      value={formData.name}
+      onChange={(e) => handleChange("name", e.target.value)}
+    />
+  </div>
+
+  <div className="space-y-1">
+    <Label htmlFor="guardPhone">Phone</Label>
+    <Input
+      id="guardPhone"
+      placeholder="+1 555-0123"
+      value={formData.mobile}
+      onChange={(e) => handleChange("mobile", e.target.value)}
+    />
+  </div>
+
+  <div className="space-y-1">
+    <Label htmlFor="guardEmail">Email</Label>
+    <Input
+      id="guardEmail"
+      type="email"
+      placeholder="guard@vigilo.com"
+      value={formData.email}
+      onChange={(e) => handleChange("email", e.target.value)}
+    />
+  </div>
+
+  <div className="space-y-1">
+    <Label htmlFor="guardPassword">Password</Label>
+    <Input
+      id="guardPassword"
+      type="password"
+      placeholder="Enter password"
+      value={formData.password}
+      onChange={(e) => handleChange("password", e.target.value)}
+    />
+  </div>
+
+  <div className="space-y-1">
+    <Label htmlFor="guardAddress">Address</Label>
+    <Input
+      id="guardAddress"
+      placeholder="Enter address"
+      value={formData.address}
+      onChange={(e) => handleChange("address", e.target.value)}
+    />
+  </div>
+</div>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={() => setShowAddDialog(false)}>
+            <Button onClick={() =>{handleAddingGuard(); setShowAddDialog(false)}}>
               Add Guard
             </Button>
           </div>

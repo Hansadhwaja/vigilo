@@ -32,6 +32,22 @@ export interface LatestStatic {
   Order: Order;
 }
 
+export interface CreateGuardAdminRequest {
+  name: string;
+  email: string;
+  password: string;
+  address: string;
+  mobile?: string;
+  avatar?: string;
+}
+
+export interface CreateGuardAdminResponse {
+  success: boolean;
+  message: string;
+  guard?: Guard;
+}
+
+
 // Extended guard interface with latest static (from getGuardById)
 export interface GuardWithStatic extends Guard {
   latestStatic: LatestStatic | null;
@@ -92,7 +108,17 @@ export const guardsApi = baseApi.injectEndpoints({
       }),
       providesTags: (_result, _error, id) => [{ type: "Guards", id }],
     }),
+
+    createGuardByAdmin: builder.mutation<CreateGuardAdminResponse, CreateGuardAdminRequest>({
+  query: (body) => ({
+    url: "/users/createGuardByAdmin",
+    method: "POST",
+    body,
+  }),
+  invalidatesTags: ["Guards"],
+}),
+
   }),
 });
 
-export const { useGetAllGuardsQuery, useGetGuardByIdQuery } = guardsApi;
+export const { useGetAllGuardsQuery, useGetGuardByIdQuery, useCreateGuardByAdminMutation, } = guardsApi;

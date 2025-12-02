@@ -380,13 +380,7 @@ const handleDeleteClient = async (clientId: string) => {
                                   >
                                     <Eye className="h-3 w-3" />
                                   </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-8 w-8 p-0"
-                                  >
-                                    <Edit className="h-3 w-3" />
-                                  </Button>
+                                  
                                   {order.status === "pending" && (
                                     <>
                                       <Button
@@ -504,62 +498,42 @@ const handleDeleteClient = async (clientId: string) => {
               {!isLoading && !isError  && clientsList.length>0 && (
                 <div className="space-y-3">
                   {clientsList.map((client) => (
-                      <Card key={client.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
-                                          <CardContent className="p-4">
-                                            <div className="flex items-center justify-between">
-                                              <div className="flex flex-wrap md:flex-nowrap items-center justify-between w-full gap-4">
-                                                {/* Guard Info */}
-                                                <div className="flex-1 min-w-0">
-                                                  <div className="font-medium text-gray-900">{client.name}</div>
-                                                  <div className="flex items-center gap-1 mt-0.5">
-                                                    <Mail className="h-3 w-3 text-gray-400" />
-                                                    <span className="text-xs text-gray-600 truncate">{client.email}</span>
-                                                  </div>
-                                                  <div className="flex items-center gap-1 mt-1">
-                                                    <Phone className="h-3 w-3 text-gray-400" />
-                                                    <span className="text-xs text-gray-600">{client.mobile}</span>
-                                                  </div>
-                                                  {client.address && (
-                                                    <div className="text-xs text-gray-500 mt-1 truncate">{client.address}</div>
-                                                  )}
-                                                </div>
-                                                
-                                                {/* Actions */}
-                                                <div className="flex gap-1">
-                                                  <Button 
-                                                    variant="outline"
-                                                    onClick={() => {
-                                                      setSelectedClient(client);
-                                                      setShowClientDialog(true);
-                                                    }}
-                                                  >
-                                                    <Eye className="h-3 w-3" />
+                    <Card key={client.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
+                      <CardContent className="p-4">
 
-                                                  </Button>
-{/* 
-                                                  <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="h-8 w-8 p-0"
-                                                  >
-                                                    <Edit className="h-3 w-3" />
-                                                  </Button> */}
-                                                  <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                                     onClick={() => handleDeleteClient(client.id)}
-                                                  >
-                                                    <Trash2 className="h-3 w-3" />
-                                                  </Button>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </CardContent>
-                                        </Card>
+                        <div className="flex items-center justify-between w-full px-4 py-3">
+                  {/* Name */}
+                  <div className="w-1/5 font-medium">{client.name}</div>
 
-                                      ))}
+                  {/* Email */}
+                  <div className="w-1/5 flex items-center gap-2 text-gray-600">
+                    <Mail size={16} />
+                    {client.email}
+                  </div>
+
+                  {/* Phone */}
+                  <div className="w-1/5 flex items-center gap-2 text-gray-600">
+                    <Phone size={16} />
+                    {client.mobile}
+                  </div>
+
+                  {/* Created Date */}
+                  {client.address && ( <div className="text-xs text-gray-500 mt-1 truncate">{client.address}</div> )}
+
+                  {/* Actions */}
+                  <div className="w-1/5 flex items-center justify-end gap-3">
+                    <Button variant="outline" onClick={() => { setSelectedClient(client); setShowClientDialog(true); }} > <Eye className="h-3 w-3" /> </Button>
+                    
+                    <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-red-600 hover:text-red-700" onClick={() => handleDeleteClient(client.id)} > <Trash2 className="h-3 w-3" /> </Button>
+                  </div>
                 </div>
+
+
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
               )}
             </CardContent>
           </Card>
