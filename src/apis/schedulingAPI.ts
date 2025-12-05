@@ -7,6 +7,7 @@ import { baseApi } from "./baseApi";
 
 export interface Schedule {
   id: string;
+  orderName: string | null;
   orderId: string;
   date: string;               // "2025-11-28"
   type: string;               // e.g. "static"
@@ -57,6 +58,10 @@ export interface CreateScheduleResponse {
   message: string;
   data: any;
 }
+export interface DeleteScheduleResponse {
+  success: boolean;
+  message: string;
+}
 
 // --------------------------------------------------
 // API Module
@@ -75,33 +80,45 @@ export const schedulingApi = baseApi.injectEndpoints({
       }),
 
       transformResponse: (response: any): GetAllSchedulesResponse => {
-        // Map data exactly like guards API does (clean + UI ready)
-        const mapped = response.data.map((item: any) => ({
-        id: item.id,
-        orderId: item.orderId,
-        type: item.type,
-        status: item.status,
-        description: item.description,
-        startTime: item.startTime,
-        endTime: item.endTime,
-        createdAt: item.createdAt,
+          // Map data to a UI-friendly shape while preserving nested fields
+          const mapped = response.data.map((item: any) => ({
+            id: item.id,
+            orderId: item.orderId,
+            orderName: item.orderLocationAddress || null,
+            date: item.date,
+            type: item.type,
+            description: item.description,
+            status: item.status,
+            startTime: item.startTime,
+            endTime: item.endTime,
+            createdAt: item.createdAt,
+            updatedAt: item.updatedAt || null,
+            deletedAt: item.deletedAt || null,
 
-        // Keep full guards array
-         guards: item.guards?.map((g: any) => ({
-         id: g.id,
-         name: g.name,
-         email: g.email,
-         status: g.StaticGuards?.status || "pending",
-         assignedAt: g.StaticGuards?.createdAt || null,
-        })) || [],
-        }));
+            // Keep more fields on guards that the UI expects (role, StaticGuards, etc.)
+            guards: item.guards?.map((g: any) => ({
+              id: g.id,
+              name: g.name,
+              email: g.email,
+              // preserve role if provided by backend
+              role: g.role || g.userRole || null,
+              // preserve other optional fields the UI may use
+              description: g.description ?? null,
+              time: g.time ?? null,
+              // prefer explicit StaticGuards object if backend provides it
+              StaticGuards: g.StaticGuards ?? null,
+              // expose a computed status but keep original StaticGuards too
+              status: g.StaticGuards?.status ?? g.status ?? "pending",
+              assignedAt: g.StaticGuards?.createdAt ?? g.assignedAt ?? null,
+            })) || [],
+          }));
 
-
-        return {
-          ...response,
-          data: mapped,
-        };
-      },
+          return {
+            ...response,
+            data: mapped,
+            pagination: response.pagination || null,
+          };
+        },
 
       providesTags: ["Schedules"],
     }),
@@ -120,6 +137,15 @@ export const schedulingApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Schedules"],
     }),
+    deleteSchedule: builder.mutation<DeleteScheduleResponse, { id: string }>({
+      query: (body) => ({
+        url: `/scheduling/deleteSchedule`,
+        method: "DELETE",
+        body,
+      }),
+      invalidatesTags: ["Schedules"],
+    }),
+
   }),
 });
 
@@ -128,5 +154,6 @@ export const schedulingApi = baseApi.injectEndpoints({
 // --------------------------------------------------
 export const { 
   useGetAllSchedulesQuery, 
-  useCreateScheduleMutation 
+  useCreateScheduleMutation,
+   useDeleteScheduleMutation,
 } = schedulingApi;

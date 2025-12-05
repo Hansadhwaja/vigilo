@@ -142,6 +142,13 @@ export default function Sidebar({
           open={isOpen}
         />
         <SideItem
+          icon={<Calendar />}
+          label="Shifts"
+          active={activeTab === "shifts"}
+          onClick={() => onTabChange("shifts")}
+          open={isOpen}
+        />
+        <SideItem
           icon={<Building2 />}
           label="Clients Management"
           active={activeTab === "clients"}

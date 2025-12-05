@@ -19,6 +19,7 @@ import IncidentsPage from "./pages/IncidentsPage";
 import IncidentDetailsPage from "./pages/IncidentDetailsPage";
 import SettingsPage from "./pages/SettingsPage";
 import SchedulingPage from "./pages/SchedulingPage";
+import ShiftPage from "./pages/ShiftPage";
 import AlarmsPage from "./pages/AlarmsPage";
 import PatrolPage from "./pages/PatrolPage";
 import HRPage from "./pages/HRPage";
@@ -261,6 +262,7 @@ function MainLayout() {
             <Route path="/" element={<Dashboard kpi={kpi} />} />
             <Route path="/dashboard" element={<Dashboard kpi={kpi} />} />
             <Route path="/scheduling" element={<SchedulingPage />} />
+            <Route path="/shifts" element={<ShiftPage />} />
             <Route path="/clients" element={<ClientsPage />} />
             <Route 
               path="/incidents" 
