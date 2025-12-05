@@ -19,6 +19,8 @@ import { useGetAllGuardsQuery } from "../apis/guardsApi";
 import { useCreateScheduleMutation, useDeleteScheduleMutation, useGetAllSchedulesQuery } from "../apis/schedulingAPI";
 import { useGetAllOrdersQuery } from "../apis/ordersApi";
 import { toast } from "sonner";
+import { DatePicker } from "@heroui/react";
+
 
 // Helper to get current week dates
 const getCurrentWeekDates = () => {
@@ -154,9 +156,13 @@ export default function ShiftPage() {
   const [selectedDate, setSelectedDate] = useState<Date>(today);
   const [currentMonth, setCurrentMonth] = useState<Date>(today);
   const [reminders] = useState(upcomingReminders);
+  const [guardsOpen, setGuardsOpen] = useState(false);
+
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
+  const [openCalendar, setOpenCalendar] = useState(false);
+
   const [showAlertsDialog, setShowAlertsDialog] = useState(false);
   const [viewMode, setViewMode] = useState<"weekly" | "daily">("weekly");
     const [currentPage, setCurrentPage] = React.useState(1);
@@ -1317,7 +1323,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
       </Dialog>
 
       {/* Create Assignment Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog} >
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create Guard Assignment</DialogTitle>
@@ -1327,7 +1333,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <Label htmlFor="description">Assignment Description</Label>
+              <Label htmlFor="description" className="mb-1 block">Assignment Description</Label>
               <Textarea
                 id="description"
                 placeholder="Describe the assignment details..."
@@ -1337,121 +1343,216 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
               />
             </div>
 
-            <div>
-              <Label htmlFor="assignmentDate">Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date.toLocaleDateString()}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.date}
-                    onSelect={(date:any) => date && setFormData({...formData, date})}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+<div className="flex flex-col gap-2">
+  <Label>Date</Label>
 
-            <div>
-              <Label htmlFor="order">Order</Label>
-              <Select value={formData.orderId} onValueChange={(value: string) => setFormData({...formData, orderId: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select order" />
-                </SelectTrigger>
-                <SelectContent>
-                  {orders.map(order => (
-                    <SelectItem key={order.id} value={order.id}>
-                      {order.locationAddress}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+  <Button
+    variant="outline"
+    className="w-full justify-start"
+    onClick={() => setOpenCalendar(true)}
+  >
+    <CalendarIcon className="mr-2 h-4 w-4" />
+    {formData.date ? new Date(formData.date).toLocaleDateString() : "Pick a date"}
+  </Button>
 
-            <div className="col-span-2">
-              <Label>Select Guards (Multiple)</Label>
-              <div className="border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto bg-gray-50">
-                {guards.map(guard => (
-                  <div key={guard.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`${guard.id}`}
-                      checked={formData.guardIds.includes(guard.id)}
-                      onCheckedChange={(checked:any) => {
-                        if (checked) {
-                          setFormData({
-                            ...formData,
-                            guardIds: [...formData.guardIds, guard.id]
-                          });
-                        } else {
-                          setFormData({
-                            ...formData,
-                            guardIds: formData.guardIds.filter(id => id !== guard.id)
-                          });
-                        }
-                      }}
-                    />
-                    <label
-                      htmlFor={`edit-guard-${guard.id}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      {guard.name} - {Array.isArray((guard as any).roles) ? (guard as any).roles.join(", ") : ((guard as any).role ?? "N/A")} ({Array.isArray((guard as any).licences) ? (guard as any).licences.join(", ") : ((guard as any).licence ?? "N/A")})
-                    </label>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {formData.guardIds.length} guard(s) selected
-              </p>
+  <Dialog open={openCalendar} onOpenChange={setOpenCalendar}>
+    <DialogContent className="p-4">
+      <Calendar
+        mode="single"
+        selected={formData.date ? new Date(formData.date) : undefined}
+        onSelect={(date:any) => {
+          if (!date) return;
+          setFormData({
+            ...formData,
+            date: date.toISOString().split("T")[0],
+          });
+          setOpenCalendar(false);
+        }}
+      />
+    </DialogContent>
+  </Dialog>
+</div>
+
+
+
+            {/* Order select with scrollbar */}
+      <div>
+        <Label htmlFor="order" className="mb-1 block">Order</Label>
+
+        <Select
+          value={String(formData.orderId ?? "")}
+          onValueChange={(value: string) => setFormData({ ...formData, orderId: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select order" />
+          </SelectTrigger>
+
+          {/* ensure overflow + z-index + fixed max height */}
+          <SelectContent className="max-h-56 overflow-y-auto z-50" style={{ maxHeight: "14rem", overflowY: "auto" }}>
+            {orders && orders.length > 0 ? (
+              orders.map((order: any) => (
+                <SelectItem key={order.id} value={order.id}>
+                  {order.locationAddress ?? order.orderName ?? order.id}
+                </SelectItem>
+              ))
+            ) : (
+              <div className="p-3 text-sm text-gray-500">No orders available</div>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+
+            {/* Multi-select Guards Dropdown */}
+{/* Multi-select Guards Dropdown */}
+<div className="col-span-2">
+  <Label className="mb-1 block">Select Guards (Multiple)</Label>
+
+  <Select open={guardsOpen} onOpenChange={setGuardsOpen}>
+    <SelectTrigger>
+      <SelectValue
+        placeholder={
+          formData.guardIds.length > 0
+            ? `${formData.guardIds.length} guard(s) selected`
+            : "Select Guards"
+        }
+      />
+    </SelectTrigger>
+
+    <SelectContent
+      className="max-h-56 overflow-y-auto z-50"
+      style={{ maxHeight: "14rem", overflowY: "auto" }}
+    >
+      {guards && guards.length > 0 ? (
+        guards.map((guard: any) => {
+          const isChecked = formData.guardIds.includes(guard.id);
+
+          return (
+            <div
+              key={guard.id}
+              className="flex items-center px-2 py-1 space-x-2 cursor-pointer hover:bg-gray-100 rounded-md"
+              onClick={(e) => {
+                e.stopPropagation(); // prevent closing dropdown
+
+                if (isChecked) {
+                  setFormData({
+                    ...formData,
+                    guardIds: formData.guardIds.filter(
+                      (id: string) => id !== guard.id
+                    ),
+                  });
+                } else {
+                  setFormData({
+                    ...formData,
+                    guardIds: [...formData.guardIds, guard.id],
+                  });
+                }
+              }}
+            >
+              <Checkbox
+                checked={isChecked}
+                onCheckedChange={(checked: any) => {
+                  if (checked) {
+                    setFormData({
+                      ...formData,
+                      guardIds: [...formData.guardIds, guard.id],
+                    });
+                  } else {
+                    setFormData({
+                      ...formData,
+                      guardIds: formData.guardIds.filter(
+                        (id: string) => id !== guard.id
+                      ),
+                    });
+                  }
+                }}
+                onClick={(e: { stopPropagation: () => any; }) => e.stopPropagation()}
+              />
+
+              <span className="text-sm">
+                {guard.name} ({guard.role ?? "N/A"})
+              </span>
             </div>
+          );
+        })
+      ) : (
+        <div className="p-3 text-sm text-gray-500">No Guards available</div>
+      )}
+    </SelectContent>
+  </Select>
+
+  <p className="text-xs text-gray-500 mt-1">
+    {formData.guardIds.length} guard(s) selected
+  </p>
+</div>
+
 
            <div className="col-span-2 grid grid-cols-2 gap-4">
-  <div>
-    <Label htmlFor="editStartTime">Start Time</Label>
-    <Input
-      id="editStartTime"
-      type="time"
-      value={formData.startTime}
-      onChange={(e) =>
-        setFormData({ ...formData, startTime: e.target.value })
-      }
-    />
+
+  {/* START TIME */}
+  <div className="space-y-1">
+    <Label htmlFor="editStartTime" className="text-sm font-medium text-gray-700">
+      Start Time
+    </Label>
+
+    <div className="relative">
+      <Input
+        id="editStartTime"
+        type="time"
+        value={formData.startTime}
+        onChange={(e) =>
+          setFormData({ ...formData, startTime: e.target.value })
+        }
+        className="pl-10 h-11 rounded-lg border-gray-300 
+                   focus-visible:ring-2 focus-visible:ring-blue-500"
+      />
+
+      {/* clock icon */}
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+        🕒
+      </span>
+    </div>
   </div>
 
-  <div>
-    <Label htmlFor="editEndTime">End Time</Label>
-    <Input
-      id="editEndTime"
-      type="time"
-      value={formData.endTime}
-      onChange={(e) =>
-        setFormData({ ...formData, endTime: e.target.value })
-      }
-    />
+  {/* END TIME */}
+  <div className="space-y-1">
+    <Label htmlFor="editEndTime" className="text-sm font-medium text-gray-700">
+      End Time
+    </Label>
+
+    <div className="relative">
+      <Input
+        id="editEndTime"
+        type="time"
+        value={formData.endTime}
+        onChange={(e) =>
+          setFormData({ ...formData, endTime: e.target.value })
+        }
+        className="pl-10 h-11 rounded-lg border-gray-300 
+                   focus-visible:ring-2 focus-visible:ring-blue-500"
+      />
+
+      {/* clock icon */}
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+        ⏰
+      </span>
+    </div>
   </div>
+
 </div>
+
           </div>
 
           <div className="flex justify-between pt-4">
             <Button 
               variant="destructive" 
-              // onClick={() => {
-              //   if (selectedAssignment) {
-              //     handleDeleteAssignment(selectedAssignment.id, selectedDate);
-              //     setShowEditDialog(false);
-              //   }
-              // }}
+              onClick={() => {
+               setShowCreateDialog(false); 
+              }}
             >
               Delete Assignment
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
                 Cancel
               </Button>
               <Button onClick={handleCreateSchedule} disabled={isCreating}>

@@ -3,6 +3,7 @@ import { baseApi } from "./baseApi";
 
 // Basic guard interface (from getAllGuards)
 export interface Guard {
+  roles: never[];
   id: string;
   name: string;
   email: string;
