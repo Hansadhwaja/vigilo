@@ -16,9 +16,12 @@ import { Checkbox } from "../components/ui/checkbox";
 import { Calendar } from "../components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
 import { useGetAllGuardsQuery } from "../apis/guardsApi";
-import { useCreateScheduleMutation, useGetAllSchedulesQuery } from "../apis/schedulingAPI";
+import { useCreateScheduleMutation, useDeleteScheduleMutation, useGetAllSchedulesQuery } from "../apis/schedulingAPI";
 import { useGetAllOrdersQuery } from "../apis/ordersApi";
 import { toast } from "sonner";
+import { DatePicker } from "@heroui/react";
+import { useRef } from "react";
+
 
 // Helper to get current week dates
 const getCurrentWeekDates = () => {
@@ -57,21 +60,108 @@ const upcomingReminders = [
     assignee: "Mike Chen"
   }
 ];
+// Convert to Local Date object
+const toLocalTime = (isoString: string | number | Date) => new Date(isoString);
 
-export default function SchedulingPage() {
+// HH:MM formatter
+const getTimeHHMM = (dateObj: Date) => dateObj.toTimeString().slice(0, 5);
+
+// Duration
+const getDuration = (start: string | number | Date, end: string | number | Date) => {
+  const diff = (new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60);
+  return `${diff} hours`;
+};
+
+export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
+  const organized: { [key: string]: any } = {};
+
+  const toMinutes = (hhmm: string) => {
+    const [h, m] = hhmm.split(":").map(Number);
+    return h * 60 + m;
+  };
+
+  scheduleList.forEach((shift) => {
+    const start = toLocalTime(shift.startTime);
+    const end = toLocalTime(shift.endTime);
+
+    const dateKey = start.toISOString().split("T")[0];
+
+    // ❗ FIX — use LOCAL TIME for comparison (not UTC)
+    const shiftStartHHMM = getTimeHHMM(start);
+    const shiftStartMin = toMinutes(shiftStartHHMM);
+
+    // find matching slot
+    let matchedSlot: string | null = null;
+
+    for (let i = 0; i < timeSlots.length; i++) {
+      const curr = toMinutes(timeSlots[i].time);
+      const next =
+        i < timeSlots.length - 1 ? toMinutes(timeSlots[i + 1].time) : 9999;
+
+      if (shiftStartMin >= curr && shiftStartMin < next) {
+        matchedSlot = timeSlots[i].time;
+        break;
+      }
+    }
+
+    if (!matchedSlot) return;
+
+    if (!organized[dateKey]) organized[dateKey] = {};
+    if (!organized[dateKey][matchedSlot]) organized[dateKey][matchedSlot] = [];
+
+    // add guard-based assignments
+    shift.guards.forEach((guard: any) => {
+      organized[dateKey][matchedSlot].push({
+        shiftId: shift.id,
+        guardId: guard.id,
+        id: `${shift.id}-${guard.id}`,
+
+        guardName: guard.name,
+        guardEmail: guard.email,
+        guardStatus: guard.StaticGuards?.status || shift.status,
+
+        orderId: shift.orderId,
+        orderLocationName: shift.locationName || "Unknown Location",
+        orderName: shift.orderName || "Unknown Location",
+
+        description: shift.description,
+        type: shift.type,
+        status: shift.status,
+
+        timeSlot: matchedSlot,
+        start,
+        end,
+        duration: getDuration(shift.startTime, shift.endTime),
+      });
+    });
+  });
+
+  return organized;
+};
+
+
+
+
+export default function ShiftPage() {
   const today = new Date();
   // const [scheduleData, setScheduleData] = useState(sampleScheduleData);
   const [selectedDate, setSelectedDate] = useState<Date>(today);
   const [currentMonth, setCurrentMonth] = useState<Date>(today);
   const [reminders] = useState(upcomingReminders);
+  const [guardsOpen, setGuardsOpen] = useState(false);
+
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
+  const [openCalendar, setOpenCalendar] = useState(false);
+
   const [showAlertsDialog, setShowAlertsDialog] = useState(false);
   const [viewMode, setViewMode] = useState<"weekly" | "daily">("weekly");
     const [currentPage, setCurrentPage] = React.useState(1);
     const itemsPerPage = 5;
     const [debouncedSearch, setDebouncedSearch] = useState("");
+    const startRef = useRef<HTMLInputElement>(null);
+const endRef = useRef<HTMLInputElement>(null);
     
   
   // Filter states
@@ -79,6 +169,45 @@ export default function SchedulingPage() {
   const [filterGuard, setFilterGuard] = useState("all");
   const [filterRole, setFilterRole] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+
+  //delete a schedule
+  const [deleteSchedule] = useDeleteScheduleMutation();
+  const handleDelete = async (id: string, e: any) => {
+  e.stopPropagation();
+
+  try {
+    const res = await deleteSchedule({ id }).unwrap();
+
+    if (res.success) {
+      toast.success("Schedule deleted successfully");
+    } else {
+      toast.error(res.message || "Failed to delete schedule");
+    }
+  } catch (error) {
+    toast.error("Something went wrong while deleting");
+  }
+};
+
+  // Helpers: timezone constants & formatters
+const TIMEZONE = "Asia/Kolkata";
+
+const formatDateStr = (iso: string | Date) => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-US", { timeZone: TIMEZONE, year: "numeric", month: "short", day: "numeric" });
+};
+
+const formatTimeStr = (iso: string | Date) => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return d.toLocaleTimeString("en-US", { timeZone: TIMEZONE, hour: "2-digit", minute: "2-digit", hour12: true });
+};
+
+const formatHourShort = (iso: string | Date) => {
+  // e.g. "02:30 PM" — used where only start time required
+  return formatTimeStr(iso);
+};
+
 
   const [createSchedule, { isLoading: isCreating }] = useCreateScheduleMutation();
 
@@ -92,13 +221,22 @@ const combineDateAndTime = (date: Date, time: string) => {
 
 const handleCreateSchedule = async () => {
   try {
+    // --- FIX: ensure date is converted to JS Date ---
+    const jsDate = new Date(formData.date);
+
+    if (isNaN(jsDate.getTime())) {
+      console.error("Invalid date:", formData.date);
+      toast.error("Invalid date");
+      return;
+    }
+
     const payload = {
       description: formData.description,
-      date: formData.date.toISOString(),               // convert JS Date → string
-      orderId: formData.orderId,                          // because API expects "site"
-      guardIds: formData.guardIds,               // string[]
-      startTime:  formData.startTime,
-      endTime:formData.endTime,
+      date: jsDate.toISOString(),            // FIXED
+      orderId: formData.orderId,
+      guardIds: formData.guardIds,
+      startTime: formData.startTime,         // already HH:mm format or ISO — OK
+      endTime: formData.endTime,
     };
 
     console.log("Sending payload:", payload);
@@ -112,6 +250,7 @@ const handleCreateSchedule = async () => {
     toast.error(err?.data?.message || "Failed to create schedule");
   }
 };
+
 
 
   
@@ -134,6 +273,34 @@ const handleCreateSchedule = async () => {
      // Extract schedule data from API response
      const schedule = schedulingResponse?.data || [];
      console.log("Fetched Schedules:", schedule);
+
+     // Time slots for the scheduler
+     const timeSlots = [
+       { time: "06:00", label: "6 am" },
+       { time: "08:00", label: "8 am" },
+       { time: "10:00", label: "10 am" },
+       { time: "12:00", label: "12 pm" },
+       { time: "14:00", label: "2 pm" },
+       { time: "16:00", label: "4 pm" },
+       { time: "18:00", label: "6 pm" },
+       { time: "20:00", label: "8 pm" },
+       { time: "22:00", label: "10 pm" }
+     ];
+
+     const organizedShifts = useMemo(() => {
+  return organizeShifts(schedule, timeSlots);
+}, [schedule, timeSlots]);
+
+const getAssignmentsForSlotFromOrganized = (day: { toISOString: () => string; }, time: string | number) => {
+  const dateKey = day.toISOString().split("T")[0];
+  return organizedShifts[dateKey]?.[time] || [];
+};
+
+const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { hour: string; minute: string; }) => any; }, end: { toLocaleTimeString: (arg0: never[], arg1: { hour: string; minute: string; }) => any; }) => {
+  return `${start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - ${end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+};
+
+
   
 
   // Debounce search input
@@ -169,13 +336,87 @@ const handleCreateSchedule = async () => {
     const orders = ordersResponse?.data || [];
 
     const scheduleData = useMemo(() => {
-  return (schedule || []).map(item => ({
-    ...item,
-    date: new Date(item.startTime),  // derive date from startTime
-    start: new Date(item.startTime),
-    end: new Date(item.endTime)
-  }));
+  // `schedule` is API response array (from useGetAllSchedulesQuery)
+  // if schedule is undefined, return empty
+  const arr = (schedule || []).map(item => {
+    // item.startTime, item.endTime are ISO UTC strings in API
+    const startDateObj = new Date(item.startTime);
+    const endDateObj = new Date(item.endTime);
+
+    // Normalize end crossing midnight: if end < start, add 1 day to end
+    let correctedEnd = new Date(endDateObj);
+    if (correctedEnd < startDateObj) {
+      correctedEnd = new Date(correctedEnd.getTime() + 24 * 60 * 60 * 1000);
+    }
+
+    // build guard-assignment objects (one per guard). Each assignment will include:
+    // id (unique), name, email, orderId, description, role (if available), time string, status, StaticGuards
+    const guards = (item.guards || []).map(g => {
+        
+      const assignmentStart = startDateObj;
+      const assignmentEnd = correctedEnd;
+      const timeStr = `${formatTimeStr(assignmentStart)} - ${formatTimeStr(assignmentEnd)}`;
+
+      // unique id for the assignment: combine shift id + guard id
+      const assignmentId = `${item.id}-${g.id}`;
+
+      return {
+        id: assignmentId,
+        guardId: g.id,
+        name: g.name,
+        email: g.email,
+        orderId: item.orderId,
+        description: item.description || "",
+        role: g.role || "Guard", // fallback
+        time: timeStr,
+        timeStart: assignmentStart,    // Date object (local conversion will depend on display)
+        timeEnd: assignmentEnd,
+        status: g.StaticGuards?.status || item.status || "pending", // prefer guard assignment status
+        StaticGuards: g.StaticGuards || null,
+        shiftId: item.id,
+        rawStartISO: item.startTime,
+        rawEndISO: item.endTime,
+      };
+    });
+
+    return {
+      id: item.id,
+      orderId: item.orderId,
+      date: new Date(item.startTime), // used for grouping by day
+      dateString: formatDateStr(item.startTime), // e.g. "Dec 05, 2025"
+      start: new Date(item.startTime),
+      end: correctedEnd,
+      startFormatted: formatTimeStr(item.startTime),
+      endFormatted: formatTimeStr(correctedEnd),
+      shiftDuration: (() => {
+        const hours = (correctedEnd.getTime() - startDateObj.getTime()) / (1000 * 60 * 60);
+        return `${Number(hours.toFixed(1))} hours`;
+      })(),
+      guards,
+      original: item, // keep full original if you want
+    };
+  });
+
+  // If you want scheduleData grouped by date (one object per date with guards flattened),
+  // convert array of shifts into days:
+  const groupedByDay: { [key: string]: any } = {};
+  for (const shift of arr) {
+    const dateKey = shift.date.toDateString();
+    if (!groupedByDay[dateKey]) {
+      groupedByDay[dateKey] = {
+        date: shift.date,
+        dateString: shift.dateString,
+        guards: [],
+      };
+    }
+    // push every guard assignment for this shift into that day's guards
+    groupedByDay[dateKey].guards.push(...shift.guards);
+  }
+
+  // return as array sorted by date ascending
+  return Object.values(groupedByDay).sort((a: any, b: any) => a.date.getTime() - b.date.getTime());
 }, [schedule]);
+
 
 
     
@@ -183,39 +424,35 @@ const handleCreateSchedule = async () => {
   // Calculate metrics
  const metrics = useMemo(() => {
   const allAssignments = scheduleData.flatMap(s => s.guards);
-
-  const todayAssignments = scheduleData.filter(s =>
-    s.date.toDateString() === today.toDateString()
-  ).flatMap(s => s.guards);
+  const todayAssignments = scheduleData.find(s => s.date.toDateString() === today.toDateString())?.guards || [];
 
   return {
-    activeShifts: todayAssignments.filter(g => g.StaticGuards?.status === "active").length,
+    activeShifts: todayAssignments.filter((g: { StaticGuards: { status: string; }; }) => g.StaticGuards?.status === "active").length,
     scheduledToday: todayAssignments.length,
     totalThisWeek: allAssignments.length,
-     patrolsActive: allAssignments.filter(g => g.role === "Patrol" && g.StaticGuards?.status === "active").length,
+    patrolsActive: allAssignments.filter(g => g.role === "Patrol" && g.StaticGuards?.status === "active").length,
   };
-}, [scheduleData]);
+}, [scheduleData, today]);
+
 
 
   // Get assignments for selected date with filters
   const getFilteredAssignments = (date: Date) => {
-    const dayData = scheduleData.find(day => 
-      day.date.toDateString() === date.toDateString()
-    );
-    
-    if (!dayData) return [];
-    
-    return dayData.guards.filter(assignment => {
-      const matchesOrder = filterOrder === "all" || assignment.orderId === filterOrder;
-      const matchesGuard = filterGuard === "all" || assignment.id === filterGuard;
-      const matchesRole = filterRole === "all" || assignment.role.toLowerCase() === filterRole.toLowerCase();
-      const matchesSearch = !searchTerm || 
-        assignment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        assignment.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      return matchesOrder && matchesGuard && matchesRole && matchesSearch;
-    });
-  };
+  const dayData = scheduleData.find(day => day.date.toDateString() === date.toDateString());
+  if (!dayData) return [];
+
+  return dayData.guards.filter((assignment: { orderId: string; guardId: string; id: string; role: any; name: any; description: any; }) => {
+    const matchesOrder = filterOrder === "all" || assignment.orderId === filterOrder;
+    const matchesGuard = filterGuard === "all" || assignment.guardId === filterGuard || assignment.id === filterGuard;
+    const matchesRole = filterRole === "all" || (assignment.role || "").toLowerCase() === filterRole.toLowerCase();
+    const matchesSearch = !searchTerm ||
+      (assignment.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (assignment.description || "").toLowerCase().includes(searchTerm.toLowerCase());
+
+    return matchesOrder && matchesGuard && matchesRole && matchesSearch;
+  });
+};
+
 
   // Get all assignments for calendar view
   const getDateAssignments = (date: Date) => {
@@ -358,19 +595,7 @@ const handleCreateSchedule = async () => {
 
   const weekDays = generateWeekDays();
   
-  // Time slots for the scheduler
-  const timeSlots = [
-    { time: "06:00", label: "6 am" },
-    { time: "08:00", label: "8 am" },
-    { time: "10:00", label: "10 am" },
-    { time: "12:00", label: "12 pm" },
-    { time: "14:00", label: "2 pm" },
-    { time: "16:00", label: "4 pm" },
-    { time: "18:00", label: "6 pm" },
-    { time: "20:00", label: "8 pm" },
-    { time: "22:00", label: "10 pm" }
-  ];
-  
+
   // Helper function to get assignments for a specific day and time
  const getAssignmentsForSlot = (date: Date, timeSlot: string) => {
   const dayData = scheduleData.find(day => 
@@ -379,10 +604,10 @@ const handleCreateSchedule = async () => {
 
   if (!dayData) return [];
 
-  return dayData.guards.filter(assignment => {
+  return dayData.guards.filter((assignment: any) => {
     //  backend returns ISO strings:
     // "startTime": "2025-11-28T11:25:00.000Z"
-    const assignmentStart = new Date(dayData.startTime)
+    const assignmentStart = new Date(assignment.rawStartISO)
       .toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
 
     return assignmentStart === timeSlot;
@@ -602,7 +827,7 @@ const handleCreateSchedule = async () => {
                     <MapPin className="h-4 w-4 text-orange-600" />
                     <span className="text-sm">
                       <span className="font-bold text-orange-900">
-                        {getFilteredAssignments(selectedDate).filter(a => a.role === 'Patrol').length}
+                        {getFilteredAssignments(selectedDate).filter((a: { role: string; }) => a.role === 'Patrol').length}
                       </span> 
                       <span className="text-gray-600 ml-1">Patrol</span>
                     </span>
@@ -611,7 +836,7 @@ const handleCreateSchedule = async () => {
                     <User className="h-4 w-4 text-green-600" />
                     <span className="text-sm">
                       <span className="font-bold text-green-900">
-                        {getFilteredAssignments(selectedDate).filter(a => a.role === 'Static').length}
+                        {getFilteredAssignments(selectedDate).filter((a: { role: string; }) => a.role === 'static').length}
                       </span> 
                       <span className="text-gray-600 ml-1">Static</span>
                     </span>
@@ -620,7 +845,7 @@ const handleCreateSchedule = async () => {
                     <CalendarIcon className="h-4 w-4 text-purple-600" />
                     <span className="text-sm">
                       <span className="font-bold text-purple-900">
-                        {new Set(getFilteredAssignments(selectedDate).map(a => a.orderId)).size}
+                        {new Set(getFilteredAssignments(selectedDate).map((a: { orderId: any; }) => a.orderId)).size}
                       </span> 
                       <span className="text-gray-600 ml-1">Orders</span>
                     </span>
@@ -630,22 +855,28 @@ const handleCreateSchedule = async () => {
                 {/* All Shifts Displayed as Cards */}
                 {getFilteredAssignments(selectedDate).length > 0 ? (
                   <div className="space-y-3">
-                    {Array.from(new Set(getFilteredAssignments(selectedDate).map(a => a.time.split('-')[0]))).sort().map(startTime => {
-                      const shiftsAtTime = getFilteredAssignments(selectedDate).filter(a => a.time.split('-')[0] === startTime);
+                    {Array.from(new Set(getFilteredAssignments(selectedDate).map((a: { time: string; }) => a.time.split('-')[0]))).sort().map((startTime: unknown) => {
+                      const timeStr = String(startTime);
+                      const shiftsAtTime = getFilteredAssignments(selectedDate).filter((a: { time: string; }) => a.time.split('-')[0] === timeStr);
                       
                       return (
-                        <div key={startTime} className="space-y-2">
+                        <div key={timeStr} className="space-y-2">
                           <div className="flex items-center gap-2 px-2">
                             <Clock className="h-4 w-4 text-gray-500" />
-                            <span className="font-semibold text-gray-700">{startTime}</span>
+                            <span className="font-semibold text-gray-700">{timeStr}</span>
                             <div className="flex-1 h-px bg-gray-300"></div>
                             <span className="text-xs text-gray-500">{shiftsAtTime.length} shift{shiftsAtTime.length > 1 ? 's' : ''}</span>
                           </div>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {shiftsAtTime.map((assignment, idx) => (
+                            {shiftsAtTime.map((assignment: {
+                              
+                              
+                              id: string; role: string; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; time: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; description: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; orderId: string; StaticGuards: { status: string; }; status: any; 
+}, idx: React.Key | null | undefined) => (
+  
                               <div
-                                key={idx}
+                                key={assignment.id}
                                 className={`
                                   relative p-4 rounded-lg border-2 shadow-sm hover:shadow-md transition-all cursor-pointer
                                   ${assignment.role === 'Patrol' 
@@ -655,6 +886,7 @@ const handleCreateSchedule = async () => {
                                 `}
                                 onClick={() => handleEditAssignment(assignment)}
                               >
+                                
                                 <div className="absolute top-2 right-2">
                                   <Badge 
                                     variant="outline" 
@@ -712,30 +944,17 @@ const handleCreateSchedule = async () => {
                                   <div className="flex items-center justify-between pt-2">
                                     <Badge 
                                       variant="outline" 
-                                      className={`text-xs ${getStatusColor(assignment.StaticGuards.status)}`}
+                                      className={`text-xs ${getStatusColor(assignment.status)}`}
                                     >
                                       {assignment.status}
                                     </Badge>
                                     <div className="flex gap-1">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-7 w-7 p-0 hover:bg-white/50"
-                                        onClick={(e:any) => {
-                                          e.stopPropagation();
-                                          handleEditAssignment(assignment);
-                                        }}
-                                      >
-                                        <Edit className="h-3 w-3" />
-                                      </Button>
+                                      
                                       <Button
                                         variant="ghost"
                                         size="sm"
                                         className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
-                                        // onClick={(e:any) => {
-                                        //   e.stopPropagation();
-                                        //   handleDeleteAssignment(assignment.id, selectedDate);
-                                        // }}
+                                        onClick={(e: any) => handleDelete(assignment.id, e)}
                                       >
                                         <Trash2 className="h-3 w-3" />
                                       </Button>
@@ -766,11 +985,11 @@ const handleCreateSchedule = async () => {
                   <div className="mt-4 p-3 bg-white rounded-lg border">
                     <div className="text-xs font-medium text-gray-600 mb-2">ORDER LEGEND</div>
                     <div className="flex flex-wrap gap-2">
-                      {Array.from(new Set(getFilteredAssignments(selectedDate).map(a => a.orderId))).map(orderId => {
-                        const assignment = getFilteredAssignments(selectedDate).find(a => a.orderId === orderId);
+                      {Array.from(new Set(getFilteredAssignments(selectedDate).map((a: { orderId: any; }) => a.orderId))).map(orderId => {
+                        const assignment = getFilteredAssignments(selectedDate).find((a: { orderId: unknown; }) => a.orderId === orderId);
                         return (
                           <div
-                            key={orderId}
+                            key={orderId as string}
                             className={`
                               px-3 py-1 rounded-full text-xs font-medium
                               ${orderId === 'o1' ? 'bg-blue-200 text-blue-900' :
@@ -884,81 +1103,133 @@ const handleCreateSchedule = async () => {
                   </div>
                   
                   {weekDays.map((day, dayIndex) => {
-                    const assignments = getAssignmentsForSlot(day, slot.time);
-                    const filteredAssignments = assignments.filter(assignment => {
-                      const matchesOrder = filterOrder === "all" || assignment.orderId === filterOrder;
-                      const matchesGuard = filterGuard === "all" || assignment.id === filterGuard;
-                      const matchesRole = filterRole === "all" || assignment.role.toLowerCase() === filterRole.toLowerCase();
-                      const matchesSearch = !searchTerm || 
-                        assignment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        assignment.description?.toLowerCase().includes(searchTerm.toLowerCase());
-                      
-                      return matchesOrder && matchesGuard && matchesRole && matchesSearch;
-                    });
-                    
-                    return (
-                      <div 
-                        key={dayIndex} 
-                        className={`
-                          p-2 border-r border-gray-200 min-h-[70px] relative group cursor-pointer transition-all
-                          ${day.toDateString() === selectedDate.toDateString() ? 'bg-blue-50' : 'hover:bg-gray-50'}
-                        `}
-                        onClick={() => {
-                          setSelectedDate(new Date(day));
-                          setFormData({...formData, startTime: slot.time});
-                          handleCreateAssignment();
-                        }}
-                      >
-                        {filteredAssignments.length > 0 ? (
-                          <div className="space-y-1">
-                            {filteredAssignments.map((assignment, idx) => (
-                              <div
-                                key={idx}
-                                className={`
-                                  p-2 rounded-md text-xs cursor-pointer transition-all border group-hover:shadow-sm
-                                  ${assignment.role === 'Patrol' 
-                                    ? 'bg-gradient-to-r from-orange-100 to-orange-50 text-orange-900 border-orange-200 hover:from-orange-200 hover:to-orange-100' 
-                                    : 'bg-gradient-to-r from-green-100 to-green-50 text-green-900 border-green-200 hover:from-green-200 hover:to-green-100'
-                                  }
-                                `}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleEditAssignment(assignment);
-                                }}
-                                title={`${assignment.name} - ${assignment.description || ''}`}
-                              >
-                                <div className="font-medium truncate">{assignment.name}</div>
-                                <div className="text-xs opacity-80 truncate">{assignment.description}</div>
-                                <div className="flex items-center gap-1 mt-1">
-                                  <Badge 
-                                    variant="outline" 
-                                    className={`text-xs px-1 py-0 ${getStatusColor(assignment.StaticGuards.status)}`}
-                                  >
-                                    {assignment.status}
-                                  </Badge>
+
+  const assignments = getAssignmentsForSlotFromOrganized(day, slot.time);
+
+  const filteredAssignments = assignments.filter((assignment: {
+      orderName: any;
+      guardName: any;
+      type: any; guards: {}; orderId: string; guardId: string; description: string; 
+}) => {
+  const guard = assignment.guards || {};
+
+  const matchesOrder =
+  filterOrder === "all" ||
+  assignment.orderId === filterOrder ||
+  assignment.orderName?.toLowerCase().includes(filterOrder.toLowerCase());
+
+
+  const matchesGuard =
+    filterGuard === "all" || assignment.guardId === filterGuard;
+
+  const matchesRole =
+    filterRole === "all" ||
+    assignment.type?.toLowerCase() === filterRole.toLowerCase();
+
+  const matchesSearch =
+    !searchTerm ||
+    assignment.guardName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    assignment.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
+  return matchesOrder && matchesGuard && matchesRole && matchesSearch;
+});
+
+
+  return (
+    <div
+      key={dayIndex}
+      className={`
+        p-2 border-r border-gray-200 min-h-[70px] relative group cursor-pointer transition-all
+        ${day.toDateString() === selectedDate.toDateString() ? "bg-blue-50" : "hover:bg-gray-50"}
+      `}
+      onClick={() => {
+        setSelectedDate(new Date(day));
+        setFormData({ ...formData, startTime: slot.time });
+        handleCreateAssignment();
+      }}
+    >
+      {filteredAssignments.length > 0 ? (
+        <div className="space-y-1">
+                    {filteredAssignments.map((assignment: {
+                        orderName: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | React.ReactPortal | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | React.ReactPortal | Iterable<React.ReactNode> | null | undefined> | null | undefined;
+                        guardName: any;
+                        guardEmail: any;
+                        guardId: any; guards: any[]; id: React.Key | null | undefined; type: string; description: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; start: { toLocaleTimeString: (arg0: never[], arg1: { hour: string; minute: string; }) => any; }; end: { toLocaleTimeString: (arg0: never[], arg1: { hour: string; minute: string; }) => any; }; status: any; 
+}) => {
+                        console.log("Assignment:", assignment);
+    const guard = {
+  id: assignment.guardId,
+  name: assignment.guardName,
+  email: assignment.guardEmail,
+  status: assignment.status
+};
+
+    
+    return (
+      <div
+        key={assignment.id}
+        className={`
+          p-2 rounded-md text-xs cursor-pointer transition-all border group-hover:shadow-sm
+          ${
+            assignment.type === "patrol"
+              ? "bg-gradient-to-r from-orange-100 to-orange-50 text-orange-900 border-orange-200 hover:from-orange-200 hover:to-orange-100"
+              : "bg-gradient-to-r from-green-100 to-green-50 text-green-900 border-green-200 hover:from-green-200 hover:to-green-100"
+          }
+        `}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleEditAssignment(assignment);
+        }}
+        title={`${guard?.name || "No Guard"} - ${assignment.description}`}
+      >
+        {/* GUARD NAME */}
+        <div className="font-medium truncate">
+          {guard?.name || "Unassigned Guard"}
+        </div>
+  
+        {/* SHIFT DESCRIPTION */}
+        <div className="text-xs opacity-80 truncate">
+          {assignment.orderName || assignment.description || "No Description"}
+        </div>
+  
+        {/* TIME RANGE */}
+        <div className="flex items-center gap-2 mt-1">
+          <Clock className="h-3 w-3 text-gray-500" />
+          <span className="text-xs text-gray-700 font-medium">
+            {formatShiftTime(assignment.start, assignment.end)}
+          </span>
+        </div>
+  
+        {/* STATUS */}
+        <Badge
+          variant="outline"
+          className={`text-xs px-1 py-0 ${getStatusColor(
+            guard.status || assignment.status
+          )}`}
+        >
+          {guard.status || assignment.status || "pending"}
+        </Badge>
+      </div>
+    );
+  })}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-full text-gray-400 group-hover:text-gray-600 transition-colors">
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <Plus className="h-4 w-4 mb-1" />
+          </div>
+          <div className="text-xs opacity-0 group-hover:opacity-100 transition-opacity">Add</div>
+                                    </div>
+                                  )}
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center h-full text-gray-400 group-hover:text-gray-600 transition-colors">
-                            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Plus className="h-4 w-4 mb-1" />
-                            </div>
-                            <div className="text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                              Add
-                            </div>
-                          </div>
-                        )}
+                        ))}
                       </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        )}
+                    </CardContent>
+                  </Card>
+                  )}
 
         {/* Selected Date Summary Bar */}
         {viewMode === "weekly" && (
@@ -995,7 +1266,7 @@ const handleCreateSchedule = async () => {
               
               {getFilteredAssignments(selectedDate).length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {getFilteredAssignments(selectedDate).slice(0, 3).map((assignment, idx) => (
+                  {getFilteredAssignments(selectedDate).slice(0, 3).map((assignment: { role: string; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; time: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }, idx: React.Key | null | undefined) => (
                     <div
                       key={idx}
                       className={`
@@ -1056,7 +1327,7 @@ const handleCreateSchedule = async () => {
       </Dialog>
 
       {/* Create Assignment Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog} >
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create Guard Assignment</DialogTitle>
@@ -1066,7 +1337,7 @@ const handleCreateSchedule = async () => {
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
-              <Label htmlFor="description">Assignment Description</Label>
+              <Label htmlFor="description" className="mb-1 block">Assignment Description</Label>
               <Textarea
                 id="description"
                 placeholder="Describe the assignment details..."
@@ -1076,121 +1347,243 @@ const handleCreateSchedule = async () => {
               />
             </div>
 
-            <div>
-              <Label htmlFor="assignmentDate">Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.date.toLocaleDateString()}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.date}
-                    onSelect={(date:any) => date && setFormData({...formData, date})}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+<div className="flex flex-col gap-2">
+  <Label>Date</Label>
 
-            <div>
-              <Label htmlFor="order">Order</Label>
-              <Select value={formData.orderId} onValueChange={(value: string) => setFormData({...formData, orderId: value})}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select order" />
-                </SelectTrigger>
-                <SelectContent>
-                  {orders.map(order => (
-                    <SelectItem key={order.id} value={order.id}>
-                      {order.locationAddress}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+  <Button
+    variant="outline"
+    className="w-full justify-start"
+    onClick={() => setOpenCalendar(true)}
+  >
+    <CalendarIcon className="mr-2 h-4 w-4" />
+    {formData.date ? new Date(formData.date).toLocaleDateString() : "Pick a date"}
+  </Button>
 
-            <div className="col-span-2">
-              <Label>Select Guards (Multiple)</Label>
-              <div className="border rounded-md p-3 space-y-2 max-h-40 overflow-y-auto bg-gray-50">
-                {guards.map(guard => (
-                  <div key={guard.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`${guard.id}`}
-                      checked={formData.guardIds.includes(guard.id)}
-                      onCheckedChange={(checked:any) => {
-                        if (checked) {
-                          setFormData({
-                            ...formData,
-                            guardIds: [...formData.guardIds, guard.id]
-                          });
-                        } else {
-                          setFormData({
-                            ...formData,
-                            guardIds: formData.guardIds.filter(id => id !== guard.id)
-                          });
-                        }
-                      }}
-                    />
-                    <label
-                      htmlFor={`edit-guard-${guard.id}`}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      {guard.name} - {Array.isArray((guard as any).roles) ? (guard as any).roles.join(", ") : ((guard as any).role ?? "N/A")} ({Array.isArray((guard as any).licences) ? (guard as any).licences.join(", ") : ((guard as any).licence ?? "N/A")})
-                    </label>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {formData.guardIds.length} guard(s) selected
-              </p>
+  <Dialog open={openCalendar} onOpenChange={setOpenCalendar}>
+    <DialogContent className="p-4">
+      <Calendar
+        mode="single"
+        selected={formData.date ? new Date(formData.date) : undefined}
+        onSelect={(date:any) => {
+          if (!date) return;
+          setFormData({
+            ...formData,
+            date: date.toISOString().split("T")[0],
+          });
+          setOpenCalendar(false);
+        }}
+      />
+    </DialogContent>
+  </Dialog>
+</div>
+
+
+
+            {/* Order select with scrollbar */}
+      <div>
+        <Label htmlFor="order" className="mb-1 block">Order Address</Label>
+
+        <Select
+          value={String(formData.orderId ?? "")}
+          onValueChange={(value: string) => setFormData({ ...formData, orderId: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select order" />
+          </SelectTrigger>
+
+          {/* ensure overflow + z-index + fixed max height */}
+          <SelectContent className="max-h-56 overflow-y-auto z-50" style={{ maxHeight: "14rem", overflowY: "auto" }}>
+            {orders && orders.length > 0 ? (
+              orders.map((order: any) => (
+                <SelectItem key={order.id} value={order.id}>
+                  {order.locationAddress  ?? order.id}
+                </SelectItem>
+              ))
+            ) : (
+              <div className="p-3 text-sm text-gray-500">No orders available</div>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Order select with scrollbar */}
+      <div>
+        <Label htmlFor="order" className="mb-1 block">Order Name</Label>
+
+        <Select
+          value={String(formData.orderId ?? "")}
+          onValueChange={(value: string) => setFormData({ ...formData, orderId: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select order" />
+          </SelectTrigger>
+
+          {/* ensure overflow + z-index + fixed max height */}
+          <SelectContent className="max-h-56 overflow-y-auto z-50" style={{ maxHeight: "14rem", overflowY: "auto" }}>
+            {orders && orders.length > 0 ? (
+              orders.map((order: any) => (
+                <SelectItem key={order.id} value={order.id}>
+                  {order.locationName  ?? order.id}
+                </SelectItem>
+              ))
+            ) : (
+              <div className="p-3 text-sm text-gray-500">No orders available</div>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+
+            {/* Multi-select Guards Dropdown */}
+{/* Multi-select Guards Dropdown */}
+<div>
+  <Label className="mb-1 block">Select Guards (Multiple)</Label>
+
+  <Select open={guardsOpen} onOpenChange={setGuardsOpen}>
+    <SelectTrigger>
+      <SelectValue
+        placeholder={
+          formData.guardIds.length > 0
+            ? `${formData.guardIds.length} guard(s) selected`
+            : "Select Guards"
+        }
+      />
+    </SelectTrigger>
+
+    <SelectContent
+      className="max-h-56 overflow-y-auto z-50"
+      style={{ maxHeight: "14rem", overflowY: "auto" }}
+    >
+      {guards && guards.length > 0 ? (
+        guards.map((guard: any) => {
+          const isChecked = formData.guardIds.includes(guard.id);
+
+          return (
+            <div
+              key={guard.id}
+              className="flex items-center px-2 py-1 space-x-2 cursor-pointer hover:bg-gray-100 rounded-md"
+              onClick={(e) => {
+                e.stopPropagation(); // prevent closing dropdown
+
+                if (isChecked) {
+                  setFormData({
+                    ...formData,
+                    guardIds: formData.guardIds.filter(
+                      (id: string) => id !== guard.id
+                    ),
+                  });
+                } else {
+                  setFormData({
+                    ...formData,
+                    guardIds: [...formData.guardIds, guard.id],
+                  });
+                }
+              }}
+            >
+              <Checkbox
+                checked={isChecked}
+                onCheckedChange={(checked: any) => {
+                  if (checked) {
+                    setFormData({
+                      ...formData,
+                      guardIds: [...formData.guardIds, guard.id],
+                    });
+                  } else {
+                    setFormData({
+                      ...formData,
+                      guardIds: formData.guardIds.filter(
+                        (id: string) => id !== guard.id
+                      ),
+                    });
+                  }
+                }}
+                onClick={(e: { stopPropagation: () => any; }) => e.stopPropagation()}
+              />
+
+              <span className="text-sm">
+                {guard.name} ({guard.role ?? "N/A"})
+              </span>
             </div>
+          );
+        })
+      ) : (
+        <div className="p-3 text-sm text-gray-500">No Guards available</div>
+      )}
+    </SelectContent>
+  </Select>
+
+  <p className="text-xs text-gray-500 mt-1">
+    {formData.guardIds.length} guard(s) selected
+  </p>
+</div>
+
 
            <div className="col-span-2 grid grid-cols-2 gap-4">
-  <div>
-    <Label htmlFor="editStartTime">Start Time</Label>
-    <Input
-      id="editStartTime"
-      type="time"
-      value={formData.startTime}
-      onChange={(e) =>
-        setFormData({ ...formData, startTime: e.target.value })
-      }
-    />
+
+  {/* START TIME */}
+  <div className="space-y-1">
+    <Label htmlFor="editStartTime" className="text-sm font-medium text-gray-700">
+      Start Time
+    </Label>
+
+    <div className="relative">
+      <Input
+        id="editStartTime"
+        type="time"
+        value={formData.startTime}
+        onChange={(e) =>
+          setFormData({ ...formData, startTime: e.target.value })
+        }
+        className="pl-10 h-11 rounded-lg border-gray-300 
+                   focus-visible:ring-2 focus-visible:ring-blue-500"
+      />
+
+      {/* clock icon */}
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+        🕒
+      </span>
+    </div>
   </div>
 
-  <div>
-    <Label htmlFor="editEndTime">End Time</Label>
-    <Input
-      id="editEndTime"
-      type="time"
-      value={formData.endTime}
-      onChange={(e) =>
-        setFormData({ ...formData, endTime: e.target.value })
-      }
-    />
+  {/* END TIME */}
+  <div className="space-y-1">
+    <Label htmlFor="editEndTime" className="text-sm font-medium text-gray-700">
+      End Time
+    </Label>
+
+    <div className="relative">
+      <Input
+        id="editEndTime"
+        type="time"
+        value={formData.endTime}
+        onChange={(e) =>
+          setFormData({ ...formData, endTime: e.target.value })
+        }
+        className="pl-10 h-11 rounded-lg border-gray-300 
+                   focus-visible:ring-2 focus-visible:ring-blue-500"
+      />
+
+      {/* clock icon */}
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+        ⏰
+      </span>
+    </div>
   </div>
+
 </div>
+
           </div>
 
           <div className="flex justify-between pt-4">
             <Button 
               variant="destructive" 
-              // onClick={() => {
-              //   if (selectedAssignment) {
-              //     handleDeleteAssignment(selectedAssignment.id, selectedDate);
-              //     setShowEditDialog(false);
-              //   }
-              // }}
+              onClick={() => {
+               setShowCreateDialog(false); 
+              }}
             >
               Delete Assignment
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
                 Cancel
               </Button>
               <Button onClick={handleCreateSchedule} disabled={isCreating}>

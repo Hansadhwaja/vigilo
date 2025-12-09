@@ -192,7 +192,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                 <TableRow className="bg-gray-50 border-b border-gray-200">
                   {/* <TableHead className="text-sm text-gray-700">Incident ID</TableHead> */}
                   <TableHead className="text-sm text-gray-700">Location</TableHead>
-                  <TableHead className="text-sm text-gray-700">Status</TableHead>
+                  <TableHead className="text-sm text-gray-700">Description</TableHead>
                   <TableHead className="text-sm text-gray-700">Assigned Guard</TableHead>
                   <TableHead className="text-sm text-gray-700">Date/Time</TableHead>
                   <TableHead className="text-sm text-gray-700 text-right">Actions</TableHead>
@@ -207,8 +207,8 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                     
                     <TableCell className="py-4">
                       <div>
-                        <div className="font-medium text-gray-900">{incident.site}</div>
-                        <div className="text-sm text-gray-500 flex items-center gap-1 mt-0.5">
+                        
+                        <div className="text-lg text-gray-900 flex items-center gap-1 mt-0.5">
                           <MapPin className="h-3 w-3" />
                           {incident.location?.name}
                         </div>
@@ -216,9 +216,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                     </TableCell>             
                     
                     <TableCell className="py-4">
-                      <Badge className={`${getStatusColor(incident.status)} px-3 py-1 text-sm font-medium rounded-full`}>
-                        {incident.status}
-                      </Badge>
+                      <div className="font-medium text-gray-900">{incident.site}</div>
                     </TableCell>
                     
                     <TableCell className="py-4">

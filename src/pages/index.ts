@@ -9,7 +9,7 @@ export { default as SettingsPage } from './SettingsPage';
 export { default as SchedulingPage } from './SchedulingPage';
 export { default as ClientsPage } from './ClientsPage';
 export { default as IncidentDetailsPage } from './IncidentDetailsPage';
-export{ default as ShiftPage} from './ShiftPage'
+// export{ default as ShiftPage} from './ShiftPage'
 export { default as AlarmsPage } from './AlarmsPage';
 export { default as PatrolPage } from './PatrolPage';
 export { default as VehiclesPage } from './VehiclesPage';
