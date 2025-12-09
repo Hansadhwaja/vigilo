@@ -315,101 +315,123 @@ const handleDeleteClient = async (clientId: string) => {
               {/* Order List */}
               {!isLoading && !isError && orders.length > 0 && (
                 <>
-                  <div className="space-y-3">
-                    {orders.map((order) => (
-                      <Card key={order.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                              {/* Order Info */}
-                              <div>
-                                <div className="font-medium text-gray-900 capitalize">
-                                  {order.serviceType.replace(/([A-Z])/g, ' $1').trim()}
-                                </div>
-                                <div className="flex items-center gap-1 mt-1">
-                                  <MapPin className="h-3 w-3 text-gray-400" />
-                                  <span className="text-xs text-gray-600 truncate">
-                                    {order.locationAddress}
-                                  </span>
-                                </div>
-                                <div className="text-xs text-gray-500 mt-1">
-                                  ID: {order.id.slice(0, 8)}...
-                                </div>
-                              </div>
-                                            
-                              {/* Schedule Details */}
-                              <div>
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="h-3 w-3 text-gray-400" />
-                                  <span className="text-xs text-gray-600">
-                                    {formatDate(order.startDate)} - {formatDate(order.endDate)}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1 mt-1">
-                                  <Clock className="h-3 w-3 text-gray-400" />
-                                  <span className="text-xs text-gray-600">
-                                    {formatTime(order.startTime)} - {formatTime(order.endTime)}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1 mt-1">
-                                  <User className="h-3 w-3 text-gray-400" />
-                                  <span className="text-xs text-gray-600">
-                                    {order.guardsRequired} guard{order.guardsRequired > 1 ? 's' : ''} required
-                                  </span>
-                                </div>
-                              </div>
-                                            
-                              {/* Status & Actions */}
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <Badge className={getStatusColor(order.status)}>
-                                    {order.status}
-                                  </Badge>
-                                  <div className="text-xs text-gray-500 mt-2">
-                                    Created: {formatDate(order.createdAt)}
-                                  </div>
-                                </div>
-                                                  
-                                {/* Action Buttons */}
-                                <div className="flex gap-1">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleViewDetails(order)}
-                                    className="h-8 w-8 p-0"
-                                  >
-                                    <Eye className="h-3 w-3" />
-                                  </Button>
-                                  
-                                  {order.status === "pending" && (
-                                    <>
-                                      <Button
-                                        size="sm"
-                                        onClick={() => handleAction(order, "accept")}
-                                        className="h-8 px-2 text-xs bg-green-600 hover:bg-green-700"
-                                        disabled={isAccepting}
-                                      >
-                                        Accept
-                                      </Button>
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleAction(order, "reject")}
-                                        className="h-8 px-2 text-xs border-red-200 text-red-600 hover:bg-red-50"
-                                        disabled={isCancelling}
-                                      >
-                                        Reject
-                                      </Button>
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                 <div className="overflow-x-auto rounded-lg border border-gray-200">
+  <table className="w-full text-sm text-left">
+    <thead className="bg-gray-50 border-b">
+      <tr>
+        <th className="px-4 py-3 font-medium text-gray-700">Service Type</th>
+        <th className="px-4 py-3 font-medium text-gray-700">Location</th>
+        <th className="px-4 py-3 font-medium text-gray-700">Schedule</th>
+        <th className="px-4 py-3 font-medium text-gray-700">Time</th>
+        <th className="px-4 py-3 font-medium text-gray-700">Guards</th>
+        <th className="px-4 py-3 font-medium text-gray-700">Status</th>
+        <th className="px-4 py-3 font-medium text-gray-700">Created</th>
+        <th className="px-4 py-3 font-medium text-gray-700 text-right">Actions</th>
+      </tr>
+    </thead>
+
+    <tbody className="divide-y">
+      {orders.map((order) => (
+        <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+
+          {/* Service Type */}
+          <td className="px-4 py-3 font-medium text-gray-900 capitalize">
+            {order.serviceType.replace(/([A-Z])/g, " $1").trim()}
+            <div className="text-xs text-gray-500">
+              ID: {order.id.slice(0, 8)}...
+            </div>
+          </td>
+
+          {/* Location */}
+          <td className="px-4 py-3 text-gray-700 max-w-[180px] truncate">
+            <div className="flex items-center gap-1">
+              <MapPin className="h-3 w-3 text-gray-400" />
+              {order.locationAddress}
+            </div>
+          </td>
+
+          {/* Schedule */}
+          <td className="px-4 py-3 text-gray-700">
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3 text-gray-400" />
+              {formatDate(order.startDate)} – {formatDate(order.endDate)}
+            </div>
+          </td>
+
+          {/* Time */}
+          <td className="px-4 py-3 text-gray-700">
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3 text-gray-400" />
+              {formatTime(order.startTime)} – {formatTime(order.endTime)}
+            </div>
+          </td>
+
+          {/* Guards Required */}
+          <td className="px-4 py-3 text-gray-700">
+            <div className="flex items-center gap-1">
+              <User className="h-3 w-3 text-gray-400" />
+              {order.guardsRequired} guard{order.guardsRequired > 1 ? "s" : ""}
+            </div>
+          </td>
+
+          {/* Status */}
+          <td className="px-4 py-3">
+            <Badge className={getStatusColor(order.status)}>
+              {order.status}
+            </Badge>
+          </td>
+
+          {/* Created At */}
+          <td className="px-4 py-3 text-gray-600 text-xs">
+            {formatDate(order.createdAt)}
+          </td>
+
+          {/* Actions */}
+          <td className="px-4 py-3 text-right">
+            <div className="flex items-center justify-end gap-2">
+
+              {/* View */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => handleViewDetails(order)}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+
+              {/* Accept/Reject for pending */}
+              {order.status === "pending" && (
+                <>
+                  <Button
+                    size="sm"
+                    className="h-8 px-2 text-xs bg-green-600 hover:bg-green-700"
+                    onClick={() => handleAction(order, "accept")}
+                    disabled={isAccepting}
+                  >
+                    Accept
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-2 text-xs border-red-200 text-red-600 hover:bg-red-50"
+                    onClick={() => handleAction(order, "reject")}
+                    disabled={isCancelling}
+                  >
+                    Reject
+                  </Button>
+                </>
+              )}
+            </div>
+          </td>
+
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
 
                   {/* Pagination */}
                   {totalPages > 1 && (
@@ -496,43 +518,88 @@ const handleDeleteClient = async (clientId: string) => {
             </CardHeader>
             <CardContent className="pt-0">
               {!isLoading && !isError  && clientsList.length>0 && (
-                <div className="space-y-3">
-                  {clientsList.map((client) => (
-                    <Card key={client.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
-                      <CardContent className="p-4">
+                <div className="overflow-x-auto rounded-lg border border-gray-200">
+  <table className="w-full text-sm text-left">
+    
+    {/* Table Header */}
+    <thead className="bg-gray-50 border-b">
+      <tr>
+        <th className="px-4 py-3 font-medium text-gray-700">Name</th>
+        <th className="px-4 py-3 font-medium text-gray-700">Email</th>
+        <th className="px-4 py-3 font-medium text-gray-700">Phone</th>
+        <th className="px-4 py-3 font-medium text-gray-700">Address</th>
+        <th className="px-4 py-3 font-medium text-gray-700 text-right">Actions</th>
+      </tr>
+    </thead>
 
-                        <div className="flex items-center justify-between w-full px-4 py-3">
-                  {/* Name */}
-                  <div className="w-1/5 font-medium">{client.name}</div>
+    {/* Table Body */}
+    <tbody className="divide-y">
+      {clientsList.map((client) => (
+        <tr key={client.id} className="hover:bg-gray-50 transition-colors">
 
-                  {/* Email */}
-                  <div className="w-1/5 flex items-center gap-2 text-gray-600">
-                    <Mail size={16} />
-                    {client.email}
-                  </div>
+          {/* Name */}
+          <td className="px-4 py-3 font-medium text-gray-900">
+            {client.name}
+          </td>
 
-                  {/* Phone */}
-                  <div className="w-1/5 flex items-center gap-2 text-gray-600">
-                    <Phone size={16} />
-                    {client.mobile}
-                  </div>
+          {/* Email */}
+          <td className="px-4 py-3 text-gray-700 max-w-[200px] truncate">
+            <div className="flex items-center gap-1">
+              <Mail className="h-4 w-4 text-gray-400" />
+              {client.email}
+            </div>
+          </td>
 
-                  {/* Created Date */}
-                  {client.address && ( <div className="text-xs text-gray-500 mt-1 truncate">{client.address}</div> )}
+          {/* Phone */}
+          <td className="px-4 py-3 text-gray-700 max-w-[150px] truncate">
+            <div className="flex items-center gap-1">
+              <Phone className="h-4 w-4 text-gray-400" />
+              {client.mobile}
+            </div>
+          </td>
 
-                  {/* Actions */}
-                  <div className="w-1/5 flex items-center justify-end gap-3">
-                    <Button variant="outline" onClick={() => { setSelectedClient(client); setShowClientDialog(true); }} > <Eye className="h-3 w-3" /> </Button>
-                    
-                    <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-red-600 hover:text-red-700" onClick={() => handleDeleteClient(client.id)} > <Trash2 className="h-3 w-3" /> </Button>
-                  </div>
-                </div>
+          {/* Address */}
+          <td className="px-4 py-3 text-gray-600 max-w-[220px] truncate">
+            {client.address || "—"}
+          </td>
 
+          {/* Actions */}
+          <td className="px-4 py-3 text-right">
+            <div className="flex justify-end gap-2">
 
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+              {/* View Button */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  setSelectedClient(client);
+                  setShowClientDialog(true);
+                }}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+
+              {/* Delete Button */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                onClick={() => handleDeleteClient(client.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+
+            </div>
+          </td>
+
+        </tr>
+      ))}
+    </tbody>
+
+  </table>
+</div>
+
 
               )}
             </CardContent>

@@ -20,6 +20,7 @@ import { useCreateScheduleMutation, useDeleteScheduleMutation, useGetAllSchedule
 import { useGetAllOrdersQuery } from "../apis/ordersApi";
 import { toast } from "sonner";
 import { DatePicker } from "@heroui/react";
+import { useRef } from "react";
 
 
 // Helper to get current week dates
@@ -59,24 +60,18 @@ const upcomingReminders = [
     assignee: "Mike Chen"
   }
 ];
-// Convert UTC → Local
-const toLocalTime = (isoString: string | number | Date) => {
-  const date = new Date(isoString);
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-};
+// Convert to Local Date object
+const toLocalTime = (isoString: string | number | Date) => new Date(isoString);
 
-// Get HH:MM format
-const getTimeHHMM = (dateObj: Date) => {
-  return dateObj.toTimeString().slice(0, 5);
-};
+// HH:MM formatter
+const getTimeHHMM = (dateObj: Date) => dateObj.toTimeString().slice(0, 5);
 
-// Calculate duration in hours
+// Duration
 const getDuration = (start: string | number | Date, end: string | number | Date) => {
   const diff = (new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60);
   return `${diff} hours`;
 };
 
-// Organize shifts into: { date: { slot: [shifts] }}
 export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
   const organized: { [key: string]: any } = {};
 
@@ -91,7 +86,9 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
 
     const dateKey = start.toISOString().split("T")[0];
 
-    const shiftStartMin = start.getHours() * 60 + start.getMinutes();
+    // ❗ FIX — use LOCAL TIME for comparison (not UTC)
+    const shiftStartHHMM = getTimeHHMM(start);
+    const shiftStartMin = toMinutes(shiftStartHHMM);
 
     // find matching slot
     let matchedSlot: string | null = null;
@@ -112,31 +109,26 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
     if (!organized[dateKey]) organized[dateKey] = {};
     if (!organized[dateKey][matchedSlot]) organized[dateKey][matchedSlot] = [];
 
-    // ✔️ Create one assignment per guard
+    // add guard-based assignments
     shift.guards.forEach((guard: any) => {
       organized[dateKey][matchedSlot].push({
-        // IDs
-        shiftId: shift.id,          // API shift ID
-        guardId: guard.id,          // guard ID
-        id: `${shift.id}-${guard.id}`, // unique assignment ID
+        shiftId: shift.id,
+        guardId: guard.id,
+        id: `${shift.id}-${guard.id}`,
 
-        // guard info
         guardName: guard.name,
         guardEmail: guard.email,
         guardStatus: guard.StaticGuards?.status || shift.status,
 
-        // shift info
         orderId: shift.orderId,
+        orderLocationName: shift.locationName || "Unknown Location",
         orderName: shift.orderName || "Unknown Location",
 
         description: shift.description,
         type: shift.type,
         status: shift.status,
 
-        // time info
         timeSlot: matchedSlot,
-        startTime: shift.startTime,
-        endTime: shift.endTime,
         start,
         end,
         duration: getDuration(shift.startTime, shift.endTime),
@@ -168,6 +160,8 @@ export default function ShiftPage() {
     const [currentPage, setCurrentPage] = React.useState(1);
     const itemsPerPage = 5;
     const [debouncedSearch, setDebouncedSearch] = useState("");
+    const startRef = useRef<HTMLInputElement>(null);
+const endRef = useRef<HTMLInputElement>(null);
     
   
   // Filter states
@@ -227,13 +221,22 @@ const combineDateAndTime = (date: Date, time: string) => {
 
 const handleCreateSchedule = async () => {
   try {
+    // --- FIX: ensure date is converted to JS Date ---
+    const jsDate = new Date(formData.date);
+
+    if (isNaN(jsDate.getTime())) {
+      console.error("Invalid date:", formData.date);
+      toast.error("Invalid date");
+      return;
+    }
+
     const payload = {
       description: formData.description,
-      date: formData.date.toISOString(),               // convert JS Date → string
-      orderId: formData.orderId,                          // because API expects "site"
-      guardIds: formData.guardIds,               // string[]
-      startTime:  formData.startTime,
-      endTime:formData.endTime,
+      date: jsDate.toISOString(),            // FIXED
+      orderId: formData.orderId,
+      guardIds: formData.guardIds,
+      startTime: formData.startTime,         // already HH:mm format or ISO — OK
+      endTime: formData.endTime,
     };
 
     console.log("Sending payload:", payload);
@@ -247,6 +250,7 @@ const handleCreateSchedule = async () => {
     toast.error(err?.data?.message || "Failed to create schedule");
   }
 };
+
 
 
   
@@ -1377,7 +1381,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
 
             {/* Order select with scrollbar */}
       <div>
-        <Label htmlFor="order" className="mb-1 block">Order</Label>
+        <Label htmlFor="order" className="mb-1 block">Order Address</Label>
 
         <Select
           value={String(formData.orderId ?? "")}
@@ -1392,7 +1396,34 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
             {orders && orders.length > 0 ? (
               orders.map((order: any) => (
                 <SelectItem key={order.id} value={order.id}>
-                  {order.locationAddress ?? order.orderName ?? order.id}
+                  {order.locationAddress  ?? order.id}
+                </SelectItem>
+              ))
+            ) : (
+              <div className="p-3 text-sm text-gray-500">No orders available</div>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Order select with scrollbar */}
+      <div>
+        <Label htmlFor="order" className="mb-1 block">Order Name</Label>
+
+        <Select
+          value={String(formData.orderId ?? "")}
+          onValueChange={(value: string) => setFormData({ ...formData, orderId: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select order" />
+          </SelectTrigger>
+
+          {/* ensure overflow + z-index + fixed max height */}
+          <SelectContent className="max-h-56 overflow-y-auto z-50" style={{ maxHeight: "14rem", overflowY: "auto" }}>
+            {orders && orders.length > 0 ? (
+              orders.map((order: any) => (
+                <SelectItem key={order.id} value={order.id}>
+                  {order.locationName  ?? order.id}
                 </SelectItem>
               ))
             ) : (
@@ -1404,7 +1435,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
 
             {/* Multi-select Guards Dropdown */}
 {/* Multi-select Guards Dropdown */}
-<div className="col-span-2">
+<div>
   <Label className="mb-1 block">Select Guards (Multiple)</Label>
 
   <Select open={guardsOpen} onOpenChange={setGuardsOpen}>

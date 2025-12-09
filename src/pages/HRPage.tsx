@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Plus, Search, Filter, Edit, Trash2, Eye, User, Shield, AlertCircle, Mail, Phone } from "lucide-react";
+import { Plus, Search, Filter, Edit, Trash2, Eye, User, Shield, AlertCircle, Mail, Phone, Users } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -336,74 +336,127 @@ export default function HRPage() {
               {/* Guard List */}
               {!isLoading && !isError && guards.length > 0 && (
                 <>
-                  <div className="space-y-3">
-                    {guards.map((guard) => (
-                      <Card key={guard.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center justify-between w-full gap-6">
+                  {/* Guard List Table */}
+{/* Guard List Table */}
+<Card>
+  <CardHeader className="pb-4">
+    <CardTitle className="text-xl font-semibold flex items-center gap-2">
+      <Users className="h-5 w-5" />
+      Guards List
+    </CardTitle>
+  </CardHeader>
 
-                            {/* Name */}
-                            <div className="w-40 font-medium text-gray-900 truncate">
-                              {guard.name}
-                            </div>
+  <CardContent className="p-0">
+    <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-gray-50 border-b border-gray-200">
+            <TableHead className="text-base font-medium text-gray-800">Name</TableHead>
+            <TableHead className="text-base font-medium text-gray-800">Email</TableHead>
+            <TableHead className="text-base font-medium text-gray-800">Mobile</TableHead>
+            <TableHead className="text-base font-medium text-gray-800">Address</TableHead>
+            <TableHead className="text-base font-medium text-gray-800">Joined</TableHead>
+            <TableHead className="text-base font-medium text-gray-800 text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
 
-                            {/* Email */}
-                            <div className="w-52 flex items-center gap-1 truncate">
-                              <Mail className="h-3 w-3 text-gray-400" />
-                              <span className="text-xs text-gray-600 truncate">{guard.email}</span>
-                            </div>
+        <TableBody>
+          {guards.map((guard: any) => (
+            <TableRow 
+              key={guard.id} 
+              className="border-b border-gray-100 hover:bg-gray-50 transition"
+            >
+              
+              {/* Name */}
+              <TableCell className="py-4">
+                <div className="text-gray-900 font-medium text-base truncate max-w-40">
+                  {guard.name}
+                </div>
+              </TableCell>
 
-                            {/* Mobile */}
-                            <div className="w-32 flex items-center gap-1">
-                              <Phone className="h-3 w-3 text-gray-400" />
-                              <span className="text-xs text-gray-600">{guard.mobile}</span>
-                            </div>
+              {/* Email */}
+              <TableCell className="py-4">
+                <div className="flex items-center gap-2 truncate max-w-52">
+                  <Mail className="h-4 w-4 text-gray-400" />
+                  <span className="text-base text-gray-700 truncate">
+                    {guard.email}
+                  </span>
+                </div>
+              </TableCell>
 
-                            {/* Address */}
-                            <div className="w-60 text-xs text-gray-600 truncate">
-                              {guard.address || "—"}
-                            </div>
+              {/* Mobile */}
+              <TableCell className="py-4">
+                <div className="flex items-center gap-2 truncate max-w-32">
+                  <Phone className="h-4 w-4 text-gray-400" />
+                  <span className="text-base text-gray-700 truncate">
+                    {guard.mobile}
+                  </span>
+                </div>
+              </TableCell>
 
-                            {/* Joined Date */}
-                            <div className="w-32 text-xs text-gray-500">
-                              {formatDate(guard.createdAt)}
-                            </div>
+              {/* Address */}
+              <TableCell className="py-4">
+                <span className="text-base text-gray-600 truncate block max-w-60">
+                  {guard.address || "—"}
+                </span>
+              </TableCell>
 
-                            {/* Actions */}
-                            <div className="flex gap-2 w-32 justify-end">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleViewDetails(guard.id)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Eye className="h-3 w-3" />
-                              </Button>
+              {/* Joined */}
+              <TableCell className="py-4">
+                <span className="text-base text-gray-600">
+                  {formatDate(guard.createdAt)}
+                </span>
+              </TableCell>
 
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 w-8 p-0"
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
+              {/* Actions */}
+              <TableCell className="py-4 text-right">
+                <div className="flex justify-end gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleViewDetails(guard.id)}
+                    className="h-9 w-9 p-0 text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
 
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
+                  {/* <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="h-9 w-9 p-0 text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
 
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                  <Button 
+                    size="sm"
+                    variant="ghost"
+                    className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-gray-100"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button> */}
+                </div>
+              </TableCell>
+
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+
+    {guards.length === 0 && (
+      <div className="text-center py-12 text-gray-500">
+        <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+        <h3 className="font-medium mb-2">No guards found</h3>
+        <p className="text-sm">Try adjusting your search or filter criteria</p>
+      </div>
+    )}
+  </CardContent>
+</Card>
+
+
+
+
 
                   {/* Pagination */}
                   {totalPages > 1 && (

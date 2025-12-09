@@ -16,6 +16,7 @@ export interface SiteServiceCoordinates {
 export interface Order {
   id: string;
   serviceType: string;
+  locationName: string;
   locationAddress: string;
   siteService: SiteServiceCoordinates;
   guardsRequired: number;
