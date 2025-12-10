@@ -892,7 +892,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                                     variant="outline" 
                                     className={`
                                       text-xs px-2 py-0.5
-                                      ${assignment.role === 'Patrol' 
+                                      ${assignment.role === 'patrol' 
                                         ? 'bg-orange-200 text-orange-900 border-orange-400' 
                                         : 'bg-green-200 text-green-900 border-green-400'
                                       }

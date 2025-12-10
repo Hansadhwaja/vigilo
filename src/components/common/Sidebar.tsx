@@ -18,6 +18,18 @@ import {
   Receipt,
   LogOut
 } from "lucide-react";
+import DashboardIcon from "../../images/duo-icons_dashboard.svg";
+import SchedulingIcon from "../../images/duo-icons_clock.svg";
+import ClientIcon from "../../images/duo-icons_building.svg";
+import IncidentIcon from "../../images/duo-icons_alert-triangle.svg";
+import AlarmIcon from "../../images/duo-icons_bell.svg";
+import MapIcon from "../../images/duo-icons_message.svg";
+import MessageIcon from "../../images/duo-icons_message.svg";
+import PatrolingIcon from "../../images/duo-icons_lamp.svg";
+import HRIcon from "../../images/duo-icons_user.svg";
+import InvoicingIcon from "../../images/duo-icons_currency-euro.svg";
+import SettingsIcon from "../../images/duo-icons_settings.svg";
+
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
@@ -128,14 +140,14 @@ export default function Sidebar({
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2 bg-[rgba(88,80,80,0)]">
         <SideItem
-          icon={<Activity />}
+          icon={<img src={DashboardIcon} className="h-5 w-5"/> }
           label="Dashboard"
           active={activeTab === "dashboard"}
           onClick={() => onTabChange("dashboard")}
           open={isOpen}
         />
         <SideItem
-          icon={<Calendar />}
+          icon={<img src={SchedulingIcon} className="h-5 w-5"/>}
           label="Scheduling"
           active={activeTab === "scheduling"}
           onClick={() => onTabChange("scheduling")}
@@ -149,63 +161,63 @@ export default function Sidebar({
           open={isOpen}
         /> */}
         <SideItem
-          icon={<Building2 />}
+          icon={<img src={ClientIcon} className="h-5 w-5"/>}
           label="Clients Management"
           active={activeTab === "clients"}
           onClick={() => onTabChange("clients")}
           open={isOpen}
         />
         <SideItem
-          icon={<FileWarning />}
+          icon={<img src={IncidentIcon} className="h-5 w-5"/>}
           label="Incidents"
           active={activeTab === "incidents"}
           onClick={() => onTabChange("incidents")}
           open={isOpen}
         />
         <SideItem
-          icon={<Bell />}
+          icon={<img src={AlarmIcon} className="h-5 w-5"/>}
           label="Alarms"
           active={activeTab === "alarms"}
           onClick={() => onTabChange("alarms")}
           open={isOpen}
         />
         <SideItem
-          icon={<Map />}
+          icon={<img src={MapIcon} className="h-5 w-5"/>}
           label="Map"
           active={activeTab === "map"}
           onClick={() => onTabChange("map")}
           open={isOpen}
         />
         <SideItem
-          icon={<MessageSquare />}
+          icon={<img src={MessageIcon} className="h-5 w-5"/>}
           label="Messages"
           active={activeTab === "messages"}
           onClick={() => onTabChange("messages")}
           open={isOpen}
         />
         <SideItem
-          icon={<Route />}
+          icon={<img src={PatrolingIcon} className="h-5 w-5"/>}
           label="Patrolling"
           active={activeTab === "patrol"}
           onClick={() => onTabChange("patrol")}
           open={isOpen}
         />
         <SideItem
-          icon={<Users2 />}
+          icon={<img src={HRIcon} className="h-5 w-5"/>}
           label="HR & Compliance"
           active={activeTab === "hr"}
           onClick={() => onTabChange("hr")}
           open={isOpen}
         />
         <SideItem
-          icon={<Receipt />}
+          icon={<img src={InvoicingIcon} className="h-5 w-5"/>}
           label="Invoicing"
           active={activeTab === "invoicing"}
           onClick={() => onTabChange("invoicing")}
           open={isOpen}
         />
         <SideItem
-          icon={<Settings />}
+          icon={<img src={SettingsIcon} className="h-5 w-5"/>}
           label="Settings & Vehicles"
           active={activeTab === "settings"}
           onClick={() => onTabChange("settings")}
