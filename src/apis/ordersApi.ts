@@ -174,6 +174,65 @@ deleteClient: builder.mutation<
   ],
 }),
 
+// ---- GET ONE ORDER BY ID (ADMIN VIEW) ----
+getOrderById: builder.query<
+  { success: boolean; message: string; data: any },
+  string
+>({
+  query: (id: string) => ({
+    url: `/orders/getAdminOrderById/${id}`,
+    method: "GET",
+  }),
+
+  transformResponse: (res: any) => {
+    const o = res.data;
+
+    const mapped = {
+      id: o.id,
+      serviceType: o.serviceType,
+      locationName: o.locationName || "Unknown",
+      locationAddress: o.locationAddress || "Not Provided",
+
+      siteService: o.siteService || {
+        crs: { type: "", properties: { name: "" } },
+        type: "Point",
+        coordinates: [0, 0],
+      },
+
+      guardsRequired: o.guardsRequired || 0,
+      description: o.description || "",
+      startDate: o.startDate,
+      endDate: o.endDate,
+      startTime: o.startTime,
+      endTime: o.endTime,
+      status: o.status || "pending",
+
+      images: o.images || [],
+      createdAt: o.createdAt,
+      updatedAt: o.updatedAt,
+      deletedAt: o.deletedAt || null,
+
+      userId: o.userId,
+
+      // 👇 Mapping the User Object (Important!)
+      client: o.user
+        ? {
+            id: o.user.id,
+            name: o.user.name,
+            email: o.user.email,
+            mobile: o.user.mobile,
+            address: o.user.address,
+          }
+        : null,
+    };
+
+    return { ...res, data: mapped };
+  },
+
+  providesTags: (_result, _error, id) => [{ type: "Orders", id }],
+}),
+
+
 
   }),
 });
@@ -185,4 +244,6 @@ export const {
   useAcceptOrderMutation,
    useGetAllClientsQuery,
    useDeleteClientMutation,
+   useGetOrderByIdQuery,
+
 } = ordersApi;

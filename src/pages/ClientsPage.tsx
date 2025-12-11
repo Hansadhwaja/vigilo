@@ -14,6 +14,7 @@ import { useGetAllOrdersQuery, useCancelOrderMutation, useAcceptOrderMutation, u
 import { AlertCircle } from "lucide-react";
 import { useGetAllClientsQuery } from "../apis/ordersApi";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function ClientsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,6 +31,7 @@ export default function ClientsPage() {
   const itemsPerPage = 10;
 const [showClientDialog, setShowClientDialog] = useState(false);
 const [selectedClient, setSelectedClient] = useState<any>(null);
+const navigate = useNavigate();
 
 
   // Debounce search
@@ -101,9 +103,8 @@ const handleDeleteClient = async (clientId: string) => {
   // Pagination
   const totalPages = apiPagination?.totalPages || 1;
 
-  const handleViewDetails = (order: any) => {
-    setSelectedOrder(order);
-    setShowDetailsDialog(true);
+  const handleViewDetails = (orderId: string) => {
+    navigate(`/clients/${orderId}`);
   };
 
   const handleAction = (order: any, action: "accept" | "reject") => {
@@ -322,7 +323,7 @@ const handleDeleteClient = async (clientId: string) => {
         <th className="px-4 py-3 font-medium text-gray-700">Service Type</th>
         <th className="px-4 py-3 font-medium text-gray-700">Location</th>
         <th className="px-4 py-3 font-medium text-gray-700">Schedule</th>
-        <th className="px-4 py-3 font-medium text-gray-700">Time</th>
+        {/* <th className="px-4 py-3 font-medium text-gray-700">Time</th> */}
         <th className="px-4 py-3 font-medium text-gray-700">Guards</th>
         <th className="px-4 py-3 font-medium text-gray-700">Status</th>
         <th className="px-4 py-3 font-medium text-gray-700">Created</th>
@@ -359,12 +360,12 @@ const handleDeleteClient = async (clientId: string) => {
           </td>
 
           {/* Time */}
-          <td className="px-4 py-3 text-gray-700">
+          {/* <td className="px-4 py-3 text-gray-700">
             <div className="flex items-center gap-1">
               <Clock className="h-3 w-3 text-gray-400" />
               {formatTime(order.startTime)} – {formatTime(order.endTime)}
             </div>
-          </td>
+          </td> */}
 
           {/* Guards Required */}
           <td className="px-4 py-3 text-gray-700">
@@ -395,7 +396,7 @@ const handleDeleteClient = async (clientId: string) => {
                 size="sm"
                 variant="outline"
                 className="h-8 w-8 p-0"
-                onClick={() => handleViewDetails(order)}
+                onClick={() => handleViewDetails(order.id)}
               >
                 <Eye className="h-4 w-4" />
               </Button>

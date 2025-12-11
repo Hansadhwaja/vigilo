@@ -181,7 +181,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
+            
             Incident Reports
           </CardTitle>
         </CardHeader>

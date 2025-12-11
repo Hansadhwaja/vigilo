@@ -174,6 +174,7 @@ const endRef = useRef<HTMLInputElement>(null);
   const [deleteSchedule] = useDeleteScheduleMutation();
   const handleDelete = async (id: string, e: any) => {
   e.stopPropagation();
+  console.log("Starting deleting schedule with id:", id);
 
   try {
     const res = await deleteSchedule({ id }).unwrap();
@@ -870,6 +871,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                             {shiftsAtTime.map((assignment: {
+                              shiftId: string;
                               
                               
                               id: string; role: string; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; time: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; description: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; orderId: string; StaticGuards: { status: string; }; status: any; 
@@ -954,7 +956,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                                         variant="ghost"
                                         size="sm"
                                         className="h-7 w-7 p-0 hover:bg-red-100 hover:text-red-600"
-                                        onClick={(e: any) => handleDelete(assignment.id, e)}
+                                        onClick={(e: any) => handleDelete(assignment.shiftId, e)}
                                       >
                                         <Trash2 className="h-3 w-3" />
                                       </Button>

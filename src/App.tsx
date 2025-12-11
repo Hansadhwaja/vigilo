@@ -27,6 +27,8 @@ import ClientsPage from "./pages/ClientsPage";
 import MessagesPage from "./pages/MessagesPage";
 import InvoicingPage from "./pages/InvoicingPage";
 import { AuthPage, GuardDetailsPage } from "./pages";
+import OrderDetailsPage from "./pages/OrderDetailsPage";
+
 
 // Data and utilities
 import {
@@ -264,6 +266,8 @@ function MainLayout() {
             <Route path="/scheduling" element={<SchedulingPage />} />
             {/* <Route path="/shifts" element={<ShiftPage />} /> */}
             <Route path="/clients" element={<ClientsPage />} />
+             {/* NEW CLIENT DETAILS ROUTE */}
+  <Route path="/clients/:id" element={<OrderDetailsPage />} />
             <Route 
               path="/incidents" 
               element={

@@ -18,17 +18,18 @@ import {
   Receipt,
   LogOut
 } from "lucide-react";
-import DashboardIcon from "../../images/duo-icons_dashboard.svg";
-import SchedulingIcon from "../../images/duo-icons_clock.svg";
-import ClientIcon from "../../images/duo-icons_building.svg";
-import IncidentIcon from "../../images/duo-icons_alert-triangle.svg";
-import AlarmIcon from "../../images/duo-icons_bell.svg";
-import MapIcon from "../../images/duo-icons_message.svg";
-import MessageIcon from "../../images/duo-icons_message.svg";
-import PatrolingIcon from "../../images/duo-icons_lamp.svg";
-import HRIcon from "../../images/duo-icons_user.svg";
-import InvoicingIcon from "../../images/duo-icons_currency-euro.svg";
-import SettingsIcon from "../../images/duo-icons_settings.svg";
+
+import DashboardIcon from "../../images/material-symbols_dashboard-rounded.svg";
+import SchedulingIcon from "../../public/lets-icons_clock-fill.svg";
+import ClientIcon from "../../public/mingcute_building-1-fill.svg";
+import IncidentIcon from "../../public/fluent-mdl2_incident-triangle.svg";
+import AlarmIcon from "../../public/mingcute_notification-fill.svg";
+import MapIcon from "../../public/solar_map-bold.svg";
+import MessageIcon from "../../public/tabler_message-filled.svg";
+import PatrolingIcon from "../../public/mingcute_bulb-fill.svg";
+import HRIcon from "../../public/duo-icons_user.svg";
+import InvoicingIcon from "../../public/Frame.svg";
+import SettingsIcon from "../../public/material-symbols_settings.svg";
 
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";

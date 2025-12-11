@@ -268,40 +268,54 @@ export default function HRPage() {
         {/* Guards Tab */}
         <TabsContent value="guards">
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Guard Directory</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {/* Compact Filters */}
-              <div className="flex flex-wrap gap-2 items-center mb-4 bg-gray-50 p-3 rounded-lg border">
-                <Filter className="h-4 w-4 text-gray-500" />
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
-                  <Input
-                    placeholder="Search guards..."
-                    value={searchTerm}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="pl-9 w-40 h-8"
-                  />
-                  {isFetching && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <div className="h-3 w-3 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
-                    </div>
-                  )}
-                </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setDebouncedSearch("");
-                    setCurrentPage(1);
-                  }}
-                  className="h-8"
-                >
-                  Clear
-                </Button>
-              </div>
+            <CardHeader className="py-1"> 
+  <div className="flex items-center justify-between ">
+    
+    {/* LEFT SIDE = Heading + Filters */}
+    <div className="flex items-center gap-4 mt-2 ">
+      {/* Heading */}
+      <CardTitle className="text-lg font-semibold">Guard Directory</CardTitle>
+
+      {/* Filters Row */}
+      <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border">
+        <Filter className="h-4 w-4 text-gray-500" />
+
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
+          <Input
+            placeholder="Search guards..."
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="pl-9 w-40 h-8"
+          />
+          {isFetching && (
+            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+              <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-r-transparent"></div>
+            </div>
+          )}
+        </div>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setSearchTerm("");
+            setDebouncedSearch("");
+            setCurrentPage(1);
+          }}
+          className="h-8"
+        >
+          Clear
+        </Button>
+      </div>
+    </div>
+
+    {/* RIGHT SIDE EMPTY FOR NOW (optional) */}
+    <div></div>
+  </div>
+</CardHeader>
+
+<CardContent className="pt-0">
 
               {/* Loading State */}
               {isLoading && (
@@ -337,122 +351,117 @@ export default function HRPage() {
               {!isLoading && !isError && guards.length > 0 && (
                 <>
                   {/* Guard List Table */}
-{/* Guard List Table */}
-<Card>
-  <CardHeader className="pb-4">
-    <CardTitle className="text-xl font-semibold flex items-center gap-2">
-      <Users className="h-5 w-5" />
-      Guards List
-    </CardTitle>
-  </CardHeader>
+                {/* Guard List Table */}
+                <Card>
+                  
 
-  <CardContent className="p-0">
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-gray-50 border-b border-gray-200">
-            <TableHead className="text-base font-medium text-gray-800">Name</TableHead>
-            <TableHead className="text-base font-medium text-gray-800">Email</TableHead>
-            <TableHead className="text-base font-medium text-gray-800">Mobile</TableHead>
-            <TableHead className="text-base font-medium text-gray-800">Address</TableHead>
-            <TableHead className="text-base font-medium text-gray-800">Joined</TableHead>
-            <TableHead className="text-base font-medium text-gray-800 text-right">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+                  <CardContent className="p-0">
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gray-50 border-b border-gray-200">
+                            <TableHead className="text-base font-medium text-gray-800">Name</TableHead>
+                            <TableHead className="text-base font-medium text-gray-800">Email</TableHead>
+                            <TableHead className="text-base font-medium text-gray-800">Mobile</TableHead>
+                            <TableHead className="text-base font-medium text-gray-800">Address</TableHead>
+                            <TableHead className="text-base font-medium text-gray-800">Joined</TableHead>
+                            <TableHead className="text-base font-medium text-gray-800 text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
 
-        <TableBody>
-          {guards.map((guard: any) => (
-            <TableRow 
-              key={guard.id} 
-              className="border-b border-gray-100 hover:bg-gray-50 transition"
-            >
-              
-              {/* Name */}
-              <TableCell className="py-4">
-                <div className="text-gray-900 font-medium text-base truncate max-w-40">
-                  {guard.name}
-                </div>
-              </TableCell>
+                        <TableBody>
+                          {guards.map((guard: any) => (
+                            <TableRow 
+                              key={guard.id} 
+                              className="border-b border-gray-100 hover:bg-gray-50 transition"
+                            >
+                              
+                              {/* Name */}
+                              <TableCell className="py-4">
+                                <div className="text-gray-900 font-medium text-base truncate max-w-40">
+                                  {guard.name}
+                                </div>
+                              </TableCell>
 
-              {/* Email */}
-              <TableCell className="py-4">
-                <div className="flex items-center gap-2 truncate max-w-52">
-                  <Mail className="h-4 w-4 text-gray-400" />
-                  <span className="text-base text-gray-700 truncate">
-                    {guard.email}
-                  </span>
-                </div>
-              </TableCell>
+                              {/* Email */}
+                              <TableCell className="py-4">
+                                <div className="flex items-center gap-2 truncate max-w-52">
+                                  
+                                  <span className="text-base text-gray-700 truncate">
+                                    {guard.email}
+                                  </span>
+                                </div>
+                              </TableCell>
 
-              {/* Mobile */}
-              <TableCell className="py-4">
-                <div className="flex items-center gap-2 truncate max-w-32">
-                  <Phone className="h-4 w-4 text-gray-400" />
-                  <span className="text-base text-gray-700 truncate">
-                    {guard.mobile}
-                  </span>
-                </div>
-              </TableCell>
+                              {/* Mobile */}
+                              <TableCell className="py-4">
+                                <div className="flex items-center gap-2 truncate max-w-32">
+                                  
+                                  <span className="text-base text-gray-700 truncate">
+                                    {guard.mobile}
+                                  </span>
+                                </div>
+                              </TableCell>
 
-              {/* Address */}
-              <TableCell className="py-4">
-                <span className="text-base text-gray-600 truncate block max-w-60">
-                  {guard.address || "—"}
-                </span>
-              </TableCell>
+                              {/* Address */}
+                              <TableCell className="py-4">
+                                <span className="text-base text-gray-600 truncate block max-w-60">
+                                  {guard.address || "—"}
+                                </span>
+                              </TableCell>
 
-              {/* Joined */}
-              <TableCell className="py-4">
-                <span className="text-base text-gray-600">
-                  {formatDate(guard.createdAt)}
-                </span>
-              </TableCell>
+                              {/* Joined */}
+                              <TableCell className="py-4">
+                                <span className="text-base text-gray-600">
+                                  {formatDate(guard.createdAt)}
+                                </span>
+                              </TableCell>
 
-              {/* Actions */}
-              <TableCell className="py-4 text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleViewDetails(guard.id)}
-                    className="h-9 w-9 p-0 text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
+                              {/* Actions */}
+                              <TableCell className="py-4 text-right">
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => handleViewDetails(guard.id)}
+                                    className="h-9 w-9 p-0 text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
 
-                  {/* <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    className="h-9 w-9 p-0 text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
+                                  {/* <Button 
+                                    size="sm" 
+                                    variant="ghost" 
+                                    className="h-9 w-9 p-0 text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
 
-                  <Button 
-                    size="sm"
-                    variant="ghost"
-                    className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-gray-100"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button> */}
-                </div>
-              </TableCell>
+                                  <Button 
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-gray-100"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button> */}
+                                </div>
+                              </TableCell>
 
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
 
-    {guards.length === 0 && (
-      <div className="text-center py-12 text-gray-500">
-        <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-        <h3 className="font-medium mb-2">No guards found</h3>
-        <p className="text-sm">Try adjusting your search or filter criteria</p>
-      </div>
-    )}
-  </CardContent>
-</Card>
+                    {guards.length === 0 && (
+                      <div className="text-center py-12 text-gray-500">
+                        <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <h3 className="font-medium mb-2">No guards found</h3>
+                        <p className="text-sm">Try adjusting your search or filter criteria</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
 
 

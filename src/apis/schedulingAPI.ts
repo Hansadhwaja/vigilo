@@ -140,7 +140,7 @@ export const schedulingApi = baseApi.injectEndpoints({
     deleteSchedule: builder.mutation<DeleteScheduleResponse, { id: string }>({
       query: (body) => ({
         url: `/scheduling/deleteSchedule`,
-        method: "DELETE",
+        method: "POST",
         body,
       }),
       invalidatesTags: ["Schedules"],
