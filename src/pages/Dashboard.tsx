@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { 
   DollarSign, 
   Users, 
@@ -36,6 +36,10 @@ import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import { Button } from "../components/ui/button";
 
 import { demoTrend, revenueStreams, liveMetrics } from "../data/sampleData";
+// APIs
+import { useGetAllGuardsQuery } from "../apis/guardsApi";
+import { useGetAllSchedulesQuery } from "../apis/schedulingAPI";
+import { useGetAllOrdersQuery } from "../apis/ordersApi";
 
 interface DashboardProps {
   kpi: {
@@ -52,6 +56,108 @@ interface DashboardProps {
 
 export default function Dashboard({ kpi }: DashboardProps) {
   const [currentTime, setCurrentTime] = useState(new Date());
+
+    const { data: ordersResponse } = useGetAllOrdersQuery({
+    limit: 5000,
+    page: 1,
+  });
+
+  const allOrders = ordersResponse?.data ?? [];
+
+  const buildDateTime = (isoDate: string, time: string) => {
+    const datePart = isoDate.split("T")[0];
+    return new Date(`${datePart}T${time}:00`);
+  };
+
+  const activeOrdersCount = useMemo(() => {
+    const now = new Date();
+
+    return allOrders.filter((order) => {
+      if (["cancelled", "completed"].includes(order.status)) {
+        return false;
+      }
+
+      const startDateTime = buildDateTime(order.startDate, order.startTime);
+      const endDateTime = buildDateTime(order.endDate, order.endTime);
+
+      return now >= startDateTime && now <= endDateTime;
+    }).length;
+  }, [allOrders, currentTime]);
+
+   const { data: guardsResponse } = useGetAllGuardsQuery({
+    page: 1,
+    limit: 5000,
+  });
+
+  const { data: schedulesResponse } = useGetAllSchedulesQuery();
+
+  const allGuards = guardsResponse?.data ?? [];
+  const schedules = schedulesResponse?.data ?? [];
+
+  const activeShiftsCount = useMemo(() => {
+  const now = new Date();
+
+  return schedules.filter((shift: any) => {
+    // Ignore completed / cancelled
+    if (["completed", "cancelled"].includes(shift.status)) {
+      return false;
+    }
+
+    const start = new Date(shift.startTime);
+    const end = new Date(shift.endTime);
+
+    return now >= start && now <= end;
+  }).length;
+}, [schedules, currentTime]);
+
+const activePatrolsCount = useMemo(() => {
+  const now = new Date();
+
+  return schedules.filter((schedule: any) => {
+    // Must be patrol
+    if (schedule.type !== "patrol") {
+      return false;
+    }
+
+    // Ignore finished schedules
+    if (["completed", "cancelled"].includes(schedule.status)) {
+      return false;
+    }
+
+    const start = new Date(schedule.startTime);
+    const end = new Date(schedule.endTime);
+
+    return now >= start && now <= end;
+  }).length;
+}, [schedules, currentTime]);
+
+
+  // Compute On Duty Guards
+
+  const onDutyGuardIds = useMemo(() => {
+    const ids = new Set<string>();
+
+    schedules.forEach((shift: any) => {
+      if (shift.status === "ongoing") {
+        shift.guards?.forEach((guard: any) => {
+          ids.add(guard.id);
+        });
+      }
+    });
+
+    return ids;
+  }, [schedules]);
+
+  const onDutyGuardsCount = onDutyGuardIds.size;
+
+  //Compute Available Guards
+
+  const availableGuardsCount = useMemo(() => {
+    return allGuards.filter(
+      (guard) => !onDutyGuardIds.has(guard.id)
+    ).length;
+  }, [allGuards, onDutyGuardIds]);
+
   const line = demoTrend;
   const pieData = [
     { name: "On-time", value: 92 },
@@ -96,10 +202,10 @@ export default function Dashboard({ kpi }: DashboardProps) {
 
       {/* Primary KPIs - Per Scope Requirements */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KPI 
+         <KPI 
           icon={<Users className="h-5 w-5" />} 
           label="Available Guards" 
-          value={12} 
+          value={availableGuardsCount} 
           sub="ready for assignment"
         />
         <KPI 
@@ -109,34 +215,36 @@ export default function Dashboard({ kpi }: DashboardProps) {
           sub="requiring response"
           urgent={kpi.openAlarms > 2}
         />
-        <KPI 
+         <KPI 
           icon={<Users className="h-5 w-5" />} 
           label="On Duty Guards" 
-          value={kpi.onDuty} 
+          value={onDutyGuardsCount} 
           sub="currently working"
         />
         <KPI 
           icon={<Target className="h-5 w-5" />} 
           label="Active Shifts" 
-          value={18} 
+          value={activeShiftsCount} 
           sub="in progress"
         />
+
       </div>
 
       {/* Secondary KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KPI 
+         <KPI 
           icon={<Target className="h-5 w-5" />} 
           label="Active Orders" 
-          value={8} 
-          sub="quick summary"
+          value={activeOrdersCount} 
+          sub="currently running"
         />
         <KPI 
           icon={<Target className="h-5 w-5" />} 
           label="Active Patrols" 
-          value={6} 
+          value={activePatrolsCount} 
           sub="currently patrolling"
         />
+
         <KPI 
           icon={<DollarSign className="h-5 w-5" />} 
           label="Total Revenue" 

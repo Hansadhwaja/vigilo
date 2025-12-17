@@ -534,7 +534,7 @@ export default function InvoicingPage() {
                   
                   <div>
                     <Label htmlFor="clientSelect">Select Client</Label>
-                    <Select value={newInvoice.clientId} onValueChange={(value) => {
+                    <Select value={newInvoice.clientId} onValueChange={(value: string) => {
                       const client = clientList.find(c => c.id === value);
                       setNewInvoice({
                         ...newInvoice, 
