@@ -1330,7 +1330,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
 
       {/* Create Assignment Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog} >
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create Guard Assignment</DialogTitle>
             <DialogDescription>
@@ -1402,7 +1402,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                 </SelectItem>
               ))
             ) : (
-              <div className="p-3 text-sm text-gray-500">No orders available</div>
+              <div className="p-3 text-lg text-gray-500">No orders available</div>
             )}
           </SelectContent>
         </Select>
@@ -1523,7 +1523,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
 
   {/* START TIME */}
   <div className="space-y-1">
-    <Label htmlFor="editStartTime" className="text-sm font-medium text-gray-700">
+    <Label htmlFor="editStartTime" className="text-lg font-medium text-gray-700">
       Start Time
     </Label>
 
@@ -1548,7 +1548,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
 
   {/* END TIME */}
   <div className="space-y-1">
-    <Label htmlFor="editEndTime" className="text-sm font-medium text-gray-700">
+    <Label htmlFor="editEndTime" className="text-lg font-medium text-gray-700">
       End Time
     </Label>
 
