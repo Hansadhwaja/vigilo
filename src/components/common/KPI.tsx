@@ -20,7 +20,7 @@ export default function KPI({ icon, label, value, sub, trend, urgent }: KPIProps
     )}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className={classNames(
-          "text-sm font-medium",
+          "text-xl font-medium",
           urgent && "text-red-700"
         )}>
           {label}
@@ -44,7 +44,7 @@ export default function KPI({ icon, label, value, sub, trend, urgent }: KPIProps
             {trend === "up" && <TrendingUp className="h-3 w-3 text-green-600" />}
             {trend === "down" && <TrendingDown className="h-3 w-3 text-red-600" />}
             <p className={classNames(
-              "text-xs",
+              "text-xl",
               urgent ? "text-red-600" : "text-gray-500"
             )}>
               {sub}
