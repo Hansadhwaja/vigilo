@@ -1362,11 +1362,12 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
   </Button>
 
   <Dialog open={openCalendar} onOpenChange={setOpenCalendar}>
-    <DialogContent className="p-4">
+  <DialogContent className="w-auto max-w-fit p-4 overflow-hidden">
+    <div className="bg-gradient-to-br from-background to-muted/20 rounded-lg">
       <Calendar
         mode="single"
         selected={formData.date ? new Date(formData.date) : undefined}
-        onSelect={(date:any) => {
+        onSelect={(date: any) => {
           if (!date) return;
           setFormData({
             ...formData,
@@ -1375,8 +1376,10 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
           setOpenCalendar(false);
         }}
       />
-    </DialogContent>
-  </Dialog>
+    </div>
+  </DialogContent>
+</Dialog>
+
 </div>
 
 

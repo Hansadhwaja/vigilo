@@ -170,7 +170,7 @@ const handleDeleteClient = async (clientId: string) => {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div className="flex-1">
           <h1 className="mb-1">Order Management</h1>
-          <p className="text-gray-600 text-sm">Manage security service orders & contracts</p>
+          <p className="text-gray-600 text-lg">Manage security service orders & contracts</p>
         </div>
                 
         {/* Inline Summary Cards */}
@@ -179,7 +179,7 @@ const handleDeleteClient = async (clientId: string) => {
             <Building className="h-4 w-4 text-blue-600" />
             <div>
               <div className="font-bold text-blue-700">{totalOrders}</div>
-              <div className="text-xs text-blue-600">Total</div>
+              <div className="text-lg text-blue-600">Total</div>
             </div>
           </div>
                     
@@ -187,7 +187,7 @@ const handleDeleteClient = async (clientId: string) => {
             <CheckCircle className="h-4 w-4 text-green-600" />
             <div>
               <div className="font-bold text-green-700">{activeOrders}</div>
-              <div className="text-xs text-green-600">Active</div>
+              <div className="text-lg text-green-600">Active</div>
             </div>
           </div>
                     
@@ -195,7 +195,7 @@ const handleDeleteClient = async (clientId: string) => {
             <Building className="h-4 w-4 text-purple-600" />
             <div>
               <div className="font-bold text-purple-700">${totalRevenue.toLocaleString()}</div>
-              <div className="text-xs text-purple-600">Estimated</div>
+              <div className="text-lg text-purple-600">Estimated</div>
             </div>
           </div>
                     
@@ -203,7 +203,7 @@ const handleDeleteClient = async (clientId: string) => {
             <Building className="h-4 w-4 text-orange-600" />
             <div>
               <div className="font-bold text-orange-700">${avgOrderValue.toLocaleString()}</div>
-              <div className="text-xs text-orange-600">Avg Value</div>
+              <div className="text-lg text-orange-600">Avg Value</div>
             </div>
           </div>
         </div>
@@ -261,7 +261,7 @@ const handleDeleteClient = async (clientId: string) => {
             </Select>
             <Button 
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={() => {
                 setStatusFilter("all");
                 setServiceTypeFilter("all");
@@ -294,7 +294,7 @@ const handleDeleteClient = async (clientId: string) => {
                 <div className="text-center py-8">
                   <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-2" />
                   <p className="text-red-600">Failed to load orders</p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-lg text-gray-500 mt-1">
                     {error && 'data' in error ? JSON.stringify(error.data) : 'An error occurred'}
                   </p>
                 </div>
@@ -305,7 +305,7 @@ const handleDeleteClient = async (clientId: string) => {
                 <div className="text-center py-8">
                   <Building className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                   <p className="text-gray-600">No orders found</p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-lg text-gray-500 mt-1">
                     {searchTerm || statusFilter !== "all" || serviceTypeFilter !== "all"
                       ? "Try adjusting your filters"
                       : "No orders available"}
@@ -317,7 +317,7 @@ const handleDeleteClient = async (clientId: string) => {
               {!isLoading && !isError && orders.length > 0 && (
                 <>
                  <div className="overflow-x-auto rounded-lg border border-gray-200">
-  <table className="w-full text-sm text-left">
+  <table className="w-full text-lg text-left">
     <thead className="bg-gray-50 border-b">
       <tr>
         <th className="px-4 py-3 font-medium text-gray-700">Service Type</th>
@@ -393,7 +393,7 @@ const handleDeleteClient = async (clientId: string) => {
 
               {/* View */}
               <Button
-                size="sm"
+                size="lg"
                 variant="outline"
                 className="h-8 w-8 p-0"
                 onClick={() => handleViewDetails(order.id)}
@@ -405,8 +405,8 @@ const handleDeleteClient = async (clientId: string) => {
               {order.status === "pending" && (
                 <>
                   <Button
-                    size="sm"
-                    className="h-8 px-2 text-xs bg-green-600 hover:bg-green-700"
+                    size="lg"
+                    className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
                     onClick={() => handleAction(order, "accept")}
                     disabled={isAccepting}
                   >
@@ -414,9 +414,9 @@ const handleDeleteClient = async (clientId: string) => {
                   </Button>
 
                   <Button
-                    size="sm"
+                    size="lg"
                     variant="outline"
-                    className="h-8 px-2 text-xs border-red-200 text-red-600 hover:bg-red-50"
+                    className="h-8 px-2 text-lg border-red-200 text-red-600 hover:bg-red-50"
                     onClick={() => handleAction(order, "reject")}
                     disabled={isCancelling}
                   >
@@ -502,7 +502,7 @@ const handleDeleteClient = async (clientId: string) => {
             </div>
             <Button 
               variant="outline"
-              size="sm"
+              size="lg"
               onClick={() => {
                 setSearchTerm("");
                 setDebouncedSearch("");
@@ -520,7 +520,7 @@ const handleDeleteClient = async (clientId: string) => {
             <CardContent className="pt-0">
               {!isLoading && !isError  && clientsList.length>0 && (
                 <div className="overflow-x-auto rounded-lg border border-gray-200">
-  <table className="w-full text-sm text-left">
+  <table className="w-full text-lg text-left">
     
     {/* Table Header */}
     <thead className="bg-gray-50 border-b">
@@ -570,7 +570,7 @@ const handleDeleteClient = async (clientId: string) => {
 
               {/* View Button */}
               <Button
-                size="sm"
+                size="lg"
                 variant="outline"
                 className="h-8 w-8 p-0"
                 onClick={() => {
@@ -583,7 +583,7 @@ const handleDeleteClient = async (clientId: string) => {
 
               {/* Delete Button */}
               <Button
-                size="sm"
+                size="lg"
                 variant="outline"
                 className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
                 onClick={() => handleDeleteClient(client.id)}
@@ -670,7 +670,7 @@ const handleDeleteClient = async (clientId: string) => {
                     <div><strong>Location:</strong> {selectedOrder.locationAddress}</div>
                     <div>
                       <strong>Coordinates:</strong> 
-                      <div className="text-sm text-gray-600">
+                      <div className="text-lg text-gray-600">
                         Lat: {selectedOrder.siteService.coordinates[1]}, 
                         Lng: {selectedOrder.siteService.coordinates[0]}
                       </div>
@@ -680,7 +680,7 @@ const handleDeleteClient = async (clientId: string) => {
 
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-3">Description</h3>
-                  <p className="text-sm text-gray-600">{selectedOrder.description}</p>
+                  <p className="text-lg text-gray-600">{selectedOrder.description}</p>
                 </div>
               </div>
 
