@@ -1357,7 +1357,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
     className="w-full justify-start"
     onClick={() => setOpenCalendar(true)}
   >
-    <CalendarIcon className="mr-2 h-4 w-4" />
+    <CalendarIcon className="mr-2 h-4 w-4 bg-red-200" />
     {formData.date ? new Date(formData.date).toLocaleDateString() : "Pick a date"}
   </Button>
 
