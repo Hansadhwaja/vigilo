@@ -36,6 +36,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
 import { classNames } from "../../utils/helpers";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -87,10 +88,17 @@ export default function Sidebar({
   const navigate = useNavigate();
 
   const handleLogout = () => {
+  try {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    navigate("/auth");
-  };
+
+    toast.success("You have been logged out successfully");
+
+    navigate("/auth", { replace: true });
+  } catch (error) {
+    toast.error("Logout failed. Please try again.");
+  }
+};
 
   return (
     <aside
