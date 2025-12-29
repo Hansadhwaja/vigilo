@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Shield} from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { useLoginMutation } from "../apis/authApi";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Shield, Eye, EyeOff } from "lucide-react";
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -40,14 +40,14 @@ export default function AuthPage() {
               VIGILO ADMIN
             </CardTitle>
           </div>
-          <p className="text-sm text-gray-600">Admin Login Portal</p>
+          <p className="text-xl text-gray-600">Admin Login Portal</p>
         </CardHeader>
 
         <CardContent>
           <div className="space-y-4">
             {/* Email */}
             <div>
-              <label className="text-sm font-medium text-gray-700">Email Address</label>
+              <label className="text-xl font-medium text-gray-700">Email Address</label>
               <Input
                 type="email"
                 value={email}
@@ -60,7 +60,7 @@ export default function AuthPage() {
 
             {/* Password */}
             <div>
-              <label className="text-sm font-medium text-gray-700">Password</label>
+              <label className="text-xl font-medium text-gray-700">Password</label>
               <div className="relative mt-1">
                 <Input
                   type={showPassword ? "text" : "password"}
@@ -74,6 +74,11 @@ export default function AuthPage() {
                   className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
                   onClick={() => setShowPassword(!showPassword)}
                 >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-500" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-500" />
+                  )}
                 </div>
               </div>
             </div>
