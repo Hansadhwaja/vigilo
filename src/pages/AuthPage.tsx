@@ -9,27 +9,44 @@ import { Shield, Eye, EyeOff } from "lucide-react";
 
 export default function AuthPage() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const [login, { isLoading }] = useLoginMutation();
 
-  const handleSubmit = async () => {
-  try {
-    const res = await login({ email, password }).unwrap();
-    localStorage.setItem("token", res.token);
-    localStorage.setItem("user", JSON.stringify(res.user));
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmailValid = emailRegex.test(email);
 
-    toast.success(res.message || "Login successful!");
-    navigate("/dashboard");
-    
-  } catch (error: any) {
-    console.log("Login response:", error);
-    const errorMessage = error?.data?.error?.message || "Login failed!";
-    toast.error(errorMessage);
-  }
-};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await login({
+        email: email.trim(),
+        password: password.trim(),
+      }).unwrap();
+
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("user", JSON.stringify(res.user));
+
+      toast.success(res.message || "Login successful!");
+      navigate("/dashboard");
+    } catch (error) {
+      console.log("Login response:", error);
+
+      const errorMessage =
+        error?.data?.error?.message ||
+        error?.data?.message ||
+        "Invalid email or password";
+
+      toast.error(errorMessage);
+    }
+  };
+
+  const isButtonDisabled =
+    !email || !password || !isEmailValid || isLoading;
 
   return (
     <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-b from-gray-800 via-gray-600 to-gray-900 p-4 overflow-hidden">
@@ -47,11 +64,17 @@ export default function AuthPage() {
         </CardHeader>
 
         <CardContent>
-          <div className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}
             <div>
-              <label className="text-xl font-medium text-gray-700">Email Address</label>
+              <label
+                htmlFor="email"
+                className="text-xl font-medium text-gray-700"
+              >
+                Email Address
+              </label>
               <Input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -59,13 +82,24 @@ export default function AuthPage() {
                 required
                 className="mt-1 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-gray-400"
               />
+              {email && !isEmailValid && (
+                <p className="text-sm text-red-500 mt-1">
+                  Please enter a valid email address
+                </p>
+              )}
             </div>
 
             {/* Password */}
             <div>
-              <label className="text-xl font-medium text-gray-700">Password</label>
+              <label
+                htmlFor="password"
+                className="text-xl font-medium text-gray-700"
+              >
+                Password
+              </label>
               <div className="relative mt-1">
                 <Input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -74,8 +108,14 @@ export default function AuthPage() {
                   className="pl-4 pr-10 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-gray-400"
                 />
                 <div
-                  className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
-                  onClick={() => setShowPassword(!showPassword)}
+                  className={`absolute inset-y-0 right-3 flex items-center ${
+                    password
+                      ? "cursor-pointer"
+                      : "cursor-not-allowed opacity-50"
+                  }`}
+                  onClick={() =>
+                    password && setShowPassword(!showPassword)
+                  }
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-500" />
@@ -88,13 +128,13 @@ export default function AuthPage() {
 
             {/* Login Button */}
             <Button
-              onClick={handleSubmit}
-              disabled={isLoading}
+              type="submit"
+              disabled={isButtonDisabled}
               className="w-full bg-gradient-to-b from-gray-800 to-gray-900 text-white font-semibold py-2 rounded-lg transition-all duration-200 mt-4"
             >
               {isLoading ? "Logging in..." : "Login"}
             </Button>
-          </div>
+          </form>
         </CardContent>
       </Card>
     </div>
