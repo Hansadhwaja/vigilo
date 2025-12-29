@@ -23,8 +23,11 @@ export default function AuthPage() {
 
     toast.success(res.message || "Login successful!");
     navigate("/dashboard");
+    
   } catch (error: any) {
-    toast.error(error?.data?.message || "Login failed!");
+    console.log("Login response:", error);
+    const errorMessage = error?.data?.error?.message || "Login failed!";
+    toast.error(errorMessage);
   }
 };
 
