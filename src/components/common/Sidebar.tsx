@@ -109,9 +109,14 @@ export default function Sidebar({
     >
       {/* Header */}
       <div className="flex items-center gap-3 p-3 border-b border-white/10">
-        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-400 to-gray-600 grid place-items-center shadow-lg">
-          <Shield className="h-6 w-6" />
-        </div>
+        <div
+  onClick={() => navigate("/dashboard", { replace: true })}
+  className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-400 to-gray-600 
+             grid place-items-center shadow-lg cursor-pointer 
+             hover:scale-105 transition-transform"
+>
+  <Shield className="h-6 w-6 text-white" />
+</div>
         {isOpen && (
           <div>
             <div className="text-lg font-semibold tracking-wide">VIGILO</div>
