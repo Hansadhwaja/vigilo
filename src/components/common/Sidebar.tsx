@@ -59,7 +59,7 @@ function SideItem({ icon, label, active, onClick, open }: SideItemProps) {
     <button
       onClick={onClick}
       className={classNames(
-        "w-full flex items-center gap-3 px-3 py-2 text-sm font-bold transition-all duration-200",
+        "w-full flex items-center gap-3 px-3 py-2 text-lg font-bold transition-all duration-200",
         active ? "bg-white/15" : "hover:bg-white/10"
       )}
     >
@@ -115,7 +115,7 @@ export default function Sidebar({
         {isOpen && (
           <div>
             <div className="text-lg font-semibold tracking-wide">VIGILO</div>
-            <div className="text-xs text-white/70">Workforce & Monitoring</div>
+            <div className="text-sm text-white/70">Workforce & Monitoring</div>
           </div>
         )}
         <div className="ml-auto">
@@ -129,7 +129,7 @@ export default function Sidebar({
       {isOpen && (
         <Card className="m-3 bg-white/5 border-white/10 text-white">
           <CardHeader className="p-4 pb-0">
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-2 text-lg">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
               <Activity className="h-4 w-4" />
               System Status
@@ -138,7 +138,7 @@ export default function Sidebar({
           </CardHeader>
           <CardContent className="p-4 pt-2 space-y-2">
             <Progress value={96} />
-            <div className="text-xs text-white/70 flex justify-between">
+            <div className="text-sm text-white/70 flex justify-between">
               <span>Revenue: ${Math.round(liveRevenue / 1000)}k</span>
               <span>96% uptime</span>
             </div>
@@ -238,13 +238,13 @@ export default function Sidebar({
       <div className="p-3 border-t border-white/10">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-semibold bg-red-600 hover:bg-red-700 transition-all duration-200"
+          className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-lg font-semibold bg-red-600 hover:bg-red-700 transition-all duration-200"
         >
           <LogOut className="h-4 w-4" />
           {isOpen && <span>Logout</span>}
         </button>
         {isOpen && (
-          <div className="mt-3 text-xs text-white/70 text-center">
+          <div className="mt-3 text-sm text-white/70 text-center">
             © {new Date().getFullYear()} Vigilo
           </div>
         )}
