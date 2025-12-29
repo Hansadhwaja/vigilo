@@ -19,7 +19,7 @@ export default function AuthPage() {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const isEmailValid = emailRegex.test(email);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
@@ -33,7 +33,7 @@ export default function AuthPage() {
 
       toast.success(res.message || "Login successful!");
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.log("Login response:", error);
 
       const errorMessage =
