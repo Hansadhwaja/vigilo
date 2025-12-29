@@ -630,7 +630,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div className="flex-1">
           <h1 className="mb-1">Scheduling Calendar</h1>
-          <p className="text-gray-600 text-sm">Managed Assignment & Calendar View</p>
+          <p className="text-gray-600 text-lg">Managed Assignment & Calendar View</p>
         </div>
         
         {/* Inline Summary Cards */}
@@ -639,7 +639,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
             <Clock className="h-4 w-4 text-green-600" />
             <div>
               <div className="font-bold text-green-700">{metrics.activeShifts}</div>
-              <div className="text-xs text-green-600">Active Now</div>
+              <div className="text-lg text-green-600">Active Now</div>
             </div>
           </div>
           
@@ -647,7 +647,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
             <CalendarIcon className="h-4 w-4 text-blue-600" />
             <div>
               <div className="font-bold text-blue-700">{metrics.scheduledToday}</div>
-              <div className="text-xs text-blue-600">Today</div>
+              <div className="text-lg text-blue-600">Today</div>
             </div>
           </div>
           
@@ -655,7 +655,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
             <User className="h-4 w-4 text-purple-600" />
             <div>
               <div className="font-bold text-purple-700">{metrics.totalThisWeek}</div>
-              <div className="text-xs text-purple-600">This Week</div>
+              <div className="text-lg text-purple-600">This Week</div>
             </div>
           </div>
           
@@ -663,7 +663,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
             <MapPin className="h-4 w-4 text-orange-600" />
             <div>
               <div className="font-bold text-orange-700">{metrics.patrolsActive}</div>
-              <div className="text-xs text-orange-600">Patrols</div>
+              <div className="text-lg text-orange-600">Patrols</div>
             </div>
           </div>
           
@@ -770,7 +770,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                   <CardTitle className="text-lg font-bold text-gray-900">
                     Daily Schedule Timeline
                   </CardTitle>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-600 text-lg">
                     {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
                   </p>
                 </div>
@@ -819,14 +819,14 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                 <div className="flex flex-wrap gap-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm">
+                    <span className="text-lg">
                       <span className="font-bold text-blue-900">{getFilteredAssignments(selectedDate).length}</span> 
                       <span className="text-gray-600 ml-1">Total Shifts</span>
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-orange-600" />
-                    <span className="text-sm">
+                    <span className="text-lg">
                       <span className="font-bold text-orange-900">
                         {getFilteredAssignments(selectedDate).filter((a: { role: string; }) => a.role === 'Patrol').length}
                       </span> 
@@ -835,7 +835,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                   </div>
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-green-600" />
-                    <span className="text-sm">
+                    <span className="text-lg">
                       <span className="font-bold text-green-900">
                         {getFilteredAssignments(selectedDate).filter((a: { role: string; }) => a.role === 'static').length}
                       </span> 
@@ -844,7 +844,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                   </div>
                   <div className="flex items-center gap-2">
                     <CalendarIcon className="h-4 w-4 text-purple-600" />
-                    <span className="text-sm">
+                    <span className="text-lg">
                       <span className="font-bold text-purple-900">
                         {new Set(getFilteredAssignments(selectedDate).map((a: { orderId: any; }) => a.orderId)).size}
                       </span> 
@@ -866,7 +866,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                             <Clock className="h-4 w-4 text-gray-500" />
                             <span className="font-semibold text-gray-700">{timeStr}</span>
                             <div className="flex-1 h-px bg-gray-300"></div>
-                            <span className="text-xs text-gray-500">{shiftsAtTime.length} shift{shiftsAtTime.length > 1 ? 's' : ''}</span>
+                            <span className="text-lg text-gray-500">{shiftsAtTime.length} shift{shiftsAtTime.length > 1 ? 's' : ''}</span>
                           </div>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -893,7 +893,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                                   <Badge 
                                     variant="outline" 
                                     className={`
-                                      text-xs px-2 py-0.5
+                                      text-lg px-2 py-0.5
                                       ${assignment.role === 'patrol' 
                                         ? 'bg-orange-200 text-orange-900 border-orange-400' 
                                         : 'bg-green-200 text-green-900 border-green-400'
@@ -910,14 +910,14 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                                       <User className="h-5 w-5 text-gray-700" />
                                       <span className="font-bold text-gray-900">{assignment.name}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-gray-700">
+                                    <div className="flex items-center gap-2 text-lg text-gray-700">
                                       <Clock className="h-4 w-4" />
                                       <span className="font-medium">{assignment.time}</span>
                                     </div>
                                   </div>
 
                                   {assignment.description && (
-                                    <div className="text-sm text-gray-700 pt-2 border-t border-gray-300">
+                                    <div className="text-lg text-gray-700 pt-2 border-t border-gray-300">
                                       {assignment.description}
                                     </div>
                                   )}
@@ -927,7 +927,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-1 mt-1">
                                           <div className={`
-                                            px-2 py-0.5 rounded-full text-xs font-medium
+                                            px-2 py-0.5 rounded-full text-lg font-medium
                                             ${assignment.orderId === 'o1' ? 'bg-blue-200 text-blue-900' :
                                               assignment.orderId === 'o2' ? 'bg-purple-200 text-purple-900' :
                                               assignment.orderId === 'o3' ? 'bg-cyan-200 text-cyan-900' :
@@ -946,7 +946,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                                   <div className="flex items-center justify-between pt-2">
                                     <Badge 
                                       variant="outline" 
-                                      className={`text-xs ${getStatusColor(assignment.status)}`}
+                                      className={`text-lg ${getStatusColor(assignment.status)}`}
                                     >
                                       {assignment.status}
                                     </Badge>
@@ -974,7 +974,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                   <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                     <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                     <h3 className="font-medium text-gray-900 mb-1">No Shifts Scheduled</h3>
-                    <p className="text-sm text-gray-500 mb-4">No guard assignments for this date</p>
+                    <p className="text-lg text-gray-500 mb-4">No guard assignments for this date</p>
                     <Button onClick={handleCreateAssignment} size="sm">
                       <Plus className="h-4 w-4 mr-2" />
                       Create Assignment
@@ -985,7 +985,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                 {/* Order Legend */}
                 {getFilteredAssignments(selectedDate).length > 0 && (
                   <div className="mt-4 p-3 bg-white rounded-lg border">
-                    <div className="text-xs font-medium text-gray-600 mb-2">ORDER LEGEND</div>
+                    <div className="text-lg font-medium text-gray-600 mb-2">ORDER LEGEND</div>
                     <div className="flex flex-wrap gap-2">
                       {Array.from(new Set(getFilteredAssignments(selectedDate).map((a: { orderId: any; }) => a.orderId))).map(orderId => {
                         const assignment = getFilteredAssignments(selectedDate).find((a: { orderId: unknown; }) => a.orderId === orderId);
@@ -993,7 +993,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                           <div
                             key={orderId as string}
                             className={`
-                              px-3 py-1 rounded-full text-xs font-medium
+                              px-3 py-1 rounded-full text-lg font-medium
                               ${orderId === 'o1' ? 'bg-blue-200 text-blue-900' :
                                 orderId === 'o2' ? 'bg-purple-200 text-purple-900' :
                                 orderId === 'o3' ? 'bg-cyan-200 text-cyan-900' :
@@ -1024,7 +1024,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                 <CardTitle className="text-lg font-bold text-gray-900">
                   Weekly Schedule
                 </CardTitle>
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-600 text-lg">
                   {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
               </div>
@@ -1062,7 +1062,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
           <CardContent className="px-4 pb-4">
             <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
               <div className="grid grid-cols-8 bg-gradient-to-r from-gray-50 to-gray-100">
-                <div className="p-3 border-r border-gray-200 font-semibold text-gray-700 text-sm">
+                <div className="p-3 border-r border-gray-200 font-semibold text-gray-700 text-lg">
                   TIME
                 </div>
                 {weekDays.map((day, index) => {
@@ -1085,11 +1085,11 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                       `}
                       onClick={() => setSelectedDate(new Date(day))}
                     >
-                      <div className="font-semibold text-xs">{dayName}</div>
+                      <div className="font-semibold text-lg">{dayName}</div>
                       <div className={`text-lg font-bold ${isSelected ? 'text-white' : isToday ? 'text-blue-700' : 'text-gray-900'}`}>
                         {day.getDate()}
                       </div>
-                      <div className={`text-xs ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                      <div className={`text-lg ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
                         {monthName}
                       </div>
                     </div>
@@ -1100,8 +1100,8 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
               {timeSlots.map((slot, slotIndex) => (
                 <div key={slotIndex} className="grid grid-cols-8 border-b border-gray-200 last:border-b-0">
                   <div className="p-3 border-r border-gray-200 bg-gray-50">
-                    <div className="font-semibold text-gray-900 text-sm">{slot.time}</div>
-                    <div className="text-xs text-gray-500">{slot.label}</div>
+                    <div className="font-semibold text-gray-900 text-lg">{slot.time}</div>
+                    <div className="text-lg text-gray-500">{slot.label}</div>
                   </div>
                   
                   {weekDays.map((day, dayIndex) => {
@@ -1171,7 +1171,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
       <div
         key={assignment.id}
         className={`
-          p-2 rounded-md text-xs cursor-pointer transition-all border group-hover:shadow-sm
+          p-2 rounded-md text-lg cursor-pointer transition-all border group-hover:shadow-sm
           ${
             assignment.type === "patrol"
               ? "bg-gradient-to-r from-orange-100 to-orange-50 text-orange-900 border-orange-200 hover:from-orange-200 hover:to-orange-100"
@@ -1190,14 +1190,14 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
         </div>
   
         {/* SHIFT DESCRIPTION */}
-        <div className="text-xs opacity-80 truncate">
+        <div className="text-lg opacity-80 truncate">
           {assignment.orderName || assignment.description || "No Description"}
         </div>
   
         {/* TIME RANGE */}
         <div className="flex items-center gap-2 mt-1">
           <Clock className="h-3 w-3 text-gray-500" />
-          <span className="text-xs text-gray-700 font-medium">
+          <span className="text-lg text-gray-700 font-medium">
             {formatShiftTime(assignment.start, assignment.end)}
           </span>
         </div>
@@ -1205,7 +1205,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
         {/* STATUS */}
         <Badge
           variant="outline"
-          className={`text-xs px-1 py-0 ${getStatusColor(
+          className={`text-lg px-1 py-0 ${getStatusColor(
             guard.status || assignment.status
           )}`}
         >
@@ -1220,7 +1220,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
             <Plus className="h-4 w-4 mb-1" />
           </div>
-          <div className="text-xs opacity-0 group-hover:opacity-100 transition-opacity">Add</div>
+          <div className="text-lg opacity-0 group-hover:opacity-100 transition-opacity">Add</div>
                                     </div>
                                   )}
                                 </div>
@@ -1250,7 +1250,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                     })}
                   </h3>
                 </div>
-                <div className="flex items-center gap-3 text-sm">
+                <div className="flex items-center gap-3 text-lg">
                   <div className="flex items-center gap-1">
                     <User className="h-4 w-4 text-blue-500" />
                     <span className="text-gray-600">
@@ -1272,7 +1272,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                     <div
                       key={idx}
                       className={`
-                        inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs cursor-pointer transition-all
+                        inline-flex items-center gap-1 px-2 py-1 rounded-full text-lg cursor-pointer transition-all
                         ${assignment.role === 'Patrol' 
                           ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' 
                           : 'bg-green-100 text-green-800 hover:bg-green-200'
@@ -1285,7 +1285,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                     </div>
                   ))}
                   {getFilteredAssignments(selectedDate).length > 3 && (
-                    <div className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-600">
+                    <div className="inline-flex items-center px-2 py-1 rounded-full text-lg bg-gray-100 text-gray-600">
                       +{getFilteredAssignments(selectedDate).length - 3} more
                     </div>
                   )}
@@ -1312,7 +1312,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                 <Bell className="h-5 w-5 text-blue-600" />
                 <div className="flex-1">
                   <div className="font-medium">{reminder.message}</div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-lg text-gray-600">
                     {reminder.assignee} • {formatDateTime(reminder.time).time} on {formatDateTime(reminder.time).date}
                   </div>
                 </div>
@@ -1432,7 +1432,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                 </SelectItem>
               ))
             ) : (
-              <div className="p-3 text-sm text-gray-500">No orders available</div>
+              <div className="p-3 text-lg text-gray-500">No orders available</div>
             )}
           </SelectContent>
         </Select>
@@ -1504,19 +1504,19 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                 onClick={(e: { stopPropagation: () => any; }) => e.stopPropagation()}
               />
 
-              <span className="text-sm">
+              <span className="text-lg">
                 {guard.name} ({guard.role ?? "N/A"})
               </span>
             </div>
           );
         })
       ) : (
-        <div className="p-3 text-sm text-gray-500">No Guards available</div>
+        <div className="p-3 text-lg text-gray-500">No Guards available</div>
       )}
     </SelectContent>
   </Select>
 
-  <p className="text-xs text-gray-500 mt-1">
+  <p className="text-lg text-gray-500 mt-1">
     {formData.guardIds.length} guard(s) selected
   </p>
 </div>
