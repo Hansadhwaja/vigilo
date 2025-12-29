@@ -19,6 +19,7 @@ import { useGetAllGuardsQuery } from "../apis/guardsApi";
 import { useCreateScheduleMutation, useDeleteScheduleMutation, useGetAllSchedulesQuery } from "../apis/schedulingAPI";
 import { useGetAllOrdersQuery } from "../apis/ordersApi";
 import { toast } from "sonner";
+
 import { DatePicker } from "@heroui/react";
 import { useRef } from "react";
 
@@ -1522,31 +1523,25 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
 </div>
 
 
-           <div className="col-span-2 grid grid-cols-2 gap-4">
+        
 
+<div className="col-span-2 grid grid-cols-2 gap-4">
   {/* START TIME */}
   <div className="space-y-1">
     <Label htmlFor="editStartTime" className="text-lg font-medium text-gray-700">
       Start Time
     </Label>
 
-    <div className="relative">
-      <Input
-        id="editStartTime"
-        type="time"
-        value={formData.startTime}
-        onChange={(e) =>
-          setFormData({ ...formData, startTime: e.target.value })
-        }
-        className="pl-10 h-11 rounded-lg border-gray-300 
-                   focus-visible:ring-2 focus-visible:ring-blue-500"
-      />
-
-      {/* clock icon */}
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-        🕒
-      </span>
-    </div>
+    <Input
+      id="editStartTime"
+      type="time"
+      value={formData.startTime}
+      onChange={(e) =>
+        setFormData({ ...formData, startTime: e.target.value })
+      }
+      className="h-11 rounded-lg border-gray-300
+                 focus-visible:ring-2 focus-visible:ring-blue-500"
+    />
   </div>
 
   {/* END TIME */}
@@ -1555,26 +1550,20 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
       End Time
     </Label>
 
-    <div className="relative">
-      <Input
-        id="editEndTime"
-        type="time"
-        value={formData.endTime}
-        onChange={(e) =>
-          setFormData({ ...formData, endTime: e.target.value })
-        }
-        className="pl-10 h-11 rounded-lg border-gray-300 
-                   focus-visible:ring-2 focus-visible:ring-blue-500"
-      />
-
-      {/* clock icon */}
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-        ⏰
-      </span>
-    </div>
+    <Input
+      id="editEndTime"
+      type="time"
+      value={formData.endTime}
+      onChange={(e) =>
+        setFormData({ ...formData, endTime: e.target.value })
+      }
+      className="h-11 rounded-lg border-gray-300
+                 focus-visible:ring-2 focus-visible:ring-blue-500"
+    />
   </div>
-
 </div>
+
+
 
           </div>
 
