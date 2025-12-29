@@ -222,7 +222,7 @@ export default function HRPage() {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div className="flex-1">
           <h1 className="mb-1">HR & Compliance</h1>
-          <p className="text-gray-600 text-sm">Manage guards, assignments & compliance</p>
+          <p className="text-gray-600 text-xl">Manage guards, assignments & compliance</p>
         </div>
         
         {/* Inline Summary Badges */}
@@ -231,7 +231,7 @@ export default function HRPage() {
             <User className="h-4 w-4 text-blue-600" />
             <div>
               <div className="font-bold text-blue-700">{totalGuards}</div>
-              <div className="text-xs text-blue-600">Total</div>
+              <div className="text-lg text-blue-600">Total</div>
             </div>
           </div>
           
@@ -239,7 +239,7 @@ export default function HRPage() {
             <Shield className="h-4 w-4 text-green-600" />
             <div>
               <div className="font-bold text-green-700">{activeGuards}</div>
-              <div className="text-xs text-green-600">Guards</div>
+              <div className="text-lg text-green-600">Guards</div>
             </div>
           </div>
           
@@ -247,7 +247,7 @@ export default function HRPage() {
             <AlertCircle className="h-4 w-4 text-orange-600" />
             <div>
               <div className="font-bold text-orange-700">{pendingCompliance}</div>
-              <div className="text-xs text-orange-600">Issues</div>
+              <div className="text-lg text-orange-600">Issues</div>
             </div>
           </div>
           
@@ -330,7 +330,7 @@ export default function HRPage() {
                 <div className="text-center py-8">
                   <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-2" />
                   <p className="text-red-600">Failed to load guards</p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-xl text-gray-500 mt-1">
                     {error && 'data' in error ? JSON.stringify(error.data) : 'An error occurred'}
                   </p>
                 </div>
@@ -341,7 +341,7 @@ export default function HRPage() {
                 <div className="text-center py-8">
                   <User className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                   <p className="text-gray-600">No guards found</p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-xl text-gray-500 mt-1">
                     {searchTerm ? "Try adjusting your search" : "Add your first guard to get started"}
                   </p>
                 </div>
@@ -457,7 +457,7 @@ export default function HRPage() {
                       <div className="text-center py-12 text-gray-500">
                         <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                         <h3 className="font-medium mb-2">No guards found</h3>
-                        <p className="text-sm">Try adjusting your search or filter criteria</p>
+                        <p className="text-xl">Try adjusting your search or filter criteria</p>
                       </div>
                     )}
                   </CardContent>
@@ -569,13 +569,13 @@ export default function HRPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-xs">Guard</TableHead>
-                      <TableHead className="text-xs">Type</TableHead>
-                      <TableHead className="text-xs">Description</TableHead>
-                      <TableHead className="text-xs">Due Date</TableHead>
-                      <TableHead className="text-xs">Priority</TableHead>
-                      <TableHead className="text-xs">Status</TableHead>
-                      <TableHead className="text-xs text-center">Actions</TableHead>
+                      <TableHead className="text-lg">Guard</TableHead>
+                      <TableHead className="text-lg">Type</TableHead>
+                      <TableHead className="text-lg">Description</TableHead>
+                      <TableHead className="text-lg">Due Date</TableHead>
+                      <TableHead className="text-lg">Priority</TableHead>
+                      <TableHead className="text-lg">Status</TableHead>
+                      <TableHead className="text-lg text-center">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -583,13 +583,13 @@ export default function HRPage() {
                       <TableRow key={item.id} className="hover:bg-gray-50">
                         <TableCell>
                           <div>
-                            <div className="text-sm font-medium">{item.guardName}</div>
-                            <div className="text-xs text-gray-500">{item.guardId}</div>
+                            <div className="text-xl font-medium">{item.guardName}</div>
+                            <div className="text-lg text-gray-500">{item.guardId}</div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm">{item.type}</TableCell>
-                        <TableCell className="text-sm text-gray-600">{item.description}</TableCell>
-                        <TableCell className="text-sm">{item.dueDate}</TableCell>
+                        <TableCell className="text-xl">{item.type}</TableCell>
+                        <TableCell className="text-xl text-gray-600">{item.description}</TableCell>
+                        <TableCell className="text-xl">{item.dueDate}</TableCell>
                         <TableCell>
                           <Badge className={getPriorityColor(item.priority)}>
                             {item.priority}
@@ -619,7 +619,7 @@ export default function HRPage() {
 
       {/* Add Guard Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-3xl h-auto">
           <DialogHeader>
             <DialogTitle>Add New Guard</DialogTitle>
             <DialogDescription>
