@@ -108,7 +108,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
       <div className="flex items-center justify-between">
         <div>
           <h1 className="mb-1">Incident Management</h1>
-          <p className="text-gray-600 text-sm">View and manage incidents raised by guards and clients</p>
+          <p className="text-gray-600 text-xl">View and manage incidents raised by guards and clients</p>
         </div>
       </div>
 
@@ -118,7 +118,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
           <Clock className="h-5 w-5 text-yellow-600" />
           <div>
             <div className="font-bold text-yellow-700">{incident.filter(i => i.status === "Pending").length}</div>
-            <div className="text-xs text-yellow-600">Pending</div>
+            <div className="text-lg text-yellow-600">Pending</div>
           </div>
         </div>
         
@@ -126,7 +126,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
           <CheckCircle className="h-5 w-5 text-green-600" />
           <div>
             <div className="font-bold text-green-700">{incident.filter(i => i.status === "Resolved").length}</div>
-            <div className="text-xs text-green-600">Resolved</div>
+            <div className="text-lg text-green-600">Resolved</div>
           </div>
         </div>
         
@@ -134,7 +134,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
           <AlertTriangle className="h-5 w-5 text-red-600" />
           <div>
             <div className="font-bold text-red-700">{incident.filter(i => i.severity === "High").length}</div>
-            <div className="text-xs text-red-600">High Priority</div>
+            <div className="text-lg text-red-600">High Priority</div>
           </div>
         </div>
         
@@ -146,7 +146,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
               const incidentDate = new Date(i.time);
               return incidentDate.toDateString() === today.toDateString();
             }).length}</div>
-            <div className="text-xs text-blue-600">Today</div>
+            <div className="text-lg text-blue-600">Today</div>
           </div>
         </div>
       </div>
@@ -172,7 +172,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
           className="w-64"
         />
         
-        <div className="ml-auto text-sm text-gray-600">
+        <div className="ml-auto text-xl text-gray-600">
           Showing {currentIncidents.length} of {filtered.length} incidents (Page {currentPage} of {totalPages})
         </div>
       </div>
@@ -190,12 +190,12 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
             <Table>
               <TableHeader>
                 <TableRow className="bg-gray-50 border-b border-gray-200">
-                  {/* <TableHead className="text-sm text-gray-700">Incident ID</TableHead> */}
-                  <TableHead className="text-sm text-gray-700">Location</TableHead>
-                  <TableHead className="text-sm text-gray-700">Description</TableHead>
-                  <TableHead className="text-sm text-gray-700">Assigned Guard</TableHead>
-                  <TableHead className="text-sm text-gray-700">Date/Time</TableHead>
-                  <TableHead className="text-sm text-gray-700 text-right">Actions</TableHead>
+                  {/* <TableHead className="text-xl text-gray-700">Incident ID</TableHead> */}
+                  <TableHead className="text-xl text-gray-700">Location</TableHead>
+                  <TableHead className="text-xl text-gray-700">Description</TableHead>
+                  <TableHead className="text-xl text-gray-700">Assigned Guard</TableHead>
+                  <TableHead className="text-xl text-gray-700">Date/Time</TableHead>
+                  <TableHead className="text-xl text-gray-700 text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -222,7 +222,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                     <TableCell className="py-4">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                           <span className="text-white font-medium text-xs">
+                           <span className="text-white font-medium text-lg">
                             {incident.assigned
                               ? incident.assigned
                                   .split(" ")
@@ -232,20 +232,20 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                               : "NA"}
                           </span>
                         </div>
-                        <span className="text-sm text-gray-700">{incident.assigned || "Not Assigned"}</span>
+                        <span className="text-xl text-gray-700">{incident.assigned || "Not Assigned"}</span>
                       </div>
                     </TableCell>
                     
                     <TableCell className="py-4">
                       <div>
-                        <div className="text-sm text-gray-900">
+                        <div className="text-xl text-gray-900">
                           {new Date(incident.time).toLocaleDateString('en-US', { 
                             year: 'numeric',
                             month: '2-digit',
                             day: '2-digit'
                           })}
                         </div>
-                        <div className="text-sm text-gray-500 mt-0.5">
+                        <div className="text-xl text-gray-500 mt-0.5">
                           {new Date(incident.time).toLocaleTimeString([], { 
                             hour: '2-digit', 
                             minute: '2-digit' 
@@ -274,7 +274,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
             <div className="text-center py-12 text-gray-500">
               <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
               <h3 className="font-medium mb-2">No incidents found</h3>
-              <p className="text-sm">Try adjusting your search or filter criteria</p>
+              <p className="text-xl">Try adjusting your search or filter criteria</p>
             </div>
           )}
         </CardContent>
