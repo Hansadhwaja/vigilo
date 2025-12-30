@@ -180,13 +180,13 @@ const activePatrolsCount = useMemo(() => {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium">System Operational</span>
+                <span className="text-xl font-medium">System Operational</span>
               </div>
-              <div className="text-sm text-gray-600">
+              <div className="text-xl text-gray-600">
                 Live as of {currentTime.toLocaleTimeString()}
               </div>
             </div>
-            <div className="flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-6 text-xl">
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4 text-blue-600" />
                 <span>Avg Response: {kpi.avgResponseTime}min</span>
@@ -204,9 +204,10 @@ const activePatrolsCount = useMemo(() => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
          <KPI 
           icon={<Users className="h-5 w-5" />} 
-          label="Available Guards" 
+          label="Available Guards"          //
           value={availableGuardsCount} 
           sub="ready for assignment"
+          to="/hr"
         />
         <KPI 
           icon={<Bell className="h-5 w-5" />} 
@@ -214,18 +215,21 @@ const activePatrolsCount = useMemo(() => {
           value={kpi.openAlarms} 
           sub="requiring response"
           urgent={kpi.openAlarms > 2}
+          to="/alarms"
         />
          <KPI 
           icon={<Users className="h-5 w-5" />} 
           label="On Duty Guards" 
           value={onDutyGuardsCount} 
           sub="currently working"
+          to="/hr"
         />
         <KPI 
           icon={<Target className="h-5 w-5" />} 
           label="Active Shifts" 
           value={activeShiftsCount} 
           sub="in progress"
+          to="/scheduling"
         />
 
       </div>
@@ -237,12 +241,14 @@ const activePatrolsCount = useMemo(() => {
           label="Active Orders" 
           value={activeOrdersCount} 
           sub="currently running"
+          to="/clients"
         />
         <KPI 
           icon={<Target className="h-5 w-5" />} 
           label="Active Patrols" 
           value={activePatrolsCount} 
           sub="currently patrolling"
+          to="/patrol"
         />
 
         <KPI 
@@ -251,12 +257,14 @@ const activePatrolsCount = useMemo(() => {
           value={`${Math.round(kpi.dailyRevenue/1000)}k`} 
           sub="monthly total"
           trend="up"
+          to="/invoicing"
         />
         <KPI 
           icon={<DollarSign className="h-5 w-5" />} 
           label="Billing Cost" 
           value={`${Math.round(kpi.dailyRevenue * 0.72/1000)}k`} 
           sub="monthly cost"
+          to="/invoicing"
         />
       </div>
 
@@ -270,38 +278,38 @@ const activePatrolsCount = useMemo(() => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Total Completed Patrols</span>
+                <span className="text-xl font-medium">Total Completed Patrols</span>
                 <Badge className="bg-green-100 text-green-800">
                   <Check className="h-3 w-3 mr-1" />
                   124
                 </Badge>
               </div>
               <Progress value={82} className="h-2" />
-              <div className="text-xs text-gray-500">82% of monthly target (150)</div>
+              <div className="text-lg text-gray-500">82% of monthly target (150)</div>
             </div>
             
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">SLA Breaches</span>
+                <span className="text-xl font-medium">SLA Breaches</span>
                 <Badge className="bg-red-100 text-red-800">
                   <Clock className="h-3 w-3 mr-1" />
                   3
                 </Badge>
               </div>
               <Progress value={15} className="h-2" />
-              <div className="text-xs text-red-600">15% breach rate (target: &lt;10%)</div>
+              <div className="text-lg text-red-600">15% breach rate (target: &lt;10%)</div>
             </div>
             
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Unresolved Incidents</span>
+                <span className="text-xl font-medium">Unresolved Incidents</span>
                 <Badge className="bg-yellow-100 text-yellow-800">
                   <Bell className="h-3 w-3 mr-1" />
                   {kpi.openIncidents}
                 </Badge>
               </div>
               <Progress value={kpi.openIncidents * 10} className="h-2" />
-              <div className="text-xs text-gray-500">{kpi.openIncidents} pending resolution</div>
+              <div className="text-lg text-gray-500">{kpi.openIncidents} pending resolution</div>
             </div>
           </div>
         </CardContent>
@@ -314,7 +322,7 @@ const activePatrolsCount = useMemo(() => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">{stream.name}</p>
+                  <p className="text-xl text-gray-600 mb-1">{stream.name}</p>
                   <p className="text-2xl font-bold">${stream.value.toLocaleString()}</p>
                   <div className="flex items-center gap-1 mt-1">
                     {stream.change > 0 ? (
@@ -322,7 +330,7 @@ const activePatrolsCount = useMemo(() => {
                     ) : (
                       <TrendingDown className="h-4 w-4 text-red-600" />
                     )}
-                    <span className={`text-sm ${stream.change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <span className={`text-xl ${stream.change > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {stream.change > 0 ? '+' : ''}{stream.change}%
                     </span>
                   </div>
@@ -404,7 +412,7 @@ const activePatrolsCount = useMemo(() => {
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm text-gray-500">Live</span>
+                <span className="text-xl text-gray-500">Live</span>
               </div>
             </div>
           </CardHeader>
@@ -455,26 +463,26 @@ const activePatrolsCount = useMemo(() => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xl">
                 <span>Current Shift Cost</span>
                 <span className="font-semibold">${liveMetrics.currentShiftCost.toLocaleString()}</span>
               </div>
               <Progress value={65} className="h-2" />
-              <div className="text-xs text-gray-500">65% of daily budget</div>
+              <div className="text-lg text-gray-500">65% of daily budget</div>
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-xl">
                 <span>Client Satisfaction</span>
                 <span className="font-semibold">{liveMetrics.clientSatisfaction}%</span>
               </div>
               <Progress value={liveMetrics.clientSatisfaction} className="h-2" />
-              <div className="text-xs text-green-600">Above target (90%)</div>
+              <div className="text-lg text-green-600">Above target (90%)</div>
             </div>
 
             <div className="pt-2 border-t">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm">Outstanding Invoices</span>
+                <span className="text-xl">Outstanding Invoices</span>
                 <Badge variant="outline">{liveMetrics.overdueInvoices}</Badge>
               </div>
               <Button size="sm" variant="outline" className="w-full">

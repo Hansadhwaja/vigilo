@@ -1,5 +1,6 @@
 import React from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { classNames } from "../../utils/helpers";
 
@@ -10,12 +11,13 @@ interface KPIProps {
   sub?: string;
   trend?: "up" | "down";
   urgent?: boolean;
+  to?: string;
 }
 
-export default function KPI({ icon, label, value, sub, trend, urgent }: KPIProps) {
-  return (
+export default function KPI({ icon, label, value, sub, trend, urgent, to }: KPIProps) {
+  const card = (
     <Card className={classNames(
-      "relative overflow-hidden transition-all duration-200",
+      "relative overflow-hidden transition-all duration-200 hover:shadow-md cursor-pointer",
       urgent && "border-red-200 bg-red-50"
     )}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -57,4 +59,10 @@ export default function KPI({ icon, label, value, sub, trend, urgent }: KPIProps
       </CardContent>
     </Card>
   );
+
+  if (to) {
+    return <Link to={to}>{card}</Link>;
+  }
+
+  return card;
 }
