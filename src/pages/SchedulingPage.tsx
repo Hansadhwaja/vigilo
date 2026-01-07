@@ -175,7 +175,7 @@ const endRef = useRef<HTMLInputElement>(null);
   const [deleteSchedule] = useDeleteScheduleMutation();
   const handleDelete = async (id: string, e: any) => {
   e.stopPropagation();
-  console.log("Starting deleting schedule with id:", id);
+  // console.log("Starting deleting schedule with id:", id);
 
   try {
     const res = await deleteSchedule({ id }).unwrap();
@@ -266,7 +266,8 @@ const handleCreateSchedule = async () => {
     guardIds: [] as string[],
     orderId: "",
     role: "",
-    recurring: "none"
+    recurring: "none",
+    limit: 1000000,
   });
 
     const { data: schedulingResponse } = useGetAllSchedulesQuery(
@@ -274,7 +275,7 @@ const handleCreateSchedule = async () => {
    
      // Extract schedule data from API response
      const schedule = schedulingResponse?.data || [];
-     console.log("Fetched Schedules:", schedule);
+    //  console.log("Fetched Schedules:", schedule);
 
      // Time slots for the scheduler
      const timeSlots = [
@@ -624,6 +625,9 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
     setSelectedDate(newDate);
     setCurrentMonth(newDate);
   };
+// useEffect(() => {
+//   console.log("Selected Guards:", formData.guardIds);
+// }, [formData.guardIds]);
 
   return (
     <div className="space-y-3">
@@ -1159,7 +1163,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                         guardEmail: any;
                         guardId: any; guards: any[]; id: React.Key | null | undefined; type: string; description: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; start: { toLocaleTimeString: (arg0: never[], arg1: { hour: string; minute: string; }) => any; }; end: { toLocaleTimeString: (arg0: never[], arg1: { hour: string; minute: string; }) => any; }; status: any; 
 }) => {
-                        console.log("Assignment:", assignment);
+                        // console.log("Assignment:", assignment);
     const guard = {
   id: assignment.guardId,
   name: assignment.guardName,
