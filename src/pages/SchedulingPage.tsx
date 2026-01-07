@@ -682,16 +682,16 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
       {/* Compact Filters and Controls Row */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
         {/* Compact Filters */}
-        <div className="flex flex-wrap gap-2 items-center bg-white p-3 rounded-lg border">
+        <div className="flex flex-wrap gap-2 items-center w-full p-3 rounded-lg border">
           <Filter className="h-4 w-4 text-gray-500" />
           <Input
             placeholder="Search..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-32 h-8"
+            className="w-auto h-8"
           />
           <Select value={filterOrder} onValueChange={setFilterOrder}>
-            <SelectTrigger className="w-32 h-8">
+            <SelectTrigger className="w-auto h-8">
               <SelectValue placeholder="Order" />
             </SelectTrigger>
             <SelectContent>
@@ -702,7 +702,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
             </SelectContent>
           </Select>
           <Select value={filterGuard} onValueChange={setFilterGuard}>
-            <SelectTrigger className="w-32 h-8">
+            <SelectTrigger className="w-auto h-8">
               <SelectValue placeholder="Guard" />
             </SelectTrigger>
             <SelectContent>
@@ -713,7 +713,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
             </SelectContent>
           </Select>
           <Select value={filterRole} onValueChange={setFilterRole}>
-            <SelectTrigger className="w-32 h-8">
+            <SelectTrigger className="w-auto h-8">
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent>
