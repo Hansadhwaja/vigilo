@@ -482,12 +482,12 @@ const activePatrolsCount = useMemo(() => {
 
             <div className="pt-2 border-t">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xl">Outstanding Invoices</span>
-                <Badge variant="outline">{liveMetrics.overdueInvoices}</Badge>
+              <span className="text-xl">Outstanding Invoices</span>
+              <Badge variant="outline">{liveMetrics.overdueInvoices}</Badge>
               </div>
-              <Button size="sm" variant="outline" className="w-full">
-                <CreditCard className="h-4 w-4 mr-2" />
-                Manage Billing
+              <Button size="sm" variant="outline" className="w-full" onClick={() => window.location.href = '/invoicing'}>
+              <CreditCard className="h-4 w-4 mr-2" />
+              Manage Billing
               </Button>
             </div>
           </CardContent>
