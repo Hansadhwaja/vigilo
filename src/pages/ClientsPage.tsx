@@ -210,8 +210,8 @@ const handleDeleteClient = async (clientId: string) => {
       </div>
 
       {/* Tabs for Directory and Personal Details */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-auto">
+        <TabsList className="grid w-full h-auto grid-cols-2">
           <TabsTrigger value="directory">Order Management</TabsTrigger>
           <TabsTrigger value="personal">Clients Details</TabsTrigger>
         </TabsList>
