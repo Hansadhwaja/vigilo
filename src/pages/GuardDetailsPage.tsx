@@ -150,26 +150,26 @@ export default function GuardDetailsPage() {
                   <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
                     <div className="space-y-3">
                       <div>
-                        <div className="text-sm text-gray-600 mb-1">Assignment Type</div>
+                        <div className="text-xl text-gray-600 mb-1">Assignment Type</div>
                         <div className="font-semibold text-lg capitalize">{guard.latestStatic.type}</div>
                       </div>
                       
                       <Separator />
                       
                       <div>
-                        <div className="text-sm text-gray-600 mb-1">Description</div>
+                        <div className="text-xl text-gray-600 mb-1">Description</div>
                         <div className="text-gray-900">{guard.latestStatic.description}</div>
                       </div>
                       
                       <Separator />
                       
                       <div>
-                        <div className="text-sm text-gray-600 mb-2">Location</div>
+                        <div className="text-xl text-gray-600 mb-2">Location</div>
                         <div className="flex items-start gap-2 bg-gray-50 p-3 rounded-lg">
                           <MapPin className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
                           <div>
                             <div className="font-semibold">{guard.latestStatic.Order.locationAddress}</div>
-                            <div className="text-sm text-gray-600 mt-1">
+                            <div className="text-xl text-gray-600 mt-1">
                               Service Type: <span className="font-medium capitalize">{guard.latestStatic.Order.serviceType}</span>
                             </div>
                           </div>
@@ -180,14 +180,14 @@ export default function GuardDetailsPage() {
                       
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <div className="text-sm text-gray-600 mb-1">Start Time</div>
+                          <div className="text-xl text-gray-600 mb-1">Start Time</div>
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-green-600" />
                             <span className="font-semibold">{formatDateTime(guard.latestStatic.startTime)}</span>
                           </div>
                         </div>
                         <div>
-                          <div className="text-sm text-gray-600 mb-1">End Time</div>
+                          <div className="text-xl text-gray-600 mb-1">End Time</div>
                           <div className="flex items-center gap-2">
                             <Clock className="h-4 w-4 text-red-600" />
                             <span className="font-semibold">{formatDateTime(guard.latestStatic.endTime)}</span>
@@ -198,10 +198,10 @@ export default function GuardDetailsPage() {
                       <Separator />
                       
                       {/* <div className="bg-blue-50 p-3 rounded-lg">
-                        <div className="text-sm text-blue-900">
+                        <div className="text-xl text-blue-900">
                           <span className="font-semibold">Order ID:</span> {guard.latestStatic.orderId}
                         </div>
-                        <div className="text-sm text-blue-900 mt-1">
+                        <div className="text-xl text-blue-900 mt-1">
                           <span className="font-semibold">Assignment ID:</span> {guard.latestStatic.id}
                         </div>
                       </div> */}
@@ -224,7 +224,7 @@ export default function GuardDetailsPage() {
                   <div className="text-center py-8">
                     <Building className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                     <p className="text-gray-600">No active assignment</p>
-                    <p className="text-sm text-gray-500 mt-1">This guard is currently available</p>
+                    <p className="text-xl text-gray-500 mt-1">This guard is currently available</p>
                   </div>
                 </CardContent>
               </Card>
@@ -263,23 +263,23 @@ export default function GuardDetailsPage() {
                   <div className="flex items-start gap-3 p-3 bg-white rounded-lg border-2 border-gray-200">
                     <Phone className="h-5 w-5 text-indigo-600 mt-0.5 flex-shrink-0" />
                     <div>
-                      <div className="text-xs text-gray-600 mb-1">Phone Number</div>
-                      <div className="font-semibold">{guard.mobile}</div>
+                      <div className="text-xl text-gray-600 mb-1">Phone Number</div>
+                      <div className="font-semibold text-xl">{guard.mobile}</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 p-3 bg-white rounded-lg border-2 border-gray-200">
                     <Mail className="h-5 w-5 text-indigo-600 mt-0.5 flex-shrink-0" />
                     <div className="min-w-0">
-                      <div className="text-xs text-gray-600 mb-1">Email Address</div>
-                      <div className="font-semibold text-sm break-all">{guard.email}</div>
+                      <div className="text-xl text-gray-600 mb-1">Email Address</div>
+                      <div className="font-semibold text-xl break-all">{guard.email}</div>
                     </div>
                   </div>
                   {guard.address && (
                     <div className="flex items-start gap-3 p-3 bg-white rounded-lg border-2 border-gray-200">
                       <MapPin className="h-5 w-5 text-indigo-600 mt-0.5 flex-shrink-0" />
                       <div>
-                        <div className="text-xs text-gray-600 mb-1">Address</div>
-                        <div className="font-semibold text-sm">{guard.address}</div>
+                        <div className="text-xl text-gray-600 mb-1">Address</div>
+                        <div className="font-semibold text-xl">{guard.address}</div>
                       </div>
                     </div>
                   )}
@@ -289,7 +289,7 @@ export default function GuardDetailsPage() {
 
                 {/* Quick Actions */}
                 <div className="space-y-2">
-                  <div className="text-sm font-semibold text-gray-700 mb-3">Quick Actions</div>
+                  <div className="text-xl font-semibold text-gray-700 mb-3">Quick Actions</div>
                   <Button 
                     variant="outline" 
                     className="w-full justify-start hover:bg-indigo-50"
@@ -318,16 +318,16 @@ export default function GuardDetailsPage() {
               </CardHeader>
               <CardContent className="pt-0 space-y-3">
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm text-gray-600">Joined Date</span>
-                  <span className="font-semibold text-sm">{formatDate(guard.createdAt)}</span>
+                  <span className="text-xl text-gray-600">Joined Date</span>
+                  <span className="font-semibold text-xl">{formatDate(guard.createdAt)}</span>
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm text-gray-600">Employee ID</span>
-                  <span className="font-semibold text-sm font-mono break-all">{guard.id}</span>
+                  <span className="text-xl text-gray-600">Employee ID</span>
+                  <span className="font-semibold text-xl font-mono break-all">{guard.id}</span>
                 </div>
                 {guard.latestStatic && (
                   <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    {/* <span className="text-sm text-gray-600">Status</span>
+                    {/* <span className="text-xl text-gray-600">Status</span>
                     <Badge className={getStatusColor(guard.latestStatic.status)}>
                       {guard.latestStatic.status}
                     </Badge> */}
