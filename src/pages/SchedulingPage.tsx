@@ -159,7 +159,7 @@ export default function ShiftPage() {
   const [showAlertsDialog, setShowAlertsDialog] = useState(false);
   const [viewMode, setViewMode] = useState<"weekly" | "daily">("weekly");
     const [currentPage, setCurrentPage] = React.useState(1);
-    const itemsPerPage = 5;
+    const itemsPerPage = 100000000;
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const startRef = useRef<HTMLInputElement>(null);
 const endRef = useRef<HTMLInputElement>(null);
