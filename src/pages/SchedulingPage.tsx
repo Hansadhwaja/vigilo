@@ -1521,9 +1521,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
     </SelectContent>
   </Select>
 
-  <p className="text-lg text-gray-500 mt-1">
-    {formData.guardIds.length} guard(s) selected
-  </p>
+  
 </div>
 
 
