@@ -286,67 +286,67 @@ export default function InvoicingPage() {
       <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
+            <CardTitle className="text-xl font-medium">Total Invoices</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalInvoices}</div>
-            <p className="text-xs text-muted-foreground">This period</p>
+            <p className="text-lg text-muted-foreground">This period</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-xl font-medium">Total Revenue</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${totalRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">All invoices</p>
+            <p className="text-lg text-muted-foreground">All invoices</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Paid Revenue</CardTitle>
+            <CardTitle className="text-xl font-medium">Paid Revenue</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">${paidRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">{paidInvoices.length} invoices paid</p>
+            <p className="text-lg text-muted-foreground">{paidInvoices.length} invoices paid</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Outstanding</CardTitle>
+            <CardTitle className="text-xl font-medium">Outstanding</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">${outstandingRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Awaiting payment</p>
+            <p className="text-lg text-muted-foreground">Awaiting payment</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Billable Items</CardTitle>
+            <CardTitle className="text-xl font-medium">Billable Items</CardTitle>
             <Calculator className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{billableAlarms + billablePatrols}</div>
-            <p className="text-xs text-muted-foreground">{billableAlarms} alarms, {billablePatrols} patrols</p>
+            <p className="text-lg text-muted-foreground">{billableAlarms} alarms, {billablePatrols} patrols</p>
           </CardContent>
         </Card>
         
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Guard Costs</CardTitle>
+            <CardTitle className="text-xl font-medium">Guard Costs</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">${totalGuardCosts.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Pending payments</p>
+            <p className="text-lg text-muted-foreground">Pending payments</p>
           </CardContent>
         </Card>
       </div>
@@ -380,7 +380,7 @@ export default function InvoicingPage() {
           </div>
           
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-2 text-xl">
               <DollarSign className="h-4 w-4 text-blue-600" />
               <span className="font-medium">Potential Revenue:</span>
               <span className="text-blue-700">${potentialRevenue.toLocaleString()}</span>
@@ -444,12 +444,12 @@ export default function InvoicingPage() {
                     <TableCell>
                       <div>
                         <div className="font-medium">{invoice.clientName}</div>
-                        <div className="text-sm text-gray-500">{invoice.clientId}</div>
+                        <div className="text-xl text-gray-500">{invoice.clientId}</div>
                       </div>
                     </TableCell>
                     <TableCell>{invoice.billingPeriod}</TableCell>
                     <TableCell>
-                      <div className="text-sm">
+                      <div className="text-xl">
                         <div>{invoice.alarmEvents} alarms</div>
                         <div>{invoice.patrolRecords} patrols</div>
                       </div>
@@ -466,7 +466,7 @@ export default function InvoicingPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">
+                      <div className="text-xl">
                         <div>{invoice.dueDate}</div>
                         {invoice.paidDate && (
                           <div className="text-green-600">Paid: {invoice.paidDate}</div>
@@ -551,7 +551,7 @@ export default function InvoicingPage() {
                             <div className="flex items-center gap-2">
                               <div>
                                 <div className="font-medium">{client.name}</div>
-                                <div className="text-xs text-gray-500">{client.sites} sites</div>
+                                <div className="text-lg text-gray-500">{client.sites} sites</div>
                               </div>
                             </div>
                           </SelectItem>
@@ -795,9 +795,9 @@ export default function InvoicingPage() {
                       <CardContent className="p-4">
                         <div className="text-center">
                           <div className="font-medium">{guard.name}</div>
-                          <div className="text-sm text-gray-600">{guard.roles.join(", ")}</div>
+                          <div className="text-xl text-gray-600">{guard.roles.join(", ")}</div>
                           <div className="mt-2">
-                            <div className="text-sm text-gray-600">Hours: 24h</div>
+                            <div className="text-xl text-gray-600">Hours: 24h</div>
                             <div className="font-medium text-green-600">$1,080</div>
                           </div>
                           <Button variant="outline" size="sm" className="mt-2">
@@ -815,7 +815,7 @@ export default function InvoicingPage() {
           {/* Action Buttons */}
           <div className="flex justify-between pt-6 border-t">
             <div className="flex items-center gap-4">
-              <div className="text-sm text-gray-600">
+              <div className="text-xl text-gray-600">
                 Total Services: {newInvoice.selectedAlarms.length + newInvoice.selectedPatrols.length + newInvoice.customServices.length}
               </div>
               <div className="text-lg font-medium">
@@ -855,8 +855,8 @@ export default function InvoicingPage() {
                 <div>
                   <h3 className="font-medium mb-2">Bill To:</h3>
                   <p className="font-medium">{selectedInvoice.clientName}</p>
-                  <p className="text-sm text-gray-600">Client ID: {selectedInvoice.clientId}</p>
-                  <p className="text-sm text-gray-600">Period: {selectedInvoice.billingPeriod}</p>
+                  <p className="text-xl text-gray-600">Client ID: {selectedInvoice.clientId}</p>
+                  <p className="text-xl text-gray-600">Period: {selectedInvoice.billingPeriod}</p>
                 </div>
                 <div>
                   <h3 className="font-medium mb-2">Invoice Details:</h3>
