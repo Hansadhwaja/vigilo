@@ -338,7 +338,7 @@ const handleDeleteClient = async (clientId: string) => {
           {/* Service Type */}
           <td className="px-4 py-3 font-medium text-gray-900 capitalize">
             {order.serviceType.replace(/([A-Z])/g, " $1").trim()}
-            <div className="text-xs text-gray-500">
+            <div className="text-lg text-gray-500">
               ID: {order.id.slice(0, 8)}...
             </div>
           </td>
@@ -383,7 +383,7 @@ const handleDeleteClient = async (clientId: string) => {
           </td>
 
           {/* Created At */}
-          <td className="px-4 py-3 text-gray-600 text-xs">
+          <td className="px-4 py-3 text-gray-600 text-lg">
             {formatDate(order.createdAt)}
           </td>
 
