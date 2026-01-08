@@ -360,12 +360,12 @@ export default function HRPage() {
                       <Table>
                         <TableHeader>
                           <TableRow className="bg-gray-50 border-b border-gray-200">
-                            <TableHead className="text-base font-medium text-gray-800">Name</TableHead>
-                            <TableHead className="text-base font-medium text-gray-800">Email</TableHead>
-                            <TableHead className="text-base font-medium text-gray-800">Mobile</TableHead>
-                            <TableHead className="text-base font-medium text-gray-800">Address</TableHead>
-                            <TableHead className="text-base font-medium text-gray-800">Joined</TableHead>
-                            <TableHead className="text-base font-medium text-gray-800 text-right">Actions</TableHead>
+                            <TableHead className="text-lg font-medium text-gray-800">Name</TableHead>
+                            <TableHead className="text-lg font-medium text-gray-800">Email</TableHead>
+                            <TableHead className="text-lg font-medium text-gray-800">Mobile</TableHead>
+                            <TableHead className="text-lg font-medium text-gray-800">Address</TableHead>
+                            <TableHead className="text-lg font-medium text-gray-800">Joined</TableHead>
+                            <TableHead className="text-lg font-medium text-gray-800 text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
 
@@ -378,7 +378,7 @@ export default function HRPage() {
                               
                               {/* Name */}
                               <TableCell className="py-4">
-                                <div className="text-gray-900 font-medium text-base truncate max-w-40">
+                                <div className="text-gray-900 font-medium text-lg truncate max-w-40">
                                   {guard.name}
                                 </div>
                               </TableCell>
@@ -387,7 +387,7 @@ export default function HRPage() {
                               <TableCell className="py-4">
                                 <div className="flex items-center gap-2 truncate max-w-52">
                                   
-                                  <span className="text-base text-gray-700 truncate">
+                                  <span className="text-lg text-gray-700 truncate">
                                     {guard.email}
                                   </span>
                                 </div>
@@ -397,7 +397,7 @@ export default function HRPage() {
                               <TableCell className="py-4">
                                 <div className="flex items-center gap-2 truncate max-w-32">
                                   
-                                  <span className="text-base text-gray-700 truncate">
+                                  <span className="text-lg text-gray-700 truncate">
                                     {guard.mobile}
                                   </span>
                                 </div>
@@ -405,14 +405,14 @@ export default function HRPage() {
 
                               {/* Address */}
                               <TableCell className="py-4">
-                                <span className="text-base text-gray-600 truncate block max-w-60">
+                                <span className="text-lg text-gray-600 truncate block max-w-60">
                                   {guard.address || "—"}
                                 </span>
                               </TableCell>
 
                               {/* Joined */}
                               <TableCell className="py-4">
-                                <span className="text-base text-gray-600">
+                                <span className="text-lg text-gray-600">
                                   {formatDate(guard.createdAt)}
                                 </span>
                               </TableCell>
