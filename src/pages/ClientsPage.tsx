@@ -227,7 +227,7 @@ const handleDeleteClient = async (clientId: string) => {
                 placeholder="Search orders..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 w-40 h-8"
+                className="pl-9 w-auto h-8"
               />
               {isFetching && (
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -236,7 +236,7 @@ const handleDeleteClient = async (clientId: string) => {
               )}
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32 h-8">
+              <SelectTrigger className="w-auto h-8">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -249,7 +249,7 @@ const handleDeleteClient = async (clientId: string) => {
               </SelectContent>
             </Select>
             <Select value={serviceTypeFilter} onValueChange={setServiceTypeFilter}>
-              <SelectTrigger className="w-36 h-8">
+              <SelectTrigger className="w-auto h-8">
                 <SelectValue placeholder="Service Type" />
               </SelectTrigger>
               <SelectContent>

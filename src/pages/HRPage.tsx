@@ -283,10 +283,10 @@ export default function HRPage() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
           <Input
-            placeholder="Search guards..."
+            placeholder="Search guards...."
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="pl-9 w-40 h-8"
+            className="pl-9 w-lg h-auto"
           />
           {isFetching && (
             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
