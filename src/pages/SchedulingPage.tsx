@@ -1361,86 +1361,80 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
       </Dialog>
 
       {/* Create Assignment Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog} >
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Create Guard Assignment</DialogTitle>
-            <DialogDescription>
-              Assign guards to a shift
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2">
-              <Label htmlFor="description" className="mb-1 block">Assignment Description</Label>
-              <Textarea
-                id="description"
-                placeholder="Describe the assignment details..."
-                value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
-                rows={3}
+<Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+  <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle>Create Guard Assignment</DialogTitle>
+      <DialogDescription>
+        Assign guards to a shift
+      </DialogDescription>
+    </DialogHeader>
+    <div className="grid grid-cols-2 gap-4">
+      <div className="col-span-2">
+        <Label htmlFor="description" className="mb-1 block">
+          Assignment Description <span className="text-red-500">*</span>
+        </Label>
+        <Textarea
+          id="description"
+          placeholder="Describe the assignment details..."
+          value={formData.description}
+          onChange={(e) => setFormData({...formData, description: e.target.value})}
+          rows={3}
+        />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label>Date <span className="text-red-500">*</span></Label>
+
+        <Button
+          variant="outline"
+          className="w-full justify-start"
+          onClick={() => setOpenCalendar(true)}
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          {formData.date ? new Date(formData.date).toLocaleDateString() : "Pick a date"}
+        </Button>
+
+        <Dialog open={openCalendar} onOpenChange={setOpenCalendar}>
+          <DialogContent className="w-auto max-w-fit p-4 overflow-hidden">
+            <div className="bg-gradient-to-br from-background to-muted/20 rounded-lg">
+              <Calendar
+                mode="single"
+                selected={formData.date ? new Date(formData.date + 'T00:00:00') : undefined}
+                onSelect={(date: any) => {
+                  if (!date) return;
+                  
+                  // Format date in local timezone YYYY-MM-DD
+                  const year = date.getFullYear();
+                  const month = String(date.getMonth() + 1).padStart(2, '0');
+                  const day = String(date.getDate()).padStart(2, '0');
+                  const localDateString = `${year}-${month}-${day}`;
+                  
+                  setFormData({
+                    ...formData,
+                    date: localDateString,
+                  });
+                  setOpenCalendar(false);
+                }}
+                disabled={(date) => {
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const checkDate = new Date(date);
+                  checkDate.setHours(0, 0, 0, 0);
+                  return checkDate < today;
+                }}
+                fromDate={new Date()}
               />
             </div>
+          </DialogContent>
+        </Dialog>
+      </div>
 
-<div className="flex flex-col gap-2">
-  <Label>Date</Label>
-
-  <Button
-    variant="outline"
-    className="w-full justify-start"
-    onClick={() => setOpenCalendar(true)}
-  >
-    <CalendarIcon className="mr-2 h-4 w-4" />
-    {formData.date ? new Date(formData.date).toLocaleDateString() : "Pick a date"}
-  </Button>
-
-  <Dialog open={openCalendar} onOpenChange={setOpenCalendar}>
-  <DialogContent className="w-auto max-w-fit p-4 overflow-hidden">
-    <div className="bg-gradient-to-br from-background to-muted/20 rounded-lg">
-      <Calendar
-        mode="single"
-        selected={formData.date ? new Date(formData.date + 'T00:00:00') : undefined}
-        onSelect={(date: any) => {
-          if (!date) return;
-          
-          // Format date in local timezone YYYY-MM-DD
-          const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const day = String(date.getDate()).padStart(2, '0');
-          const localDateString = `${year}-${month}-${day}`;
-          
-          setFormData({
-            ...formData,
-            date: localDateString,
-          });
-          setOpenCalendar(false);
-        }}
-        disabled={(date) => {
-          // Get today at start of day in local timezone
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          
-          // Get the selected date at start of day in local timezone
-          const checkDate = new Date(date);
-          checkDate.setHours(0, 0, 0, 0);
-          
-          // Disable if date is before today
-          return checkDate < today;
-        }}
-        fromDate={new Date()} // Don't even show dates before today
-      />
-    </div>
-  </DialogContent>
-</Dialog>
-
-
-
-</div>
-
-
-
-            {/* Order select with scrollbar */}
+      {/* Order Address */}
       <div>
-        <Label htmlFor="order" className="mb-1 block">Order Address</Label>
+        <Label htmlFor="order" className="mb-1 block">
+          Order Address <span className="text-red-500">*</span>
+        </Label>
 
         <Select
           value={String(formData.orderId ?? "")}
@@ -1450,12 +1444,11 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
             <SelectValue placeholder="Select order" />
           </SelectTrigger>
 
-          {/* ensure overflow + z-index + fixed max height */}
           <SelectContent className="max-h-56 overflow-y-auto z-50" style={{ maxHeight: "14rem", overflowY: "auto" }}>
             {orders && orders.length > 0 ? (
               orders.map((order: any) => (
                 <SelectItem key={order.id} value={order.id}>
-                  {order.locationAddress  ?? order.id}
+                  {order.locationAddress ?? order.id}
                 </SelectItem>
               ))
             ) : (
@@ -1465,7 +1458,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
         </Select>
       </div>
 
-      {/* Order select with scrollbar */}
+      {/* Order Name */}
       <div>
         <Label htmlFor="order" className="mb-1 block">Order Name</Label>
 
@@ -1477,12 +1470,11 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
             <SelectValue placeholder="Select order" />
           </SelectTrigger>
 
-          {/* ensure overflow + z-index + fixed max height */}
           <SelectContent className="max-h-56 overflow-y-auto z-50" style={{ maxHeight: "14rem", overflowY: "auto" }}>
             {orders && orders.length > 0 ? (
               orders.map((order: any) => (
                 <SelectItem key={order.id} value={order.id}>
-                  {order.locationName  ?? order.id}
+                  {order.locationName ?? order.id}
                 </SelectItem>
               ))
             ) : (
@@ -1492,153 +1484,190 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
         </Select>
       </div>
 
-            {/* Multi-select Guards Dropdown */}
-{/* Multi-select Guards Dropdown */}
-<div>
-  <Label className="mb-1 block">Select Guards (Multiple)</Label>
+      {/* Multi-select Guards Dropdown */}
+      <div>
+        <Label className="mb-1 block">
+          Select Guards (Multiple) <span className="text-red-500">*</span>
+        </Label>
 
-  <Select open={guardsOpen} onOpenChange={setGuardsOpen}>
-    <SelectTrigger>
-      <SelectValue
-        placeholder={
-          formData.guardIds.length > 0
-            ? `${formData.guardIds.length} guard(s) selected`
-            : "Select Guards"
-        }
-      />
-    </SelectTrigger>
+        <Select open={guardsOpen} onOpenChange={setGuardsOpen}>
+          <SelectTrigger>
+            <SelectValue
+              placeholder={
+                formData.guardIds.length > 0
+                  ? `${formData.guardIds.length} guard(s) selected`
+                  : "Select Guards"
+              }
+            />
+          </SelectTrigger>
 
-    <SelectContent
-      className="max-h-56 overflow-y-auto z-50"
-      style={{ maxHeight: "14rem", overflowY: "auto" }}
-    >
-      {guards && guards.length > 0 ? (
-        guards.map((guard: any) => {
-          const isChecked = formData.guardIds.includes(guard.id);
+          <SelectContent
+            className="max-h-56 overflow-y-auto z-50"
+            style={{ maxHeight: "14rem", overflowY: "auto" }}
+          >
+            {guards && guards.length > 0 ? (
+              guards.map((guard: any) => {
+                const isChecked = formData.guardIds.includes(guard.id);
 
-          return (
-            <div
-              key={guard.id}
-              className="flex items-center px-2 py-1 space-x-2 cursor-pointer hover:bg-gray-100 rounded-md"
-              onClick={(e) => {
-                e.stopPropagation(); // prevent closing dropdown
+                return (
+                  <div
+                    key={guard.id}
+                    className="flex items-center px-2 py-1 space-x-2 cursor-pointer hover:bg-gray-100 rounded-md"
+                    onClick={(e) => {
+                      e.stopPropagation();
 
-                if (isChecked) {
-                  setFormData({
-                    ...formData,
-                    guardIds: formData.guardIds.filter(
-                      (id: string) => id !== guard.id
-                    ),
-                  });
-                } else {
-                  setFormData({
-                    ...formData,
-                    guardIds: [...formData.guardIds, guard.id],
-                  });
-                }
-              }}
-            >
-              <Checkbox
-                checked={isChecked}
-                onCheckedChange={(checked: any) => {
-                  if (checked) {
-                    setFormData({
-                      ...formData,
-                      guardIds: [...formData.guardIds, guard.id],
-                    });
-                  } else {
-                    setFormData({
-                      ...formData,
-                      guardIds: formData.guardIds.filter(
-                        (id: string) => id !== guard.id
-                      ),
-                    });
-                  }
-                }}
-                onClick={(e: { stopPropagation: () => any; }) => e.stopPropagation()}
-              />
+                      if (isChecked) {
+                        setFormData({
+                          ...formData,
+                          guardIds: formData.guardIds.filter(
+                            (id: string) => id !== guard.id
+                          ),
+                        });
+                      } else {
+                        setFormData({
+                          ...formData,
+                          guardIds: [...formData.guardIds, guard.id],
+                        });
+                      }
+                    }}
+                  >
+                    <Checkbox
+                      checked={isChecked}
+                      onCheckedChange={(checked: any) => {
+                        if (checked) {
+                          setFormData({
+                            ...formData,
+                            guardIds: [...formData.guardIds, guard.id],
+                          });
+                        } else {
+                          setFormData({
+                            ...formData,
+                            guardIds: formData.guardIds.filter(
+                              (id: string) => id !== guard.id
+                            ),
+                          });
+                        }
+                      }}
+                      onClick={(e: { stopPropagation: () => any; }) => e.stopPropagation()}
+                    />
 
-              <span className="text-lg">
-                {guard.name} ({guard.role ?? "N/A"})
-              </span>
-            </div>
-          );
-        })
-      ) : (
-        <div className="p-3 text-lg text-gray-500">No Guards available</div>
-      )}
-    </SelectContent>
-  </Select>
+                    <span className="text-lg">
+                      {guard.name} ({guard.mobile})
+                    </span>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="p-3 text-lg text-gray-500">No Guards available</div>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
 
-  
-</div>
+      <div className="col-span-2 grid grid-cols-2 gap-4">
+        {/* START TIME */}
+        <div className="space-y-1">
+          <Label htmlFor="editStartTime" className="text-lg font-medium text-gray-700">
+            Start Time <span className="text-red-500">*</span>
+          </Label>
 
+          <Input
+            id="editStartTime"
+            type="time"
+            value={formData.startTime}
+            onChange={(e) =>
+              setFormData({ ...formData, startTime: e.target.value })
+            }
+            className="h-11 rounded-lg border-gray-300
+                       focus-visible:ring-2 focus-visible:ring-blue-500"
+          />
+        </div>
 
-        
+        {/* END TIME */}
+        <div className="space-y-1">
+          <Label htmlFor="editEndTime" className="text-lg font-medium text-gray-700">
+            End Time <span className="text-red-500">*</span>
+          </Label>
 
-<div className="col-span-2 grid grid-cols-2 gap-4">
-  {/* START TIME */}
-  <div className="space-y-1">
-    <Label htmlFor="editStartTime" className="text-lg font-medium text-gray-700">
-      Start Time
-    </Label>
+          <Input
+            id="editEndTime"
+            type="time"
+            value={formData.endTime}
+            onChange={(e) =>
+              setFormData({ ...formData, endTime: e.target.value })
+            }
+            className="h-11 rounded-lg border-gray-300
+                       focus-visible:ring-2 focus-visible:ring-blue-500"
+          />
+        </div>
+      </div>
+    </div>
 
-    <Input
-      id="editStartTime"
-      type="time"
-      value={formData.startTime}
-      onChange={(e) =>
-        setFormData({ ...formData, startTime: e.target.value })
-      }
-      className="h-11 rounded-lg border-gray-300
-                 focus-visible:ring-2 focus-visible:ring-blue-500"
-    />
-  </div>
+    <div className="flex justify-between pt-4">
+      <Button 
+        variant="destructive" 
+        onClick={() => {
+          setShowCreateDialog(false); 
+        }}
+      >
+        Delete Assignment
+      </Button>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+          Cancel
+        </Button>
+        <Button 
+          onClick={() => {
+            // Validate before submitting
+            if (!formData.description?.trim()) {
+              toast.error("Please enter assignment description");
+              return;
+            }
+            if (!formData.date) {
+              toast.error("Please select a date");
+              return;
+            }
+            if (!formData.orderId) {
+              toast.error("Please select an order");
+              return;
+            }
+            if (formData.guardIds.length === 0) {
+              toast.error("Please select at least one guard");
+              return;
+            }
+            if (!formData.startTime) {
+              toast.error("Please enter start time");
+              return;
+            }
+            if (!formData.endTime) {
+              toast.error("Please enter end time");
+              return;
+            }
+            if (formData.startTime >= formData.endTime) {
+              toast.error("End time must be after start time");
+              return;
+            }
+            
+            // All validations passed
+            handleCreateSchedule();
+          }} 
+          disabled={
+            isCreating || 
+            !formData.description?.trim() ||
+            !formData.date ||
+            !formData.orderId ||
+            formData.guardIds.length === 0 ||
+            !formData.startTime ||
+            !formData.endTime
+          }
+        >
+          {isCreating ? "Saving..." : "Create Assignment"}
+        </Button>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
 
-  {/* END TIME */}
-  <div className="space-y-1">
-    <Label htmlFor="editEndTime" className="text-lg font-medium text-gray-700">
-      End Time
-    </Label>
-
-    <Input
-      id="editEndTime"
-      type="time"
-      value={formData.endTime}
-      onChange={(e) =>
-        setFormData({ ...formData, endTime: e.target.value })
-      }
-      className="h-11 rounded-lg border-gray-300
-                 focus-visible:ring-2 focus-visible:ring-blue-500"
-    />
-  </div>
-</div>
-
-
-
-          </div>
-
-          <div className="flex justify-between pt-4">
-            <Button 
-              variant="destructive" 
-              onClick={() => {
-               setShowCreateDialog(false); 
-              }}
-            >
-              Delete Assignment
-            </Button>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleCreateSchedule} disabled={isCreating}>
-  {isCreating ? "Saving..." : "Create Assignment"}
-</Button>
-
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
