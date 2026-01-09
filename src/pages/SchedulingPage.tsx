@@ -173,7 +173,6 @@ const endRef = useRef<HTMLInputElement>(null);
 
   //delete a schedule
   const [deleteSchedule] = useDeleteScheduleMutation();
-
   const handleDelete = async (id: string, e: any) => {
     e.stopPropagation();
 
@@ -1399,19 +1398,41 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
     <div className="bg-gradient-to-br from-background to-muted/20 rounded-lg">
       <Calendar
         mode="single"
-        selected={formData.date ? new Date(formData.date) : undefined}
+        selected={formData.date ? new Date(formData.date + 'T00:00:00') : undefined}
         onSelect={(date: any) => {
           if (!date) return;
+          
+          // Format date in local timezone YYYY-MM-DD
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          const localDateString = `${year}-${month}-${day}`;
+          
           setFormData({
             ...formData,
-            date: date.toISOString().split("T")[0],
+            date: localDateString,
           });
           setOpenCalendar(false);
         }}
+        disabled={(date) => {
+          // Get today at start of day in local timezone
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          // Get the selected date at start of day in local timezone
+          const checkDate = new Date(date);
+          checkDate.setHours(0, 0, 0, 0);
+          
+          // Disable if date is before today
+          return checkDate < today;
+        }}
+        fromDate={new Date()} // Don't even show dates before today
       />
     </div>
   </DialogContent>
 </Dialog>
+
+
 
 </div>
 
