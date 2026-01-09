@@ -173,22 +173,50 @@ const endRef = useRef<HTMLInputElement>(null);
 
   //delete a schedule
   const [deleteSchedule] = useDeleteScheduleMutation();
+
   const handleDelete = async (id: string, e: any) => {
-  e.stopPropagation();
-  // console.log("Starting deleting schedule with id:", id);
+    e.stopPropagation();
 
-  try {
-    const res = await deleteSchedule({ id }).unwrap();
-
-    if (res.success) {
-      toast.success("Schedule deleted successfully");
-    } else {
-      toast.error(res.message || "Failed to delete schedule");
+    try {
+      // Show confirmation toast with action buttons
+      toast.custom((t) => (
+        <div className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg max-w-sm">
+          <div className="flex-1">
+            <div className="font-semibold text-red-900">Delete Schedule?</div>
+            <div className="text-sm text-red-700 mt-1">This action cannot be undone.</div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => toast.dismiss(t)}
+              className="px-3 py-1 rounded bg-red-100 hover:bg-red-200 text-red-800 font-medium text-sm transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                toast.dismiss(t);
+                try {
+                  const res = await deleteSchedule({ id }).unwrap();
+                  if (res.success) {
+                    toast.success("Schedule deleted successfully");
+                  } else {
+                    toast.error(res.message || "Failed to delete schedule");
+                  }
+                } catch (error) {
+                  toast.error("Failed to delete schedule");
+                }
+              }}
+              className="px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-white font-medium text-sm transition-colors"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ));
+    } catch (error) {
+      toast.error("Something went wrong");
     }
-  } catch (error) {
-    toast.error("Something went wrong while deleting");
-  }
-};
+  };
 
   // Helpers: timezone constants & formatters
 const TIMEZONE = "Asia/Kolkata";
