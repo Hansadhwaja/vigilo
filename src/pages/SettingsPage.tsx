@@ -113,7 +113,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={classNames(
-                  "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
+                  "flex items-center gap-2 px-4 py-3 text-xl font-medium transition-colors",
                   activeTab === tab.id
                     ? "border-b-2 border-blue-600 text-blue-600 bg-blue-50"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
@@ -139,28 +139,28 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Email notifications</div>
-                  <div className="text-sm text-gray-500">Receive alerts via email</div>
+                  <div className="text-xl text-gray-500">Receive alerts via email</div>
                 </div>
                 <Switch defaultChecked />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">SMS alerts</div>
-                  <div className="text-sm text-gray-500">Critical incidents only</div>
+                  <div className="text-xl text-gray-500">Critical incidents only</div>
                 </div>
                 <Switch />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Push notifications</div>
-                  <div className="text-sm text-gray-500">Mobile app notifications</div>
+                  <div className="text-xl text-gray-500">Mobile app notifications</div>
                 </div>
                 <Switch defaultChecked />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Sound alerts</div>
-                  <div className="text-sm text-gray-500">Audio notifications for critical alarms</div>
+                  <div className="text-xl text-gray-500">Audio notifications for critical alarms</div>
                 </div>
                 <Switch defaultChecked />
               </div>
@@ -176,26 +176,26 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Auto-assign alarms</div>
-                  <div className="text-sm text-gray-500">Based on proximity and availability</div>
+                  <div className="text-xl text-gray-500">Based on proximity and availability</div>
                 </div>
                 <Switch defaultChecked />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Auto-escalate overdue alarms</div>
-                  <div className="text-sm text-gray-500">Escalate after SLA threshold</div>
+                  <div className="text-xl text-gray-500">Escalate after SLA threshold</div>
                 </div>
                 <Switch defaultChecked />
               </div>
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-medium">Real-time tracking</div>
-                  <div className="text-sm text-gray-500">GPS tracking for all guards</div>
+                  <div className="text-xl text-gray-500">GPS tracking for all guards</div>
                 </div>
                 <Switch defaultChecked />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Default SLA (minutes)</label>
+                <label className="text-xl font-medium">Default SLA (minutes)</label>
                 <Select defaultValue="15">
                   <SelectTrigger>
                     <SelectValue />
@@ -219,7 +219,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Timezone</label>
+                  <label className="text-xl font-medium">Timezone</label>
                   <Select defaultValue="australia/melbourne">
                     <SelectTrigger>
                       <SelectValue />
@@ -233,7 +233,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Currency</label>
+                  <label className="text-xl font-medium">Currency</label>
                   <Select defaultValue="aud">
                     <SelectTrigger>
                       <SelectValue />
@@ -246,7 +246,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Date Format</label>
+                  <label className="text-xl font-medium">Date Format</label>
                   <Select defaultValue="dd/mm/yyyy">
                     <SelectTrigger>
                       <SelectValue />
@@ -274,7 +274,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold">Vehicle Management</h2>
-              <p className="text-sm text-gray-600">Manage fleet vehicles, maintenance, and assignments</p>
+              <p className="text-xl text-gray-600">Manage fleet vehicles, maintenance, and assignments</p>
             </div>
             <Button onClick={() => setShowAddVehicleDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />Add Vehicle
@@ -285,7 +285,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Vehicles</CardTitle>
+                <CardTitle className="text-xl font-medium">Total Vehicles</CardTitle>
                 <Car className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -295,7 +295,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
             
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Vehicles</CardTitle>
+                <CardTitle className="text-xl font-medium">Active Vehicles</CardTitle>
                 <Car className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -307,7 +307,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
             
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">In Maintenance</CardTitle>
+                <CardTitle className="text-xl font-medium">In Maintenance</CardTitle>
                 <Wrench className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -319,7 +319,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
             
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Avg Fuel/Month</CardTitle>
+                <CardTitle className="text-xl font-medium">Avg Fuel/Month</CardTitle>
                 <Fuel className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -349,7 +349,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                       <TableCell>
                         <div>
                           <div className="font-medium">{vehicle.type}</div>
-                          <div className="text-sm text-gray-500">{vehicle.id}</div>
+                          <div className="text-xl text-gray-500">{vehicle.id}</div>
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{vehicle.registration}</TableCell>
@@ -363,12 +363,12 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                         <div className="flex flex-wrap gap-1">
                           {vehicle.assignedPatrols.length > 0 ? (
                             vehicle.assignedPatrols.map((patrol, index) => (
-                              <Badge key={index} variant="outline" className="text-xs">
+                              <Badge key={index} variant="outline" className="text-lg">
                                 {patrol}
                               </Badge>
                             ))
                           ) : (
-                            <span className="text-sm text-gray-500">Unassigned</span>
+                            <span className="text-xl text-gray-500">Unassigned</span>
                           )}
                         </div>
                       </TableCell>
@@ -401,7 +401,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                 <h3 className="text-lg font-semibold mb-4">Add New Vehicle</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="text-sm font-medium">Vehicle Type</label>
+                    <label className="text-xl font-medium">Vehicle Type</label>
                     <Select>
                       <SelectTrigger>
                         <SelectValue placeholder="Select vehicle type" />
@@ -415,11 +415,11 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                     </Select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Registration Number</label>
+                    <label className="text-xl font-medium">Registration Number</label>
                     <Input placeholder="VIG-005" />
                   </div>
                   <div>
-                    <label className="text-sm font-medium">Status</label>
+                    <label className="text-xl font-medium">Status</label>
                     <Select>
                       <SelectTrigger>
                         <SelectValue placeholder="Select status" />
@@ -452,7 +452,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold">User Management</h2>
-              <p className="text-sm text-gray-600">Manage user accounts, roles, and permissions</p>
+              <p className="text-xl text-gray-600">Manage user accounts, roles, and permissions</p>
             </div>
             <Button><UserPlus className="h-4 w-4 mr-2" />Add User</Button>
           </div>
@@ -475,7 +475,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                       <TableCell>
                         <div>
                           <div className="font-medium">{user.name}</div>
-                          <div className="text-sm text-gray-500">{user.email}</div>
+                          <div className="text-xl text-gray-500">{user.email}</div>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -509,7 +509,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
         <div className="space-y-6">
           <div>
             <h2 className="text-xl font-semibold">Security Settings</h2>
-            <p className="text-sm text-gray-600">Configure security policies and access controls</p>
+            <p className="text-xl text-gray-600">Configure security policies and access controls</p>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -520,7 +520,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">API Key</label>
+                  <label className="text-xl font-medium">API Key</label>
                   <div className="flex gap-2">
                     <Input 
                       type={showApiKey ? "text" : "password"}
@@ -543,7 +543,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">Rate limiting</div>
-                    <div className="text-sm text-gray-500">1000 requests per hour</div>
+                    <div className="text-xl text-gray-500">1000 requests per hour</div>
                   </div>
                   <Switch defaultChecked />
                 </div>
@@ -559,28 +559,28 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">Minimum 8 characters</div>
-                    <div className="text-sm text-gray-500">Require at least 8 characters</div>
+                    <div className="text-xl text-gray-500">Require at least 8 characters</div>
                   </div>
                   <Switch defaultChecked />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">Require uppercase letters</div>
-                    <div className="text-sm text-gray-500">At least one uppercase letter</div>
+                    <div className="text-xl text-gray-500">At least one uppercase letter</div>
                   </div>
                   <Switch defaultChecked />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">Require numbers</div>
-                    <div className="text-sm text-gray-500">At least one numeric character</div>
+                    <div className="text-xl text-gray-500">At least one numeric character</div>
                   </div>
                   <Switch defaultChecked />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">Require special characters</div>
-                    <div className="text-sm text-gray-500">At least one special character</div>
+                    <div className="text-xl text-gray-500">At least one special character</div>
                   </div>
                   <Switch />
                 </div>
@@ -595,7 +595,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
         <div className="space-y-6">
           <div>
             <h2 className="text-xl font-semibold">Billing & Subscription</h2>
-            <p className="text-sm text-gray-600">Manage your subscription and billing information</p>
+            <p className="text-xl text-gray-600">Manage your subscription and billing information</p>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -608,24 +608,24 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                 <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
                   <div>
                     <div className="font-semibold text-lg">Professional Plan</div>
-                    <div className="text-sm text-gray-600">Unlimited users, Advanced features</div>
+                    <div className="text-xl text-gray-600">Unlimited users, Advanced features</div>
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold">$299</div>
-                    <div className="text-sm text-gray-500">per month</div>
+                    <div className="text-xl text-gray-500">per month</div>
                   </div>
                 </div>
                 
                 <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xl">
                     <span>Alarms processed (MTD)</span>
                     <span>{usageAlarmsMTD} × $55 = ${usageAlarmsMTD * 55}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xl">
                     <span>Base subscription</span>
                     <span>$299</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xl">
                     <span>SMS charges</span>
                     <span>$23.50</span>
                   </div>
@@ -647,7 +647,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                   <CreditCard className="h-5 w-5 text-gray-400" />
                   <div>
                     <div className="font-medium">•••• •••• •••• 4242</div>
-                    <div className="text-sm text-gray-500">Expires 12/26</div>
+                    <div className="text-xl text-gray-500">Expires 12/26</div>
                   </div>
                 </div>
                 <Button variant="outline" className="w-full">Update Payment</Button>
@@ -662,7 +662,7 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
         <div className="space-y-6">
           <div>
             <h2 className="text-xl font-semibold">System Information</h2>
-            <p className="text-sm text-gray-600">System status, performance, and maintenance</p>
+            <p className="text-xl text-gray-600">System status, performance, and maintenance</p>
           </div>
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -673,21 +673,21 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xl">
                     <span>CPU Usage</span>
                     <span>23%</span>
                   </div>
                   <Progress value={23} className="h-2" />
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xl">
                     <span>Memory Usage</span>
                     <span>67%</span>
                   </div>
                   <Progress value={67} className="h-2" />
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xl">
                     <span>Database Storage</span>
                     <span>45%</span>
                   </div>
@@ -702,25 +702,25 @@ export default function SettingsPage({ usageAlarmsMTD }: SettingsPageProps) {
                 <CardDescription>Current software versions and updates</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xl">
                   <span>VIGILO Platform</span>
                   <span>v2.4.1</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xl">
                   <span>API Version</span>
                   <span>v1.2.0</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xl">
                   <span>Database</span>
                   <span>PostgreSQL 15.2</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-xl">
                   <span>Last Update</span>
                   <span>3 days ago</span>
                 </div>
                 <div className="pt-3 border-t">
                   <Badge className="bg-blue-100 text-blue-800">Updates Available</Badge>
-                  <div className="text-xs text-gray-500 mt-1">Security update v2.4.2 available</div>
+                  <div className="text-lg text-gray-500 mt-1">Security update v2.4.2 available</div>
                 </div>
               </CardContent>
             </Card>

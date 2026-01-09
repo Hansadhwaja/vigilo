@@ -73,12 +73,12 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
               <div className={`w-3 h-3 rounded-full ${apiConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
               <div className="flex items-center gap-2">
                 <Satellite className={`h-4 w-4 ${apiConnected ? 'text-green-600' : 'text-red-600'}`} />
-                <span className={`text-sm font-medium ${apiConnected ? 'text-green-800' : 'text-red-800'}`}>
+                <span className={`text-xl font-medium ${apiConnected ? 'text-green-800' : 'text-red-800'}`}>
                   Vehicle Tracking API {apiConnected ? 'Connected' : 'Disconnected'}
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-4 text-xl">
               <div className="flex items-center gap-1">
                 <RefreshCw className={`h-4 w-4 ${apiConnected ? 'text-green-600' : 'text-red-600'} ${apiConnected ? 'animate-spin' : ''}`} />
                 <span className={apiConnected ? 'text-green-700' : 'text-red-700'}>
@@ -283,7 +283,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <div className={`w-3 h-3 rounded-full ${vehicle.speed > 0 ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
-                      <span className="font-medium text-sm">{vehicle.callsign}</span>
+                      <span className="font-medium text-xl">{vehicle.callsign}</span>
                     </div>
                     <Badge className={`${getVehicleColor(vehicle) === '#22c55e' ? 'bg-green-100 text-green-800' : 
                                              getVehicleColor(vehicle) === '#f59e0b' ? 'bg-yellow-100 text-yellow-800' : 
@@ -292,7 +292,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
                     </Badge>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+                  <div className="grid grid-cols-2 gap-2 text-lg text-gray-600">
                     <div>Speed: {vehicle.speed}km/h</div>
                     <div>Fuel: {vehicle.fuel}%</div>
                     <div>Driver: {vehicle.driver || "None"}</div>
@@ -300,7 +300,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
                   </div>
 
                   {vehicle.destination && (
-                    <div className="mt-2 text-xs">
+                    <div className="mt-2 text-lg">
                       <div className="font-medium">→ {vehicle.destination}</div>
                       {vehicle.eta && <div className="text-gray-500">ETA: {vehicle.eta}</div>}
                     </div>
@@ -318,19 +318,19 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between text-xl">
                   <span>Provider:</span>
                   <span className="font-medium">GPS Fleet Pro</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between text-xl">
                   <span>Update Rate:</span>
                   <span className="font-medium">30 seconds</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between text-xl">
                   <span>Data Points/Hour:</span>
                   <span className="font-medium">1,200</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between text-xl">
                   <span>Monthly Usage:</span>
                   <span className="font-medium">847k / 1M</span>
                 </div>
@@ -365,7 +365,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
               {/* Vehicle Status Overview */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="font-semibold mb-3">Current Status</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-4 text-xl">
                   <div>
                     <span className="text-gray-500">Status:</span>
                     <Badge className={`ml-2 ${selectedVehicle.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
@@ -392,7 +392,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
                 <h3 className="font-semibold mb-3">Live Telemetry</h3>
                 <div className="space-y-4">
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-xl mb-1">
                       <span>Fuel Level</span>
                       <span>{selectedVehicle.fuel}%</span>
                     </div>
@@ -400,7 +400,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
                   </div>
                   
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-xl mb-1">
                       <span>Battery Level</span>
                       <span>{selectedVehicle.batteryLevel}%</span>
                     </div>
@@ -408,7 +408,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-xl mb-1">
                       <span>Engine Temperature</span>
                       <span>{selectedVehicle.engineTemp}°C</span>
                     </div>
@@ -420,7 +420,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
               {/* GPS Information */}
               <div>
                 <h3 className="font-semibold mb-3">GPS Information</h3>
-                <div className="space-y-2 text-sm">
+                <div className="space-y-2 text-xl">
                   <div className="flex justify-between">
                     <span className="text-gray-500">Latitude:</span>
                     <span className="font-mono">{selectedVehicle.lat.toFixed(6)}</span>
@@ -444,7 +444,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
               {selectedVehicle.destination && (
                 <div>
                   <h3 className="font-semibold mb-3">Current Route</h3>
-                  <div className="space-y-2 text-sm">
+                  <div className="space-y-2 text-xl">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Destination:</span>
                       <span className="font-medium">{selectedVehicle.destination}</span>

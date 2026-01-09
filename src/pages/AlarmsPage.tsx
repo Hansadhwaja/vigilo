@@ -367,7 +367,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div className="flex-1">
           <h1 className="mb-1">Alarm Management</h1>
-          <p className="text-gray-600 text-sm">Real-time Response & Guard Assignment</p>
+          <p className="text-gray-600 text-xl">Real-time Response & Guard Assignment</p>
         </div>
         
         {/* Enhanced Inline Summary Cards */}
@@ -376,7 +376,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
             <Bell className="h-4 w-4 text-red-600" />
             <div>
               <div className="font-bold text-red-700">{activeAlarms}</div>
-              <div className="text-xs text-red-600">Active</div>
+              <div className="text-lg text-red-600">Active</div>
             </div>
           </div>
           
@@ -384,7 +384,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
             <Siren className="h-4 w-4 text-orange-600" />
             <div>
               <div className="font-bold text-orange-700">{criticalAlarms}</div>
-              <div className="text-xs text-orange-600">Critical</div>
+              <div className="text-lg text-orange-600">Critical</div>
             </div>
           </div>
           
@@ -392,7 +392,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
             <Zap className="h-4 w-4 text-purple-600" />
             <div>
               <div className="font-bold text-purple-700">{slaBreachAlarms}</div>
-              <div className="text-xs text-purple-600">SLA Breach</div>
+              <div className="text-lg text-purple-600">SLA Breach</div>
             </div>
           </div>
           
@@ -400,7 +400,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
             <Timer className="h-4 w-4 text-blue-600" />
             <div>
               <div className="font-bold text-blue-700">{Math.round(averageResponseTime)}m</div>
-              <div className="text-xs text-blue-600">Avg Response</div>
+              <div className="text-lg text-blue-600">Avg Response</div>
             </div>
           </div>
           
@@ -408,7 +408,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
             <TrendingUp className="h-4 w-4 text-green-600" />
             <div>
               <div className="font-bold text-green-700">${monthlyBillingValue.toFixed(0)}</div>
-              <div className="text-xs text-green-600">Monthly Billing</div>
+              <div className="text-lg text-green-600">Monthly Billing</div>
             </div>
           </div>
           
@@ -492,10 +492,10 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                       {/* Alarm Info */}
                       <div>
                         <div className="font-medium text-gray-900">{alarm.site}</div>
-                        <div className="text-sm text-gray-600">{alarm.type}</div>
+                        <div className="text-xl text-gray-600">{alarm.type}</div>
                         <div className="flex items-center gap-1 mt-1">
                           <MapPin className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-600">{alarm.location || 'Location TBD'}</span>
+                          <span className="text-lg text-gray-600">{alarm.location || 'Location TBD'}</span>
                         </div>
                       </div>
                       
@@ -504,10 +504,10 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                         <Badge className={getPriorityColor(alarm.priority)}>
                           {alarm.priority} Priority
                         </Badge>
-                        <div className="text-sm text-gray-900 mt-1">
+                        <div className="text-xl text-gray-900 mt-1">
                           {alarm.sinceMins}min ago
                         </div>
-                        <div className={`text-xs font-medium ${getSLAColor(alarm.sinceMins, alarm.slaTargetMins)}`}>
+                        <div className={`text-lg font-medium ${getSLAColor(alarm.sinceMins, alarm.slaTargetMins)}`}>
                           SLA: {alarm.slaTargetMins}min
                         </div>
                       </div>
@@ -516,15 +516,15 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                       <div>
                         {alarm.assigned ? (
                           <>
-                            <div className="text-sm text-gray-900">{alarm.assigned}</div>
-                            <div className="text-xs text-gray-600">ETA: {alarm.eta || 'Calculating...'}</div>
+                            <div className="text-xl text-gray-900">{alarm.assigned}</div>
+                            <div className="text-lg text-gray-600">ETA: {alarm.eta || 'Calculating...'}</div>
                             <div className="flex items-center gap-1 mt-1">
                               <User className="h-3 w-3 text-green-500" />
-                              <span className="text-xs text-green-600">Assigned</span>
+                              <span className="text-lg text-green-600">Assigned</span>
                             </div>
                           </>
                         ) : (
-                          <div className="text-sm text-gray-500">Unassigned</div>
+                          <div className="text-xl text-gray-500">Unassigned</div>
                         )}
                       </div>
                       
@@ -541,7 +541,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                             </Badge>
                           )}
                           {alarm.slaTargetMins && alarm.sinceMins > alarm.slaTargetMins && (
-                            <div className="text-xs text-red-600 mt-1">SLA Breach</div>
+                            <div className="text-lg text-red-600 mt-1">SLA Breach</div>
                           )}
                         </div>
                         
@@ -559,7 +559,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                             <Button
                               size="sm"
                               onClick={() => handleSmartAssign(alarm)}
-                              className="h-8 px-2 text-xs bg-blue-600 hover:bg-blue-700"
+                              className="h-8 px-2 text-lg bg-blue-600 hover:bg-blue-700"
                             >
                               <User className="h-3 w-3 mr-1" />
                               Smart Assign
@@ -569,7 +569,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                             <Button
                               size="sm"
                               onClick={() => handleResolveWithBilling(alarm)}
-                              className="h-8 px-2 text-xs bg-green-600 hover:bg-green-700"
+                              className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
                             >
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Resolve
@@ -583,7 +583,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                   {/* SLA Progress Bar */}
                   {!alarm.completed && alarm.slaTargetMins > 0 && (
                     <div className="mt-3">
-                      <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                      <div className="flex items-center justify-between text-lg text-gray-600 mb-1">
                         <span>SLA Progress</span>
                         <span>{Math.round((alarm.sinceMins / alarm.slaTargetMins) * 100)}%</span>
                       </div>
@@ -695,7 +695,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
               {selectedAlarm.description && (
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
-                  <p className="text-sm text-gray-600 p-3 bg-gray-50 rounded">
+                  <p className="text-xl text-gray-600 p-3 bg-gray-50 rounded">
                     {selectedAlarm.description}
                   </p>
                 </div>
@@ -705,7 +705,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">SLA Status</h3>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center justify-between text-xl">
                     <span>Time Elapsed:</span>
                     <span className={getSLAColor(selectedAlarm.sinceMins, selectedAlarm.slaTargetMins)}>
                       {selectedAlarm.sinceMins}m / {selectedAlarm.slaTargetMins}m
@@ -718,7 +718,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                     />
                   )}
                   {selectedAlarm.slaTargetMins > 0 && selectedAlarm.sinceMins > selectedAlarm.slaTargetMins && (
-                    <div className="text-sm text-red-600 font-medium">
+                    <div className="text-xl text-red-600 font-medium">
                       ⚠️ SLA Breach: {selectedAlarm.sinceMins - selectedAlarm.slaTargetMins} minutes overdue
                     </div>
                   )}
@@ -926,7 +926,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
             </Button>
           </div>
           
-          <div className="text-sm text-gray-600">
+          <div className="text-xl text-gray-600">
             <p>CSV: Raw data suitable for spreadsheet analysis</p>
             <p>PDF: Formatted report with charts and summaries</p>
           </div>
@@ -944,7 +944,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
         <div className="fixed top-4 right-4 w-80 max-h-96 overflow-y-auto z-50">
           <Card className="shadow-lg border-orange-200">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2">
+              <CardTitle className="text-xl flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-orange-500" />
                 SLA Alerts ({notifications.filter(n => !n.acknowledged).length})
               </CardTitle>
@@ -954,14 +954,14 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                 {notifications.slice(0, 3).map((notif) => (
                   <div 
                     key={notif.id} 
-                    className={`p-2 rounded border-l-4 text-xs ${
+                    className={`p-2 rounded border-l-4 text-lg ${
                       notif.type === 'CRITICAL_BREACH' ? 'border-red-500 bg-red-50' :
                       notif.type === 'WARNING' ? 'border-orange-500 bg-orange-50' :
                       'border-yellow-500 bg-yellow-50'
                     }`}
                   >
                     <div className="font-medium">{notif.message}</div>
-                    <div className="text-gray-600 text-xs mt-1">
+                    <div className="text-gray-600 text-lg mt-1">
                       Alarm {notif.alarmId} • {notif.timestamp.toLocaleTimeString()}
                     </div>
                   </div>
@@ -969,7 +969,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
               </div>
               
               {notifications.length > 3 && (
-                <div className="text-xs text-gray-500 mt-2 text-center">
+                <div className="text-lg text-gray-500 mt-2 text-center">
                   +{notifications.length - 3} more alerts
                 </div>
               )}
@@ -977,7 +977,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
               <Button 
                 size="sm" 
                 variant="outline" 
-                className="w-full mt-3 text-xs"
+                className="w-full mt-3 text-lg"
                 onClick={() => setNotifications([])}
               >
                 Clear All

@@ -887,7 +887,7 @@ export default function PatrolPage() {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div className="flex-1">
           <h1 className="mb-1">Patrol Management</h1>
-          <p className="text-gray-600 text-sm">QR Scanning, Real-time Tracking & Proof of Service</p>
+          <p className="text-gray-600 text-xl">QR Scanning, Real-time Tracking & Proof of Service</p>
         </div>
         
         {/* Enhanced Inline Summary Cards */}
@@ -896,7 +896,7 @@ export default function PatrolPage() {
             <Activity className="h-4 w-4 text-green-600" />
             <div>
               <div className="font-bold text-green-700">{metrics.activePatrols}</div>
-              <div className="text-xs text-green-600">Active</div>
+              <div className="text-lg text-green-600">Active</div>
             </div>
           </div>
           
@@ -904,7 +904,7 @@ export default function PatrolPage() {
             <Clock className="h-4 w-4 text-blue-600" />
             <div>
               <div className="font-bold text-blue-700">{metrics.scheduledPatrols}</div>
-              <div className="text-xs text-blue-600">Scheduled</div>
+              <div className="text-lg text-blue-600">Scheduled</div>
             </div>
           </div>
           
@@ -912,7 +912,7 @@ export default function PatrolPage() {
             <Shield className="h-4 w-4 text-purple-600" />
             <div>
               <div className="font-bold text-purple-700">{metrics.completionRate}%</div>
-              <div className="text-xs text-purple-600">Completion</div>
+              <div className="text-lg text-purple-600">Completion</div>
             </div>
           </div>
           
@@ -920,7 +920,7 @@ export default function PatrolPage() {
             <TrendingUp className="h-4 w-4 text-orange-600" />
             <div>
               <div className="font-bold text-orange-700">${metrics.dailyRevenue.toFixed(0)}</div>
-              <div className="text-xs text-orange-600">Daily Revenue</div>
+              <div className="text-lg text-orange-600">Daily Revenue</div>
             </div>
           </div>
           
@@ -928,7 +928,7 @@ export default function PatrolPage() {
             <Route className="h-4 w-4 text-yellow-600" />
             <div>
               <div className="font-bold text-yellow-700">{metrics.routeDeviations}</div>
-              <div className="text-xs text-yellow-600">Deviations</div>
+              <div className="text-lg text-yellow-600">Deviations</div>
             </div>
           </div>
           
@@ -1002,25 +1002,25 @@ export default function PatrolPage() {
                       {/* Patrol Info */}
                       <div>
                         <div className="font-medium text-gray-900">{patrol.patrolId}</div>
-                        <div className="text-sm text-gray-600">{patrol.guardName}</div>
+                        <div className="text-xl text-gray-600">{patrol.guardName}</div>
                         <div className="flex items-center gap-1 mt-1">
                           <Car className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-600">{patrol.vehicle}</span>
+                          <span className="text-lg text-gray-600">{patrol.vehicle}</span>
                         </div>
                       </div>
                       
                       {/* Client & Location */}
                       <div>
-                        <div className="text-sm text-gray-900">{patrol.clientName}</div>
+                        <div className="text-xl text-gray-900">{patrol.clientName}</div>
                         {patrol.currentLocation && (
                           <div className="flex items-center gap-1">
                             <MapPin className="h-3 w-3 text-gray-400" />
-                            <span className="text-xs text-gray-600">{patrol.currentLocation}</span>
+                            <span className="text-lg text-gray-600">{patrol.currentLocation}</span>
                           </div>
                         )}
                         <div className="flex items-center gap-1 mt-1">
                           <Clock className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-600">
+                          <span className="text-lg text-gray-600">
                             {new Date(patrol.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
@@ -1028,14 +1028,14 @@ export default function PatrolPage() {
                       
                       {/* Enhanced Progress & Details */}
                       <div>
-                        <div className="text-sm text-gray-900 mb-1">
+                        <div className="text-xl text-gray-900 mb-1">
                           {patrol.completedCheckpoints}/{patrol.totalCheckpoints} Checkpoints
                         </div>
                         <Progress 
                           value={patrol.totalCheckpoints > 0 ? (patrol.completedCheckpoints / patrol.totalCheckpoints) * 100 : 0} 
                           className="h-2"
                         />
-                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-600">
+                        <div className="flex items-center gap-3 mt-1 text-lg text-gray-600">
                           <div className="flex items-center gap-1">
                             <Building className="h-3 w-3" />
                             <span>{patrol.sites.length} sites</span>
@@ -1052,7 +1052,7 @@ export default function PatrolPage() {
                         {patrol.issuesFound > 0 && (
                           <div className="flex items-center gap-1 mt-1">
                             <AlertTriangle className="h-3 w-3 text-orange-500" />
-                            <span className="text-xs text-orange-600">{patrol.issuesFound} issue{patrol.issuesFound > 1 ? 's' : ''}</span>
+                            <span className="text-lg text-orange-600">{patrol.issuesFound} issue{patrol.issuesFound > 1 ? 's' : ''}</span>
                           </div>
                         )}
                       </div>
@@ -1066,7 +1066,7 @@ export default function PatrolPage() {
                           {patrol.routeDeviation && (
                             <div className="flex items-center gap-1 mt-1">
                               <Route className="h-3 w-3 text-red-500" />
-                              <span className="text-xs text-red-600">Route deviation</span>
+                              <span className="text-lg text-red-600">Route deviation</span>
                             </div>
                           )}
                         </div>
@@ -1086,7 +1086,7 @@ export default function PatrolPage() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="h-8 px-2 text-xs"
+                                className="h-8 px-2 text-lg"
                                 onClick={() => {
                                   const tracking = liveTracking[patrol.id];
                                   if (tracking) {
@@ -1101,7 +1101,7 @@ export default function PatrolPage() {
                               </Button>
                               <Button
                                 size="sm"
-                                className="h-8 px-2 text-xs bg-green-600 hover:bg-green-700"
+                                className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
                                 onClick={() => handleCompletePatrol(patrol)}
                               >
                                 <CheckCircle className="h-3 w-3 mr-1" />
@@ -1112,7 +1112,7 @@ export default function PatrolPage() {
                           {patrol.status === "Scheduled" && (
                             <Button
                               size="sm"
-                              className="h-8 px-2 text-xs bg-green-600 hover:bg-green-700"
+                              className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
                               onClick={() => handleStartPatrol(patrol)}
                             >
                               <Play className="h-3 w-3 mr-1" />
@@ -1123,7 +1123,7 @@ export default function PatrolPage() {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="h-8 px-2 text-xs"
+                              className="h-8 px-2 text-lg"
                               onClick={() => handleGenerateProofOfService(patrol)}
                             >
                               <FileText className="h-3 w-3 mr-1" />
@@ -1199,20 +1199,20 @@ export default function PatrolPage() {
                       <h4 className="font-medium text-gray-900 mb-2">{site.name}</h4>
                       {site.subsites.map((subsite: any) => (
                         <div key={subsite.id} className="ml-4">
-                          <h5 className="text-sm font-medium text-gray-700 mb-2">{subsite.name}</h5>
+                          <h5 className="text-xl font-medium text-gray-700 mb-2">{subsite.name}</h5>
                           <div className="grid gap-2">
                             {subsite.checkpoints.map((checkpoint: any) => (
                               <div key={checkpoint.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                                 <div className="flex-1">
                                   <div className="font-medium">{checkpoint.name}</div>
-                                  <div className="text-sm text-gray-600">QR: {checkpoint.qrCode}</div>
+                                  <div className="text-xl text-gray-600">QR: {checkpoint.qrCode}</div>
                                   {checkpoint.scannedAt && (
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-lg text-gray-500">
                                       Scanned: {new Date(checkpoint.scannedAt).toLocaleString()}
                                     </div>
                                   )}
                                   {checkpoint.issues.length > 0 && (
-                                    <div className="text-xs text-orange-600 mt-1">
+                                    <div className="text-lg text-orange-600 mt-1">
                                       Issues: {checkpoint.issues.join(", ")}
                                     </div>
                                   )}
@@ -1245,17 +1245,17 @@ export default function PatrolPage() {
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                   <QrCode className="h-8 w-8 mx-auto mb-2 text-blue-600" />
                   <div className="font-bold text-2xl">{selectedPatrol.proofOfService.qrScans}</div>
-                  <div className="text-sm text-gray-600">QR Scans</div>
+                  <div className="text-xl text-gray-600">QR Scans</div>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                   <Camera className="h-8 w-8 mx-auto mb-2 text-green-600" />
                   <div className="font-bold text-2xl">{selectedPatrol.proofOfService.photos}</div>
-                  <div className="text-sm text-gray-600">Photos</div>
+                  <div className="text-xl text-gray-600">Photos</div>
                 </div>
                 <div className="text-center p-4 bg-gray-50 rounded-lg">
                   <FileText className="h-8 w-8 mx-auto mb-2 text-purple-600" />
                   <div className="font-bold text-2xl">{selectedPatrol.proofOfService.notes}</div>
-                  <div className="text-sm text-gray-600">Notes</div>
+                  <div className="text-xl text-gray-600">Notes</div>
                 </div>
               </div>
             </div>
@@ -1286,8 +1286,8 @@ export default function PatrolPage() {
                 <div className="w-48 h-48 bg-white border-2 border-gray-300 rounded-lg flex items-center justify-center shadow-inner">
                   <div className="text-center">
                     <QrCode className="h-16 w-16 mx-auto mb-2 text-gray-700" />
-                    <div className="text-sm font-medium text-gray-800">QR Code</div>
-                    <div className="text-xs text-gray-600 mt-1 font-mono bg-gray-100 px-2 py-1 rounded">
+                    <div className="text-xl font-medium text-gray-800">QR Code</div>
+                    <div className="text-lg text-gray-600 mt-1 font-mono bg-gray-100 px-2 py-1 rounded">
                       {selectedCheckpoint.qrCode}
                     </div>
                   </div>
@@ -1298,7 +1298,7 @@ export default function PatrolPage() {
               <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">GPS Coordinates</h4>
-                  <div className="space-y-1 text-sm text-gray-600">
+                  <div className="space-y-1 text-xl text-gray-600">
                     <div className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
                       <span>Lat: {selectedCheckpoint.coordinates?.lat || 'N/A'}</span>
@@ -1312,7 +1312,7 @@ export default function PatrolPage() {
                 
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Verification</h4>
-                  <div className="space-y-1 text-sm text-gray-600">
+                  <div className="space-y-1 text-xl text-gray-600">
                     <div className="flex items-center gap-1">
                       <Wifi className="h-3 w-3" />
                       <span>Range: {selectedCheckpoint.range || 20}m</span>
@@ -1327,8 +1327,8 @@ export default function PatrolPage() {
 
               {selectedCheckpoint.description && (
                 <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                  <h4 className="font-medium text-blue-900 text-sm mb-1">Instructions</h4>
-                  <p className="text-sm text-blue-800">{selectedCheckpoint.description}</p>
+                  <h4 className="font-medium text-blue-900 text-xl mb-1">Instructions</h4>
+                  <p className="text-xl text-blue-800">{selectedCheckpoint.description}</p>
                 </div>
               )}
 
@@ -1460,7 +1460,7 @@ export default function PatrolPage() {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="font-semibold text-gray-900">Patrol Sites & Checkpoints</h3>
-                  <p className="text-sm text-gray-600">Add sites with sub-sites and checkpoints for this patrol</p>
+                  <p className="text-xl text-gray-600">Add sites with sub-sites and checkpoints for this patrol</p>
                 </div>
                 <div className="flex gap-2">
                   <Button 
@@ -1494,11 +1494,11 @@ export default function PatrolPage() {
                           <div className="flex items-center gap-2 mb-2">
                             <Building className="h-4 w-4 text-blue-600" />
                             <h4 className="font-medium text-gray-900">{site.name}</h4>
-                            <Badge variant="outline" className="text-xs">
+                            <Badge variant="outline" className="text-lg">
                               {site.subsites.length} sub-sites
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">{site.address}</p>
+                          <p className="text-xl text-gray-600 mb-2">{site.address}</p>
                           
                           {/* Sub-sites */}
                           <div className="space-y-2">
@@ -1508,26 +1508,26 @@ export default function PatrolPage() {
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2">
                                       <Target className="h-3 w-3 text-green-600" />
-                                      <span className="text-sm font-medium">{subsite.name}</span>
-                                      <Badge variant="outline" className="text-xs bg-green-50">
+                                      <span className="text-xl font-medium">{subsite.name}</span>
+                                      <Badge variant="outline" className="text-lg bg-green-50">
                                         ${subsite.unitPrice}
                                       </Badge>
-                                      <Badge variant="outline" className="text-xs">
+                                      <Badge variant="outline" className="text-lg">
                                         {subsite.checkpoints.length} checkpoints
                                       </Badge>
                                     </div>
-                                    <p className="text-xs text-gray-600 ml-5">{subsite.description}</p>
+                                    <p className="text-lg text-gray-600 ml-5">{subsite.description}</p>
                                     
                                     {/* Checkpoints */}
                                     <div className="ml-5 mt-2 space-y-1">
                                       {subsite.checkpoints.map((checkpoint) => (
-                                        <div key={checkpoint.id} className="flex items-center gap-2 text-xs">
+                                        <div key={checkpoint.id} className="flex items-center gap-2 text-lg">
                                           <Crosshair className="h-3 w-3 text-orange-500" />
                                           <span>{checkpoint.name}</span>
-                                          <Badge variant="outline" className="text-xs bg-orange-50">
+                                          <Badge variant="outline" className="text-lg bg-orange-50">
                                             QR: {checkpoint.qrCode}
                                           </Badge>
-                                          <Badge variant="outline" className="text-xs bg-purple-50">
+                                          <Badge variant="outline" className="text-lg bg-purple-50">
                                             {checkpoint.range}m range
                                           </Badge>
                                           <Button
@@ -1543,7 +1543,7 @@ export default function PatrolPage() {
                                       <Button
                                         size="sm"
                                         variant="ghost"
-                                        className="h-6 text-xs text-blue-600 hover:text-blue-700"
+                                        className="h-6 text-lg text-blue-600 hover:text-blue-700"
                                         onClick={() => handleAddCheckpoint(site.id, subsite.id)}
                                       >
                                         <Plus className="h-3 w-3 mr-1" />
@@ -1557,7 +1557,7 @@ export default function PatrolPage() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="ml-4 h-6 text-xs text-green-600 hover:text-green-700"
+                              className="ml-4 h-6 text-lg text-green-600 hover:text-green-700"
                               onClick={() => handleAddSubSite(site.id)}
                             >
                               <Plus className="h-3 w-3 mr-1" />
@@ -1571,7 +1571,7 @@ export default function PatrolPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleAddSiteToPatrol(site)}
-                            className="text-xs"
+                            className="text-lg"
                             disabled={formData.sites.some(s => s.id === site.id)}
                           >
                             {formData.sites.some(s => s.id === site.id) ? (
@@ -1599,11 +1599,11 @@ export default function PatrolPage() {
                   <h4 className="font-medium text-blue-900 mb-2">Selected Sites for Patrol:</h4>
                   <div className="space-y-2">
                     {formData.sites.map((site) => (
-                      <div key={site.id} className="flex items-center justify-between text-sm">
+                      <div key={site.id} className="flex items-center justify-between text-xl">
                         <div className="flex items-center gap-2">
                           <Building className="h-4 w-4 text-blue-600" />
                           <span>{site.name}</span>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="outline" className="text-lg">
                             {site.subsites.reduce((total: number, subsite: any) => total + subsite.checkpoints.length, 0)} checkpoints
                           </Badge>
                         </div>
@@ -1682,7 +1682,7 @@ export default function PatrolPage() {
             </Button>
           </div>
           
-          <div className="text-sm text-gray-600">
+          <div className="text-xl text-gray-600">
             <p>CSV: Raw patrol data for analysis and billing</p>
             <p>PDF: Client reports with GPS tracks, QR scan proof, and photos</p>
           </div>
@@ -1711,7 +1711,7 @@ export default function PatrolPage() {
               <div className="grid grid-cols-2 gap-6 p-4 bg-gray-50 rounded-lg">
                 <div>
                   <h3 className="font-semibold mb-2">Patrol Summary</h3>
-                  <div className="space-y-1 text-sm">
+                  <div className="space-y-1 text-xl">
                     <div><strong>Patrol ID:</strong> {selectedPatrol.patrolId}</div>
                     <div><strong>Guard:</strong> {selectedPatrol.guardName}</div>
                     <div><strong>Vehicle:</strong> {selectedPatrol.vehicle}</div>
@@ -1721,7 +1721,7 @@ export default function PatrolPage() {
                 
                 <div>
                   <h3 className="font-semibold mb-2">Performance Metrics</h3>
-                  <div className="space-y-1 text-sm">
+                  <div className="space-y-1 text-xl">
                     <div><strong>Duration:</strong> {selectedPatrol.billing.actualHours || 'N/A'}h</div>
                     <div><strong>Completion:</strong> {selectedPatrol.totalCheckpoints > 0 ? Math.round((selectedPatrol.completedCheckpoints / selectedPatrol.totalCheckpoints) * 100) : 0}%</div>
                     <div><strong>QR Scans:</strong> {selectedPatrol.proofOfService.qrScans}</div>
@@ -1740,14 +1740,14 @@ export default function PatrolPage() {
                         <div key={checkpoint.id} className="flex items-center justify-between p-3 border rounded">
                           <div>
                             <div className="font-medium">{checkpoint.name}</div>
-                            <div className="text-sm text-gray-600">{site.name} - {subsite.name}</div>
+                            <div className="text-xl text-gray-600">{site.name} - {subsite.name}</div>
                           </div>
-                          <div className="text-right text-sm">
+                          <div className="text-right text-xl">
                             <div className={checkpoint.status === 'completed' ? 'text-green-600' : 'text-gray-500'}>
                               {checkpoint.status === 'completed' ? '✅ Completed' : '⏳ Pending'}
                             </div>
                             {checkpoint.scannedAt && (
-                              <div className="text-xs text-gray-500">
+                              <div className="text-lg text-gray-500">
                                 {new Date(checkpoint.scannedAt).toLocaleString()}
                               </div>
                             )}
@@ -1764,24 +1764,24 @@ export default function PatrolPage() {
                 <div className="text-center p-4 border rounded-lg">
                   <QrCode className="h-8 w-8 mx-auto mb-2 text-blue-600" />
                   <div className="font-bold text-xl">{selectedPatrol.proofOfService.qrScans}</div>
-                  <div className="text-sm text-gray-600">QR Code Scans</div>
+                  <div className="text-xl text-gray-600">QR Code Scans</div>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
                   <Camera className="h-8 w-8 mx-auto mb-2 text-green-600" />
                   <div className="font-bold text-xl">{selectedPatrol.proofOfService.photos}</div>
-                  <div className="text-sm text-gray-600">Photo Evidence</div>
+                  <div className="text-xl text-gray-600">Photo Evidence</div>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
                   <FileText className="h-8 w-8 mx-auto mb-2 text-purple-600" />
                   <div className="font-bold text-xl">{selectedPatrol.proofOfService.notes}</div>
-                  <div className="text-sm text-gray-600">Incident Notes</div>
+                  <div className="text-xl text-gray-600">Incident Notes</div>
                 </div>
               </div>
 
               {/* Billing Information */}
               <div className="p-4 bg-blue-50 rounded-lg">
                 <h3 className="font-semibold mb-2">Billing Summary</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="grid grid-cols-2 gap-4 text-xl">
                   <div><strong>Hourly Rate:</strong> ${selectedPatrol.billing.hourlyRate}/hr</div>
                   <div><strong>Total Hours:</strong> {selectedPatrol.billing.actualHours || selectedPatrol.billing.estimatedHours}h</div>
                   <div><strong>Total Amount:</strong> ${selectedPatrol.billing.actualHours ? calculatePatrolRevenue(selectedPatrol).toFixed(2) : (selectedPatrol.billing.estimatedHours * selectedPatrol.billing.hourlyRate).toFixed(2)}</div>
@@ -2066,7 +2066,7 @@ export default function PatrolPage() {
                     className="pl-10"
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">GPS tolerance for QR scan verification</p>
+                <p className="text-lg text-gray-500 mt-1">GPS tolerance for QR scan verification</p>
               </div>
               
               <div>
@@ -2100,12 +2100,12 @@ export default function PatrolPage() {
               <div className="p-4 bg-gray-50 rounded-lg border">
                 <div className="flex items-center gap-2 mb-2">
                   <QrCode className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium">Generated QR Code:</span>
+                  <span className="text-xl font-medium">Generated QR Code:</span>
                 </div>
-                <div className="text-sm text-gray-600 font-mono bg-white p-2 rounded border">
+                <div className="text-xl text-gray-600 font-mono bg-white p-2 rounded border">
                   QR-{selectedSite?.name.substring(0,3).toUpperCase() || "XXX"}-{checkpointFormData.name.substring(0,2).toUpperCase() || "XX"}-{Date.now().toString().slice(-3)}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">This QR code will be auto-generated and linked to GPS coordinates</p>
+                <p className="text-lg text-gray-500 mt-1">This QR code will be auto-generated and linked to GPS coordinates</p>
               </div>
             )}
           </div>
