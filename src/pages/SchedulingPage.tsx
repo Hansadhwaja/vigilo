@@ -1265,68 +1265,100 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
                   </Card>
                   )}
 
-        {/* Selected Date Summary Bar */}
-        {viewMode === "weekly" && (
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
-          <CardContent className="p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4 text-blue-600" />
-                  <h3 className="font-medium text-gray-900">
-                    {selectedDate.toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      year: 'numeric',
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
-                  </h3>
-                </div>
-                <div className="flex items-center gap-3 text-lg">
-                  <div className="flex items-center gap-1">
-                    <User className="h-4 w-4 text-blue-500" />
-                    <span className="text-gray-600">
-                      {getFilteredAssignments(selectedDate).length} assignments
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="h-4 w-4 text-green-500" />
-                    {/* <span className="text-gray-600">
-                      {getFilteredAssignments(selectedDate).filter(a => a.StaticGuards.status === 'Active').length} active
-                    </span> */}
-                  </div>
-                </div>
+       {/* Selected Date Summary Bar */}
+{/* Selected Date Summary Bar */}
+{viewMode === "weekly" && (
+  <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+    <CardContent className="p-4">
+      {/* Row 1: Date and Quick Stats */}
+      <div className="flex items-center justify-between mb-3 pb-3 border-b border-blue-200">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <CalendarIcon className="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 text-base leading-tight">
+              {selectedDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'short', 
+                day: 'numeric' 
+              })}
+            </h3>
+            <p className="text-xs text-gray-500">
+              {selectedDate.getFullYear()}
+            </p>
+          </div>
+        </div>
+        
+        {/* Quick Stats */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-blue-200">
+            <User className="h-4 w-4 text-blue-600" />
+            <div className="text-right">
+              <div className="text-lg font-bold text-gray-900">
+                {getFilteredAssignments(selectedDate).length}
               </div>
-              
-              {getFilteredAssignments(selectedDate).length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {getFilteredAssignments(selectedDate).slice(0, 3).map((assignment: { role: string; name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; time: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; }, idx: React.Key | null | undefined) => (
-                    <div
-                      key={idx}
-                      className={`
-                        inline-flex items-center gap-1 px-2 py-1 rounded-full text-lg cursor-pointer transition-all
-                        ${assignment.role === 'Patrol' 
-                          ? 'bg-orange-100 text-orange-800 hover:bg-orange-200' 
-                          : 'bg-green-100 text-green-800 hover:bg-green-200'
-                        }
-                      `}
-                      onClick={() => handleEditAssignment(assignment)}
-                    >
-                      <User className="h-3 w-3" />
-                      {assignment.name} • {assignment.time}
-                    </div>
-                  ))}
-                  {getFilteredAssignments(selectedDate).length > 3 && (
-                    <div className="inline-flex items-center px-2 py-1 rounded-full text-lg bg-gray-100 text-gray-600">
-                      +{getFilteredAssignments(selectedDate).length - 3} more
-                    </div>
-                  )}
-                </div>
-              )}
+              <div className="text-xs text-gray-500">Total</div>
             </div>
-          </CardContent>
-        </Card>
-        )}
+          </div>
+          
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-green-200">
+            <Clock className="h-4 w-4 text-green-600" />
+            <div className="text-right">
+              <div className="text-lg font-bold text-gray-900">
+                {getFilteredAssignments(selectedDate).filter(a => a.StaticGuards?.status === 'Active').length}
+              </div>
+              <div className="text-xs text-gray-500">Active</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Row 2: Assignment Pills */}
+      {getFilteredAssignments(selectedDate).length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {getFilteredAssignments(selectedDate).slice(0, 4).map((assignment: { 
+            role: string; 
+            name: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; 
+            time: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; 
+          }, idx: React.Key | null | undefined) => (
+            <div
+              key={idx}
+              className={`
+                inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all shadow-sm
+                ${assignment.role === 'Patrol' 
+                  ? 'bg-orange-100 text-orange-900 hover:bg-orange-200 border border-orange-300' 
+                  : 'bg-green-100 text-green-900 hover:bg-green-200 border border-green-300'
+                }
+              `}
+              onClick={() => handleEditAssignment(assignment)}
+            >
+              <div className={`p-1 rounded ${assignment.role === 'Patrol' ? 'bg-orange-200' : 'bg-green-200'}`}>
+                <User className="h-3 w-3" />
+              </div>
+              <span className="font-semibold">{assignment.name}</span>
+              <span className="opacity-50">•</span>
+              <Clock className="h-3 w-3 opacity-70" />
+              <span className="opacity-90">{assignment.time}</span>
+            </div>
+          ))}
+          {getFilteredAssignments(selectedDate).length > 4 && (
+            <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-white border-2 border-dashed border-gray-300 text-gray-600">
+              <span className="font-semibold">+{getFilteredAssignments(selectedDate).length - 4}</span>
+              <span>more assignments</span>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="text-center py-2">
+          <p className="text-sm text-gray-500">No assignments scheduled for this date</p>
+        </div>
+      )}
+    </CardContent>
+  </Card>
+)}
+
+
       </div>
 
       {/* Alerts Dialog */}
