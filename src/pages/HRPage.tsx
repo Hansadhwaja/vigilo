@@ -120,12 +120,12 @@ export default function HRPage() {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
       if (currentPage !== 1) {
-        setCurrentPage(1); // Reset to first page only when search changes, not on mount
+        setCurrentPage(1);
       }
-    }, 500); // 500ms delay
+    }, 500);
 
     return () => clearTimeout(timer);
-  }, [searchTerm]); // Removed currentPage from dependencies
+  }, [searchTerm]);
 
   // Fetch guards from API with pagination and search
   const { data: guardsResponse, isLoading, isError, error, isFetching } = useGetAllGuardsQuery(
@@ -135,7 +135,6 @@ export default function HRPage() {
       search: debouncedSearch || undefined,
     },
     {
-      // Refetch when any parameter changes
       refetchOnMountOrArgChange: true,
     }
   );
@@ -157,9 +156,7 @@ export default function HRPage() {
 
   // Calculate metrics
   const totalGuards = apiPagination?.total || guards.length;
-  // Note: getAllGuards doesn't return latestStatic, so we can't calculate active guards accurately
-  // You would need a separate endpoint or different logic
-  const activeGuards = guards.length; // Placeholder - update when you have the data
+  const activeGuards = guards.length;
   const pendingCompliance = compliance.filter(c => ["Pending", "Overdue"].includes(c.status)).length;
 
   // Use API pagination
@@ -175,7 +172,6 @@ export default function HRPage() {
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
-    // Page reset is handled in the useEffect debounce
   };
 
   const getComplianceStatusColor = (status: string) => {
@@ -217,145 +213,197 @@ export default function HRPage() {
   };
 
   return (
-    <div className="space-y-3">
-      {/* Compact Header with Inline Summary */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div className="flex-1">
-          <h1 className="mb-1">HR & Compliance</h1>
-          <p className="text-gray-600 text-xl">Manage guards, assignments & compliance</p>
-        </div>
-        
-        {/* Inline Summary Badges */}
-        <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
-            <User className="h-4 w-4 text-blue-600" />
-            <div>
-              <div className="font-bold text-blue-700">{totalGuards}</div>
-              <div className="text-lg text-blue-600">Total</div>
-            </div>
+    <div className="h-screen flex flex-col overflow-hidden">
+      {/* FIXED HEADER - No scrolling */}
+      <div className="flex-shrink-0 space-y-3 pb-3">
+        {/* Compact Header with Inline Summary */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div className="flex-1">
+            <h1 className="mb-1">HR & Compliance</h1>
+            <p className="text-gray-600 text-xl">Manage guards, assignments & compliance</p>
           </div>
           
-          <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
-            <Shield className="h-4 w-4 text-green-600" />
-            <div>
-              <div className="font-bold text-green-700">{activeGuards}</div>
-              <div className="text-lg text-green-600">Guards</div>
+          {/* Inline Summary Badges */}
+          <div className="flex flex-wrap gap-3">
+            <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
+              <User className="h-4 w-4 text-blue-600" />
+              <div>
+                <div className="font-bold text-blue-700">{totalGuards}</div>
+                <div className="text-lg text-blue-600">Total</div>
+              </div>
             </div>
+            
+            <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+              <Shield className="h-4 w-4 text-green-600" />
+              <div>
+                <div className="font-bold text-green-700">{activeGuards}</div>
+                <div className="text-lg text-green-600">Guards</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 bg-orange-50 px-3 py-2 rounded-lg border border-orange-200">
+              <AlertCircle className="h-4 w-4 text-orange-600" />
+              <div>
+                <div className="font-bold text-orange-700">{pendingCompliance}</div>
+                <div className="text-lg text-orange-600">Issues</div>
+              </div>
+            </div>
+            
+            <Button onClick={handleAddGuard} className="flex items-center gap-2 ml-2">
+              <Plus className="h-4 w-4" />
+              Add Guard
+            </Button>
           </div>
-          
-          <div className="flex items-center gap-2 bg-orange-50 px-3 py-2 rounded-lg border border-orange-200">
-            <AlertCircle className="h-4 w-4 text-orange-600" />
-            <div>
-              <div className="font-bold text-orange-700">{pendingCompliance}</div>
-              <div className="text-lg text-orange-600">Issues</div>
-            </div>
-          </div>
-          
-          <Button onClick={handleAddGuard} className="flex items-center gap-2 ml-2">
-            <Plus className="h-4 w-4" />
-            Add Guard
-          </Button>
-        </div>
-      </div>
-
-      {/* Tabs for HR and Compliance */}
-      <Tabs defaultValue="guards" className="space-y-3">
-        <TabsList>
-          <TabsTrigger value="guards">Guard Management</TabsTrigger>
-          <TabsTrigger value="compliance">Compliance Tracking</TabsTrigger>
-        </TabsList>
-
-        {/* Guards Tab */}
-        <TabsContent value="guards">
-          <Card>
-            <CardHeader className="py-1"> 
-  <div className="flex items-center justify-between ">
-    
-    {/* LEFT SIDE = Heading + Filters */}
-    <div className="flex items-center gap-4 mt-2 ">
-      {/* Heading */}
-      <CardTitle className="text-lg font-semibold">Guard Directory</CardTitle>
-
-      {/* Filters Row */}
-      <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border">
-        <Filter className="h-4 w-4 text-gray-500" />
-
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
-          <Input
-            placeholder="Search guards...."
-            value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
-            className="pl-9 w-lg h-auto"
-          />
-          {isFetching && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-r-transparent"></div>
-            </div>
-          )}
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setSearchTerm("");
-            setDebouncedSearch("");
-            setCurrentPage(1);
-          }}
-          className="h-8"
-        >
-          Clear
-        </Button>
-      </div>
-    </div>
+        {/* Tabs Header - Fixed */}
+        <Tabs defaultValue="guards" className="space-y-3">
+          <TabsList>
+            <TabsTrigger value="guards">Guard Management</TabsTrigger>
+            <TabsTrigger value="compliance">Compliance Tracking</TabsTrigger>
+          </TabsList>
 
-    {/* RIGHT SIDE EMPTY FOR NOW (optional) */}
-    <div></div>
-  </div>
-</CardHeader>
-
-<CardContent className="pt-0">
-
-              {/* Loading State */}
-              {isLoading && (
-                <div className="text-center py-8">
-                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-                  <p className="mt-2 text-gray-600">Loading guards...</p>
-                </div>
-              )}
-
-              {/* Error State */}
-              {isError && (
-                <div className="text-center py-8">
-                  <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-2" />
-                  <p className="text-red-600">Failed to load guards</p>
-                  <p className="text-xl text-gray-500 mt-1">
-                    {error && 'data' in error ? JSON.stringify(error.data) : 'An error occurred'}
-                  </p>
-                </div>
-              )}
-
-              {/* Empty State */}
-              {!isLoading && !isError && guards.length === 0 && (
-                <div className="text-center py-8">
-                  <User className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600">No guards found</p>
-                  <p className="text-xl text-gray-500 mt-1">
-                    {searchTerm ? "Try adjusting your search" : "Add your first guard to get started"}
-                  </p>
-                </div>
-              )}
-
-              {/* Guard List */}
-              {!isLoading && !isError && guards.length > 0 && (
-                <>
-                  {/* Guard List Table */}
-                {/* Guard List Table */}
-                <Card>
+          {/* Guards Tab */}
+          <TabsContent value="guards" className="m-0">
+            <Card>
+              <CardHeader className="py-1"> 
+                <div className="flex items-center justify-between">
                   
+                  {/* LEFT SIDE = Heading + Filters */}
+                  <div className="flex items-center gap-4 mt-2">
+                    {/* Heading */}
+                    <CardTitle className="text-lg font-semibold">Guard Directory</CardTitle>
 
-                  <CardContent className="p-0">
+                    {/* Filters Row */}
+                    <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border">
+                      <Filter className="h-4 w-4 text-gray-500" />
+
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
+                        <Input
+                          placeholder="Search guards...."
+                          value={searchTerm}
+                          onChange={(e) => handleSearch(e.target.value)}
+                          className="pl-9 w-lg h-auto"
+                        />
+                        {isFetching && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-r-transparent"></div>
+                          </div>
+                        )}
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSearchTerm("");
+                          setDebouncedSearch("");
+                          setCurrentPage(1);
+                        }}
+                        className="h-8"
+                      >
+                        Clear
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div></div>
+                </div>
+              </CardHeader>
+            </Card>
+          </TabsContent>
+
+          {/* Compliance Tab Header */}
+          <TabsContent value="compliance" className="m-0">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">Compliance Tracking</CardTitle>
+                
+                {/* Compact Filters */}
+                <div className="flex flex-wrap gap-2 items-center bg-gray-50 p-3 rounded-lg border">
+                  <Filter className="h-4 w-4 text-gray-500" />
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
+                    <Input
+                      placeholder="Search compliance..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9 w-40 h-8"
+                    />
+                  </div>
+                  <Select value={complianceFilter} onValueChange={setComplianceFilter}>
+                    <SelectTrigger className="w-36 h-8">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="scheduled">Scheduled</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="overdue">Overdue</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      setComplianceFilter("all");
+                      setSearchTerm("");
+                    }}
+                    className="h-8"
+                  >
+                    Clear
+                  </Button>
+                </div>
+              </CardHeader>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      {/* SCROLLABLE CONTENT AREA */}
+      <div className="flex-1 overflow-y-auto">
+        <Tabs defaultValue="guards">
+          {/* Guards Tab Content - Scrollable */}
+          <TabsContent value="guards">
+            <Card>
+              <CardContent className="pt-4">
+
+                {/* Loading State */}
+                {isLoading && (
+                  <div className="text-center py-8">
+                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
+                    <p className="mt-2 text-gray-600">Loading guards...</p>
+                  </div>
+                )}
+
+                {/* Error State */}
+                {isError && (
+                  <div className="text-center py-8">
+                    <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-2" />
+                    <p className="text-red-600">Failed to load guards</p>
+                    <p className="text-xl text-gray-500 mt-1">
+                      {error && 'data' in error ? JSON.stringify(error.data) : 'An error occurred'}
+                    </p>
+                  </div>
+                )}
+
+                {/* Empty State */}
+                {!isLoading && !isError && guards.length === 0 && (
+                  <div className="text-center py-8">
+                    <User className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-600">No guards found</p>
+                    <p className="text-xl text-gray-500 mt-1">
+                      {searchTerm ? "Try adjusting your search" : "Add your first guard to get started"}
+                    </p>
+                  </div>
+                )}
+
+                {/* Guard List */}
+                {!isLoading && !isError && guards.length > 0 && (
+                  <>
+                    {/* Guard List Table */}
                     <div className="border border-gray-200 rounded-lg overflow-hidden">
                       <Table>
                         <TableHeader>
@@ -386,7 +434,6 @@ export default function HRPage() {
                               {/* Email */}
                               <TableCell className="py-4">
                                 <div className="flex items-center gap-2 truncate max-w-52">
-                                  
                                   <span className="text-lg text-gray-700 truncate">
                                     {guard.email}
                                   </span>
@@ -396,7 +443,6 @@ export default function HRPage() {
                               {/* Mobile */}
                               <TableCell className="py-4">
                                 <div className="flex items-center gap-2 truncate max-w-32">
-                                  
                                   <span className="text-lg text-gray-700 truncate">
                                     {guard.mobile}
                                   </span>
@@ -428,22 +474,6 @@ export default function HRPage() {
                                   >
                                     <Eye className="h-4 w-4" />
                                   </Button>
-
-                                  {/* <Button 
-                                    size="sm" 
-                                    variant="ghost" 
-                                    className="h-9 w-9 p-0 text-gray-700 hover:text-gray-900 hover:bg-gray-100"
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-
-                                  <Button 
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-gray-100"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button> */}
                                 </div>
                               </TableCell>
 
@@ -453,169 +483,116 @@ export default function HRPage() {
                       </Table>
                     </div>
 
-                    {guards.length === 0 && (
-                      <div className="text-center py-12 text-gray-500">
-                        <Users className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <h3 className="font-medium mb-2">No guards found</h3>
-                        <p className="text-xl">Try adjusting your search or filter criteria</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-
-
-
-
-
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="flex justify-center mt-4">
-                      <Pagination>
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (currentPage > 1) {
-                                  setCurrentPage(prev => prev - 1);
-                                }
-                              }}
-                              className={currentPage === 1 ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                            />
-                          </PaginationItem>
-                          
-                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                            <PaginationItem key={page}>
-                              <PaginationLink
+                    {/* Pagination */}
+                    {totalPages > 1 && (
+                      <div className="flex justify-center mt-4">
+                        <Pagination>
+                          <PaginationContent>
+                            <PaginationItem>
+                              <PaginationPrevious 
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  setCurrentPage(page);
+                                  if (currentPage > 1) {
+                                    setCurrentPage(prev => prev - 1);
+                                  }
                                 }}
-                                isActive={page === currentPage}
-                                className="cursor-pointer"
-                              >
-                                {page}
-                              </PaginationLink>
+                                className={currentPage === 1 ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                              />
                             </PaginationItem>
-                          ))}
-                          
-                          <PaginationItem>
-                            <PaginationNext 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (currentPage < totalPages) {
-                                  setCurrentPage(prev => prev + 1);
-                                }
-                              }}
-                              className={currentPage === totalPages ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                            />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
-                    </div>
-                  )}
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                            
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                              <PaginationItem key={page}>
+                                <PaginationLink
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setCurrentPage(page);
+                                  }}
+                                  isActive={page === currentPage}
+                                  className="cursor-pointer"
+                                >
+                                  {page}
+                                </PaginationLink>
+                              </PaginationItem>
+                            ))}
+                            
+                            <PaginationItem>
+                              <PaginationNext 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  if (currentPage < totalPages) {
+                                    setCurrentPage(prev => prev + 1);
+                                  }
+                                }}
+                                className={currentPage === totalPages ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                              />
+                            </PaginationItem>
+                          </PaginationContent>
+                        </Pagination>
+                      </div>
+                    )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {/* Compliance Tab */}
-        <TabsContent value="compliance">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Compliance Tracking</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {/* Compact Filters */}
-              <div className="flex flex-wrap gap-2 items-center mb-4 bg-gray-50 p-3 rounded-lg border">
-                <Filter className="h-4 w-4 text-gray-500" />
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
-                  <Input
-                    placeholder="Search compliance..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9 w-40 h-8"
-                  />
-                </div>
-                <Select value={complianceFilter} onValueChange={setComplianceFilter}>
-                  <SelectTrigger className="w-36 h-8">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="scheduled">Scheduled</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="overdue">Overdue</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    setComplianceFilter("all");
-                    setSearchTerm("");
-                  }}
-                  className="h-8"
-                >
-                  Clear
-                </Button>
-              </div>
-
-              {/* Compliance Table */}
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="text-lg">Guard</TableHead>
-                      <TableHead className="text-lg">Type</TableHead>
-                      <TableHead className="text-lg">Description</TableHead>
-                      <TableHead className="text-lg">Due Date</TableHead>
-                      <TableHead className="text-lg">Priority</TableHead>
-                      <TableHead className="text-lg">Status</TableHead>
-                      <TableHead className="text-lg text-center">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCompliance.map((item) => (
-                      <TableRow key={item.id} className="hover:bg-gray-50">
-                        <TableCell>
-                          <div>
-                            <div className="text-xl font-medium">{item.guardName}</div>
-                            <div className="text-lg text-gray-500">{item.guardId}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-xl">{item.type}</TableCell>
-                        <TableCell className="text-xl text-gray-600">{item.description}</TableCell>
-                        <TableCell className="text-xl">{item.dueDate}</TableCell>
-                        <TableCell>
-                          <Badge className={getPriorityColor(item.priority)}>
-                            {item.priority}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={getComplianceStatusColor(item.status)}>
-                            {item.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center justify-center gap-1">
-                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </TableCell>
+          {/* Compliance Tab Content - Scrollable */}
+          <TabsContent value="compliance">
+            <Card>
+              <CardContent className="pt-4">
+                {/* Compliance Table */}
+                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="text-lg">Guard</TableHead>
+                        <TableHead className="text-lg">Type</TableHead>
+                        <TableHead className="text-lg">Description</TableHead>
+                        <TableHead className="text-lg">Due Date</TableHead>
+                        <TableHead className="text-lg">Priority</TableHead>
+                        <TableHead className="text-lg">Status</TableHead>
+                        <TableHead className="text-lg text-center">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredCompliance.map((item) => (
+                        <TableRow key={item.id} className="hover:bg-gray-50">
+                          <TableCell>
+                            <div>
+                              <div className="text-xl font-medium">{item.guardName}</div>
+                              <div className="text-lg text-gray-500">{item.guardId}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xl">{item.type}</TableCell>
+                          <TableCell className="text-xl text-gray-600">{item.description}</TableCell>
+                          <TableCell className="text-xl">{item.dueDate}</TableCell>
+                          <TableCell>
+                            <Badge className={getPriorityColor(item.priority)}>
+                              {item.priority}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={getComplianceStatusColor(item.status)}>
+                              {item.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center justify-center gap-1">
+                              <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Add Guard Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
@@ -627,58 +604,58 @@ export default function HRPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4">
-  <div className="space-y-1">
-    <Label htmlFor="guardName">Full Name</Label>
-    <Input
-      id="guardName"
-      placeholder="Enter guard name"
-      value={formData.name}
-      onChange={(e) => handleChange("name", e.target.value)}
-    />
-  </div>
+            <div className="space-y-1">
+              <Label htmlFor="guardName">Full Name</Label>
+              <Input
+                id="guardName"
+                placeholder="Enter guard name"
+                value={formData.name}
+                onChange={(e) => handleChange("name", e.target.value)}
+              />
+            </div>
 
-  <div className="space-y-1">
-    <Label htmlFor="guardPhone">Phone</Label>
-    <Input
-      id="guardPhone"
-      placeholder="+1 555-0123"
-      value={formData.mobile}
-      onChange={(e) => handleChange("mobile", e.target.value)}
-    />
-  </div>
+            <div className="space-y-1">
+              <Label htmlFor="guardPhone">Phone</Label>
+              <Input
+                id="guardPhone"
+                placeholder="+1 555-0123"
+                value={formData.mobile}
+                onChange={(e) => handleChange("mobile", e.target.value)}
+              />
+            </div>
 
-  <div className="space-y-1">
-    <Label htmlFor="guardEmail">Email</Label>
-    <Input
-      id="guardEmail"
-      type="email"
-      placeholder="guard@vigilo.com"
-      value={formData.email}
-      onChange={(e) => handleChange("email", e.target.value)}
-    />
-  </div>
+            <div className="space-y-1">
+              <Label htmlFor="guardEmail">Email</Label>
+              <Input
+                id="guardEmail"
+                type="email"
+                placeholder="guard@vigilo.com"
+                value={formData.email}
+                onChange={(e) => handleChange("email", e.target.value)}
+              />
+            </div>
 
-  <div className="space-y-1">
-    <Label htmlFor="guardPassword">Password</Label>
-    <Input
-      id="guardPassword"
-      type="password"
-      placeholder="Enter password"
-      value={formData.password}
-      onChange={(e) => handleChange("password", e.target.value)}
-    />
-  </div>
+            <div className="space-y-1">
+              <Label htmlFor="guardPassword">Password</Label>
+              <Input
+                id="guardPassword"
+                type="password"
+                placeholder="Enter password"
+                value={formData.password}
+                onChange={(e) => handleChange("password", e.target.value)}
+              />
+            </div>
 
-  <div className="space-y-1">
-    <Label htmlFor="guardAddress">Address</Label>
-    <Input
-      id="guardAddress"
-      placeholder="Enter address"
-      value={formData.address}
-      onChange={(e) => handleChange("address", e.target.value)}
-    />
-  </div>
-</div>
+            <div className="space-y-1">
+              <Label htmlFor="guardAddress">Address</Label>
+              <Input
+                id="guardAddress"
+                placeholder="Enter address"
+                value={formData.address}
+                onChange={(e) => handleChange("address", e.target.value)}
+              />
+            </div>
+          </div>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
               Cancel

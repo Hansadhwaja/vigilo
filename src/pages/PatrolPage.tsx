@@ -521,7 +521,7 @@ export default function PatrolPage() {
     return matchesStatus && matchesSearch;
   });
 
-  const handleCreatePatrol = () => {
+  const handleCreatePatrol = () => { 
     setFormData({
       patrolId: `P-2024-${String(patrols.length + 1).padStart(3, '0')}`,
       guardId: "",
