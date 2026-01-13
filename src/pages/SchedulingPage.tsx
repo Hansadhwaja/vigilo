@@ -317,6 +317,7 @@ const handleCreateSchedule = async () => {
        { time: "22:00", label: "10 pm" },
        { time: "00:00", label: "12 am" },
        { time: "02:00", label: "2 am" },
+      { time: "04:00", label: "4 am" },
      ];
 
      const organizedShifts = useMemo(() => {

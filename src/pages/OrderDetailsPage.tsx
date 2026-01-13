@@ -99,7 +99,7 @@ export default function OrderDetailsPage() {
     if (!order) return;
 
     // Check if order can be edited
-    if (order.status === "complete" || order.status === "cancelled") {
+    if (order.status === "completed" || order.status === "cancelled") {
       toast.error("Cannot edit completed or cancelled orders");
       return;
     }
@@ -224,7 +224,7 @@ export default function OrderDetailsPage() {
               <Button 
                 variant="outline"
                 onClick={handleEditClick}
-                disabled={order.status === "complete" || order.status === "cancelled"}
+                disabled={order.status === "completed" || order.status === "cancelled"}
                 className="flex items-center gap-2"
               >
                 <Edit className="h-4 w-4" />
