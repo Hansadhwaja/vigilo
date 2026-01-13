@@ -1,12 +1,16 @@
-import React from "react";
-import { ArrowLeft, MapPin, Clock, User, Camera, MessageSquare, FileText, Badge as BadgeIcon } from "lucide-react";
+import React, { useState } from "react";
+import { ArrowLeft, MapPin, Clock, User, Camera, MessageSquare, FileText, Badge as BadgeIcon, Edit, Save, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import { Separator } from "../components/ui/separator";
+import { Input } from "../components/ui/input";
+import { Textarea } from "../components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { useNavigate, useParams } from "react-router-dom";
-import { useGetOrderByIdQuery } from "../apis/ordersApi"; // <-- make sure this exists
+import { useGetOrderByIdQuery, useEditOrderMutation } from "../apis/ordersApi";
+import { toast } from "react-hot-toast";
 
 // small date/time helpers (local)
 const formatDate = (iso?: string) => {
@@ -22,9 +26,17 @@ const formatDate = (iso?: string) => {
   }
 };
 
+const formatDateForInput = (iso?: string) => {
+  if (!iso) return "";
+  try {
+    return new Date(iso).toISOString().split('T')[0];
+  } catch {
+    return "";
+  }
+};
+
 const formatTime = (isoOrTime?: string) => {
   if (!isoOrTime) return "—";
-  // if it's an ISO string, convert; otherwise parse as time string
   try {
     const d = new Date(isoOrTime);
     if (!isNaN(d.getTime())) {
@@ -38,8 +50,10 @@ const getStatusColor = (status: string) => {
   switch ((status || "").toLowerCase()) {
     case "pending":
       return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case "upcoming":
+    case "ongoing":
       return "bg-blue-100 text-blue-800 border-blue-200";
+    case "upcoming":
+      return "bg-purple-100 text-purple-800 border-purple-200";
     case "completed":
       return "bg-green-100 text-green-800 border-green-200";
     case "cancelled":
@@ -54,15 +68,108 @@ export default function OrderDetailsPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
+  // ===== STATE FOR EDIT MODE =====
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    serviceType: "",
+    locationName: "",
+    locationAddress: "",
+    siteServiceLat: "",
+    siteServiceLng: "",
+    guardsRequired: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    startTime: "",
+    endTime: "",
+  });
+
   const { data: orderResponse, isLoading, isError } = useGetOrderByIdQuery(id || "", {
     skip: !id,
   });
 
-  // your API shape: { data: { ...order } } or maybe direct — check and adapt below
-  // handle both common shapes:
+  const [editOrder, { isLoading: isEditing }] = useEditOrderMutation();
+
   const order = orderResponse?.data ?? orderResponse ?? null;
 
-  const onBack = () => navigate("/clients"); // or '/orders' depending where you want to go
+  const onBack = () => navigate("/clients");
+
+  // ===== EDIT MODE FUNCTIONS =====
+  const handleEditClick = () => {
+    if (!order) return;
+
+    // Check if order can be edited
+    if (order.status === "complete" || order.status === "cancelled") {
+      toast.error("Cannot edit completed or cancelled orders");
+      return;
+    }
+
+    // Populate form with current data
+    setEditFormData({
+      serviceType: order.serviceType || "",
+      locationName: order.locationName || "",
+      locationAddress: order.locationAddress || "",
+      siteServiceLat: order.siteService?.coordinates?.[1]?.toString() || "",
+      siteServiceLng: order.siteService?.coordinates?.[0]?.toString() || "",
+      guardsRequired: order.guardsRequired?.toString() || "",
+      description: order.description || "",
+      startDate: formatDateForInput(order.startDate),
+      endDate: formatDateForInput(order.endDate),
+      startTime: order.startTime || "",
+      endTime: order.endTime || "",
+    });
+
+    setIsEditMode(true);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditMode(false);
+  };
+
+  const handleFormChange = (field: string, value: string) => {
+    setEditFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSaveEdit = async () => {
+    if (!order) return;
+
+    try {
+      // Build the payload
+      const payload: any = {};
+
+      if (editFormData.serviceType) payload.serviceType = editFormData.serviceType;
+      if (editFormData.locationName) payload.locationName = editFormData.locationName;
+      if (editFormData.locationAddress) payload.locationAddress = editFormData.locationAddress;
+      if (editFormData.guardsRequired) payload.guardsRequired = parseInt(editFormData.guardsRequired);
+      if (editFormData.description) payload.description = editFormData.description;
+      if (editFormData.startDate) payload.startDate = editFormData.startDate;
+      if (editFormData.endDate) payload.endDate = editFormData.endDate;
+      if (editFormData.startTime) payload.startTime = editFormData.startTime;
+      if (editFormData.endTime) payload.endTime = editFormData.endTime;
+
+      // Handle coordinates
+      if (editFormData.siteServiceLat && editFormData.siteServiceLng) {
+        payload.siteService = {
+          lat: parseFloat(editFormData.siteServiceLat),
+          lng: parseFloat(editFormData.siteServiceLng)
+        };
+      }
+
+      await editOrder({
+        id: order.id,
+        body: payload
+      }).unwrap();
+
+      toast.success("Order updated successfully");
+      setIsEditMode(false);
+    } catch (err: any) {
+      console.error("Failed to update order:", err);
+      toast.error(err?.data?.message || "Failed to update order");
+    }
+  };
 
   if (!order && !isLoading) {
     return (
@@ -110,11 +217,49 @@ export default function OrderDetailsPage() {
           <p className="text-gray-600 mt-1">Full order information including location and requirements</p>
         </div>
 
+        {/* ===== EDIT BUTTONS ===== */}
         <div className="flex gap-2">
-          <Button variant="outline">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Add Note
-          </Button>
+          {!isEditMode ? (
+            <>
+              <Button 
+                variant="outline"
+                onClick={handleEditClick}
+                disabled={order.status === "complete" || order.status === "cancelled"}
+                className="flex items-center gap-2"
+              >
+                <Edit className="h-4 w-4" />
+                Edit Order
+              </Button>
+              <Button variant="outline">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Add Note
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button 
+                onClick={handleSaveEdit}
+                disabled={isEditing}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+              >
+                {isEditing ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+                Save Changes
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={handleCancelEdit}
+                disabled={isEditing}
+                className="flex items-center gap-2"
+              >
+                <X className="h-4 w-4" />
+                Cancel
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -130,44 +275,135 @@ export default function OrderDetailsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Service Type */}
                 <div>
                   <Label className="text-sm font-medium text-gray-600">Service Type</Label>
-                  <div className="font-medium text-lg mt-1">{order.serviceType}</div>
+                  {!isEditMode ? (
+                    <div className="font-medium text-lg mt-1 capitalize">
+                      {order.serviceType?.replace(/([A-Z])/g, " $1").trim()}
+                    </div>
+                  ) : (
+                    <Select
+                      value={editFormData.serviceType}
+                      onValueChange={(value) => handleFormChange("serviceType", value)}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="static">Static</SelectItem>
+                        <SelectItem value="premiumSecurity">Premium Security</SelectItem>
+                        <SelectItem value="standardPatrol">Standard Patrol</SelectItem>
+                        <SelectItem value="24/7Monitoring">24/7 Monitoring</SelectItem>
+                        <SelectItem value="healthcareSecurity">Healthcare Security</SelectItem>
+                        <SelectItem value="industrialSecurity">Industrial Security</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
 
+                {/* Guards Required */}
                 <div>
                   <Label className="text-sm font-medium text-gray-600">Guards Required</Label>
-                  <div className="font-medium text-lg mt-1">{order.guardsRequired ?? "—"}</div>
+                  {!isEditMode ? (
+                    <div className="font-medium text-lg mt-1">{order.guardsRequired ?? "—"}</div>
+                  ) : (
+                    <Input
+                      type="number"
+                      min="1"
+                      value={editFormData.guardsRequired}
+                      onChange={(e) => handleFormChange("guardsRequired", e.target.value)}
+                      className="mt-1"
+                    />
+                  )}
                 </div>
 
-                <div className="md:col-span-2">
-                  <Label className="text-sm font-medium text-gray-600">Location</Label>
-                  <div className="mt-1 text-base">{order.locationAddress ?? "—"}</div>
-                </div>
-
-                   {/* ⬇️ SHOW FIELD ONLY IF locationName IS EMPTY / NULL */}
-    {order.locationName && (
-      <div className="md:col-span-2">
-        <Label className="text-sm font-medium text-gray-600">Location Name</Label>
-        <div className="mt-1 text-base">{order.locationName ?? "—"}</div>
-      </div>
-    )}
-
-                <div className="md:col-span-2">
-                  <Label className="text-sm font-medium text-gray-600">Coordinates</Label>
-                  <div className="text-sm text-gray-600 mt-1 font-mono">
-                    Lat: {order.siteService?.coordinates?.[1] ?? "—"}, Lng: {order.siteService?.coordinates?.[0] ?? "—"}
+                {/* Location Name */}
+                {(order.locationName || isEditMode) && (
+                  <div className="md:col-span-2">
+                    <Label className="text-sm font-medium text-gray-600">Location Name</Label>
+                    {!isEditMode ? (
+                      <div className="mt-1 text-base">{order.locationName ?? "—"}</div>
+                    ) : (
+                      <Input
+                        value={editFormData.locationName}
+                        onChange={(e) => handleFormChange("locationName", e.target.value)}
+                        className="mt-1"
+                        placeholder="e.g., Mumbai Office"
+                      />
+                    )}
                   </div>
+                )}
+
+                {/* Location Address */}
+                <div className="md:col-span-2">
+                  <Label className="text-sm font-medium text-gray-600">Location Address</Label>
+                  {!isEditMode ? (
+                    <div className="mt-1 text-base">{order.locationAddress ?? "—"}</div>
+                  ) : (
+                    <Input
+                      value={editFormData.locationAddress}
+                      onChange={(e) => handleFormChange("locationAddress", e.target.value)}
+                      className="mt-1"
+                      placeholder="Full address"
+                    />
+                  )}
                 </div>
+
+                {/* Coordinates */}
+                <div className={isEditMode ? "" : "md:col-span-2"}>
+                  <Label className="text-sm font-medium text-gray-600">
+                    {isEditMode ? "Latitude" : "Coordinates"}
+                  </Label>
+                  {!isEditMode ? (
+                    <div className="text-sm text-gray-600 mt-1 font-mono">
+                      Lat: {order.siteService?.coordinates?.[1] ?? "—"}, Lng: {order.siteService?.coordinates?.[0] ?? "—"}
+                    </div>
+                  ) : (
+                    <Input
+                      type="number"
+                      step="0.000001"
+                      value={editFormData.siteServiceLat}
+                      onChange={(e) => handleFormChange("siteServiceLat", e.target.value)}
+                      className="mt-1"
+                      placeholder="e.g., 28.7041"
+                    />
+                  )}
+                </div>
+
+                {isEditMode && (
+                  <div>
+                    <Label className="text-sm font-medium text-gray-600">Longitude</Label>
+                    <Input
+                      type="number"
+                      step="0.000001"
+                      value={editFormData.siteServiceLng}
+                      onChange={(e) => handleFormChange("siteServiceLng", e.target.value)}
+                      className="mt-1"
+                      placeholder="e.g., 77.1025"
+                    />
+                  </div>
+                )}
               </div>
 
               <Separator />
 
+              {/* Description */}
               <div>
                 <Label className="text-sm font-medium text-gray-600">Description</Label>
-                <div className="mt-2 p-4 bg-gray-50 rounded-lg">
-                  <p className="text-gray-800">{order.description || "—"}</p>
-                </div>
+                {!isEditMode ? (
+                  <div className="mt-2 p-4 bg-gray-50 rounded-lg">
+                    <p className="text-gray-800">{order.description || "—"}</p>
+                  </div>
+                ) : (
+                  <Textarea
+                    value={editFormData.description}
+                    onChange={(e) => handleFormChange("description", e.target.value)}
+                    className="mt-2"
+                    rows={4}
+                    placeholder="Order description and requirements..."
+                  />
+                )}
               </div>
             </CardContent>
           </Card>
@@ -175,6 +411,7 @@ export default function OrderDetailsPage() {
 
         {/* Sidebar with schedule & status */}
         <div className="space-y-6">
+          {/* Schedule Card */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -183,13 +420,69 @@ export default function OrderDetailsPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div><strong>Start Date:</strong> {formatDate(order.startDate)}</div>
-              <div><strong>End Date:</strong> {formatDate(order.endDate)}</div>
-              <div><strong>Start Time:</strong> {formatTime(order.startTime)}</div>
-              <div><strong>End Time:</strong> {formatTime(order.endTime)}</div>
+              {/* Start Date */}
+              <div>
+                <strong>Start Date:</strong>
+                {!isEditMode ? (
+                  <span className="ml-2">{formatDate(order.startDate)}</span>
+                ) : (
+                  <Input
+                    type="date"
+                    value={editFormData.startDate}
+                    onChange={(e) => handleFormChange("startDate", e.target.value)}
+                    className="mt-1"
+                  />
+                )}
+              </div>
+
+              {/* End Date */}
+              <div>
+                <strong>End Date:</strong>
+                {!isEditMode ? (
+                  <span className="ml-2">{formatDate(order.endDate)}</span>
+                ) : (
+                  <Input
+                    type="date"
+                    value={editFormData.endDate}
+                    onChange={(e) => handleFormChange("endDate", e.target.value)}
+                    className="mt-1"
+                  />
+                )}
+              </div>
+
+              {/* Start Time */}
+              <div>
+                <strong>Start Time:</strong>
+                {!isEditMode ? (
+                  <span className="ml-2">{formatTime(order.startTime)}</span>
+                ) : (
+                  <Input
+                    type="time"
+                    value={editFormData.startTime}
+                    onChange={(e) => handleFormChange("startTime", e.target.value)}
+                    className="mt-1"
+                  />
+                )}
+              </div>
+
+              {/* End Time */}
+              <div>
+                <strong>End Time:</strong>
+                {!isEditMode ? (
+                  <span className="ml-2">{formatTime(order.endTime)}</span>
+                ) : (
+                  <Input
+                    type="time"
+                    value={editFormData.endTime}
+                    onChange={(e) => handleFormChange("endTime", e.target.value)}
+                    className="mt-1"
+                  />
+                )}
+              </div>
             </CardContent>
           </Card>
 
+          {/* Order Status Card */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -204,7 +497,7 @@ export default function OrderDetailsPage() {
               </div>
               <div><strong>Created:</strong> {formatDate(order.createdAt)}</div>
               <div><strong>Last Updated:</strong> {formatDate(order.updatedAt)}</div>
-              <div className="break-words"><strong>Order ID:</strong> {order.id}</div>
+              <div className="break-words"><strong>Order ID:</strong> <span className="text-xs font-mono">{order.id}</span></div>
             </CardContent>
           </Card>
 
@@ -225,6 +518,24 @@ export default function OrderDetailsPage() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Client Information (if available) */}
+          {order.client && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Client Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div><strong>Name:</strong> {order.client.name}</div>
+                <div><strong>Email:</strong> {order.client.email}</div>
+                <div><strong>Mobile:</strong> {order.client.mobile}</div>
+                <div><strong>Address:</strong> {order.client.address}</div>
               </CardContent>
             </Card>
           )}

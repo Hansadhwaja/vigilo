@@ -10,9 +10,15 @@ import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
-import { useGetAllOrdersQuery, useCancelOrderMutation, useAcceptOrderMutation, useDeleteClientMutation } from "../apis/ordersApi";
+import { 
+  useGetAllOrdersQuery, 
+  useCancelOrderMutation, 
+  useAcceptOrderMutation, 
+  useDeleteClientMutation,
+  useEditOrderMutation,  
+  useGetAllClientsQuery 
+} from "../apis/ordersApi";
 import { AlertCircle } from "lucide-react";
-import { useGetAllClientsQuery } from "../apis/ordersApi";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -29,10 +35,25 @@ export default function ClientsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeTab, setActiveTab] = useState("directory");
   const itemsPerPage = 10;
-const [showClientDialog, setShowClientDialog] = useState(false);
-const [selectedClient, setSelectedClient] = useState<any>(null);
-const navigate = useNavigate();
+  const [showClientDialog, setShowClientDialog] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<any>(null);
+  const navigate = useNavigate();
 
+  // ===== EDIT ORDER STATE =====
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    serviceType: "",
+    locationName: "",
+    locationAddress: "",
+    siteServiceLat: "",
+    siteServiceLng: "",
+    guardsRequired: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    startTime: "",
+    endTime: "",
+  });
 
   // Debounce search
   useEffect(() => {
@@ -63,41 +84,36 @@ const navigate = useNavigate();
   // Mutations
   const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();
   const [acceptOrder, { isLoading: isAccepting }] = useAcceptOrderMutation();
+  const [editOrder, { isLoading: isEditing }] = useEditOrderMutation();  // ← ADD THIS
 
   const orders = ordersResponse?.data || [];
   const apiPagination = ordersResponse?.pagination;
 
-const { data } = useGetAllClientsQuery();
+  const { data } = useGetAllClientsQuery();
 
-const clients = data?.data; 
-const clientsList = clients ? (Array.isArray(clients) ? clients : [clients]) : [];
-console.log("Clients List:", clientsList);
-console.log("Raw Clients Data:", data);
+  const clients = data?.data; 
+  const clientsList = clients ? (Array.isArray(clients) ? clients : [clients]) : [];
 
-const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
+  const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
 
-const handleDeleteClient = async (clientId: string) => {
-  if (!clientId) return;
+  const handleDeleteClient = async (clientId: string) => {
+    if (!clientId) return;
 
-  const confirmDelete = window.confirm("Are you sure you want to delete this client?");
-  if (!confirmDelete) return;
+    const confirmDelete = window.confirm("Are you sure you want to delete this client?");
+    if (!confirmDelete) return;
 
-  try {
-    const response = await deleteClient({ id: clientId }).unwrap();
-    console.log(response);
-
-    toast.success("Client deleted successfully");
-  } catch (error) {
-    toast.error("Failed to delete client");
-  }
-};
-
-
+    try {
+      const response = await deleteClient({ id: clientId }).unwrap();
+      toast.success("Client deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete client");
+    }
+  };
 
   // Calculate metrics
   const totalOrders = apiPagination?.total || 0;
   const activeOrders = orders.filter(o => o.status === "ongoing").length;
-  const totalRevenue = orders.reduce((sum, order) => sum + (order.guardsRequired * 1000), 0); // Estimated
+  const totalRevenue = orders.reduce((sum, order) => sum + (order.guardsRequired * 1000), 0);
   const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
   // Pagination
@@ -120,13 +136,97 @@ const handleDeleteClient = async (clientId: string) => {
     try {
       if (actionType === "accept") {
         await acceptOrder(selectedOrder.id).unwrap();
+        toast.success("Order accepted successfully");
       } else if (actionType === "reject") {
         await cancelOrder(selectedOrder.id).unwrap();
+        toast.success("Order rejected successfully");
       }
       setShowActionDialog(false);
       setActionMessage("");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to process order:", err);
+      toast.error(err?.data?.message || "Failed to process order");
+    }
+  };
+
+  // ===== EDIT ORDER FUNCTIONS =====
+  const handleEditClick = (order: any) => {
+    // Check if order can be edited
+    if (order.status === "completed" || order.status === "cancelled") {
+      toast.error("Cannot edit completed or cancelled orders");
+      return;
+    }
+
+    // Format dates for input fields (YYYY-MM-DD)
+    const formatDateForInput = (dateString: string) => {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    };
+
+    // Populate form with current order data
+    setEditFormData({
+      serviceType: order.serviceType || "",
+      locationName: order.locationName || "",
+      locationAddress: order.locationAddress || "",
+      siteServiceLat: order.siteService?.coordinates?.[1]?.toString() || "",
+      siteServiceLng: order.siteService?.coordinates?.[0]?.toString() || "",
+      guardsRequired: order.guardsRequired?.toString() || "",
+      description: order.description || "",
+      startDate: formatDateForInput(order.startDate),
+      endDate: formatDateForInput(order.endDate),
+      startTime: order.startTime || "",
+      endTime: order.endTime || "",
+    });
+
+    setSelectedOrder(order);
+    setShowEditDialog(true);
+  };
+
+  const handleEditFormChange = (field: string, value: string) => {
+    setEditFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleEditSubmit = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      // Build the payload
+      const payload: any = {};
+
+      // Only include changed fields
+      if (editFormData.serviceType) payload.serviceType = editFormData.serviceType;
+      if (editFormData.locationName) payload.locationName = editFormData.locationName;
+      if (editFormData.locationAddress) payload.locationAddress = editFormData.locationAddress;
+      if (editFormData.guardsRequired) payload.guardsRequired = parseInt(editFormData.guardsRequired);
+      if (editFormData.description) payload.description = editFormData.description;
+      if (editFormData.startDate) payload.startDate = editFormData.startDate;
+      if (editFormData.endDate) payload.endDate = editFormData.endDate;
+      if (editFormData.startTime) payload.startTime = editFormData.startTime;
+      if (editFormData.endTime) payload.endTime = editFormData.endTime;
+
+      // Handle siteService coordinates
+      if (editFormData.siteServiceLat && editFormData.siteServiceLng) {
+        payload.siteService = {
+          lat: parseFloat(editFormData.siteServiceLat),
+          lng: parseFloat(editFormData.siteServiceLng)
+        };
+      }
+
+      // Call the edit API
+      await editOrder({
+        id: selectedOrder.id,
+        body: payload
+      }).unwrap();
+
+      toast.success("Order updated successfully");
+      setShowEditDialog(false);
+      setSelectedOrder(null);
+    } catch (err: any) {
+      console.error("Failed to update order:", err);
+      toast.error(err?.data?.message || "Failed to update order");
     }
   };
 
@@ -156,7 +256,6 @@ const handleDeleteClient = async (clientId: string) => {
   };
 
   const formatTime = (timeString: string) => {
-    // Convert 24-hour time to 12-hour format
     const [hours, minutes] = timeString.split(':');
     const hour = parseInt(hours);
     const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -254,9 +353,12 @@ const handleDeleteClient = async (clientId: string) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Services</SelectItem>
+                <SelectItem value="static">Static</SelectItem>
                 <SelectItem value="premiumSecurity">Premium Security</SelectItem>
                 <SelectItem value="standardPatrol">Standard Patrol</SelectItem>
                 <SelectItem value="24/7Monitoring">24/7 Monitoring</SelectItem>
+                <SelectItem value="healthcareSecurity">Healthcare Security</SelectItem>
+                <SelectItem value="industrialSecurity">Industrial Security</SelectItem>
               </SelectContent>
             </Select>
             <Button 
@@ -316,123 +418,124 @@ const handleDeleteClient = async (clientId: string) => {
               {/* Order List */}
               {!isLoading && !isError && orders.length > 0 && (
                 <>
-                 <div className="overflow-x-auto rounded-lg border border-gray-200">
-  <table className="w-full text-lg text-left">
-    <thead className="bg-gray-50 border-b">
-      <tr>
-        <th className="px-4 py-3 font-medium text-gray-700">Service Type</th>
-        <th className="px-4 py-3 font-medium text-gray-700">Location</th>
-        <th className="px-4 py-3 font-medium text-gray-700">Schedule</th>
-        {/* <th className="px-4 py-3 font-medium text-gray-700">Time</th> */}
-        <th className="px-4 py-3 font-medium text-gray-700">Guards</th>
-        <th className="px-4 py-3 font-medium text-gray-700">Status</th>
-        <th className="px-4 py-3 font-medium text-gray-700">Created</th>
-        <th className="px-4 py-3 font-medium text-gray-700 text-right">Actions</th>
-      </tr>
-    </thead>
+                  <div className="overflow-x-auto rounded-lg border border-gray-200">
+                    <table className="w-full text-lg text-left">
+                      <thead className="bg-gray-50 border-b">
+                        <tr>
+                          <th className="px-4 py-3 font-medium text-gray-700">Service Type</th>
+                          <th className="px-4 py-3 font-medium text-gray-700">Location</th>
+                          <th className="px-4 py-3 font-medium text-gray-700">Schedule</th>
+                          <th className="px-4 py-3 font-medium text-gray-700">Guards</th>
+                          <th className="px-4 py-3 font-medium text-gray-700">Status</th>
+                          <th className="px-4 py-3 font-medium text-gray-700">Created</th>
+                          <th className="px-4 py-3 font-medium text-gray-700 text-right">Actions</th>
+                        </tr>
+                      </thead>
 
-    <tbody className="divide-y">
-      {orders.map((order) => (
-        <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                      <tbody className="divide-y">
+                        {orders.map((order) => (
+                          <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                            {/* Service Type */}
+                            <td className="px-4 py-3 font-medium text-gray-900 capitalize">
+                              {order.serviceType.replace(/([A-Z])/g, " $1").trim()}
+                              <div className="text-lg text-gray-500">
+                                ID: {order.id.slice(0, 8)}...
+                              </div>
+                            </td>
 
-          {/* Service Type */}
-          <td className="px-4 py-3 font-medium text-gray-900 capitalize">
-            {order.serviceType.replace(/([A-Z])/g, " $1").trim()}
-            <div className="text-lg text-gray-500">
-              ID: {order.id.slice(0, 8)}...
-            </div>
-          </td>
+                            {/* Location */}
+                            <td className="px-4 py-3 text-gray-700 max-w-[180px] truncate">
+                              <div className="flex items-center gap-1">
+                                <MapPin className="h-3 w-3 text-gray-400" />
+                                {order.locationAddress}
+                              </div>
+                            </td>
 
-          {/* Location */}
-          <td className="px-4 py-3 text-gray-700 max-w-[180px] truncate">
-            <div className="flex items-center gap-1">
-              <MapPin className="h-3 w-3 text-gray-400" />
-              {order.locationAddress}
-            </div>
-          </td>
+                            {/* Schedule */}
+                            <td className="px-4 py-3 text-gray-700">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3 text-gray-400" />
+                                {formatDate(order.startDate)} – {formatDate(order.endDate)}
+                              </div>
+                            </td>
 
-          {/* Schedule */}
-          <td className="px-4 py-3 text-gray-700">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3 w-3 text-gray-400" />
-              {formatDate(order.startDate)} – {formatDate(order.endDate)}
-            </div>
-          </td>
+                            {/* Guards Required */}
+                            <td className="px-4 py-3 text-gray-700">
+                              <div className="flex items-center gap-1">
+                                <User className="h-3 w-3 text-gray-400" />
+                                {order.guardsRequired} guard{order.guardsRequired > 1 ? "s" : ""}
+                              </div>
+                            </td>
 
-          {/* Time */}
-          {/* <td className="px-4 py-3 text-gray-700">
-            <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3 text-gray-400" />
-              {formatTime(order.startTime)} – {formatTime(order.endTime)}
-            </div>
-          </td> */}
+                            {/* Status */}
+                            <td className="px-4 py-3">
+                              <Badge className={getStatusColor(order.status)}>
+                                {order.status}
+                              </Badge>
+                            </td>
 
-          {/* Guards Required */}
-          <td className="px-4 py-3 text-gray-700">
-            <div className="flex items-center gap-1">
-              <User className="h-3 w-3 text-gray-400" />
-              {order.guardsRequired} guard{order.guardsRequired > 1 ? "s" : ""}
-            </div>
-          </td>
+                            {/* Created At */}
+                            <td className="px-4 py-3 text-gray-600 text-lg">
+                              {formatDate(order.createdAt)}
+                            </td>
 
-          {/* Status */}
-          <td className="px-4 py-3">
-            <Badge className={getStatusColor(order.status)}>
-              {order.status}
-            </Badge>
-          </td>
+                            {/* Actions */}
+                            <td className="px-4 py-3 text-right">
+                              <div className="flex items-center justify-end gap-2">
+                                {/* View */}
+                                <Button
+                                  size="lg"
+                                  variant="outline"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => handleViewDetails(order.id)}
+                                  title="View Details"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
 
-          {/* Created At */}
-          <td className="px-4 py-3 text-gray-600 text-lg">
-            {formatDate(order.createdAt)}
-          </td>
+                                {/* Edit - Show for non-completed/cancelled orders */}
+                                {order.status !== "completed" && order.status !== "cancelled" && (
+                                  <Button
+                                    size="lg"
+                                    variant="outline"
+                                    className="h-8 w-8 p-0 border-blue-200 text-blue-600 hover:bg-blue-50"
+                                    onClick={() => handleEditClick(order)}
+                                    title="Edit Order"
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                )}
 
-          {/* Actions */}
-          <td className="px-4 py-3 text-right">
-            <div className="flex items-center justify-end gap-2">
+                                {/* Accept/Reject for pending */}
+                                {order.status === "pending" && (
+                                  <>
+                                    <Button
+                                      size="lg"
+                                      className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
+                                      onClick={() => handleAction(order, "accept")}
+                                      disabled={isAccepting}
+                                    >
+                                      Accept
+                                    </Button>
 
-              {/* View */}
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-8 w-8 p-0"
-                onClick={() => handleViewDetails(order.id)}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-
-              {/* Accept/Reject for pending */}
-              {order.status === "pending" && (
-                <>
-                  <Button
-                    size="lg"
-                    className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
-                    onClick={() => handleAction(order, "accept")}
-                    disabled={isAccepting}
-                  >
-                    Accept
-                  </Button>
-
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="h-8 px-2 text-lg border-red-200 text-red-600 hover:bg-red-50"
-                    onClick={() => handleAction(order, "reject")}
-                    disabled={isCancelling}
-                  >
-                    Reject
-                  </Button>
-                </>
-              )}
-            </div>
-          </td>
-
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
-
+                                    <Button
+                                      size="lg"
+                                      variant="outline"
+                                      className="h-8 px-2 text-lg border-red-200 text-red-600 hover:bg-red-50"
+                                      onClick={() => handleAction(order, "reject")}
+                                      disabled={isCancelling}
+                                    >
+                                      Reject
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
                   {/* Pagination */}
                   {totalPages > 1 && (
@@ -494,7 +597,7 @@ const handleDeleteClient = async (clientId: string) => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
               <Input
-                placeholder="Search orders..."
+                placeholder="Search clients..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9 w-40 h-8"
@@ -518,227 +621,286 @@ const handleDeleteClient = async (clientId: string) => {
               <CardTitle className="text-lg">Detailed Client Information</CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              {!isLoading && !isError  && clientsList.length>0 && (
+              {!isLoading && !isError && clientsList.length > 0 && (
                 <div className="overflow-x-auto rounded-lg border border-gray-200">
-  <table className="w-full text-lg text-left">
-    
-    {/* Table Header */}
-    <thead className="bg-gray-50 border-b">
-      <tr>
-        <th className="px-4 py-3 font-medium text-gray-700">Name</th>
-        <th className="px-4 py-3 font-medium text-gray-700">Email</th>
-        <th className="px-4 py-3 font-medium text-gray-700">Phone</th>
-        <th className="px-4 py-3 font-medium text-gray-700">Address</th>
-        <th className="px-4 py-3 font-medium text-gray-700 text-right">Actions</th>
-      </tr>
-    </thead>
+                  <table className="w-full text-lg text-left">
+                    <thead className="bg-gray-50 border-b">
+                      <tr>
+                        <th className="px-4 py-3 font-medium text-gray-700">Name</th>
+                        <th className="px-4 py-3 font-medium text-gray-700">Email</th>
+                        <th className="px-4 py-3 font-medium text-gray-700">Phone</th>
+                        <th className="px-4 py-3 font-medium text-gray-700">Address</th>
+                        <th className="px-4 py-3 font-medium text-gray-700 text-right">Actions</th>
+                      </tr>
+                    </thead>
 
-    {/* Table Body */}
-    <tbody className="divide-y">
-      {clientsList.map((client) => (
-        <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+                    <tbody className="divide-y">
+                      {clientsList.map((client) => (
+                        <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-3 font-medium text-gray-900">
+                            {client.name}
+                          </td>
 
-          {/* Name */}
-          <td className="px-4 py-3 font-medium text-gray-900">
-            {client.name}
-          </td>
+                          <td className="px-4 py-3 text-gray-700 max-w-[200px] truncate">
+                            <div className="flex items-center gap-1">
+                              <Mail className="h-4 w-4 text-gray-400" />
+                              {client.email}
+                            </div>
+                          </td>
 
-          {/* Email */}
-          <td className="px-4 py-3 text-gray-700 max-w-[200px] truncate">
-            <div className="flex items-center gap-1">
-              <Mail className="h-4 w-4 text-gray-400" />
-              {client.email}
-            </div>
-          </td>
+                          <td className="px-4 py-3 text-gray-700 max-w-[150px] truncate">
+                            <div className="flex items-center gap-1">
+                              <Phone className="h-4 w-4 text-gray-400" />
+                              {client.mobile}
+                            </div>
+                          </td>
 
-          {/* Phone */}
-          <td className="px-4 py-3 text-gray-700 max-w-[150px] truncate">
-            <div className="flex items-center gap-1">
-              <Phone className="h-4 w-4 text-gray-400" />
-              {client.mobile}
-            </div>
-          </td>
+                          <td className="px-4 py-3 text-gray-600 max-w-[220px] truncate">
+                            {client.address || "—"}
+                          </td>
 
-          {/* Address */}
-          <td className="px-4 py-3 text-gray-600 max-w-[220px] truncate">
-            {client.address || "—"}
-          </td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="lg"
+                                variant="outline"
+                                className="h-8 w-8 p-0"
+                                onClick={() => {
+                                  setSelectedClient(client);
+                                  setShowClientDialog(true);
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
 
-          {/* Actions */}
-          <td className="px-4 py-3 text-right">
-            <div className="flex justify-end gap-2">
-
-              {/* View Button */}
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-8 w-8 p-0"
-                onClick={() => {
-                  setSelectedClient(client);
-                  setShowClientDialog(true);
-                }}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-
-              {/* Delete Button */}
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                onClick={() => handleDeleteClient(client.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-
-            </div>
-          </td>
-
-        </tr>
-      ))}
-    </tbody>
-
-  </table>
-</div>
-
-
+                              <Button
+                                size="lg"
+                                variant="outline"
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                onClick={() => handleDeleteClient(client.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Client Details Dialog */}
-      <Dialog open={showClientDialog} onOpenChange={setShowClientDialog}>
-  <DialogContent className="max-w-md">
-    <DialogHeader>
-      <DialogTitle>Client Details</DialogTitle>
-    </DialogHeader>
-
-    {selectedClient && (
-      <div className="space-y-3 mt-2">
-        
-        <div className="flex justify-between">
-          <span className="font-medium">Name:</span>
-          <span>{selectedClient.name}</span>
-        </div>
-
-        <div className="flex justify-between">
-          <span className="font-medium">Email:</span>
-          <span>{selectedClient.email}</span>
-        </div>
-
-        <div className="flex justify-between">
-          <span className="font-medium">Mobile:</span>
-          <span>{selectedClient.mobile}</span>
-        </div>
-
-        <div className="flex justify-between">
-          <span className="font-medium">Address:</span>
-          <span className="text-right">{selectedClient.address}</span>
-        </div>
-
-      </div>
-    )}
-
-    <DialogFooter className="mt-4">
-      <Button onClick={() => setShowClientDialog(false)}>Close</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
-
-      {/* Order Details Dialog */}
-      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      {/* ===== EDIT ORDER DIALOG ===== */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Complete Order Details</DialogTitle>
+            <DialogTitle>Edit Order</DialogTitle>
             <DialogDescription>
-              Full order information including location and requirements
+              Update order details including location, schedule, and requirements
             </DialogDescription>
           </DialogHeader>
-                    
-          {selectedOrder && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Basic Information */}
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Service Information</h3>
-                  <div className="space-y-2">
-                    <div><strong>Service Type:</strong> {selectedOrder.serviceType}</div>
-                    <div><strong>Guards Required:</strong> {selectedOrder.guardsRequired}</div>
-                    <div><strong>Location:</strong> {selectedOrder.locationAddress}</div>
-                    <div>
-                      <strong>Coordinates:</strong> 
-                      <div className="text-lg text-gray-600">
-                        Lat: {selectedOrder.siteService.coordinates[1]}, 
-                        Lng: {selectedOrder.siteService.coordinates[0]}
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Description</h3>
-                  <p className="text-lg text-gray-600">{selectedOrder.description}</p>
-                </div>
-              </div>
-
-              {/* Schedule & Status */}
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Schedule</h3>
-                  <div className="space-y-2">
-                    <div><strong>Start Date:</strong> {formatDate(selectedOrder.startDate)}</div>
-                    <div><strong>End Date:</strong> {formatDate(selectedOrder.endDate)}</div>
-                    <div><strong>Start Time:</strong> {formatTime(selectedOrder.startTime)}</div>
-                    <div><strong>End Time:</strong> {formatTime(selectedOrder.endTime)}</div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Order Status</h3>
-                  <div className="space-y-2">
-                    <div>
-                      <strong>Status:</strong>
-                      <Badge className={`ml-2 ${getStatusColor(selectedOrder.status)}`}>
-                        {selectedOrder.status}
-                      </Badge>
-                    </div>
-                    <div><strong>Created:</strong> {formatDate(selectedOrder.createdAt)}</div>
-                    <div><strong>Last Updated:</strong> {formatDate(selectedOrder.updatedAt)}</div>
-                    <div><strong>Order ID:</strong> {selectedOrder.id}</div>
-                  </div>
-                </div>
-
-                {selectedOrder.images && selectedOrder.images.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-3">Location Images</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      {selectedOrder.images.map((image: string, index: number) => (
-                        <img
-                          key={index}
-                          src={image}
-                          alt={`Location ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            {/* Service Type */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-serviceType">Service Type</Label>
+              <Select
+                value={editFormData.serviceType}
+                onValueChange={(value) => handleEditFormChange("serviceType", value)}
+              >
+                <SelectTrigger id="edit-serviceType">
+                  <SelectValue placeholder="Select service type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="static">Static</SelectItem>
+                  <SelectItem value="premiumSecurity">Premium Security</SelectItem>
+                  <SelectItem value="standardPatrol">Standard Patrol</SelectItem>
+                  <SelectItem value="24/7Monitoring">24/7 Monitoring</SelectItem>
+                  <SelectItem value="healthcareSecurity">Healthcare Security</SelectItem>
+                  <SelectItem value="industrialSecurity">Industrial Security</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          )}
-                    
-          <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
-              Close
-            </Button>
+
+            {/* Guards Required */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-guardsRequired">Guards Required</Label>
+              <Input
+                id="edit-guardsRequired"
+                type="number"
+                min="1"
+                value={editFormData.guardsRequired}
+                onChange={(e) => handleEditFormChange("guardsRequired", e.target.value)}
+              />
+            </div>
+
+            {/* Location Name */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-locationName">Location Name</Label>
+              <Input
+                id="edit-locationName"
+                value={editFormData.locationName}
+                onChange={(e) => handleEditFormChange("locationName", e.target.value)}
+                placeholder="e.g., Mumbai Central Office"
+              />
+            </div>
+
+            {/* Location Address */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-locationAddress">Location Address</Label>
+              <Input
+                id="edit-locationAddress"
+                value={editFormData.locationAddress}
+                onChange={(e) => handleEditFormChange("locationAddress", e.target.value)}
+                placeholder="Full address"
+              />
+            </div>
+
+            {/* Latitude */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-latitude">Latitude</Label>
+              <Input
+                id="edit-latitude"
+                type="number"
+                step="0.000001"
+                value={editFormData.siteServiceLat}
+                onChange={(e) => handleEditFormChange("siteServiceLat", e.target.value)}
+                placeholder="e.g., 19.0596"
+              />
+            </div>
+
+            {/* Longitude */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-longitude">Longitude</Label>
+              <Input
+                id="edit-longitude"
+                type="number"
+                step="0.000001"
+                value={editFormData.siteServiceLng}
+                onChange={(e) => handleEditFormChange("siteServiceLng", e.target.value)}
+                placeholder="e.g., 72.8295"
+              />
+            </div>
+
+            {/* Start Date */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-startDate">Start Date</Label>
+              <Input
+                id="edit-startDate"
+                type="date"
+                value={editFormData.startDate}
+                onChange={(e) => handleEditFormChange("startDate", e.target.value)}
+              />
+            </div>
+
+            {/* End Date */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-endDate">End Date</Label>
+              <Input
+                id="edit-endDate"
+                type="date"
+                value={editFormData.endDate}
+                onChange={(e) => handleEditFormChange("endDate", e.target.value)}
+              />
+            </div>
+
+            {/* Start Time */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-startTime">Start Time</Label>
+              <Input
+                id="edit-startTime"
+                type="time"
+                value={editFormData.startTime}
+                onChange={(e) => handleEditFormChange("startTime", e.target.value)}
+              />
+            </div>
+
+            {/* End Time */}
+            <div className="space-y-2">
+              <Label htmlFor="edit-endTime">End Time</Label>
+              <Input
+                id="edit-endTime"
+                type="time"
+                value={editFormData.endTime}
+                onChange={(e) => handleEditFormChange("endTime", e.target.value)}
+              />
+            </div>
+
+            {/* Description - Full Width */}
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={editFormData.description}
+                onChange={(e) => handleEditFormChange("description", e.target.value)}
+                placeholder="Order description and requirements..."
+                rows={3}
+              />
+            </div>
           </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowEditDialog(false)}
+              disabled={isEditing}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEditSubmit}
+              disabled={isEditing}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {isEditing && (
+                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
+              )}
+              Save Changes
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      
+      {/* Client Details Dialog */}
+      <Dialog open={showClientDialog} onOpenChange={setShowClientDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Client Details</DialogTitle>
+          </DialogHeader>
+
+          {selectedClient && (
+            <div className="space-y-3 mt-2">
+              <div className="flex justify-between">
+                <span className="font-medium">Name:</span>
+                <span>{selectedClient.name}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="font-medium">Email:</span>
+                <span>{selectedClient.email}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="font-medium">Mobile:</span>
+                <span>{selectedClient.mobile}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="font-medium">Address:</span>
+                <span className="text-right">{selectedClient.address}</span>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="mt-4">
+            <Button onClick={() => setShowClientDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Action Dialog */}
       <Dialog open={showActionDialog} onOpenChange={setShowActionDialog}>

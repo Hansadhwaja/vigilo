@@ -74,6 +74,31 @@ export interface GetAllOrdersParams {
   search?: string;
 }
 
+// Add this interface at the top with other interfaces
+export interface EditOrderPayload {
+  serviceType?: string;
+  locationName?: string;
+  locationAddress?: string;
+  siteService?: {
+    lat: number;
+    lng: number;
+  };
+  guardsRequired?: number;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  startTime?: string;
+  endTime?: string;
+  images?: string[];
+}
+
+export interface EditOrderResponse {
+  success: boolean;
+  message: string;
+  data: Order;
+}
+
+
 export const ordersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all orders with pagination and filters
@@ -135,6 +160,23 @@ export const ordersApi = baseApi.injectEndpoints({
         { type: "Orders", id: "LIST" },
       ],
     }),
+
+    // Edit order
+editOrder: builder.mutation<
+  EditOrderResponse,
+  { id: string; body: EditOrderPayload }
+>({
+  query: ({ id, body }) => ({
+    url: `/orders/editOrder/${id}`,
+    method: "PUT",
+    body,
+  }),
+  invalidatesTags: (_result, _error, { id }) => [
+    { type: "Orders", id },
+    { type: "Orders", id: "LIST" },
+  ],
+}),
+
 
     // Get all clients
 getAllClients: builder.query<
@@ -242,8 +284,8 @@ export const {
   useGetAdminOrderByIdQuery,
   useCancelOrderMutation,
   useAcceptOrderMutation,
-   useGetAllClientsQuery,
-   useDeleteClientMutation,
-   useGetOrderByIdQuery,
-
+  useEditOrderMutation, 
+  useGetAllClientsQuery,
+  useDeleteClientMutation,
+  useGetOrderByIdQuery,
 } = ordersApi;
