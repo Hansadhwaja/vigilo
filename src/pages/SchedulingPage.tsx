@@ -1480,15 +1480,20 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
           </SelectTrigger>
 
           <SelectContent className="max-h-56 overflow-y-auto z-50" style={{ maxHeight: "14rem", overflowY: "auto" }}>
-            {orders && orders.length > 0 ? (
-              orders.map((order: any) => (
-                <SelectItem key={order.id} value={order.id}>
-                  {order.locationAddress ?? order.id}
-                </SelectItem>
-              ))
-            ) : (
-              <div className="p-3 text-lg text-gray-500">No orders available</div>
-            )}
+            {(() => {
+              const allowedOrders = (orders || []).filter(
+                (o: any) => !["completed", "cancelled"].includes((o.status || "").toLowerCase())
+              );
+              return allowedOrders.length > 0 ? (
+                allowedOrders.map((order: any) => (
+                  <SelectItem key={order.id} value={order.id}>
+                    {order.locationAddress ?? order.id}
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="p-3 text-lg text-gray-500">No active orders available</div>
+              );
+            })()}
           </SelectContent>
         </Select>
       </div>
@@ -1506,15 +1511,20 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
           </SelectTrigger>
 
           <SelectContent className="max-h-56 overflow-y-auto z-50" style={{ maxHeight: "14rem", overflowY: "auto" }}>
-            {orders && orders.length > 0 ? (
-              orders.map((order: any) => (
-                <SelectItem key={order.id} value={order.id}>
-                  {order.locationName ?? order.id}
-                </SelectItem>
-              ))
-            ) : (
-              <div className="p-3 text-lg text-gray-500">No orders available</div>
-            )}
+            {(() => {
+              const allowedOrders = (orders || []).filter(
+                (o: any) => !["completed", "cancelled"].includes((o.status || "").toLowerCase())
+              );
+              return allowedOrders.length > 0 ? (
+                allowedOrders.map((order: any) => (
+                  <SelectItem key={order.id} value={order.id}>
+                    {order.locationName ?? order.id}
+                  </SelectItem>
+                ))
+              ) : (
+                <div className="p-3 text-lg text-gray-500">No active orders available</div>
+              );
+            })()}
           </SelectContent>
         </Select>
       </div>
@@ -1666,6 +1676,14 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
               toast.error("Please select an order");
               return;
             }
+            
+            // ✅ EXTRA SAFETY: Check if selected order is completed/cancelled
+            const selectedOrder = (orders || []).find((o: any) => o.id === formData.orderId);
+            if (selectedOrder && ["completed", "cancelled"].includes((selectedOrder.status || "").toLowerCase())) {
+              toast.error("Cannot create assignment for a completed or cancelled order");
+              return;
+            }
+            
             if (formData.guardIds.length === 0) {
               toast.error("Please select at least one guard");
               return;
@@ -1702,6 +1720,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
     </div>
   </DialogContent>
 </Dialog>
+
 
     </div>
   );
