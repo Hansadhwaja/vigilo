@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Search, Filter, Edit, Trash2, Eye, User, Phone, Mail, MapPin, Building, Calendar, Clock, FileText, Image, CheckCircle, XCircle, Send, Save } from "lucide-react";
+import { Plus, Search, Filter, Edit, Trash2, Eye, User, Phone, Mail, MapPin, Building, Calendar, Clock, FileText, Image, CheckCircle, XCircle, Send, Save, Upload, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -21,7 +21,8 @@ import {
 
 import {
   useGetClientByIdQuery,     
-  useEditClientMutation,    
+  useEditClientMutation,
+  useUploadImageMutation,
 } from "../apis/usersApi";
 
 import { AlertCircle } from "lucide-react";
@@ -30,13 +31,13 @@ import { useNavigate } from "react-router-dom";
 
 export default function ClientsPage() {
   const [isEditingClient, setIsEditingClient] = useState(false);
-const [editClientData, setEditClientData] = useState({
-  name: "",
-  email: "",
-  mobile: "",
-  address: "",
-  avatar: "",
-});
+  const [editClientData, setEditClientData] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    address: "",
+    avatar: "",
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -51,7 +52,7 @@ const [editClientData, setEditClientData] = useState({
   const itemsPerPage = 10;
   const [showClientDialog, setShowClientDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
-
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const navigate = useNavigate();
 
@@ -100,8 +101,10 @@ const [editClientData, setEditClientData] = useState({
   // Mutations
   const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();
   const [acceptOrder, { isLoading: isAccepting }] = useAcceptOrderMutation();
-  const [editOrder, { isLoading: isEditing }] = useEditOrderMutation();  
+  const [editOrder, { isLoading: isEditing }] = useEditOrderMutation();
+  const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
   const [editClient, { isLoading: isEditingClientMutation }] = useEditClientMutation();
+  const [uploadImage] = useUploadImageMutation();
 
   const orders = ordersResponse?.data || [];
   const apiPagination = ordersResponse?.pagination;
@@ -110,8 +113,6 @@ const [editClientData, setEditClientData] = useState({
 
   const clients = data?.data; 
   const clientsList = clients ? (Array.isArray(clients) ? clients : [clients]) : [];
-
-  const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
 
   const handleDeleteClient = async (clientId: string) => {
     if (!clientId) return;
@@ -148,42 +149,41 @@ const [editClientData, setEditClientData] = useState({
   };
 
   const handleAcceptReject = async () => {
-  if (!selectedOrder) return;
+    if (!selectedOrder) return;
 
-  try {
-    if (actionType === "accept") {
-      // ✅ Check if start date has passed
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const startDate = new Date(selectedOrder.startDate);
-      startDate.setHours(0, 0, 0, 0);
-      
-      if (startDate < today) {
-        const daysLate = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-        const confirmLate = window.confirm(
-          `⚠️ WARNING: This order's start date was ${daysLate} day(s) ago.\n\n` +
-          `Are you sure you want to accept an expired order?`
-        );
+    try {
+      if (actionType === "accept") {
+        // ✅ Check if start date has passed
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const startDate = new Date(selectedOrder.startDate);
+        startDate.setHours(0, 0, 0, 0);
         
-        if (!confirmLate) {
-          return;
+        if (startDate < today) {
+          const daysLate = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+          const confirmLate = window.confirm(
+            `⚠️ WARNING: This order's start date was ${daysLate} day(s) ago.\n\n` +
+            `Are you sure you want to accept an expired order?`
+          );
+          
+          if (!confirmLate) {
+            return;
+          }
         }
+        
+        await acceptOrder(selectedOrder.id).unwrap();
+        toast.success("Order accepted successfully");
+      } else if (actionType === "reject") {
+        await cancelOrder(selectedOrder.id).unwrap();
+        toast.success("Order rejected successfully");
       }
-      
-      await acceptOrder(selectedOrder.id).unwrap();
-      toast.success("Order accepted successfully");
-    } else if (actionType === "reject") {
-      await cancelOrder(selectedOrder.id).unwrap();
-      toast.success("Order rejected successfully");
+      setShowActionDialog(false);
+      setActionMessage("");
+    } catch (err: any) {
+      console.error("Failed to process order:", err);
+      toast.error(err?.data?.message || "Failed to process order");
     }
-    setShowActionDialog(false);
-    setActionMessage("");
-  } catch (err: any) {
-    console.error("Failed to process order:", err);
-    toast.error(err?.data?.message || "Failed to process order");
-  }
-};
-
+  };
 
   // ===== EDIT ORDER FUNCTIONS =====
   const handleEditClick = (order: any) => {
@@ -299,68 +299,109 @@ const [editClientData, setEditClientData] = useState({
     return `${hour12}:${minutes} ${ampm}`;
   };
 
-  // Add this function after formatTime
-const getOrderUrgency = (order: any) => {
-  if (order.status !== "pending") return null;
-  
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  
-  const startDate = new Date(order.startDate);
-  startDate.setHours(0, 0, 0, 0);
-  
-  const daysUntilStart = Math.floor((startDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  
-  if (daysUntilStart < 0) {
-    return { type: "expired", days: Math.abs(daysUntilStart), color: "bg-red-50" };
-  } else if (daysUntilStart <= 2) {
-    return { type: "urgent", days: daysUntilStart, color: "bg-red-50" };
-  } 
-  
-  return null;
-};
+  const getOrderUrgency = (order: any) => {
+    if (order.status !== "pending") return null;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const startDate = new Date(order.startDate);
+    startDate.setHours(0, 0, 0, 0);
+    
+    const daysUntilStart = Math.floor((startDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilStart < 0) {
+      return { type: "expired", days: Math.abs(daysUntilStart), color: "bg-red-50" };
+    } else if (daysUntilStart <= 2) {
+      return { type: "urgent", days: daysUntilStart, color: "bg-red-50" };
+    } 
+    
+    return null;
+  };
 
-// Handler to start editing client
-const handleEditClientClick = () => {
-  if (selectedClient) {
-    setEditClientData({
-      name: selectedClient.name,
-      email: selectedClient.email,
-      mobile: selectedClient.mobile,
-      address: selectedClient.address,
-      avatar: selectedClient.avatar || "",
-    });
-    setIsEditingClient(true);
+  // ===== CLIENT EDIT HANDLERS =====
+  
+  // Handler to start editing client
+  const handleEditClientClick = () => {
+    if (selectedClient) {
+      setEditClientData({
+        name: selectedClient.name,
+        email: selectedClient.email,
+        mobile: selectedClient.mobile,
+        address: selectedClient.address,
+        avatar: selectedClient.avatar || "",
+      });
+      setIsEditingClient(true);
+    }
+  };
+
+  // Handler to save edited client
+  const handleSaveClient = async () => {
+    if (!selectedClient) return;
+
+    try {
+      await editClient({
+        id: selectedClient.id,
+        body: editClientData,
+      }).unwrap();
+      
+      toast.success("Client updated successfully");
+      setIsEditingClient(false);
+      setShowClientDialog(false);
+    } catch (err: any) {
+      console.error("Failed to update client:", err);
+      toast.error(err?.data?.message || "Failed to update client");
+    }
+  };
+
+  // Handler for form changes
+  const handleClientFormChange = (field: string, value: string) => {
+    setEditClientData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Handler for avatar upload
+const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    toast.error("Please upload an image file");
+    return;
   }
-};
 
-
-// Handler to save edited client
-const handleSaveClient = async () => {
-  if (!selectedClient) return;
+  if (file.size > 5 * 1024 * 1024) {
+    toast.error("Image size should be less than 5MB");
+    return;
+  }
 
   try {
-    await editClient({
-      id: selectedClient.id,
-      body: editClientData,
-    }).unwrap();
+    setUploadingAvatar(true);
     
-    toast.success("Client updated successfully");
-    setIsEditingClient(false);
-    setShowClientDialog(false);
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await uploadImage(formData).unwrap();
+    
+    console.log('🎯 Upload response:', response); 
+    console.log('🎯 New avatar URL:', response.imageUrl); 
+    
+    handleClientFormChange("avatar", response.imageUrl);
+    
+    toast.success("Avatar uploaded successfully");
+    e.target.value = '';
   } catch (err: any) {
-    console.error("Failed to update client:", err);
-    toast.error(err?.data?.message || "Failed to update client");
+    console.error("Failed to upload avatar:", err);
+    toast.error(err?.data?.message || "Failed to upload avatar");
+  } finally {
+    setUploadingAvatar(false);
   }
 };
 
-// Handler for form changes
-const handleClientFormChange = (field: string, value: string) => {
-  setEditClientData(prev => ({
-    ...prev,
-    [field]: value
-  }));
-};
+
+
 
   return (
     <div className="space-y-3">
@@ -532,132 +573,121 @@ const handleClientFormChange = (field: string, value: string) => {
                       </thead>
 
                       <tbody className="divide-y">
-  {orders.map((order) => {
-    const urgency = getOrderUrgency(order);
-    
-    return (
-      <tr 
-        key={order.id} 
-        className={`hover:bg-gray-50 transition-colors ${urgency ? urgency.color : ''}`}
-      >
-        {/* Service Type with urgency badge */}
-        <td className="px-4 py-3 font-medium text-gray-900 capitalize">
-          <div className="flex items-center gap-2">
-            <span>{order.serviceType.replace(/([A-Z])/g, " $1").trim()}</span>
-            {urgency && urgency.type === "expired" && (
-              <Badge className="bg-red-600 text-white text-xs">
-                EXPIRED ({urgency.days}d ago)
-              </Badge>
-            )}
-            {urgency && urgency.type === "urgent" && (
-              <Badge className="bg-orange-600 text-white text-xs">
-                URGENT ({urgency.days}d left)
-              </Badge>
-            )}
-            {urgency && urgency.type === "warning" && (
-              <Badge className="bg-yellow-600 text-white text-xs">
-                {urgency.days}d left
-              </Badge>
-            )}
-          </div>
-          <div className="text-lg text-gray-500">
-            ID: {order.id.slice(0, 8)}...
-          </div>
-        </td>
+                        {orders.map((order) => {
+                          const urgency = getOrderUrgency(order);
+                          
+                          return (
+                            <tr 
+                              key={order.id} 
+                              className={`hover:bg-gray-50 transition-colors ${urgency ? urgency.color : ''}`}
+                            >
+                              <td className="px-4 py-3 font-medium text-gray-900 capitalize">
+                                <div className="flex items-center gap-2">
+                                  <span>{order.serviceType.replace(/([A-Z])/g, " $1").trim()}</span>
+                                  {urgency && urgency.type === "expired" && (
+                                    <Badge className="bg-red-600 text-white text-xs">
+                                      EXPIRED ({urgency.days}d ago)
+                                    </Badge>
+                                  )}
+                                  {urgency && urgency.type === "urgent" && (
+                                    <Badge className="bg-orange-600 text-white text-xs">
+                                      URGENT ({urgency.days}d left)
+                                    </Badge>
+                                  )}
+                                  {urgency && urgency.type === "warning" && (
+                                    <Badge className="bg-yellow-600 text-white text-xs">
+                                      {urgency.days}d left
+                                    </Badge>
+                                  )}
+                                </div>
+                                <div className="text-lg text-gray-500">
+                                  ID: {order.id.slice(0, 8)}...
+                                </div>
+                              </td>
 
-        {/* Location */}
-        <td className="px-4 py-3 text-gray-700 max-w-[180px] truncate">
-          <div className="flex items-center gap-1">
-            <MapPin className="h-3 w-3 text-gray-400" />
-            {order.locationAddress}
-          </div>
-        </td>
+                              <td className="px-4 py-3 text-gray-700 max-w-[180px] truncate">
+                                <div className="flex items-center gap-1">
+                                  <MapPin className="h-3 w-3 text-gray-400" />
+                                  {order.locationAddress}
+                                </div>
+                              </td>
 
-        {/* Schedule */}
-        <td className="px-4 py-3 text-gray-700">
-          <div className="flex items-center gap-1">
-            <Calendar className="h-3 w-3 text-gray-400" />
-            {formatDate(order.startDate)} – {formatDate(order.endDate)}
-          </div>
-        </td>
+                              <td className="px-4 py-3 text-gray-700">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3 text-gray-400" />
+                                  {formatDate(order.startDate)} – {formatDate(order.endDate)}
+                                </div>
+                              </td>
 
-        {/* Guards Required */}
-        <td className="px-4 py-3 text-gray-700">
-          <div className="flex items-center gap-1">
-            <User className="h-3 w-3 text-gray-400" />
-            {order.guardsRequired} guard{order.guardsRequired > 1 ? "s" : ""}
-          </div>
-        </td>
+                              <td className="px-4 py-3 text-gray-700">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-3 w-3 text-gray-400" />
+                                  {order.guardsRequired} guard{order.guardsRequired > 1 ? "s" : ""}
+                                </div>
+                              </td>
 
-        {/* Status */}
-        <td className="px-4 py-3">
-          <Badge className={getStatusColor(order.status)}>
-            {order.status}
-          </Badge>
-        </td>
+                              <td className="px-4 py-3">
+                                <Badge className={getStatusColor(order.status)}>
+                                  {order.status}
+                                </Badge>
+                              </td>
 
-        {/* Created At */}
-        <td className="px-4 py-3 text-gray-600 text-lg">
-          {formatDate(order.createdAt)}
-        </td>
+                              <td className="px-4 py-3 text-gray-600 text-lg">
+                                {formatDate(order.createdAt)}
+                              </td>
 
-        {/* Actions */}
-        <td className="px-4 py-3 text-right">
-          <div className="flex items-center justify-end gap-2">
-            {/* View */}
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => handleViewDetails(order.id)}
-              title="View Details"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
+                              <td className="px-4 py-3 text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button
+                                    size="lg"
+                                    variant="outline"
+                                    className="h-8 w-8 p-0"
+                                    onClick={() => handleViewDetails(order.id)}
+                                    title="View Details"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
 
-            {/* Edit - Show for non-completed/cancelled orders */}
-            {order.status !== "completed" && order.status !== "cancelled" && (
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-8 w-8 p-0 border-blue-200 text-blue-600 hover:bg-blue-50"
-                onClick={() => handleEditClick(order)}
-                title="Edit Order"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-            )}
+                                  {order.status !== "completed" && order.status !== "cancelled" && (
+                                    <Button
+                                      size="lg"
+                                      variant="outline"
+                                      className="h-8 w-8 p-0 border-blue-200 text-blue-600 hover:bg-blue-50"
+                                      onClick={() => handleEditClick(order)}
+                                      title="Edit Order"
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                  )}
 
-            {/* Accept/Reject for pending */}
-            {order.status === "pending" && (
-              <>
-                <Button
-                  size="lg"
-                  className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
-                  onClick={() => handleAction(order, "accept")}
-                  disabled={isAccepting}
-                >
-                  Accept
-                </Button>
+                                  {order.status === "pending" && (
+                                    <>
+                                      <Button
+                                        size="lg"
+                                        className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
+                                        onClick={() => handleAction(order, "accept")}
+                                        disabled={isAccepting}
+                                      >
+                                        Accept
+                                      </Button>
 
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="h-8 px-2 text-lg border-red-200 text-red-600 hover:bg-red-50"
-                  onClick={() => handleAction(order, "reject")}
-                  disabled={isCancelling}
-                >
-                  Reject
-                </Button>
-              </>
-            )}
-          </div>
-        </td>
-      </tr>
-    );
-  })}
-</tbody>
-
+                                      <Button
+                                        size="lg"
+                                        variant="outline"
+                                        className="h-8 px-2 text-lg border-red-200 text-red-600 hover:bg-red-50"
+                                        onClick={() => handleAction(order, "reject")}
+                                        disabled={isCancelling}
+                                      >
+                                        Reject
+                                      </Button>
+                                    </>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
                     </table>
                   </div>
 
@@ -829,14 +859,13 @@ const handleClientFormChange = (field: string, value: string) => {
           </DialogHeader>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-            {/* Service Type */}
             <div className="space-y-2">
               <Label htmlFor="edit-serviceType">Service Type</Label>
               <Select
                 value={editFormData.serviceType}
                 onValueChange={(value: string) => handleEditFormChange("serviceType", value)}
               >
-                <SelectTrigger id="edit-serviceType"> 
+                <SelectTrigger id="edit-serviceType">
                   <SelectValue placeholder="Select service type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -850,7 +879,6 @@ const handleClientFormChange = (field: string, value: string) => {
               </Select>
             </div>
 
-            {/* Guards Required */}
             <div className="space-y-2">
               <Label htmlFor="edit-guardsRequired">Guards Required</Label>
               <Input
@@ -862,7 +890,6 @@ const handleClientFormChange = (field: string, value: string) => {
               />
             </div>
 
-            {/* Location Name */}
             <div className="space-y-2">
               <Label htmlFor="edit-locationName">Location Name</Label>
               <Input
@@ -873,7 +900,6 @@ const handleClientFormChange = (field: string, value: string) => {
               />
             </div>
 
-            {/* Location Address */}
             <div className="space-y-2">
               <Label htmlFor="edit-locationAddress">Location Address</Label>
               <Input
@@ -884,7 +910,6 @@ const handleClientFormChange = (field: string, value: string) => {
               />
             </div>
 
-            {/* Latitude */}
             <div className="space-y-2">
               <Label htmlFor="edit-latitude">Latitude</Label>
               <Input
@@ -897,7 +922,6 @@ const handleClientFormChange = (field: string, value: string) => {
               />
             </div>
 
-            {/* Longitude */}
             <div className="space-y-2">
               <Label htmlFor="edit-longitude">Longitude</Label>
               <Input
@@ -910,7 +934,6 @@ const handleClientFormChange = (field: string, value: string) => {
               />
             </div>
 
-            {/* Start Date */}
             <div className="space-y-2">
               <Label htmlFor="edit-startDate">Start Date</Label>
               <Input
@@ -921,7 +944,6 @@ const handleClientFormChange = (field: string, value: string) => {
               />
             </div>
 
-            {/* End Date */}
             <div className="space-y-2">
               <Label htmlFor="edit-endDate">End Date</Label>
               <Input
@@ -932,7 +954,6 @@ const handleClientFormChange = (field: string, value: string) => {
               />
             </div>
 
-            {/* Start Time */}
             <div className="space-y-2">
               <Label htmlFor="edit-startTime">Start Time</Label>
               <Input
@@ -943,7 +964,6 @@ const handleClientFormChange = (field: string, value: string) => {
               />
             </div>
 
-            {/* End Time */}
             <div className="space-y-2">
               <Label htmlFor="edit-endTime">End Time</Label>
               <Input
@@ -954,7 +974,6 @@ const handleClientFormChange = (field: string, value: string) => {
               />
             </div>
 
-            {/* Description - Full Width */}
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="edit-description">Description</Label>
               <Textarea
@@ -989,225 +1008,289 @@ const handleClientFormChange = (field: string, value: string) => {
         </DialogContent>
       </Dialog>
 
-      {/* PREMIUM Client Details Dialog with Avatar & Edit */}
-<Dialog open={showClientDialog} onOpenChange={(open) => {
-  setShowClientDialog(open);
-  if (!open) {
-    setIsEditingClient(false);
-  }
-}}>
-  <DialogContent className="max-w-2xl">
-    <DialogHeader className="border-b pb-4">
-      <div className="flex items-center justify-between">
-        <DialogTitle className="text-2xl font-bold text-gray-900">
-          Client Details
-        </DialogTitle>
-        {!isEditingClient && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleEditClientClick}
-            className="flex items-center gap-2"
-          >
-            <Edit className="h-4 w-4" />
-            Edit
-          </Button>
-        )}
-      </div>
-    </DialogHeader>
-
-    {selectedClient && (
-      <div className="space-y-6 py-4">
-        {/* Avatar Section */}
-        <div className="flex flex-col items-center gap-4 pb-4 border-b">
-          {!isEditingClient ? (
-            <>
-              {selectedClient.avatar ? (
-                <img 
-                  src={selectedClient.avatar} 
-                  alt={selectedClient.name}
-                  className="h-24 w-24 rounded-full object-cover border-4 border-blue-100 shadow-lg"
-                />
-              ) : (
-                <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg">
-                  <User className="h-12 w-12 text-white" />
-                </div>
-              )}
-              <div className="text-center">
-                <h3 className="text-xl font-bold text-gray-900">{selectedClient.name}</h3>
-                <p className="text-sm text-gray-500 mt-1">Client ID: {selectedClient.id.slice(0, 8)}...</p>
-              </div>
-            </>
-          ) : (
-            <div className="w-full">
-              <Label className="text-sm font-semibold text-gray-700 mb-2 block">
-                Avatar URL
-              </Label>
-              <Input
-                value={editClientData.avatar}
-                onChange={(e) => handleClientFormChange("avatar", e.target.value)}
-                placeholder="https://example.com/avatar.jpg"
-                className="h-11 text-base"
-              />
-              {editClientData.avatar && (
-                <div className="mt-3 flex justify-center">
-                  <img 
-                    src={editClientData.avatar} 
-                    alt="Preview"
-                    className="h-20 w-20 rounded-full object-cover border-2 border-gray-200"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
+      {/* PREMIUM Client Details Dialog with Avatar Upload & Edit */}
+      <Dialog open={showClientDialog} onOpenChange={(open) => {
+        setShowClientDialog(open);
+        if (!open) {
+          setIsEditingClient(false);
+        }
+      }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="border-b pb-4">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-2xl font-bold text-gray-900">
+                Client Details
+              </DialogTitle>
+              {!isEditingClient && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEditClientClick}
+                  className="flex items-center gap-2"
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit
+                </Button>
               )}
             </div>
-          )}
-        </div>
+          </DialogHeader>
 
-        {/* Client Information Grid */}
-        <div className="grid grid-cols-1 gap-5">
-          {/* Name */}
-          <div>
-            <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <User className="h-4 w-4 text-gray-500" />
-              Full Name
-            </Label>
-            {!isEditingClient ? (
-              <div className="text-base font-medium text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                {selectedClient.name}
+          {selectedClient && (
+            <div className="space-y-6 py-4">
+              {/* Avatar Section - UPDATED WITH UPLOAD */}
+              <div className="flex flex-col items-center gap-4 pb-4 border-b">
+                {!isEditingClient ? (
+                  <>
+                    {selectedClient.avatar ? (
+                      <img 
+                        src={selectedClient.avatar} 
+                        alt={selectedClient.name}
+                        className="h-24 w-24 rounded-full object-cover border-4 border-blue-100 shadow-lg"
+                      />
+                    ) : (
+                      <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg">
+                        <User className="h-12 w-12 text-white" />
+                      </div>
+                    )}
+                    <div className="text-center">
+                      <h3 className="text-xl font-bold text-gray-900">{selectedClient.name}</h3>
+                      <p className="text-sm text-gray-500 mt-1">Client ID: {selectedClient.id.slice(0, 8)}...</p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="w-full space-y-4">
+                    {/* Avatar Preview */}
+                    <div className="flex justify-center">
+                      {editClientData.avatar ? (
+                        <div className="relative">
+                          <img 
+                            src={editClientData.avatar} 
+                            alt="Avatar preview"
+                            className="h-24 w-24 rounded-full object-cover border-4 border-blue-100 shadow-lg"
+                            onError={(e) => {
+                              e.currentTarget.src = '';
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                          {/* Remove avatar button */}
+                          <button
+                            onClick={() => handleClientFormChange("avatar", "")}
+                            className="absolute -top-2 -right-2 h-8 w-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+                            type="button"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="h-24 w-24 rounded-full bg-gray-100 flex items-center justify-center border-4 border-gray-200">
+                          <User className="h-12 w-12 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Upload Section */}
+                    <div>
+                      <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+                        Profile Picture
+                      </Label>
+                      
+                      {/* Upload Button */}
+                      <div className="flex gap-2">
+                        <label className="flex-1">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarUpload}
+                            disabled={uploadingAvatar}
+                            className="hidden"
+                          />
+                          <div className={`
+                            flex items-center justify-center gap-2 px-4 py-2.5 
+                            border-2 border-dashed border-gray-300 rounded-lg 
+                            cursor-pointer hover:border-blue-400 hover:bg-blue-50 
+                            transition-all text-sm font-medium text-gray-700
+                            ${uploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''}
+                          `}>
+                            {uploadingAvatar ? (
+                              <>
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
+                                Uploading...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="h-4 w-4" />
+                                Upload Image
+                              </>
+                            )}
+                          </div>
+                        </label>
+                      </div>
+
+                      {/* OR divider */}
+                      <div className="flex items-center gap-2 my-3">
+                        <div className="flex-1 h-px bg-gray-200"></div>
+                        <span className="text-xs text-gray-500 font-medium">OR</span>
+                        <div className="flex-1 h-px bg-gray-200"></div>
+                      </div>
+
+                      {/* URL Input (as fallback) */}
+                      <Input
+                        value={editClientData.avatar}
+                        onChange={(e) => handleClientFormChange("avatar", e.target.value)}
+                        placeholder="Paste image URL here"
+                        className="h-11 text-base"
+                        disabled={uploadingAvatar}
+                      />
+                      <p className="text-xs text-gray-500 mt-1.5">
+                        Max size: 5MB • Supported: JPG, PNG, GIF, WebP
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
-            ) : (
-              <Input
-                value={editClientData.name}
-                onChange={(e) => handleClientFormChange("name", e.target.value)}
-                className="h-11 text-base"
-                placeholder="Enter full name"
-              />
-            )}
-          </div>
 
-          {/* Email */}
-          <div>
-            <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <Mail className="h-4 w-4 text-gray-500" />
-              Email Address
-            </Label>
-            {!isEditingClient ? (
-              <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200 break-all">
-                {selectedClient.email}
+              {/* Client Information Grid */}
+              <div className="grid grid-cols-1 gap-5">
+                {/* Name */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    <User className="h-4 w-4 text-gray-500" />
+                    Full Name
+                  </Label>
+                  {!isEditingClient ? (
+                    <div className="text-base font-medium text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      {selectedClient.name}
+                    </div>
+                  ) : (
+                    <Input
+                      value={editClientData.name}
+                      onChange={(e) => handleClientFormChange("name", e.target.value)}
+                      className="h-11 text-base"
+                      placeholder="Enter full name"
+                    />
+                  )}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-gray-500" />
+                    Email Address
+                  </Label>
+                  {!isEditingClient ? (
+                    <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200 break-all">
+                      {selectedClient.email}
+                    </div>
+                  ) : (
+                    <Input
+                      type="email"
+                      value={editClientData.email}
+                      onChange={(e) => handleClientFormChange("email", e.target.value)}
+                      className="h-11 text-base"
+                      placeholder="email@example.com"
+                    />
+                  )}
+                </div>
+
+                {/* Mobile */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-gray-500" />
+                    Mobile Number
+                  </Label>
+                  {!isEditingClient ? (
+                    <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      {selectedClient.mobile}
+                    </div>
+                  ) : (
+                    <Input
+                      type="tel"
+                      value={editClientData.mobile}
+                      onChange={(e) => handleClientFormChange("mobile", e.target.value)}
+                      className="h-11 text-base"
+                      placeholder="+91 1234567890"
+                    />
+                  )}
+                </div>
+
+                {/* Address */}
+                <div>
+                  <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-gray-500" />
+                    Address
+                  </Label>
+                  {!isEditingClient ? (
+                    <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[60px]">
+                      {selectedClient.address || "—"}
+                    </div>
+                  ) : (
+                    <Textarea
+                      value={editClientData.address}
+                      onChange={(e) => handleClientFormChange("address", e.target.value)}
+                      className="text-base min-h-[80px]"
+                      placeholder="Enter full address"
+                      rows={3}
+                    />
+                  )}
+                </div>
+
+                {/* Verification Badge (if available) */}
+                {selectedClient.isVerified !== undefined && !isEditingClient && (
+                  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <span className="text-sm font-semibold text-gray-700">Account Status:</span>
+                    <Badge className={selectedClient.isVerified 
+                      ? "bg-green-100 text-green-800 border-green-300" 
+                      : "bg-yellow-100 text-yellow-800 border-yellow-300"
+                    }>
+                      {selectedClient.isVerified ? "Verified" : "Unverified"}
+                    </Badge>
+                  </div>
+                )}
               </div>
-            ) : (
-              <Input
-                type="email"
-                value={editClientData.email}
-                onChange={(e) => handleClientFormChange("email", e.target.value)}
-                className="h-11 text-base"
-                placeholder="email@example.com"
-              />
-            )}
-          </div>
-
-          {/* Mobile */}
-          <div>
-            <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <Phone className="h-4 w-4 text-gray-500" />
-              Mobile Number
-            </Label>
-            {!isEditingClient ? (
-              <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                {selectedClient.mobile}
-              </div>
-            ) : (
-              <Input
-                type="tel"
-                value={editClientData.mobile}
-                onChange={(e) => handleClientFormChange("mobile", e.target.value)}
-                className="h-11 text-base"
-                placeholder="+91 1234567890"
-              />
-            )}
-          </div>
-
-          {/* Address */}
-          <div>
-            <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-gray-500" />
-              Address
-            </Label>
-            {!isEditingClient ? (
-              <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[60px]">
-                {selectedClient.address || "—"}
-              </div>
-            ) : (
-              <Textarea
-                value={editClientData.address}
-                onChange={(e) => handleClientFormChange("address", e.target.value)}
-                className="text-base min-h-[80px]"
-                placeholder="Enter full address"
-                rows={3}
-              />
-            )}
-          </div>
-
-          {/* Verification Badge (if available) */}
-          {selectedClient.isVerified !== undefined && !isEditingClient && (
-            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <span className="text-sm font-semibold text-gray-700">Account Status:</span>
-              <Badge className={selectedClient.isVerified 
-                ? "bg-green-100 text-green-800 border-green-300" 
-                : "bg-yellow-100 text-yellow-800 border-yellow-300"
-              }>
-                {selectedClient.isVerified ? "Verified" : "Unverified"}
-              </Badge>
             </div>
           )}
-        </div>
-      </div>
-    )}
 
-    <DialogFooter className="border-t pt-4 flex gap-2">
-      {!isEditingClient ? (
-        <Button 
-          onClick={() => setShowClientDialog(false)}
-          className="w-full"
-          variant="outline"
-        >
-          Close
-        </Button>
-      ) : (
-        <>
-          <Button 
-            onClick={() => setIsEditingClient(false)}
-            variant="outline"
-            disabled={isEditingClientMutation}
-            className="flex-1"
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSaveClient}
-            disabled={isEditingClientMutation}
-            className="flex-1 bg-blue-600 hover:bg-blue-700"
-          >
-            {isEditingClientMutation ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent mr-2"></div>
-                Saving...
-              </>
+          <DialogFooter className="border-t pt-4 flex gap-2">
+            {!isEditingClient ? (
+              <Button 
+                onClick={() => setShowClientDialog(false)}
+                className="w-full"
+                variant="outline"
+              >
+                Close
+              </Button>
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Changes
+                <Button 
+                  onClick={() => setIsEditingClient(false)}
+                  variant="outline"
+                  disabled={isEditingClientMutation}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSaveClient}
+                  disabled={isEditingClientMutation}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  {isEditingClientMutation ? (
+                    <>
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent mr-2"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
               </>
             )}
-          </Button>
-        </>
-      )}
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
-
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Action Dialog */}
       <Dialog open={showActionDialog} onOpenChange={setShowActionDialog}>
@@ -1256,4 +1339,5 @@ const handleClientFormChange = (field: string, value: string) => {
       </Dialog>
     </div>
   );
+
 }

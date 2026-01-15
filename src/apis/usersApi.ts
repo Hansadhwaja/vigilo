@@ -47,6 +47,12 @@ export interface DeleteClientResponse {
   message: string;
 }
 
+export interface UploadImageResponse {
+  success: boolean;
+  message: string;
+  imageUrl: string;
+}
+
 // ===== API ENDPOINTS =====
 export const usersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -95,9 +101,18 @@ export const usersApi = baseApi.injectEndpoints({
       query: (body) => ({
         url: `/users/deleteClient`,
         method: "POST",
-        body, // contains { id }
+        body,
       }),
       invalidatesTags: [{ type: "Clients", id: "LIST" }],
+    }),
+
+    // Upload single image
+    uploadImage: builder.mutation<UploadImageResponse, FormData>({
+      query: (formData) => ({
+        url: `/upload/single-image`,
+        method: "POST",
+        body: formData,
+      }),
     }),
   }),
 });
@@ -108,4 +123,5 @@ export const {
   useGetClientByIdQuery,
   useEditClientMutation,
   useDeleteClientMutation,
+  useUploadImageMutation,
 } = usersApi;
