@@ -171,9 +171,9 @@ export default function OrderDetailsPage() {
         <div className="text-center">
           <BadgeIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
           <h3 className="text-xl font-semibold mb-2">No order found</h3>
-          <p className="text-base text-gray-500">Please select an order to view details</p>
+          <p className="text-lg text-gray-500">Please select an order to view details</p>
           <div className="mt-6">
-            <Button variant="outline" onClick={onBack} className="text-base px-6 py-2">Back</Button>
+            <Button variant="outline" onClick={onBack} className="text-lg px-6 py-2">Back</Button>
           </div>
         </div>
       </div>
@@ -202,7 +202,7 @@ export default function OrderDetailsPage() {
               <Button 
                 variant="ghost" 
                 onClick={onBack} 
-                className="flex items-center gap-2 hover:bg-white text-base px-4 py-2"
+                className="flex items-center gap-2 hover:bg-white text-lg px-4 py-2"
               >
                 <ArrowLeft className="h-5 w-5" />
                 <span className="font-medium">Back</span>
@@ -214,11 +214,11 @@ export default function OrderDetailsPage() {
                 <div className="flex items-center gap-4">
                   <FileText className="h-7 w-7 text-gray-700" />
                   <h1 className="text-3xl font-bold text-gray-900">Complete Order Details</h1>
-                  <Badge className={`${getStatusColor(order.status)} border-2 text-base font-semibold px-4 py-1.5`}>
+                  <Badge className={`${getStatusColor(order.status)} border-2 text-lg font-semibold px-4 py-1.5`}>
                     {order.status}
                   </Badge>
                 </div>
-                <p className="text-base text-gray-600 mt-2 ml-11">
+                <p className="text-lg text-gray-600 mt-2 ml-11">
                   Full order information including location and requirements
                 </p>
               </div>
@@ -231,7 +231,7 @@ export default function OrderDetailsPage() {
                   variant="outline"
                   onClick={handleEditClick}
                   disabled={order.status === "completed" || order.status === "cancelled"}
-                  className="flex items-center gap-2 border-2 border-gray-300 text-base font-medium px-5 py-2.5 h-auto"
+                  className="flex items-center gap-2 border-2 border-gray-300 text-lg font-medium px-5 py-2.5 h-auto"
                 >
                   <Edit className="h-5 w-5" />
                   Edit Order
@@ -242,7 +242,7 @@ export default function OrderDetailsPage() {
                     variant="outline"
                     onClick={handleCancelEdit}
                     disabled={isEditing}
-                    className="flex items-center gap-2 text-base font-medium px-5 py-2.5 h-auto border-2"
+                    className="flex items-center gap-2 text-lg font-medium px-5 py-2.5 h-auto border-2"
                   >
                     <X className="h-5 w-5" />
                     Cancel
@@ -250,7 +250,7 @@ export default function OrderDetailsPage() {
                   <Button 
                     onClick={handleSaveEdit}
                     disabled={isEditing}
-                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-medium px-6 py-2.5 h-auto"
+                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-medium px-6 py-2.5 h-auto"
                   >
                     {isEditing ? (
                       <div className="h-5 w-5 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
@@ -286,7 +286,7 @@ export default function OrderDetailsPage() {
                   <div>
                     <Label className="text-lg font-semibold text-gray-700 mb-2 block">Service Type</Label>
                     {!isEditMode ? (
-                      <div className="font-semibold text-gray-900 text-base capitalize">
+                      <div className="font-semibold text-gray-900 text-lg capitalize">
                         {order.serviceType?.replace(/([A-Z])/g, " $1").trim()}
                       </div>
                     ) : (
@@ -294,7 +294,7 @@ export default function OrderDetailsPage() {
                         value={editFormData.serviceType}
                         onValueChange={(value) => handleFormChange("serviceType", value)}
                       >
-                        <SelectTrigger className="h-11 text-base">
+                        <SelectTrigger className="h-11 text-lg">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -313,14 +313,14 @@ export default function OrderDetailsPage() {
                   <div>
                     <Label className="text-lg font-semibold text-gray-700 mb-2 block">Guards Required</Label>
                     {!isEditMode ? (
-                      <div className="font-semibold text-gray-900 text-base">{order.guardsRequired ?? "—"}</div>
+                      <div className="font-semibold text-gray-900 text-lg">{order.guardsRequired ?? "—"}</div>
                     ) : (
                       <Input
                         type="number"
                         min="1"
                         value={editFormData.guardsRequired}
                         onChange={(e) => handleFormChange("guardsRequired", e.target.value)}
-                        className="h-11 text-base"
+                        className="h-11 text-lg"
                       />
                     )}
                   </div>
@@ -330,12 +330,12 @@ export default function OrderDetailsPage() {
                     <div className="col-span-2">
                       <Label className="text-lg font-semibold text-gray-700 mb-2 block">Location Name</Label>
                       {!isEditMode ? (
-                        <div className="text-gray-900 text-base font-medium">{order.locationName ?? "—"}</div>
+                        <div className="text-gray-900 text-lg font-medium">{order.locationName ?? "—"}</div>
                       ) : (
                         <Input
                           value={editFormData.locationName}
                           onChange={(e) => handleFormChange("locationName", e.target.value)}
-                          className="h-11 text-base"
+                          className="h-11 text-lg"
                           placeholder="e.g., Mumbai Central Office"
                         />
                       )}
@@ -346,12 +346,12 @@ export default function OrderDetailsPage() {
                   <div className="col-span-2">
                     <Label className="text-lg font-semibold text-gray-700 mb-2 block">Location Address</Label>
                     {!isEditMode ? (
-                      <div className="text-gray-900 text-base">{order.locationAddress ?? "—"}</div>
+                      <div className="text-gray-900 text-lg">{order.locationAddress ?? "—"}</div>
                     ) : (
                       <Input
                         value={editFormData.locationAddress}
                         onChange={(e) => handleFormChange("locationAddress", e.target.value)}
-                        className="h-11 text-base"
+                        className="h-11 text-lg"
                         placeholder="Full address"
                       />
                     )}
@@ -372,7 +372,7 @@ export default function OrderDetailsPage() {
                           value={editFormData.siteServiceLat}
                           onChange={(e) => handleFormChange("siteServiceLat", e.target.value)}
                           placeholder="Latitude"
-                          className="h-11 text-base"
+                          className="h-11 text-lg"
                         />
                         <Input
                           type="number"
@@ -380,7 +380,7 @@ export default function OrderDetailsPage() {
                           value={editFormData.siteServiceLng}
                           onChange={(e) => handleFormChange("siteServiceLng", e.target.value)}
                           placeholder="Longitude"
-                          className="h-11 text-base"
+                          className="h-11 text-lg"
                         />
                       </div>
                     )}
@@ -394,13 +394,13 @@ export default function OrderDetailsPage() {
                   <Label className="text-lg font-semibold text-gray-700 mb-2 block">Description</Label>
                   {!isEditMode ? (
                     <div className="mt-3 p-5 bg-gray-50 rounded-lg border-2 border-gray-100">
-                      <p className="text-base text-gray-800 leading-relaxed">{order.description || "No description provided"}</p>
+                      <p className="text-lg text-gray-800 leading-relaxed">{order.description || "No description provided"}</p>
                     </div>
                   ) : (
                     <Textarea
                       value={editFormData.description}
                       onChange={(e) => handleFormChange("description", e.target.value)}
-                      className="mt-2 text-base min-h-[100px]"
+                      className="mt-2 text-lg min-h-[100px]"
                       rows={4}
                       placeholder="Standard patrol services for industrial estate and warehouse units"
                     />
@@ -450,19 +450,19 @@ export default function OrderDetailsPage() {
                   <div className="space-y-4">
                     <div className="flex items-start gap-4">
                       <div className="text-lg font-semibold text-gray-700 w-24">Name:</div>
-                      <div className="text-base font-semibold text-gray-900">{order.client.name}</div>
+                      <div className="text-lg font-semibold text-gray-900">{order.client.name}</div>
                     </div>
                     <div className="flex items-start gap-4">
                       <div className="text-lg font-semibold text-gray-700 w-24">Email:</div>
-                      <div className="text-base text-gray-800">{order.client.email}</div>
+                      <div className="text-lg text-gray-800">{order.client.email}</div>
                     </div>
                     <div className="flex items-start gap-4">
                       <div className="text-lg font-semibold text-gray-700 w-24">Mobile:</div>
-                      <div className="text-base text-gray-800">{order.client.mobile}</div>
+                      <div className="text-lg text-gray-800">{order.client.mobile}</div>
                     </div>
                     <div className="flex items-start gap-4">
                       <div className="text-lg font-semibold text-gray-700 w-24">Address:</div>
-                      <div className="text-base text-gray-800 flex-1">{order.client.address}</div>
+                      <div className="text-lg text-gray-800 flex-1">{order.client.address}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -487,13 +487,13 @@ export default function OrderDetailsPage() {
                 <div>
                   <Label className="text-lg font-semibold text-gray-700 mb-2 block">Start Date</Label>
                   {!isEditMode ? (
-                    <div className="font-semibold text-gray-900 text-base">{formatDate(order.startDate)}</div>
+                    <div className="font-semibold text-gray-900 text-lg">{formatDate(order.startDate)}</div>
                   ) : (
                     <Input
                       type="date"
                       value={editFormData.startDate}
                       onChange={(e) => handleFormChange("startDate", e.target.value)}
-                      className="h-11 text-base"
+                      className="h-11 text-lg"
                     />
                   )}
                 </div>
@@ -502,13 +502,13 @@ export default function OrderDetailsPage() {
                 <div>
                   <Label className="text-lg font-semibold text-gray-700 mb-2 block">End Date</Label>
                   {!isEditMode ? (
-                    <div className="font-semibold text-gray-900 text-base">{formatDate(order.endDate)}</div>
+                    <div className="font-semibold text-gray-900 text-lg">{formatDate(order.endDate)}</div>
                   ) : (
                     <Input
                       type="date"
                       value={editFormData.endDate}
                       onChange={(e) => handleFormChange("endDate", e.target.value)}
-                      className="h-11 text-base"
+                      className="h-11 text-lg"
                     />
                   )}
                 </div>
@@ -519,13 +519,13 @@ export default function OrderDetailsPage() {
                 <div>
                   <Label className="text-lg font-semibold text-gray-700 mb-2 block">Start Time</Label>
                   {!isEditMode ? (
-                    <div className="font-semibold text-gray-900 text-base">{formatTime(order.startTime)}</div>
+                    <div className="font-semibold text-gray-900 text-lg">{formatTime(order.startTime)}</div>
                   ) : (
                     <Input
                       type="time"
                       value={editFormData.startTime}
                       onChange={(e) => handleFormChange("startTime", e.target.value)}
-                      className="h-11 text-base"
+                      className="h-11 text-lg"
                     />
                   )}
                 </div>
@@ -534,13 +534,13 @@ export default function OrderDetailsPage() {
                 <div>
                   <Label className="text-lg font-semibold text-gray-700 mb-2 block">End Time</Label>
                   {!isEditMode ? (
-                    <div className="font-semibold text-gray-900 text-base">{formatTime(order.endTime)}</div>
+                    <div className="font-semibold text-gray-900 text-lg">{formatTime(order.endTime)}</div>
                   ) : (
                     <Input
                       type="time"
                       value={editFormData.endTime}
                       onChange={(e) => handleFormChange("endTime", e.target.value)}
-                      className="h-11 text-base"
+                      className="h-11 text-lg"
                     />
                   )}
                 </div>
@@ -558,17 +558,17 @@ export default function OrderDetailsPage() {
               <CardContent className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <Label className="text-lg font-semibold text-gray-700">Status:</Label>
-                  <Badge className={`${getStatusColor(order.status)} text-base font-bold px-4 py-1.5 border-2`}>
+                  <Badge className={`${getStatusColor(order.status)} text-lg font-bold px-4 py-1.5 border-2`}>
                     {order.status}
                   </Badge>
                 </div>
                 <div>
                   <Label className="text-lg font-semibold text-gray-700 mb-2 block">Created:</Label>
-                  <div className="text-base text-gray-800">{formatDate(order.createdAt)}</div>
+                  <div className="text-lg text-gray-800">{formatDate(order.createdAt)}</div>
                 </div>
                 <div>
                   <Label className="text-lg font-semibold text-gray-700 mb-2 block">Last Updated:</Label>
-                  <div className="text-base text-gray-800">{formatDate(order.updatedAt)}</div>
+                  <div className="text-lg text-gray-800">{formatDate(order.updatedAt)}</div>
                 </div>
                 <div>
                   <Label className="text-lg font-semibold text-gray-700 mb-2 block">Order ID:</Label>
