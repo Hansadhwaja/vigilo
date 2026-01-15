@@ -1482,7 +1482,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
           <SelectContent className="max-h-56 overflow-y-auto z-50" style={{ maxHeight: "14rem", overflowY: "auto" }}>
             {(() => {
               const allowedOrders = (orders || []).filter(
-                (o: any) => !["completed", "cancelled"].includes((o.status || "").toLowerCase())
+                (o: any) => !["completed", "cancelled","pending"].includes((o.status || "").toLowerCase())
               );
               return allowedOrders.length > 0 ? (
                 allowedOrders.map((order: any) => (
@@ -1513,7 +1513,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
           <SelectContent className="max-h-56 overflow-y-auto z-50" style={{ maxHeight: "14rem", overflowY: "auto" }}>
             {(() => {
               const allowedOrders = (orders || []).filter(
-                (o: any) => !["completed", "cancelled"].includes((o.status || "").toLowerCase())
+                (o: any) => !["completed", "cancelled","pending"].includes((o.status || "").toLowerCase())
               );
               return allowedOrders.length > 0 ? (
                 allowedOrders.map((order: any) => (
