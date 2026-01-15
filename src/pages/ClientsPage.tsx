@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Plus, Search, Filter, Edit, Trash2, Eye, User, Phone, Mail, MapPin, Building, Calendar, Clock, FileText, Image, CheckCircle, XCircle, Send } from "lucide-react";
+import { Plus, Search, Filter, Edit, Trash2, Eye, User, Phone, Mail, MapPin, Building, Calendar, Clock, FileText, Image, CheckCircle, XCircle, Send, Save } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -10,19 +10,33 @@ import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
-import { 
+import {
   useGetAllOrdersQuery, 
   useCancelOrderMutation, 
   useAcceptOrderMutation, 
-  useDeleteClientMutation,
+  useDeleteClientMutation,  
   useEditOrderMutation,  
-  useGetAllClientsQuery 
+  useGetAllClientsQuery      
 } from "../apis/ordersApi";
+
+import {
+  useGetClientByIdQuery,     
+  useEditClientMutation,    
+} from "../apis/usersApi";
+
 import { AlertCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 export default function ClientsPage() {
+  const [isEditingClient, setIsEditingClient] = useState(false);
+const [editClientData, setEditClientData] = useState({
+  name: "",
+  email: "",
+  mobile: "",
+  address: "",
+  avatar: "",
+});
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -37,6 +51,8 @@ export default function ClientsPage() {
   const itemsPerPage = 10;
   const [showClientDialog, setShowClientDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
+
+
   const navigate = useNavigate();
 
   // ===== EDIT ORDER STATE =====
@@ -84,7 +100,8 @@ export default function ClientsPage() {
   // Mutations
   const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();
   const [acceptOrder, { isLoading: isAccepting }] = useAcceptOrderMutation();
-  const [editOrder, { isLoading: isEditing }] = useEditOrderMutation();  // ← ADD THIS
+  const [editOrder, { isLoading: isEditing }] = useEditOrderMutation();  
+  const [editClient, { isLoading: isEditingClientMutation }] = useEditClientMutation();
 
   const orders = ordersResponse?.data || [];
   const apiPagination = ordersResponse?.pagination;
@@ -301,6 +318,48 @@ const getOrderUrgency = (order: any) => {
   } 
   
   return null;
+};
+
+// Handler to start editing client
+const handleEditClientClick = () => {
+  if (selectedClient) {
+    setEditClientData({
+      name: selectedClient.name,
+      email: selectedClient.email,
+      mobile: selectedClient.mobile,
+      address: selectedClient.address,
+      avatar: selectedClient.avatar || "",
+    });
+    setIsEditingClient(true);
+  }
+};
+
+
+// Handler to save edited client
+const handleSaveClient = async () => {
+  if (!selectedClient) return;
+
+  try {
+    await editClient({
+      id: selectedClient.id,
+      body: editClientData,
+    }).unwrap();
+    
+    toast.success("Client updated successfully");
+    setIsEditingClient(false);
+    setShowClientDialog(false);
+  } catch (err: any) {
+    console.error("Failed to update client:", err);
+    toast.error(err?.data?.message || "Failed to update client");
+  }
+};
+
+// Handler for form changes
+const handleClientFormChange = (field: string, value: string) => {
+  setEditClientData(prev => ({
+    ...prev,
+    [field]: value
+  }));
 };
 
   return (
@@ -775,9 +834,9 @@ const getOrderUrgency = (order: any) => {
               <Label htmlFor="edit-serviceType">Service Type</Label>
               <Select
                 value={editFormData.serviceType}
-                onValueChange={(value) => handleEditFormChange("serviceType", value)}
+                onValueChange={(value: string) => handleEditFormChange("serviceType", value)}
               >
-                <SelectTrigger id="edit-serviceType">
+                <SelectTrigger id="edit-serviceType"> 
                   <SelectValue placeholder="Select service type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -930,42 +989,225 @@ const getOrderUrgency = (order: any) => {
         </DialogContent>
       </Dialog>
 
-      {/* Client Details Dialog */}
-      <Dialog open={showClientDialog} onOpenChange={setShowClientDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Client Details</DialogTitle>
-          </DialogHeader>
+      {/* PREMIUM Client Details Dialog with Avatar & Edit */}
+<Dialog open={showClientDialog} onOpenChange={(open) => {
+  setShowClientDialog(open);
+  if (!open) {
+    setIsEditingClient(false);
+  }
+}}>
+  <DialogContent className="max-w-2xl">
+    <DialogHeader className="border-b pb-4">
+      <div className="flex items-center justify-between">
+        <DialogTitle className="text-2xl font-bold text-gray-900">
+          Client Details
+        </DialogTitle>
+        {!isEditingClient && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleEditClientClick}
+            className="flex items-center gap-2"
+          >
+            <Edit className="h-4 w-4" />
+            Edit
+          </Button>
+        )}
+      </div>
+    </DialogHeader>
 
-          {selectedClient && (
-            <div className="space-y-3 mt-2">
-              <div className="flex justify-between">
-                <span className="font-medium">Name:</span>
-                <span>{selectedClient.name}</span>
+    {selectedClient && (
+      <div className="space-y-6 py-4">
+        {/* Avatar Section */}
+        <div className="flex flex-col items-center gap-4 pb-4 border-b">
+          {!isEditingClient ? (
+            <>
+              {selectedClient.avatar ? (
+                <img 
+                  src={selectedClient.avatar} 
+                  alt={selectedClient.name}
+                  className="h-24 w-24 rounded-full object-cover border-4 border-blue-100 shadow-lg"
+                />
+              ) : (
+                <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg">
+                  <User className="h-12 w-12 text-white" />
+                </div>
+              )}
+              <div className="text-center">
+                <h3 className="text-xl font-bold text-gray-900">{selectedClient.name}</h3>
+                <p className="text-sm text-gray-500 mt-1">Client ID: {selectedClient.id.slice(0, 8)}...</p>
               </div>
-
-              <div className="flex justify-between">
-                <span className="font-medium">Email:</span>
-                <span>{selectedClient.email}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="font-medium">Mobile:</span>
-                <span>{selectedClient.mobile}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="font-medium">Address:</span>
-                <span className="text-right">{selectedClient.address}</span>
-              </div>
+            </>
+          ) : (
+            <div className="w-full">
+              <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+                Avatar URL
+              </Label>
+              <Input
+                value={editClientData.avatar}
+                onChange={(e) => handleClientFormChange("avatar", e.target.value)}
+                placeholder="https://example.com/avatar.jpg"
+                className="h-11 text-base"
+              />
+              {editClientData.avatar && (
+                <div className="mt-3 flex justify-center">
+                  <img 
+                    src={editClientData.avatar} 
+                    alt="Preview"
+                    className="h-20 w-20 rounded-full object-cover border-2 border-gray-200"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
+              )}
             </div>
           )}
+        </div>
 
-          <DialogFooter className="mt-4">
-            <Button onClick={() => setShowClientDialog(false)}>Close</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        {/* Client Information Grid */}
+        <div className="grid grid-cols-1 gap-5">
+          {/* Name */}
+          <div>
+            <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <User className="h-4 w-4 text-gray-500" />
+              Full Name
+            </Label>
+            {!isEditingClient ? (
+              <div className="text-base font-medium text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                {selectedClient.name}
+              </div>
+            ) : (
+              <Input
+                value={editClientData.name}
+                onChange={(e) => handleClientFormChange("name", e.target.value)}
+                className="h-11 text-base"
+                placeholder="Enter full name"
+              />
+            )}
+          </div>
+
+          {/* Email */}
+          <div>
+            <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <Mail className="h-4 w-4 text-gray-500" />
+              Email Address
+            </Label>
+            {!isEditingClient ? (
+              <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200 break-all">
+                {selectedClient.email}
+              </div>
+            ) : (
+              <Input
+                type="email"
+                value={editClientData.email}
+                onChange={(e) => handleClientFormChange("email", e.target.value)}
+                className="h-11 text-base"
+                placeholder="email@example.com"
+              />
+            )}
+          </div>
+
+          {/* Mobile */}
+          <div>
+            <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <Phone className="h-4 w-4 text-gray-500" />
+              Mobile Number
+            </Label>
+            {!isEditingClient ? (
+              <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                {selectedClient.mobile}
+              </div>
+            ) : (
+              <Input
+                type="tel"
+                value={editClientData.mobile}
+                onChange={(e) => handleClientFormChange("mobile", e.target.value)}
+                className="h-11 text-base"
+                placeholder="+91 1234567890"
+              />
+            )}
+          </div>
+
+          {/* Address */}
+          <div>
+            <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-gray-500" />
+              Address
+            </Label>
+            {!isEditingClient ? (
+              <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[60px]">
+                {selectedClient.address || "—"}
+              </div>
+            ) : (
+              <Textarea
+                value={editClientData.address}
+                onChange={(e) => handleClientFormChange("address", e.target.value)}
+                className="text-base min-h-[80px]"
+                placeholder="Enter full address"
+                rows={3}
+              />
+            )}
+          </div>
+
+          {/* Verification Badge (if available) */}
+          {selectedClient.isVerified !== undefined && !isEditingClient && (
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <span className="text-sm font-semibold text-gray-700">Account Status:</span>
+              <Badge className={selectedClient.isVerified 
+                ? "bg-green-100 text-green-800 border-green-300" 
+                : "bg-yellow-100 text-yellow-800 border-yellow-300"
+              }>
+                {selectedClient.isVerified ? "Verified" : "Unverified"}
+              </Badge>
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
+    <DialogFooter className="border-t pt-4 flex gap-2">
+      {!isEditingClient ? (
+        <Button 
+          onClick={() => setShowClientDialog(false)}
+          className="w-full"
+          variant="outline"
+        >
+          Close
+        </Button>
+      ) : (
+        <>
+          <Button 
+            onClick={() => setIsEditingClient(false)}
+            variant="outline"
+            disabled={isEditingClientMutation}
+            className="flex-1"
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSaveClient}
+            disabled={isEditingClientMutation}
+            className="flex-1 bg-blue-600 hover:bg-blue-700"
+          >
+            {isEditingClientMutation ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent mr-2"></div>
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Save Changes
+              </>
+            )}
+          </Button>
+        </>
+      )}
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
 
       {/* Action Dialog */}
       <Dialog open={showActionDialog} onOpenChange={setShowActionDialog}>
