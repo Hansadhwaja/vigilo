@@ -131,23 +131,42 @@ export default function ClientsPage() {
   };
 
   const handleAcceptReject = async () => {
-    if (!selectedOrder) return;
+  if (!selectedOrder) return;
 
-    try {
-      if (actionType === "accept") {
-        await acceptOrder(selectedOrder.id).unwrap();
-        toast.success("Order accepted successfully");
-      } else if (actionType === "reject") {
-        await cancelOrder(selectedOrder.id).unwrap();
-        toast.success("Order rejected successfully");
+  try {
+    if (actionType === "accept") {
+      // ✅ Check if start date has passed
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const startDate = new Date(selectedOrder.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      
+      if (startDate < today) {
+        const daysLate = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        const confirmLate = window.confirm(
+          `⚠️ WARNING: This order's start date was ${daysLate} day(s) ago.\n\n` +
+          `Are you sure you want to accept an expired order?`
+        );
+        
+        if (!confirmLate) {
+          return;
+        }
       }
-      setShowActionDialog(false);
-      setActionMessage("");
-    } catch (err: any) {
-      console.error("Failed to process order:", err);
-      toast.error(err?.data?.message || "Failed to process order");
+      
+      await acceptOrder(selectedOrder.id).unwrap();
+      toast.success("Order accepted successfully");
+    } else if (actionType === "reject") {
+      await cancelOrder(selectedOrder.id).unwrap();
+      toast.success("Order rejected successfully");
     }
-  };
+    setShowActionDialog(false);
+    setActionMessage("");
+  } catch (err: any) {
+    console.error("Failed to process order:", err);
+    toast.error(err?.data?.message || "Failed to process order");
+  }
+};
+
 
   // ===== EDIT ORDER FUNCTIONS =====
   const handleEditClick = (order: any) => {
@@ -262,6 +281,27 @@ export default function ClientsPage() {
     const hour12 = hour % 12 || 12;
     return `${hour12}:${minutes} ${ampm}`;
   };
+
+  // Add this function after formatTime
+const getOrderUrgency = (order: any) => {
+  if (order.status !== "pending") return null;
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const startDate = new Date(order.startDate);
+  startDate.setHours(0, 0, 0, 0);
+  
+  const daysUntilStart = Math.floor((startDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  
+  if (daysUntilStart < 0) {
+    return { type: "expired", days: Math.abs(daysUntilStart), color: "bg-red-50" };
+  } else if (daysUntilStart <= 2) {
+    return { type: "urgent", days: daysUntilStart, color: "bg-red-50" };
+  } 
+  
+  return null;
+};
 
   return (
     <div className="space-y-3">
@@ -433,107 +473,132 @@ export default function ClientsPage() {
                       </thead>
 
                       <tbody className="divide-y">
-                        {orders.map((order) => (
-                          <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                            {/* Service Type */}
-                            <td className="px-4 py-3 font-medium text-gray-900 capitalize">
-                              {order.serviceType.replace(/([A-Z])/g, " $1").trim()}
-                              <div className="text-lg text-gray-500">
-                                ID: {order.id.slice(0, 8)}...
-                              </div>
-                            </td>
+  {orders.map((order) => {
+    const urgency = getOrderUrgency(order);
+    
+    return (
+      <tr 
+        key={order.id} 
+        className={`hover:bg-gray-50 transition-colors ${urgency ? urgency.color : ''}`}
+      >
+        {/* Service Type with urgency badge */}
+        <td className="px-4 py-3 font-medium text-gray-900 capitalize">
+          <div className="flex items-center gap-2">
+            <span>{order.serviceType.replace(/([A-Z])/g, " $1").trim()}</span>
+            {urgency && urgency.type === "expired" && (
+              <Badge className="bg-red-600 text-white text-xs">
+                EXPIRED ({urgency.days}d ago)
+              </Badge>
+            )}
+            {urgency && urgency.type === "urgent" && (
+              <Badge className="bg-orange-600 text-white text-xs">
+                URGENT ({urgency.days}d left)
+              </Badge>
+            )}
+            {urgency && urgency.type === "warning" && (
+              <Badge className="bg-yellow-600 text-white text-xs">
+                {urgency.days}d left
+              </Badge>
+            )}
+          </div>
+          <div className="text-lg text-gray-500">
+            ID: {order.id.slice(0, 8)}...
+          </div>
+        </td>
 
-                            {/* Location */}
-                            <td className="px-4 py-3 text-gray-700 max-w-[180px] truncate">
-                              <div className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3 text-gray-400" />
-                                {order.locationAddress}
-                              </div>
-                            </td>
+        {/* Location */}
+        <td className="px-4 py-3 text-gray-700 max-w-[180px] truncate">
+          <div className="flex items-center gap-1">
+            <MapPin className="h-3 w-3 text-gray-400" />
+            {order.locationAddress}
+          </div>
+        </td>
 
-                            {/* Schedule */}
-                            <td className="px-4 py-3 text-gray-700">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3 text-gray-400" />
-                                {formatDate(order.startDate)} – {formatDate(order.endDate)}
-                              </div>
-                            </td>
+        {/* Schedule */}
+        <td className="px-4 py-3 text-gray-700">
+          <div className="flex items-center gap-1">
+            <Calendar className="h-3 w-3 text-gray-400" />
+            {formatDate(order.startDate)} – {formatDate(order.endDate)}
+          </div>
+        </td>
 
-                            {/* Guards Required */}
-                            <td className="px-4 py-3 text-gray-700">
-                              <div className="flex items-center gap-1">
-                                <User className="h-3 w-3 text-gray-400" />
-                                {order.guardsRequired} guard{order.guardsRequired > 1 ? "s" : ""}
-                              </div>
-                            </td>
+        {/* Guards Required */}
+        <td className="px-4 py-3 text-gray-700">
+          <div className="flex items-center gap-1">
+            <User className="h-3 w-3 text-gray-400" />
+            {order.guardsRequired} guard{order.guardsRequired > 1 ? "s" : ""}
+          </div>
+        </td>
 
-                            {/* Status */}
-                            <td className="px-4 py-3">
-                              <Badge className={getStatusColor(order.status)}>
-                                {order.status}
-                              </Badge>
-                            </td>
+        {/* Status */}
+        <td className="px-4 py-3">
+          <Badge className={getStatusColor(order.status)}>
+            {order.status}
+          </Badge>
+        </td>
 
-                            {/* Created At */}
-                            <td className="px-4 py-3 text-gray-600 text-lg">
-                              {formatDate(order.createdAt)}
-                            </td>
+        {/* Created At */}
+        <td className="px-4 py-3 text-gray-600 text-lg">
+          {formatDate(order.createdAt)}
+        </td>
 
-                            {/* Actions */}
-                            <td className="px-4 py-3 text-right">
-                              <div className="flex items-center justify-end gap-2">
-                                {/* View */}
-                                <Button
-                                  size="lg"
-                                  variant="outline"
-                                  className="h-8 w-8 p-0"
-                                  onClick={() => handleViewDetails(order.id)}
-                                  title="View Details"
-                                >
-                                  <Eye className="h-4 w-4" />
-                                </Button>
+        {/* Actions */}
+        <td className="px-4 py-3 text-right">
+          <div className="flex items-center justify-end gap-2">
+            {/* View */}
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-8 w-8 p-0"
+              onClick={() => handleViewDetails(order.id)}
+              title="View Details"
+            >
+              <Eye className="h-4 w-4" />
+            </Button>
 
-                                {/* Edit - Show for non-completed/cancelled orders */}
-                                {order.status !== "completed" && order.status !== "cancelled" && (
-                                  <Button
-                                    size="lg"
-                                    variant="outline"
-                                    className="h-8 w-8 p-0 border-blue-200 text-blue-600 hover:bg-blue-50"
-                                    onClick={() => handleEditClick(order)}
-                                    title="Edit Order"
-                                  >
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                )}
+            {/* Edit - Show for non-completed/cancelled orders */}
+            {order.status !== "completed" && order.status !== "cancelled" && (
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-8 w-8 p-0 border-blue-200 text-blue-600 hover:bg-blue-50"
+                onClick={() => handleEditClick(order)}
+                title="Edit Order"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            )}
 
-                                {/* Accept/Reject for pending */}
-                                {order.status === "pending" && (
-                                  <>
-                                    <Button
-                                      size="lg"
-                                      className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
-                                      onClick={() => handleAction(order, "accept")}
-                                      disabled={isAccepting}
-                                    >
-                                      Accept
-                                    </Button>
+            {/* Accept/Reject for pending */}
+            {order.status === "pending" && (
+              <>
+                <Button
+                  size="lg"
+                  className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
+                  onClick={() => handleAction(order, "accept")}
+                  disabled={isAccepting}
+                >
+                  Accept
+                </Button>
 
-                                    <Button
-                                      size="lg"
-                                      variant="outline"
-                                      className="h-8 px-2 text-lg border-red-200 text-red-600 hover:bg-red-50"
-                                      onClick={() => handleAction(order, "reject")}
-                                      disabled={isCancelling}
-                                    >
-                                      Reject
-                                    </Button>
-                                  </>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-8 px-2 text-lg border-red-200 text-red-600 hover:bg-red-50"
+                  onClick={() => handleAction(order, "reject")}
+                  disabled={isCancelling}
+                >
+                  Reject
+                </Button>
+              </>
+            )}
+          </div>
+        </td>
+      </tr>
+    );
+  })}
+</tbody>
+
                     </table>
                   </div>
 
