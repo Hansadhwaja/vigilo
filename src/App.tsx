@@ -10,7 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "./components/ui/sheet";
-import { Toaster } from "sonner";
+// import { Toaster } from "sonner";
 
 // Pages
 import Dashboard from "./pages/Dashboard";
@@ -39,7 +39,7 @@ import {
 } from "./data/sampleData";
 import { isSameMonthNow } from "./utils/helpers";
 import ProtectedRoute from "./components/ProtectedRoute/ProctedRoute";
-
+import { Toaster } from 'react-hot-toast';
 // -------------------- Types --------------------
 export interface Guard {
   id: string;
@@ -320,6 +320,25 @@ function MainLayout() {
               element={<SettingsPage usageAlarmsMTD={usageAlarmsMTD} />} 
             />
           </Routes>
+          {/* Toaster Notifications */}
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          success: {
+            style: {
+              background: '#10b981',
+              color: '#fff',
+            },
+          },
+          error: {
+            style: {
+              background: '#ef4444',
+              color: '#fff',
+            },
+          },
+        }}
+      />
         </div>
       </div>
 
