@@ -9,7 +9,8 @@ export interface Schedule {
   id: string;
   orderName: string | null;
   orderId: string;
-  date: string;               // "2025-11-28"
+  date: string;  
+  endDate: string;      // optional end date for multi-day schedules
   type: string;               // e.g. "static"
   description: string;
   startTime: string;          // ISO date string

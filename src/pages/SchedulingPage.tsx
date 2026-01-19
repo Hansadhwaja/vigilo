@@ -155,6 +155,8 @@ export default function ShiftPage() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
   const [openCalendar, setOpenCalendar] = useState(false);
+const [openStartCalendar, setOpenStartCalendar] = useState(false);
+const [openEndCalendar, setOpenEndCalendar] = useState(false);
 
   const [showAlertsDialog, setShowAlertsDialog] = useState(false);
   const [viewMode, setViewMode] = useState<"weekly" | "daily">("weekly");
@@ -261,7 +263,8 @@ const handleCreateSchedule = async () => {
 
     const payload = {
       description: formData.description,
-      date: jsDate.toISOString(),            // FIXED
+        date: formData.date,        // ✅ Already "YYYY-MM-DD" format
+      endDate: formData.endDate,   // ✅ Already "YYYY-MM-DD" format          
       orderId: formData.orderId,
       guardIds: formData.guardIds,
       startTime: formData.startTime,         // already HH:mm format or ISO — OK
@@ -281,13 +284,11 @@ const handleCreateSchedule = async () => {
 };
 
 
-
-  
-
   // Form states
   const [formData, setFormData] = useState({
     description: "",
-    date: selectedDate,
+    date: "",
+    endDate: "",
     startTime: "",
     endTime: "",
     guardIds: [] as string[],
@@ -468,7 +469,6 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
 }, [scheduleData, today]);
 
 
-
   // Get assignments for selected date with filters
   const getFilteredAssignments = (date: Date) => {
   const dayData = scheduleData.find(day => day.date.toDateString() === date.toDateString());
@@ -503,13 +503,15 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
   const handleCreateAssignment = () => {
     setFormData({
       description: "",
-      date: selectedDate,
+      date: "",
+      endDate: "",
       startTime: "",
       endTime: "",
       guardIds: [],
       orderId: "",
       role: "",
-      recurring: "none"
+      recurring: "none",
+      limit: 1000000,
     });
     setShowCreateDialog(true);
   };
@@ -518,76 +520,18 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
     setSelectedAssignment(assignment);
     setFormData({
       description: assignment.description || "",
-      date: selectedDate,
+      date: "",
+      endDate: "",
       startTime: assignment.time.split('-')[0],
       endTime: assignment.time.split('-')[1],
       guardIds: [assignment.id],
       orderId: assignment.orderId,
       role: assignment.role,
-      recurring: "none"
+      recurring: "none",
+      limit: 1000000,
     });
     setShowEditDialog(true);
   };
-
-  // const handleSaveAssignment = () => {
-  //   const order = orders.find(o => o.id === formData.orderId);
-    
-  //   if (formData.guardIds.length === 0 || !order) return;
-
-    // Create assignments for each selected guard
-  //   const newAssignments = formData.guardIds
-  //     .map(guardId => {
-  //       const guard = guards.find(g => g.id === guardId);
-  //       if (!guard) return null;
-
-  //       return {
-  //         id: guardId,
-  //         name: guard.name,
-  //         role: formData.role,
-  //         time: `${formData.startTime}-${formData.endTime}`,
-  //         orderId: formData.orderId,
-  //         orderName: order.locationAddress,
-  //         description: formData.description,
-  //         status: "Scheduled"
-  //       };
-  //     })
-  //     .filter((assignment): assignment is NonNullable<typeof assignment> => assignment !== null);
-
-  //   setScheduleData(prev => {
-  //     const dateKey = formData.date.toDateString();
-  //     const existingDayIndex = prev.findIndex(day => day.date.toDateString() === dateKey);
-      
-  //     if (existingDayIndex >= 0) {
-  //       const updatedDay = { ...prev[existingDayIndex] };
-  //       updatedDay.guards = [...updatedDay.guards, ...newAssignments];
-  //       const newData = [...prev];
-  //       newData[existingDayIndex] = updatedDay;
-  //       return newData;
-  //     } else {
-  //       return [...prev, {
-  //         id: `SCH-${Date.now()}`,
-  //         date: new Date(formData.date),
-  //         guards: newAssignments
-  //       }];
-  //     }
-  //   });
-
-  //   setShowCreateDialog(false);
-  // };
-
-  // const handleDeleteAssignment = (assignmentId: string, date: Date) => {
-  //   setScheduleData(prev => {
-  //     return prev.map(day => {
-  //       if (day.date.toDateString() === date.toDateString()) {
-  //         return {
-  //           ...day,
-  //           guards: day.guards.filter(g => g.id !== assignmentId || g.time !== selectedAssignment?.time)
-  //         };
-  //       }
-  //       return day;
-  //     }).filter(day => day.guards.length > 0);
-  //   });
-  // };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -1309,7 +1253,7 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
             <Clock className="h-4 w-4 text-green-600" />
             <div className="text-right">
               <div className="text-lg font-bold text-gray-900">
-                {getFilteredAssignments(selectedDate).filter(a => a.StaticGuards?.status === 'Active').length}
+                {getFilteredAssignments(selectedDate).filter((a: { StaticGuards?: { status: string } }) => a.StaticGuards?.status === 'Active').length}
               </div>
               <div className="text-xs text-gray-500">Active</div>
             </div>
@@ -1418,52 +1362,113 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label>Date <span className="text-red-500">*</span></Label>
+      {/* START DATE */}
+<div className="flex flex-col gap-2">
+  <Label>Start Date <span className="text-red-500">*</span></Label>
 
-        <Button
-          variant="outline"
-          className="w-full justify-start"
-          onClick={() => setOpenCalendar(true)}
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {formData.date ? new Date(formData.date).toLocaleDateString() : "Pick a date"}
-        </Button>
+  <Button
+    variant="outline"
+    className="w-full justify-start"
+    onClick={() => setOpenStartCalendar(true)}
+  >
+    <CalendarIcon className="mr-2 h-4 w-4" />
+    {formData.date ? new Date(formData.date + 'T00:00:00').toLocaleDateString() : "Pick start date"}
+  </Button>
 
-        <Dialog open={openCalendar} onOpenChange={setOpenCalendar}>
-          <DialogContent className="w-auto max-w-fit p-4 overflow-hidden">
-            <div className="bg-gradient-to-br from-background to-muted/20 rounded-lg">
-              <Calendar
-                mode="single"
-                selected={formData.date ? new Date(formData.date + 'T00:00:00') : undefined}
-                onSelect={(date: any) => {
-                  if (!date) return;
-                  
-                  // Format date in local timezone YYYY-MM-DD
-                  const year = date.getFullYear();
-                  const month = String(date.getMonth() + 1).padStart(2, '0');
-                  const day = String(date.getDate()).padStart(2, '0');
-                  const localDateString = `${year}-${month}-${day}`;
-                  
-                  setFormData({
-                    ...formData,
-                    date: localDateString,
-                  });
-                  setOpenCalendar(false);
-                }}
-                disabled={(date) => {
-                  const today = new Date();
-                  today.setHours(0, 0, 0, 0);
-                  const checkDate = new Date(date);
-                  checkDate.setHours(0, 0, 0, 0);
-                  return checkDate < today;
-                }}
-                fromDate={new Date()}
-              />
-            </div>
-          </DialogContent>
-        </Dialog>
+  <Dialog open={openStartCalendar} onOpenChange={setOpenStartCalendar}>
+    <DialogContent className="w-auto max-w-fit p-4 overflow-hidden">
+      <div className="bg-gradient-to-br from-background to-muted/20 rounded-lg">
+        <Calendar
+          mode="single"
+          selected={formData.date ? new Date(formData.date + 'T00:00:00') : undefined}
+          onSelect={(date: any) => {
+            if (!date) return;
+            
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const localDateString = `${year}-${month}-${day}`;
+            
+            setFormData({
+              ...formData,
+              date: localDateString,
+              // Clear endDate if it's before the new start date
+              endDate: formData.endDate && formData.endDate < localDateString ? '' : formData.endDate
+            });
+            setOpenStartCalendar(false);
+          }}
+          disabled={(date) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const checkDate = new Date(date);
+            checkDate.setHours(0, 0, 0, 0);
+            return checkDate < today;
+          }}
+          fromDate={new Date()}
+        />
       </div>
+    </DialogContent>
+  </Dialog>
+</div>
+
+{/* END DATE */}
+<div className="flex flex-col gap-2">
+  <Label>End Date <span className="text-red-500">*</span></Label>
+
+  <Button
+    variant="outline"
+    className="w-full justify-start"
+    onClick={() => setOpenEndCalendar(true)}
+  >
+    <CalendarIcon className="mr-2 h-4 w-4" />
+    {formData.endDate ? new Date(formData.endDate + 'T00:00:00').toLocaleDateString() : "Pick end date"}
+  </Button>
+
+  <Dialog open={openEndCalendar} onOpenChange={setOpenEndCalendar}>
+    <DialogContent className="w-auto max-w-fit p-4 overflow-hidden">
+      <div className="bg-gradient-to-br from-background to-muted/20 rounded-lg">
+        <Calendar
+          mode="single"
+          selected={formData.endDate ? new Date(formData.endDate + 'T00:00:00') : undefined}
+          onSelect={(date: any) => {
+            if (!date) return;
+            
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const localDateString = `${year}-${month}-${day}`;
+            
+            setFormData({
+              ...formData,
+              endDate: localDateString,
+            });
+            setOpenEndCalendar(false);
+          }}
+          disabled={(date) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const checkDate = new Date(date);
+            checkDate.setHours(0, 0, 0, 0);
+            
+            // Disable past dates
+            if (checkDate < today) return true;
+            
+            // Disable dates before start date
+            if (formData.date) {
+              const startDate = new Date(formData.date + 'T00:00:00');
+              startDate.setHours(0, 0, 0, 0);
+              return checkDate < startDate;
+            }
+            
+            return false;
+          }}
+          fromDate={formData.date ? new Date(formData.date + 'T00:00:00') : new Date()}
+        />
+      </div>
+    </DialogContent>
+  </Dialog>
+</div>
+
 
       {/* Order Address */}
       <div>
