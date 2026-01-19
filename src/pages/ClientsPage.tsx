@@ -625,7 +625,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                         </Badge>
                       )}
                     </div>
-                    <div className="text-sm text-gray-500 font-mono">
+                    <div className="text-lg text-gray-500 font-mono">
                       #{order.id.slice(0, 8)}
                     </div>
                   </div>
@@ -896,164 +896,175 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       </Tabs>
 
       {/* ===== EDIT ORDER DIALOG ===== */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Order</DialogTitle>
-            <DialogDescription>
-              Update order details including location, schedule, and requirements
-            </DialogDescription>
-          </DialogHeader>
+<Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle>Edit Order</DialogTitle>
+      <DialogDescription>
+        Update order details including location, schedule, and requirements
+      </DialogDescription>
+    </DialogHeader>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-serviceType">Service Type</Label>
-              <Select
-                value={editFormData.serviceType}
-                onValueChange={(value: string) => handleEditFormChange("serviceType", value)}
-              >
-                <SelectTrigger id="edit-serviceType">
-                  <SelectValue placeholder="Select service type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="static">Static</SelectItem>
-                  <SelectItem value="premiumSecurity">Premium Security</SelectItem>
-                  <SelectItem value="standardPatrol">Standard Patrol</SelectItem>
-                  <SelectItem value="24/7Monitoring">24/7 Monitoring</SelectItem>
-                  <SelectItem value="healthcareSecurity">Healthcare Security</SelectItem>
-                  <SelectItem value="industrialSecurity">Industrial Security</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+      <div className="space-y-2">
+        <Label htmlFor="edit-serviceType">Service Type</Label>
+        <Select
+          value={editFormData.serviceType}
+          onValueChange={(value: string) => handleEditFormChange("serviceType", value)}
+        >
+          <SelectTrigger id="edit-serviceType" className="text-lg">
+            <SelectValue placeholder="Select service type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="static" className="text-lg">Static</SelectItem>
+            <SelectItem value="premiumSecurity" className="text-lg">Premium Security</SelectItem>
+            <SelectItem value="standardPatrol" className="text-lg">Standard Patrol</SelectItem>
+            <SelectItem value="24/7Monitoring" className="text-lg">24/7 Monitoring</SelectItem>
+            <SelectItem value="healthcareSecurity" className="text-lg">Healthcare Security</SelectItem>
+            <SelectItem value="industrialSecurity" className="text-lg">Industrial Security</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-guardsRequired">Guards Required</Label>
-              <Input
-                id="edit-guardsRequired"
-                type="number"
-                min="1"
-                value={editFormData.guardsRequired}
-                onChange={(e) => handleEditFormChange("guardsRequired", e.target.value)}
-              />
-            </div>
+      <div className="space-y-2">
+        <Label htmlFor="edit-guardsRequired">Guards Required</Label>
+        <Input
+          id="edit-guardsRequired"
+          type="number"
+          min="1"
+          className="text-lg"
+          value={editFormData.guardsRequired}
+          onChange={(e) => handleEditFormChange("guardsRequired", e.target.value)}
+        />
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-locationName">Location Name</Label>
-              <Input
-                id="edit-locationName"
-                value={editFormData.locationName}
-                onChange={(e) => handleEditFormChange("locationName", e.target.value)}
-                placeholder="e.g., Mumbai Central Office"
-              />
-            </div>
+      <div className="space-y-2">
+        <Label htmlFor="edit-locationName">Location Name</Label>
+        <Input
+          id="edit-locationName"
+          className="text-lg"
+          value={editFormData.locationName}
+          onChange={(e) => handleEditFormChange("locationName", e.target.value)}
+          placeholder="e.g., Mumbai Central Office"
+        />
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-locationAddress">Location Address</Label>
-              <Input
-                id="edit-locationAddress"
-                value={editFormData.locationAddress}
-                onChange={(e) => handleEditFormChange("locationAddress", e.target.value)}
-                placeholder="Full address"
-              />
-            </div>
+      <div className="space-y-2">
+        <Label htmlFor="edit-locationAddress">Location Address</Label>
+        <Input
+          id="edit-locationAddress"
+          className="text-lg"
+          value={editFormData.locationAddress}
+          onChange={(e) => handleEditFormChange("locationAddress", e.target.value)}
+          placeholder="Full address"
+        />
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-latitude">Latitude</Label>
-              <Input
-                id="edit-latitude"
-                type="number"
-                step="0.000001"
-                value={editFormData.siteServiceLat}
-                onChange={(e) => handleEditFormChange("siteServiceLat", e.target.value)}
-                placeholder="e.g., 19.0596"
-              />
-            </div>
+      <div className="space-y-2">
+        <Label htmlFor="edit-latitude">Latitude</Label>
+        <Input
+          id="edit-latitude"
+          type="number"
+          step="0.000001"
+          className="text-lg"
+          value={editFormData.siteServiceLat}
+          onChange={(e) => handleEditFormChange("siteServiceLat", e.target.value)}
+          placeholder="e.g., 19.0596"
+        />
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-longitude">Longitude</Label>
-              <Input
-                id="edit-longitude"
-                type="number"
-                step="0.000001"
-                value={editFormData.siteServiceLng}
-                onChange={(e) => handleEditFormChange("siteServiceLng", e.target.value)}
-                placeholder="e.g., 72.8295"
-              />
-            </div>
+      <div className="space-y-2">
+        <Label htmlFor="edit-longitude">Longitude</Label>
+        <Input
+          id="edit-longitude"
+          type="number"
+          step="0.000001"
+          className="text-lg"
+          value={editFormData.siteServiceLng}
+          onChange={(e) => handleEditFormChange("siteServiceLng", e.target.value)}
+          placeholder="e.g., 72.8295"
+        />
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-startDate">Start Date</Label>
-              <Input
-                id="edit-startDate"
-                type="date"
-                value={editFormData.startDate}
-                onChange={(e) => handleEditFormChange("startDate", e.target.value)}
-              />
-            </div>
+      <div className="space-y-2">
+        <Label htmlFor="edit-startDate">Start Date</Label>
+        <Input
+          id="edit-startDate"
+          type="date"
+          className="text-lg"
+          value={editFormData.startDate}
+          onChange={(e) => handleEditFormChange("startDate", e.target.value)}
+        />
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-endDate">End Date</Label>
-              <Input
-                id="edit-endDate"
-                type="date"
-                value={editFormData.endDate}
-                onChange={(e) => handleEditFormChange("endDate", e.target.value)}
-              />
-            </div>
+      <div className="space-y-2">
+        <Label htmlFor="edit-endDate">End Date</Label>
+        <Input
+          id="edit-endDate"
+          type="date"
+          className="text-lg"
+          value={editFormData.endDate}
+          onChange={(e) => handleEditFormChange("endDate", e.target.value)}
+        />
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-startTime">Start Time</Label>
-              <Input
-                id="edit-startTime"
-                type="time"
-                value={editFormData.startTime}
-                onChange={(e) => handleEditFormChange("startTime", e.target.value)}
-              />
-            </div>
+      <div className="space-y-2">
+        <Label htmlFor="edit-startTime">Start Time</Label>
+        <Input
+          id="edit-startTime"
+          type="time"
+          className="text-lg"
+          value={editFormData.startTime}
+          onChange={(e) => handleEditFormChange("startTime", e.target.value)}
+        />
+      </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-endTime">End Time</Label>
-              <Input
-                id="edit-endTime"
-                type="time"
-                value={editFormData.endTime}
-                onChange={(e) => handleEditFormChange("endTime", e.target.value)}
-              />
-            </div>
+      <div className="space-y-2">
+        <Label htmlFor="edit-endTime">End Time</Label>
+        <Input
+          id="edit-endTime"
+          type="time"
+          className="text-lg"
+          value={editFormData.endTime}
+          onChange={(e) => handleEditFormChange("endTime", e.target.value)}
+        />
+      </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="edit-description">Description</Label>
-              <Textarea
-                id="edit-description"
-                value={editFormData.description}
-                onChange={(e) => handleEditFormChange("description", e.target.value)}
-                placeholder="Order description and requirements..."
-                rows={3}
-              />
-            </div>
-          </div>
+      <div className="space-y-2 md:col-span-2">
+        <Label htmlFor="edit-description">Description</Label>
+        <Textarea
+          id="edit-description"
+          className="text-lg"
+          value={editFormData.description}
+          onChange={(e) => handleEditFormChange("description", e.target.value)}
+          placeholder="Order description and requirements..."
+          rows={3}
+        />
+      </div>
+    </div>
 
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowEditDialog(false)}
-              disabled={isEditing}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleEditSubmit}
-              disabled={isEditing}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {isEditing && (
-                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
-              )}
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+    <DialogFooter>
+      <Button
+        variant="outline"
+        onClick={() => setShowEditDialog(false)}
+        disabled={isEditing}
+      >
+        Cancel
+      </Button>
+      <Button
+        onClick={handleEditSubmit}
+        disabled={isEditing}
+        className="bg-blue-600 hover:bg-blue-700"
+      >
+        {isEditing && (
+          <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
+        )}
+        Save Changes
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+
 
       {/* PREMIUM Client Details Dialog with Avatar Upload & Edit */}
       <Dialog open={showClientDialog} onOpenChange={(open) => {
@@ -1188,7 +1199,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                         className="h-11 text-base"
                         disabled={uploadingAvatar}
                       />
-                      <p className="text-sm text-gray-500 mt-1.5">
+                      <p className="text-lg text-gray-500 mt-1.5">
                         Max size: 5MB • Supported: JPG, PNG, GIF, WebP
                       </p>
                     </div>
