@@ -555,191 +555,238 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 </div>
               )}
 
-              {/* Order List */}
-              {!isLoading && !isError && orders.length > 0 && (
-                <>
-                  <div className="overflow-x-auto rounded-lg border border-gray-200">
-                    <table className="w-full text-lg text-left">
-                      <thead className="bg-gray-50 border-b">
-                        <tr>
-                          <th className="px-4 py-3 font-medium text-gray-700">Service Type</th>
-                          <th className="px-4 py-3 font-medium text-gray-700">Location</th>
-                          <th className="px-4 py-3 font-medium text-gray-700">Schedule</th>
-                          <th className="px-4 py-3 font-medium text-gray-700">Guards</th>
-                          <th className="px-4 py-3 font-medium text-gray-700">Status</th>
-                          <th className="px-4 py-3 font-medium text-gray-700">Created</th>
-                          <th className="px-4 py-3 font-medium text-gray-700 text-right">Actions</th>
-                        </tr>
-                      </thead>
+              {/* Order List - Premium Minimal Design */}
+{!isLoading && !isError && orders.length > 0 && (
+  <>
+    {/* Custom Scrollbar Styles - Add to your global CSS or style tag */}
+    <style>{`
+      .premium-scroll::-webkit-scrollbar {
+        height: 8px;
+      }
+      
+      .premium-scroll::-webkit-scrollbar-track {
+        background: #f8fafc;
+        border-radius: 4px;
+      }
+      
+      .premium-scroll::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+        transition: background 0.2s;
+      }
+      
+      .premium-scroll::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+    `}</style>
 
-                      <tbody className="divide-y">
-                        {orders.map((order) => {
-                          const urgency = getOrderUrgency(order);
-                          
-                          return (
-                            <tr 
-                              key={order.id} 
-                              className={`hover:bg-gray-50 transition-colors ${urgency ? urgency.color : ''}`}
-                            >
-                              <td className="px-4 py-3 font-medium text-gray-900 capitalize">
-                                <div className="flex items-center gap-2">
-                                  <span>{order.serviceType.replace(/([A-Z])/g, " $1").trim()}</span>
-                                  {urgency && urgency.type === "expired" && (
-                                    <Badge className="bg-red-600 text-white text-xs">
-                                      EXPIRED ({urgency.days}d ago)
-                                    </Badge>
-                                  )}
-                                  {urgency && urgency.type === "urgent" && (
-                                    <Badge className="bg-orange-600 text-white text-xs">
-                                      URGENT ({urgency.days}d left)
-                                    </Badge>
-                                  )}
-                                  {urgency && urgency.type === "warning" && (
-                                    <Badge className="bg-yellow-600 text-white text-xs">
-                                      {urgency.days}d left
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="text-lg text-gray-500">
-                                  ID: {order.id.slice(0, 8)}...
-                                </div>
-                              </td>
+    <div className="overflow-x-auto premium-scroll rounded-xl border border-gray-200/60 shadow-sm bg-white">
+      <table className="w-full text-lg">
+        <thead className="bg-linear-to-r from-gray-50 to-gray-100/50 border-b border-gray-200/60">
+          <tr>
+            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Service</th>
+            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Location</th>
+            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Schedule</th>
+            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Guards</th>
+            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Status</th>
+            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Created</th>
+            <th className="px-6 py-4 font-semibold text-gray-700 text-right">Actions</th>
+          </tr>
+        </thead>
 
-                              <td className="px-4 py-3 text-gray-700 max-w-[180px] truncate">
-                                <div className="flex items-center gap-1">
-                                  <MapPin className="h-3 w-3 text-gray-400" />
-                                  {order.locationAddress}
-                                </div>
-                              </td>
-
-                              <td className="px-4 py-3 text-gray-700">
-                                <div className="flex items-center gap-1">
-                                  <Calendar className="h-3 w-3 text-gray-400" />
-                                  {formatDate(order.startDate)} – {formatDate(order.endDate)}
-                                </div>
-                              </td>
-
-                              <td className="px-4 py-3 text-gray-700">
-                                <div className="flex items-center gap-1">
-                                  <User className="h-3 w-3 text-gray-400" />
-                                  {order.guardsRequired} guard{order.guardsRequired > 1 ? "s" : ""}
-                                </div>
-                              </td>
-
-                              <td className="px-4 py-3">
-                                <Badge className={getStatusColor(order.status)}>
-                                  {order.status}
-                                </Badge>
-                              </td>
-
-                              <td className="px-4 py-3 text-gray-600 text-lg">
-                                {formatDate(order.createdAt)}
-                              </td>
-
-                              <td className="px-4 py-3 text-right">
-                                <div className="flex items-center justify-end gap-2">
-                                  <Button
-                                    size="lg"
-                                    variant="outline"
-                                    className="h-8 w-8 p-0"
-                                    onClick={() => handleViewDetails(order.id)}
-                                    title="View Details"
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-
-                                  {order.status !== "completed" && order.status !== "cancelled" && (
-                                    <Button
-                                      size="lg"
-                                      variant="outline"
-                                      className="h-8 w-8 p-0 border-blue-200 text-blue-600 hover:bg-blue-50"
-                                      onClick={() => handleEditClick(order)}
-                                      title="Edit Order"
-                                    >
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
-                                  )}
-
-                                  {order.status === "pending" && (
-                                    <>
-                                      <Button
-                                        size="lg"
-                                        className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
-                                        onClick={() => handleAction(order, "accept")}
-                                        disabled={isAccepting}
-                                      >
-                                        Accept
-                                      </Button>
-
-                                      <Button
-                                        size="lg"
-                                        variant="outline"
-                                        className="h-8 px-2 text-lg border-red-200 text-red-600 hover:bg-red-50"
-                                        onClick={() => handleAction(order, "reject")}
-                                        disabled={isCancelling}
-                                      >
-                                        Reject
-                                      </Button>
-                                    </>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="flex justify-center mt-4">
-                      <Pagination>
-                        <PaginationContent>
-                          <PaginationItem>
-                            <PaginationPrevious 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (currentPage > 1) {
-                                  setCurrentPage(prev => prev - 1);
-                                }
-                              }}
-                              className={currentPage === 1 ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                            />
-                          </PaginationItem>
-                          
-                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                            <PaginationItem key={page}>
-                              <PaginationLink
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setCurrentPage(page);
-                                }}
-                                isActive={page === currentPage}
-                                className="cursor-pointer"
-                              >
-                                {page}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ))}
-                          
-                          <PaginationItem>
-                            <PaginationNext 
-                              onClick={(e) => {
-                                e.preventDefault();
-                                if (currentPage < totalPages) {
-                                  setCurrentPage(prev => prev + 1);
-                                }
-                              }}
-                              className={currentPage === totalPages ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}
-                            />
-                          </PaginationItem>
-                        </PaginationContent>
-                      </Pagination>
+        <tbody className="divide-y divide-gray-100">
+          {orders.map((order) => {
+            const urgency = getOrderUrgency(order);
+            
+            return (
+              <tr 
+                key={order.id} 
+                className={`hover:bg-gray-50/50 transition-all duration-200 ${urgency ? urgency.color : ''}`}
+              >
+                <td className="px-6 py-4">
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900 text-lg">
+                        {order.serviceType.replace(/([A-Z])/g, " $1").trim()}
+                      </span>
+                      {urgency && urgency.type === "expired" && (
+                        <Badge className="bg-red-50 hover:bg-red-60 text-white text-xs px-2 py-0.5 font-medium">
+                          EXPIRED · {urgency.days}d
+                        </Badge>
+                      )}
+                      {urgency && urgency.type === "urgent" && (
+                        <Badge className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-2 py-0.5 font-medium">
+                          {urgency.days}d left
+                        </Badge>
+                      )}
+                      {urgency && urgency.type === "warning" && (
+                        <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2 py-0.5 font-medium">
+                          {urgency.days}d
+                        </Badge>
+                      )}
                     </div>
-                  )}
-                </>
-              )}
+                    <div className="text-sm text-gray-500 font-mono">
+                      #{order.id.slice(0, 8)}
+                    </div>
+                  </div>
+                </td>
+
+                <td className="px-6 py-4">
+                  <div className="flex items-start gap-2 max-w-50">
+                    <MapPin className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
+                    <span className="text-lg text-gray-700 line-clamp-2">
+                      {order.locationAddress}
+                    </span>
+                  </div>
+                </td>
+
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-gray-400 shrink-0" />
+                    <div className="text-lg text-gray-700 whitespace-nowrap">
+                      {formatDate(order.startDate)} → {formatDate(order.endDate)}
+                    </div>
+                  </div>
+                </td>
+
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-gray-400" />
+                    <span className="text-lg text-gray-700 font-medium">
+                      {order.guardsRequired}
+                    </span>
+                  </div>
+                </td>
+
+                <td className="px-6 py-4">
+                  <Badge className={`${getStatusColor(order.status)} font-medium`}>
+                    {order.status}
+                  </Badge>
+                </td>
+
+                <td className="px-6 py-4">
+                  <span className="text-lg text-gray-600">
+                    {formatDate(order.createdAt)}
+                  </span>
+                </td>
+
+                <td className="px-6 py-4">
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-9 w-9 p-0 hover:bg-gray-100"
+                      onClick={() => handleViewDetails(order.id)}
+                      title="View Details"
+                    >
+                      <Eye className="h-4 w-4 text-gray-600" />
+                    </Button>
+
+                    {order.status !== "completed" && order.status !== "cancelled" && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-9 w-9 p-0 hover:bg-blue-50 text-blue-600"
+                        onClick={() => handleEditClick(order)}
+                        title="Edit Order"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    )}
+
+                    {order.status === "pending" && (
+                      <div className="flex items-center gap-1.5 ml-2">
+                        <Button
+                          size="sm"
+                          className="h-9 px-3 text-lg bg-emerald-600 hover:bg-emerald-700 shadow-sm"
+                          onClick={() => handleAction(order, "accept")}
+                          disabled={isAccepting}
+                        >
+                          Accept
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-9 px-3 text-lg text-red-600 hover:bg-red-50"
+                          onClick={() => handleAction(order, "reject")}
+                          disabled={isCancelling}
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+
+    {/* Premium Pagination */}
+    {totalPages > 1 && (
+      <div className="flex justify-center mt-6">
+        <Pagination>
+          <PaginationContent className="gap-1">
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage > 1) {
+                    setCurrentPage(prev => prev - 1);
+                  }
+                }}
+                className={`${
+                  currentPage === 1 
+                    ? "pointer-events-none opacity-40 cursor-not-allowed" 
+                    : "cursor-pointer hover:bg-gray-100"
+                } transition-colors`}
+              />
+            </PaginationItem>
+            
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCurrentPage(page);
+                  }}
+                  isActive={page === currentPage}
+                  className={`cursor-pointer transition-all ${
+                    page === currentPage 
+                      ? "bg-gray-900 text-white hover:bg-gray-800" 
+                      : "hover:bg-gray-100"
+                  }`}
+                >
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            
+            <PaginationItem>
+              <PaginationNext 
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage < totalPages) {
+                    setCurrentPage(prev => prev + 1);
+                  }
+                }}
+                className={`${
+                  currentPage === totalPages 
+                    ? "pointer-events-none opacity-40 cursor-not-allowed" 
+                    : "cursor-pointer hover:bg-gray-100"
+                } transition-colors`}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    )}
+  </>
+)}
+
             </CardContent>
           </Card>
         </TabsContent>
@@ -795,21 +842,21 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                             {client.name}
                           </td>
 
-                          <td className="px-4 py-3 text-gray-700 max-w-[200px] truncate">
+                          <td className="px-4 py-3 text-gray-700 max-w-50 truncate">
                             <div className="flex items-center gap-1">
                               <Mail className="h-4 w-4 text-gray-400" />
                               {client.email}
                             </div>
                           </td>
 
-                          <td className="px-4 py-3 text-gray-700 max-w-[150px] truncate">
+                          <td className="px-4 py-3 text-gray-700 max-w-37.5 truncate">
                             <div className="flex items-center gap-1">
                               <Phone className="h-4 w-4 text-gray-400" />
                               {client.mobile}
                             </div>
                           </td>
 
-                          <td className="px-4 py-3 text-gray-600 max-w-[220px] truncate">
+                          <td className="px-4 py-3 text-gray-600 max-w-55 truncate">
                             {client.address || "—"}
                           </td>
 
@@ -1048,13 +1095,13 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                         className="h-24 w-24 rounded-full object-cover border-4 border-blue-100 shadow-lg"
                       />
                     ) : (
-                      <div className="h-24 w-24 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg">
+                      <div className="h-24 w-24 rounded-full bg-linear-to-br from-blue-400 to-blue-600 flex items-center justify-center shadow-lg">
                         <User className="h-12 w-12 text-white" />
                       </div>
                     )}
                     <div className="text-center">
                       <h3 className="text-xl font-bold text-gray-900">{selectedClient.name}</h3>
-                      <p className="text-sm text-gray-500 mt-1">Client ID: {selectedClient.id.slice(0, 8)}...</p>
+                      <p className="text-lg text-gray-500 mt-1">Client ID: {selectedClient.id.slice(0, 8)}...</p>
                     </div>
                   </>
                 ) : (
@@ -1090,7 +1137,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
                     {/* Upload Section */}
                     <div>
-                      <Label className="text-sm font-semibold text-gray-700 mb-2 block">
+                      <Label className="text-lg font-semibold text-gray-700 mb-2 block">
                         Profile Picture
                       </Label>
                       
@@ -1108,7 +1155,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                             flex items-center justify-center gap-2 px-4 py-2.5 
                             border-2 border-dashed border-gray-300 rounded-lg 
                             cursor-pointer hover:border-blue-400 hover:bg-blue-50 
-                            transition-all text-sm font-medium text-gray-700
+                            transition-all text-lg font-medium text-gray-700
                             ${uploadingAvatar ? 'opacity-50 cursor-not-allowed' : ''}
                           `}>
                             {uploadingAvatar ? (
@@ -1129,7 +1176,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                       {/* OR divider */}
                       <div className="flex items-center gap-2 my-3">
                         <div className="flex-1 h-px bg-gray-200"></div>
-                        <span className="text-xs text-gray-500 font-medium">OR</span>
+                        <span className="text-lg text-gray-500 font-medium">OR</span>
                         <div className="flex-1 h-px bg-gray-200"></div>
                       </div>
 
@@ -1141,7 +1188,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                         className="h-11 text-base"
                         disabled={uploadingAvatar}
                       />
-                      <p className="text-xs text-gray-500 mt-1.5">
+                      <p className="text-sm text-gray-500 mt-1.5">
                         Max size: 5MB • Supported: JPG, PNG, GIF, WebP
                       </p>
                     </div>
@@ -1153,7 +1200,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
               <div className="grid grid-cols-1 gap-5">
                 {/* Name */}
                 <div>
-                  <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <Label className="text-lg font-semibold text-gray-700 mb-2 flex items-center gap-2">
                     <User className="h-4 w-4 text-gray-500" />
                     Full Name
                   </Label>
@@ -1173,7 +1220,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
                 {/* Email */}
                 <div>
-                  <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <Label className="text-lg font-semibold text-gray-700 mb-2 flex items-center gap-2">
                     <Mail className="h-4 w-4 text-gray-500" />
                     Email Address
                   </Label>
@@ -1194,7 +1241,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
                 {/* Mobile */}
                 <div>
-                  <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <Label className="text-lg font-semibold text-gray-700 mb-2 flex items-center gap-2">
                     <Phone className="h-4 w-4 text-gray-500" />
                     Mobile Number
                   </Label>
@@ -1215,19 +1262,19 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
                 {/* Address */}
                 <div>
-                  <Label className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                  <Label className="text-lg font-semibold text-gray-700 mb-2 flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-gray-500" />
                     Address
                   </Label>
                   {!isEditingClient ? (
-                    <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[60px]">
+                    <div className="text-base text-gray-900 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-15">
                       {selectedClient.address || "—"}
                     </div>
                   ) : (
                     <Textarea
                       value={editClientData.address}
                       onChange={(e) => handleClientFormChange("address", e.target.value)}
-                      className="text-base min-h-[80px]"
+                      className="text-base min-h-20"
                       placeholder="Enter full address"
                       rows={3}
                     />
@@ -1237,7 +1284,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 {/* Verification Badge (if available) */}
                 {selectedClient.isVerified !== undefined && !isEditingClient && (
                   <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <span className="text-sm font-semibold text-gray-700">Account Status:</span>
+                    <span className="text-lg font-semibold text-gray-700">Account Status:</span>
                     <Badge className={selectedClient.isVerified 
                       ? "bg-green-100 text-green-800 border-green-300" 
                       : "bg-yellow-100 text-yellow-800 border-yellow-300"
