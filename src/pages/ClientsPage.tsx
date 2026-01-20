@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Plus, Search, Filter, Edit, Trash2, Eye, User, Phone, Mail, MapPin, Building, Calendar, Clock, FileText, Image, CheckCircle, XCircle, Send, Save, Upload, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -54,6 +54,10 @@ export default function ClientsPage() {
   const [showClientDialog, setShowClientDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+const [orderSearchTerm, setOrderSearchTerm] = useState("");
+  const [clientSearchTerm, setClientSearchTerm] = useState("");
+  const [debouncedOrderSearch, setDebouncedOrderSearch] = useState("");
+  const [debouncedClientSearch, setDebouncedClientSearch] = useState("");
 
   const navigate = useNavigate();
 
@@ -73,31 +77,34 @@ export default function ClientsPage() {
     endTime: "",
   });
 
-  // Debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      if (currentPage !== 1) {
-        setCurrentPage(1);
-      }
-    }, 500);
+// Debounce order search
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedOrderSearch(orderSearchTerm);
+    if (currentPage !== 1) setCurrentPage(1);
+  }, 500);
+  return () => clearTimeout(timer);
+}, [orderSearchTerm]);
 
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+// Debounce client search
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedClientSearch(clientSearchTerm);
+  }, 500);
+  return () => clearTimeout(timer);
+}, [clientSearchTerm]);
+
 
   // Fetch orders from API
-  const { data: ordersResponse, isLoading, isError, error, isFetching } = useGetAllOrdersQuery(
-    {
-      limit: itemsPerPage,
-      page: currentPage,
-      status: statusFilter !== "all" ? statusFilter : undefined,
-      serviceType: serviceTypeFilter !== "all" ? serviceTypeFilter : undefined,
-      search: debouncedSearch || undefined,
-    },
-    {
-      refetchOnMountOrArgChange: true,
-    }
-  );
+  const { data: ordersResponse, isLoading, isError, error, isFetching } = useGetAllOrdersQuery({
+    limit: itemsPerPage,
+    page: currentPage,
+    status: statusFilter !== "all" ? statusFilter : undefined,
+    serviceType: serviceTypeFilter !== "all" ? serviceTypeFilter : undefined,
+    search: debouncedOrderSearch || undefined,
+  }, {
+    refetchOnMountOrArgChange: true,
+  });
 
   // Mutations
   const [cancelOrder, { isLoading: isCancelling }] = useCancelOrderMutation();
@@ -110,10 +117,30 @@ export default function ClientsPage() {
   const orders = ordersResponse?.data || [];
   const apiPagination = ordersResponse?.pagination;
 
-  const { data } = useGetAllClientsQuery();
+  const { data, isLoading: isLoadingClients, isError: isErrorClients } = useGetAllClientsQuery({
+  search: debouncedClientSearch || undefined,
+  page: 1,
+  limit: 100,
+});
+
 
   const clients = data?.data; 
   const clientsList = clients ? (Array.isArray(clients) ? clients : [clients]) : [];
+
+  // Filter clients by search
+const filteredClients = useMemo(() => {
+  if (!clientsList || clientsList.length === 0) return [];
+  if (!debouncedClientSearch) return clientsList;
+  
+  const searchLower = debouncedClientSearch.toLowerCase();
+  return clientsList.filter(client => 
+    client.name?.toLowerCase().includes(searchLower) ||
+    client.email?.toLowerCase().includes(searchLower) ||
+    client.mobile?.toLowerCase().includes(searchLower) ||
+    client.address?.toLowerCase().includes(searchLower)
+  );
+}, [clientsList, debouncedClientSearch]);
+
 
   const handleDeleteClient = async (clientId: string) => {
     if (!clientId) return;
@@ -257,7 +284,8 @@ export default function ClientsPage() {
         id: selectedOrder.id,
         body: payload
       }).unwrap();
- console.log("🚀 Editing order with payload:", payload);
+
+//  console.log("🚀 Editing order with payload:", payload);
       toast.success("Order updated successfully");
       setShowEditDialog(false);
       setSelectedOrder(null);
@@ -465,8 +493,8 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
               <Input
                 placeholder="Search orders..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+               value={orderSearchTerm}
+  onChange={(e) => setOrderSearchTerm(e.target.value)}
                 className="pl-9 w-auto h-8"
               />
               {isFetching && (
@@ -502,20 +530,21 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 <SelectItem value="industrialSecurity">Industrial Security</SelectItem>
               </SelectContent>
             </Select>
-            <Button 
-              variant="outline"
-              size="lg"
-              onClick={() => {
-                setStatusFilter("all");
-                setServiceTypeFilter("all");
-                setSearchTerm("");
-                setDebouncedSearch("");
-                setCurrentPage(1);
-              }}
-              className="h-8"
-            >
-              Clear
-            </Button>
+            <Button
+  variant="outline"
+  size="lg"
+  onClick={() => {
+    setStatusFilter("all");
+    setServiceTypeFilter("all");
+    setOrderSearchTerm("");
+    setDebouncedOrderSearch("");
+    setCurrentPage(1);
+  }}
+  className="h-8"
+>
+  Clear
+</Button>
+
           </div>
 
           {/* Main Order Directory */}
@@ -799,23 +828,25 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
               <Input
-                placeholder="Search clients..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 w-40 h-8"
-              />
+  placeholder="Search clients..."
+  value={clientSearchTerm}  // ✅ CORRECT
+  onChange={(e) => setClientSearchTerm(e.target.value)}  // ✅ CORRECT
+  className="pl-9 w-40 h-8"
+/>
+
             </div>
-            <Button 
-              variant="outline"
-              size="lg"
-              onClick={() => {
-                setSearchTerm("");
-                setDebouncedSearch("");
-              }}
-              className="h-8"
-            >
-              Clear
-            </Button>
+            <Button
+  variant="outline"
+  size="lg"
+  onClick={() => {
+    setClientSearchTerm("");
+    setDebouncedClientSearch("");
+  }}
+  className="h-8"
+>
+  Clear
+</Button>
+
           </div>
           
           <Card>
@@ -837,7 +868,8 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                     </thead>
 
                     <tbody className="divide-y">
-                      {clientsList.map((client) => (
+                     {filteredClients.map((client) => (
+
                         <tr key={client.id} className="hover:bg-gray-50 transition-colors">
                           <td className="px-4 py-3 font-medium text-gray-900">
                             {client.name}
@@ -889,6 +921,15 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                       ))}
                     </tbody>
                   </table>
+                  {filteredClients.length === 0 && (
+  <div className="text-center py-8">
+    <p className="text-gray-600">No clients found</p>
+    {clientSearchTerm && (
+      <p className="text-sm text-gray-500 mt-1">Try adjusting your search</p>
+    )}
+  </div>
+)}
+
                 </div>
               )}
             </CardContent>

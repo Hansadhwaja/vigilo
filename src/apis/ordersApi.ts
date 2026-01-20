@@ -179,26 +179,45 @@ editOrder: builder.mutation<
 
 
     // Get all clients
+// Get all clients with search support
 getAllClients: builder.query<
   {
     success: boolean;
     message: string;
-    data: {
+    data: Array<{
       id: string;
       name: string;
       email: string;
       mobile: string;
       address: string;
+      avatar?: string;
+    }>;
+    pagination?: {
+      total: number;
+      page: number;
+      totalPages: number;
+      limit: number;
     };
   },
-  void
+  { search?: string; page?: number; limit?: number } | void  //Now accepts params
 >({
-  query: () => ({
-    url: `/users/getAllClients`,
-    method: "GET",
-  }),
+  query: (params) => {
+    const queryParams = new URLSearchParams();
+    
+    if (params) {
+      if (params.search) queryParams.append('search', params.search);
+      if (params.page) queryParams.append('page', params.page.toString());
+      if (params.limit) queryParams.append('limit', params.limit.toString());
+    }
+    
+    return {
+      url: `/users/getAllClients${queryParams.toString() ? `?${queryParams.toString()}` : ''}`,
+      method: "GET",
+    };
+  },
   providesTags: [{ type: "Clients", id: "LIST" }],
 }),
+
 
  
 // Delete client
