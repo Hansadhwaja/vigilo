@@ -10,7 +10,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "./components/ui/sheet";
-// import { Toaster } from "sonner";
 
 // Pages
 import Dashboard from "./pages/Dashboard";
@@ -19,7 +18,6 @@ import IncidentsPage from "./pages/IncidentsPage";
 import IncidentDetailsPage from "./pages/IncidentDetailsPage";
 import SettingsPage from "./pages/SettingsPage";
 import SchedulingPage from "./pages/SchedulingPage";
-// import ShiftPage from "./pages/ShiftPage";
 import AlarmsPage from "./pages/AlarmsPage";
 import PatrolPage from "./pages/PatrolPage";
 import HRPage from "./pages/HRPage";
@@ -28,7 +26,6 @@ import MessagesPage from "./pages/MessagesPage";
 import InvoicingPage from "./pages/InvoicingPage";
 import { AuthPage, GuardDetailsPage } from "./pages";
 import OrderDetailsPage from "./pages/OrderDetailsPage";
-
 
 // Data and utilities
 import {
@@ -40,6 +37,7 @@ import {
 import { isSameMonthNow } from "./utils/helpers";
 import ProtectedRoute from "./components/ProtectedRoute/ProctedRoute";
 import { Toaster } from 'react-hot-toast';
+
 // -------------------- Types --------------------
 export interface Guard {
   id: string;
@@ -249,8 +247,8 @@ function MainLayout() {
         liveRevenue={liveRevenue}
       />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Main Content - UPDATED BACKGROUND */}
+      <div className="flex-1 flex flex-col min-w-0 bg-gray-50">
         {/* TopBar */}
         <TopBar
           search={search}
@@ -258,16 +256,14 @@ function MainLayout() {
           onSidebarToggle={toggleSidebar}
         />
 
-        {/* Page Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Page Body - UPDATED BACKGROUND */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
           <Routes>
             <Route path="/" element={<Dashboard kpi={kpi} />} />
             <Route path="/dashboard" element={<Dashboard kpi={kpi} />} />
             <Route path="/scheduling" element={<SchedulingPage />} />
-            {/* <Route path="/shifts" element={<ShiftPage />} /> */}
             <Route path="/clients" element={<ClientsPage />} />
-             {/* NEW CLIENT DETAILS ROUTE */}
-  <Route path="/clients/:id" element={<OrderDetailsPage />} />
+            <Route path="/clients/:id" element={<OrderDetailsPage />} />
             <Route 
               path="/incidents" 
               element={
@@ -280,21 +276,6 @@ function MainLayout() {
               } 
             />
             <Route path="/incidents/:id" element={<IncidentDetailsPage />} />
-
-
-            {/* <Route 
-              path="/incidents/:id" 
-              element={
-                selectedIncident ? (
-                  <IncidentDetailsPage
-                    incident={selectedIncident}
-                    onBack={handleIncidentBack}
-                  />
-                ) : (
-                  <div className="text-center p-8">Incident not found</div>
-                )
-              } 
-            /> */}
             <Route 
               path="/alarms" 
               element={
@@ -377,7 +358,6 @@ function MainLayout() {
           )}
         </SheetContent>
       </Sheet>
-
     </div>
   );
 }
@@ -394,7 +374,24 @@ export default function VigiloApp() {
         <Route path="/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
       </Routes>
       {/* Toaster Notifications */}
-      <Toaster position="top-right" />
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          success: {
+            style: {
+              background: '#10b981',
+              color: '#fff',
+            },
+          },
+          error: {
+            style: {
+              background: '#ef4444',
+              color: '#fff',
+            },
+          },
+        }}
+      />
     </BrowserRouter>
   );
 }

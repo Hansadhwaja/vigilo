@@ -88,35 +88,36 @@ export default function Sidebar({
   const navigate = useNavigate();
 
   const handleLogout = () => {
-  try {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-
-    toast.success("You have been logged out successfully");
-
-    navigate("/auth", { replace: true });
-  } catch (error) {
-    toast.error("Logout failed. Please try again.");
-  }
-};
+    try {
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      toast.success("You have been logged out successfully");
+      navigate("/auth", { replace: true });
+    } catch (error) {
+      toast.error("Logout failed. Please try again.");
+    }
+  };
 
   return (
     <aside
       className={classNames(
-        "h-full transition-all duration-300 border-r border-gray-200 bg-gradient-to-b from-gray-800 via-gray-600 to-gray-900 text-white flex flex-col",
+        "h-full transition-all duration-300 border-r border-blue-300/30 text-white flex flex-col",
         isOpen ? "w-72" : "w-20"
       )}
+      style={{
+        background: "linear-gradient(180deg, #2360FF 0%, #1850CC 100%)"
+      }}
     >
       {/* Header */}
       <div className="flex items-center gap-3 p-3 border-b border-white/10">
         <div
-  onClick={() => navigate("/dashboard", { replace: true })}
-  className="h-10 w-10 rounded-xl bg-gradient-to-br from-gray-400 to-gray-600 
-             grid place-items-center shadow-lg cursor-pointer 
-             hover:scale-105 transition-transform"
->
-  <Shield className="h-6 w-6 text-white" />
-</div>
+          onClick={() => navigate("/dashboard", { replace: true })}
+          className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm
+                     grid place-items-center shadow-lg cursor-pointer 
+                     hover:scale-105 transition-transform"
+        >
+          <Shield className="h-6 w-6 text-white" />
+        </div>
         {isOpen && (
           <div>
             <div className="text-lg font-semibold tracking-wide">VIGILO</div>
@@ -124,7 +125,7 @@ export default function Sidebar({
           </div>
         )}
         <div className="ml-auto">
-          <Button size="icon" variant="ghost" className="text-white" onClick={onToggle}>
+          <Button size="icon" variant="ghost" className="text-white hover:bg-white/10" onClick={onToggle}>
             {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
@@ -132,7 +133,7 @@ export default function Sidebar({
 
       {/* System Status */}
       {isOpen && (
-        <Card className="m-3 bg-white/5 border-white/10 text-white">
+        <Card className="m-3 bg-white/10 backdrop-blur-sm border-white/20 text-white">
           <CardHeader className="p-4 pb-0">
             <div className="flex items-center gap-2 text-lg">
               <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -151,8 +152,20 @@ export default function Sidebar({
         </Card>
       )}
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-2 bg-[rgba(88,80,80,0)]">
+      {/* Navigation - HIDDEN SCROLLBAR */}
+      <nav 
+        className="flex-1 overflow-y-auto py-2"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        <style>{`
+          nav::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+
         <SideItem
           icon={<img src={DashboardIcon} className="h-5 w-5"/> }
           label="Dashboard"
@@ -167,13 +180,6 @@ export default function Sidebar({
           onClick={() => onTabChange("scheduling")}
           open={isOpen}
         />
-        {/* <SideItem
-          icon={<Calendar />}
-          label="Shifts"
-          active={activeTab === "shifts"}
-          onClick={() => onTabChange("shifts")}
-          open={isOpen}
-        /> */}
         <SideItem
           icon={<img src={ClientIcon} className="h-5 w-5"/>}
           label="Clients Management"
