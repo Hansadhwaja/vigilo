@@ -36,7 +36,7 @@ import {
 } from "./data/sampleData";
 import { isSameMonthNow } from "./utils/helpers";
 import ProtectedRoute from "./components/ProtectedRoute/ProctedRoute";
-import { Toaster } from 'react-hot-toast';
+import { toast, Toaster } from "sonner";
 
 // -------------------- Types --------------------
 export interface Guard {
