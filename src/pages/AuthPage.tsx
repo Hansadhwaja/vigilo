@@ -49,14 +49,33 @@ export default function AuthPage() {
     !email || !password || !isEmailValid || isLoading;
 
   return (
-    <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-b from-gray-800 via-gray-600 to-gray-900 p-4 overflow-hidden">
-      <Card className="w-full max-w-md bg-white text-gray-900 shadow-2xl p-8">
+    <div 
+      className="h-screen w-screen flex items-center justify-center p-4 overflow-hidden relative"
+    >
+      {/* Multi-layer gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600"></div>
+      <div className="absolute inset-0 bg-gradient-to-tl from-cyan-400/30 via-transparent to-blue-800/50"></div>
+      
+      {/* Animated floating shapes */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+      <div className="absolute top-40 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+      <div className="absolute -bottom-8 left-1/3 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+      
+      {/* Geometric patterns */}
+      <div className="absolute top-0 left-0 w-full h-full opacity-10">
+        <div className="absolute top-10 left-10 w-64 h-64 border border-white rounded-full"></div>
+        <div className="absolute bottom-20 right-20 w-48 h-48 border-2 border-white rotate-45"></div>
+        <div className="absolute top-1/2 right-1/4 w-32 h-32 border border-white rounded-lg rotate-12"></div>
+      </div>
+      
+      {/* Solid WHITE card */}
+      <Card className="w-full max-w-md bg-white text-gray-900 shadow-2xl p-8 relative z-10">
         <CardHeader className="text-center space-y-3">
           <div className="flex justify-center items-center gap-3">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-gray-400 to-gray-600 grid place-items-center shadow-lg">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 grid place-items-center shadow-lg">
               <Shield className="h-6 w-6 text-white" />
             </div>
-            <CardTitle className="text-2xl font-semibold tracking-wide">
+            <CardTitle className="text-2xl font-semibold tracking-wide text-gray-900">
               VIGILO ADMIN
             </CardTitle>
           </div>
@@ -80,7 +99,7 @@ export default function AuthPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 required
-                className="mt-1 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-gray-400"
+                className="mt-1 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 bg-white"
               />
               {email && !isEmailValid && (
                 <p className="text-sm text-red-500 mt-1">
@@ -105,7 +124,7 @@ export default function AuthPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="pl-4 pr-10 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-gray-400"
+                  className="pl-4 pr-10 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 bg-white"
                 />
                 <div
                   className={`absolute inset-y-0 right-3 flex items-center ${
@@ -130,13 +149,31 @@ export default function AuthPage() {
             <Button
               type="submit"
               disabled={isButtonDisabled}
-              className="w-full bg-gradient-to-b from-gray-800 to-gray-900 text-white font-semibold py-2 rounded-lg transition-all duration-200 mt-4"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 rounded-lg transition-all duration-200 mt-4 shadow-lg"
             >
               {isLoading ? "Logging in..." : "Login"}
             </Button>
           </form>
         </CardContent>
       </Card>
+
+      {/* Add animation keyframes */}
+      <style>{`
+        @keyframes blob {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   );
 }
