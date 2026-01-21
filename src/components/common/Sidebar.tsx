@@ -238,7 +238,7 @@ export default function Sidebar({
         />
         <SideItem
           icon={<img src={SettingsIcon} className="h-5 w-5"/>}
-          label="Settings & Vehicles"
+          label="Settings"
           active={activeTab === "settings"}
           onClick={() => onTabChange("settings")}
           open={isOpen}
