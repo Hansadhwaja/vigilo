@@ -1,6 +1,5 @@
 
-
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect ,useRef } from "react";
 import { Plus, Calendar as CalendarIcon, Clock, User, MapPin, Edit, Trash2, Eye, Bell, Repeat, Filter, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -10,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { Checkbox } from "../components/ui/checkbox";
@@ -21,7 +21,7 @@ import { useGetAllOrdersQuery } from "../apis/ordersApi";
 import { toast } from "sonner";
 
 import { DatePicker } from "@heroui/react";
-import { useRef } from "react";
+import EditAssignmentDialog from "../components/ui/EditAssignmentDialog";
 
 
 // Helper to get current week dates
@@ -173,6 +173,9 @@ const endRef = useRef<HTMLInputElement>(null);
   const [filterRole, setFilterRole] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
+    const { data: guardsData } = useGetAllGuardsQuery({ page: 1, limit: 1000 });
+  const { data: ordersData } = useGetAllOrdersQuery({ page: 1, limit: 1000 });
+
   //delete a schedule
   const [deleteSchedule] = useDeleteScheduleMutation();
   const handleDelete = async (id: string, e: any) => {
@@ -206,6 +209,7 @@ const endRef = useRef<HTMLInputElement>(null);
                 } catch (error) {
                   toast.error("Failed to delete schedule");
                 }
+                
               }}
               className="px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-white font-medium text-sm transition-colors"
             >
@@ -218,7 +222,10 @@ const endRef = useRef<HTMLInputElement>(null);
       toast.error("Something went wrong");
     }
   };
-
+const handleOpenEditDialog = (assignment: any) => {
+  setSelectedAssignment(assignment);
+  setShowEditDialog(true);
+};
   // Helpers: timezone constants & formatters
 const TIMEZONE = "Asia/Kolkata";
 
@@ -994,223 +1001,238 @@ const formatShiftTime = (start: { toLocaleTimeString: (arg0: never[], arg1: { ho
           </Card>
         )}
 
-        {/* WEEKLY CALENDAR VIEW */}
-        {viewMode === "weekly" && (
-        <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
-          <CardHeader className="pb-3 px-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg font-bold text-gray-900">
-                  Weekly Schedule
-                </CardTitle>
-                <p className="text-gray-600 text-lg">
-                  {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigateWeek(-1)}
-                  className="hover:bg-gray-100 h-8 w-8 p-0"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    setSelectedDate(new Date());
-                    setCurrentMonth(new Date());
-                  }}
-                  className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 h-8 px-3"
-                >
-                  Today
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => navigateWeek(1)}
-                  className="hover:bg-gray-100 h-8 w-8 p-0"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="px-4 pb-4">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              <div className="grid grid-cols-8 bg-gradient-to-r from-gray-50 to-gray-100">
-                <div className="p-3 border-r border-gray-200 font-semibold text-gray-700 text-lg">
-                  TIME
-                </div>
-                {weekDays.map((day, index) => {
-                  const isToday = day.toDateString() === today.toDateString();
-                  const isSelected = day.toDateString() === selectedDate.toDateString();
-                  const dayName = day.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
-                  const monthName = day.toLocaleDateString('en-US', { month: 'short' });
-                  
-                  return (
-                    <div 
-                      key={index} 
-                      className={`
-                        p-3 border-r border-gray-200 text-center cursor-pointer transition-all
-                        ${isSelected 
-                          ? 'bg-blue-500 text-white' 
-                          : isToday 
-                            ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
-                            : 'hover:bg-gray-200'
-                        }
-                      `}
-                      onClick={() => setSelectedDate(new Date(day))}
-                    >
-                      <div className="font-semibold text-lg">{dayName}</div>
-                      <div className={`text-lg font-bold ${isSelected ? 'text-white' : isToday ? 'text-blue-700' : 'text-gray-900'}`}>
-                        {day.getDate()}
-                      </div>
-                      <div className={`text-lg ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
-                        {monthName}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {timeSlots.map((slot, slotIndex) => (
-                <div key={slotIndex} className="grid grid-cols-8 border-b border-gray-200 last:border-b-0">
-                  <div className="p-3 border-r border-gray-200 bg-gray-50">
-                    <div className="font-semibold text-gray-900 text-lg">{slot.time}</div>
-                    <div className="text-lg text-gray-500">{slot.label}</div>
-                  </div>
-                  
-                  {weekDays.map((day, dayIndex) => {
-
-  const assignments = getAssignmentsForSlotFromOrganized(day, slot.time);
-
-  const filteredAssignments = assignments.filter((assignment: {
-      orderName: any;
-      guardName: any;
-      type: any; guards: {}; orderId: string; guardId: string; description: string; 
-}) => {
-  const guard = assignment.guards || {};
-
-  const matchesOrder =
-  filterOrder === "all" ||
-  assignment.orderId === filterOrder ||
-  assignment.orderName?.toLowerCase().includes(filterOrder.toLowerCase());
-
-
-  const matchesGuard =
-    filterGuard === "all" || assignment.guardId === filterGuard;
-
-  const matchesRole =
-    filterRole === "all" ||
-    assignment.type?.toLowerCase() === filterRole.toLowerCase();
-
-  const matchesSearch =
-    !searchTerm ||
-    assignment.guardName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    assignment.description?.toLowerCase().includes(searchTerm.toLowerCase());
-
-  return matchesOrder && matchesGuard && matchesRole && matchesSearch;
-});
-
-
-  return (
-    <div
-      key={dayIndex}
-      className={`
-        p-2 border-r border-gray-200 min-h-[70px] relative group cursor-pointer transition-all
-        ${day.toDateString() === selectedDate.toDateString() ? "bg-blue-50" : "hover:bg-gray-50"}
-      `}
-      onClick={() => {
-        setSelectedDate(new Date(day));
-        setFormData({ ...formData, startTime: slot.time });
-        handleCreateAssignment();
-      }}
-    >
-      {filteredAssignments.length > 0 ? (
-        <div className="space-y-1">
-                    {filteredAssignments.map((assignment: {
-                        orderName: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | React.ReactPortal | Iterable<React.ReactNode> | Promise<string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | React.ReactPortal | Iterable<React.ReactNode> | null | undefined> | null | undefined;
-                        guardName: any;
-                        guardEmail: any;
-                        guardId: any; guards: any[]; id: React.Key | null | undefined; type: string; description: string | number | bigint | boolean | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<string | number | bigint | boolean | React.ReactPortal | React.ReactElement<unknown, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | null | undefined> | null | undefined; start: { toLocaleTimeString: (arg0: never[], arg1: { hour: string; minute: string; }) => any; }; end: { toLocaleTimeString: (arg0: never[], arg1: { hour: string; minute: string; }) => any; }; status: any; 
-}) => {
-                        // console.log("Assignment:", assignment);
-    const guard = {
-  id: assignment.guardId,
-  name: assignment.guardName,
-  email: assignment.guardEmail,
-  status: assignment.status
-};
-
-    
-    return (
-      <div
-        key={assignment.id}
-        className={`
-          p-2 rounded-md text-lg cursor-pointer transition-all border group-hover:shadow-sm
-          ${
-            assignment.type === "patrol"
-              ? "bg-gradient-to-r from-orange-100 to-orange-50 text-orange-900 border-orange-200 hover:from-orange-200 hover:to-orange-100"
-              : "bg-gradient-to-r from-green-100 to-green-50 text-green-900 border-green-200 hover:from-green-200 hover:to-green-100"
-          }
-        `}
-        onClick={(e) => {
-          e.stopPropagation();
-          handleEditAssignment(assignment);
-        }}
-        title={`${guard?.name || "No Guard"} - ${assignment.description}`}
-      >
-        {/* GUARD NAME */}
-        <div className="font-medium truncate">
-          {guard?.name || "Unassigned Guard"}
+{/* WEEKLY CALENDAR VIEW */}
+{viewMode === "weekly" && (
+  <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
+    <CardHeader className="pb-3 px-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <CardTitle className="text-lg font-bold text-gray-900">
+            Weekly Schedule
+          </CardTitle>
+          <p className="text-gray-600 text-lg">
+            {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          </p>
         </div>
-  
-        {/* SHIFT DESCRIPTION */}
-        <div className="text-lg opacity-80 truncate">
-          {assignment.orderName || assignment.description || "No Description"}
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigateWeek(-1)}
+            className="hover:bg-gray-100 h-8 w-8 p-0"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setSelectedDate(new Date());
+              setCurrentMonth(new Date());
+            }}
+            className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 h-8 px-3"
+          >
+            Today
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigateWeek(1)}
+            className="hover:bg-gray-100 h-8 w-8 p-0"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-  
-        {/* TIME RANGE */}
-        <div className="flex items-center gap-2 mt-1">
-          <Clock className="h-3 w-3 text-gray-500" />
-          <span className="text-lg text-gray-700 font-medium">
-            {formatShiftTime(assignment.start, assignment.end)}
-          </span>
-        </div>
-  
-        {/* STATUS */}
-        <Badge
-          variant="outline"
-          className={`text-lg px-1 py-0 ${getStatusColor(
-            guard.status || assignment.status
-          )}`}
-        >
-          {guard.status || assignment.status || "pending"}
-        </Badge>
       </div>
-    );
-  })}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center h-full text-gray-400 group-hover:text-gray-600 transition-colors">
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <Plus className="h-4 w-4 mb-1" />
+    </CardHeader>
+    <CardContent className="px-4 pb-4">
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="grid grid-cols-8 bg-gradient-to-r from-gray-50 to-gray-100">
+          <div className="p-3 border-r border-gray-200 font-semibold text-gray-700 text-lg">
+            TIME
           </div>
-          <div className="text-lg opacity-0 group-hover:opacity-100 transition-opacity">Add</div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
+          {weekDays.map((day, index) => {
+            const isToday = day.toDateString() === today.toDateString();
+            const isSelected = day.toDateString() === selectedDate.toDateString();
+            const dayName = day.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+            const monthName = day.toLocaleDateString('en-US', { month: 'short' });
+            
+            return (
+              <div 
+                key={index} 
+                className={`
+                  p-3 border-r border-gray-200 text-center cursor-pointer transition-all
+                  ${isSelected 
+                    ? 'bg-blue-500 text-white' 
+                    : isToday 
+                      ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                      : 'hover:bg-gray-200'
+                  }
+                `}
+                onClick={() => setSelectedDate(new Date(day))}
+              >
+                <div className="font-semibold text-lg">{dayName}</div>
+                <div className={`text-lg font-bold ${isSelected ? 'text-white' : isToday ? 'text-blue-700' : 'text-gray-900'}`}>
+                  {day.getDate()}
+                </div>
+                <div className={`text-lg ${isSelected ? 'text-blue-100' : 'text-gray-500'}`}>
+                  {monthName}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {timeSlots.map((slot, slotIndex) => (
+          <div key={slotIndex} className="grid grid-cols-8 border-b border-gray-200 last:border-b-0">
+            <div className="p-3 border-r border-gray-200 bg-gray-50">
+              <div className="font-semibold text-gray-900 text-lg">{slot.time}</div>
+              <div className="text-lg text-gray-500">{slot.label}</div>
+            </div>
+            
+            {weekDays.map((day, dayIndex) => {
+              const assignments = getAssignmentsForSlotFromOrganized(day, slot.time);
+
+              const filteredAssignments = assignments.filter((assignment: {
+                orderName: any;
+                guardName: any;
+                type: any; 
+                guards: {}; 
+                orderId: string; 
+                guardId: string; 
+                description: string; 
+              }) => {
+                const guard = assignment.guards || {};
+
+                const matchesOrder =
+                  filterOrder === "all" ||
+                  assignment.orderId === filterOrder ||
+                  assignment.orderName?.toLowerCase().includes(filterOrder.toLowerCase());
+
+                const matchesGuard =
+                  filterGuard === "all" || assignment.guardId === filterGuard;
+
+                const matchesRole =
+                  filterRole === "all" ||
+                  assignment.type?.toLowerCase() === filterRole.toLowerCase();
+
+                const matchesSearch =
+                  !searchTerm ||
+                  assignment.guardName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  assignment.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
+                return matchesOrder && matchesGuard && matchesRole && matchesSearch;
+              });
+
+              return (
+                <div
+                  key={dayIndex}
+                  className={`
+                    p-2 border-r border-gray-200 min-h-[70px] relative group cursor-pointer transition-all
+                    ${day.toDateString() === selectedDate.toDateString() ? "bg-blue-50" : "hover:bg-gray-50"}
+                  `}
+                  onClick={() => {
+                    setSelectedDate(new Date(day));
+                    setFormData({ ...formData, startTime: slot.time });
+                    handleCreateAssignment();
+                  }}
+                >
+                  {filteredAssignments.length > 0 ? (
+                    <div className="space-y-1">
+                      {filteredAssignments.map((assignment: any) => {
+                        const guard = {
+                          id: assignment.guardId,
+                          name: assignment.guardName,
+                          email: assignment.guardEmail,
+                          status: assignment.status
+                        };
+
+                        return (
+                          <div
+                            key={assignment.id}
+                            className={`
+                              p-2 rounded-md text-lg cursor-pointer transition-all border group-hover:shadow-sm
+                              ${
+                                assignment.type === "patrol"
+                                  ? "bg-gradient-to-r from-orange-100 to-orange-50 text-orange-900 border-orange-200 hover:from-orange-200 hover:to-orange-100"
+                                  : "bg-gradient-to-r from-green-100 to-green-50 text-green-900 border-green-200 hover:from-green-200 hover:to-green-100"
+                              }
+                            `}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenEditDialog(assignment);
+                            }}
+                            title={`${guard?.name || "No Guard"} - ${assignment.description}`}
+                          >
+                            {/* GUARD NAME */}
+                            <div className="font-medium truncate">
+                              {guard?.name || "Unassigned Guard"}
+                            </div>
+                      
+                            {/* SHIFT DESCRIPTION */}
+                            <div className="text-lg opacity-80 truncate">
+                              {assignment.orderName || assignment.description || "No Description"}
+                            </div>
+                      
+                            {/* TIME RANGE */}
+                            <div className="flex items-center gap-2 mt-1">
+                              <Clock className="h-3 w-3 text-gray-500" />
+                              <span className="text-lg text-gray-700 font-medium">
+                                {formatShiftTime(assignment.start, assignment.end)}
+                              </span>
+                            </div>
+                      
+                            {/* STATUS */}
+                            <Badge
+                              variant="outline"
+                              className={`text-lg px-1 py-0 ${getStatusColor(
+                                guard.status || assignment.status
+                              )}`}
+                            >
+                              {guard.status || assignment.status || "pending"}
+                            </Badge>
                           </div>
-                        ))}
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-gray-400 group-hover:text-gray-600 transition-colors">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Plus className="h-4 w-4 mb-1" />
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="text-lg opacity-0 group-hover:opacity-100 transition-opacity">Add</div>
+                    </div>
                   )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </CardContent>
+  </Card>
+)}
+
+{/* ADD THIS AT THE END - Edit Assignment Dialog */}
+<EditAssignmentDialog
+  assignment={selectedAssignment}
+  open={showEditDialog}
+  onClose={() => {
+    setShowEditDialog(false);
+    setSelectedAssignment(null);
+  }}
+  onSave={(updatedData) => {
+    // TODO: Call your update API here
+    console.log("Saving assignment:", updatedData);
+    toast.success("Assignment updated successfully!");
+    setShowEditDialog(false);
+    setSelectedAssignment(null);
+    // Refresh your assignments list if needed
+  }}
+  guards={guards || []}  // Pass your guards array
+  orders={orders || []}  // Pass your orders array
+/>
+
 
        {/* Selected Date Summary Bar */}
 {/* Selected Date Summary Bar */}
