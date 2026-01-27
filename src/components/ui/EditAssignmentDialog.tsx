@@ -19,9 +19,11 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Badge } from "../ui/badge";
-import { Calendar, Clock, User, MapPin, FileText, ExternalLink } from "lucide-react";
+import { Checkbox } from "../ui/checkbox";
+import { Calendar, Clock, User, MapPin, FileText, ExternalLink, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
+import { useEditScheduleMutation } from "../../apis/schedulingAPI";
 
 interface EditAssignmentDialogProps {
   assignment: any;
@@ -41,61 +43,123 @@ export default function EditAssignmentDialog({
   orders,
 }: EditAssignmentDialogProps) {
   const navigate = useNavigate();
+  const [guardsOpen, setGuardsOpen] = useState(false);
+  
+  // ✅ RTK Query mutation hook
+  const [editSchedule, { isLoading: isSaving }] = useEditScheduleMutation();
+
   const [formData, setFormData] = useState({
-    guardId: "",
-    orderId: "",
-    type: "",
     description: "",
     startTime: "",
     endTime: "",
-    status: "",
+    date: "",
+    endDate: "",
+    guardIds: [] as string[],
   });
 
+  // ✅ Populate form when assignment changes
   useEffect(() => {
-    if (assignment) {
+    if (assignment && open) {
+      // Extract date from ISO string
+      const extractDate = (isoString: string): string => {
+        if (!isoString) return "";
+        try {
+          return new Date(isoString).toISOString().split('T')[0];
+        } catch {
+          return "";
+        }
+      };
+
+      // Extract time in HH:mm format
+      const extractTime = (isoString: string): string => {
+        if (!isoString) return "";
+        try {
+          const date = new Date(isoString);
+          return date.toTimeString().slice(0, 5); // "HH:mm"
+        } catch {
+          return "";
+        }
+      };
+
       setFormData({
-        guardId: assignment.guardId || "",
-        orderId: assignment.orderId || "",
-        type: assignment.type || "",
         description: assignment.description || "",
-        startTime: assignment.start
-          ? new Date(assignment.start).toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            })
-          : "",
-        endTime: assignment.end
-          ? new Date(assignment.end).toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            })
-          : "",
-        status: assignment.status || "pending",
+        startTime: extractTime(assignment.rawStartISO || assignment.start),
+        endTime: extractTime(assignment.rawEndISO || assignment.end),
+        date: extractDate(assignment.rawStartISO || assignment.start),
+        endDate: extractDate(assignment.rawEndISO || assignment.end),
+        guardIds: assignment.guardId ? [assignment.guardId] : [],
       });
     }
-  }, [assignment]);
+  }, [assignment, open]);
 
-  const handleSave = () => {
-    if (!formData.guardId || !formData.orderId) {
-      toast.error("Please select guard and order");
+  // ✅ Handle save with API call
+  const handleSave = async () => {
+    if (!assignment?.shiftId) {
+      toast.error("Shift ID not found");
       return;
     }
-    onSave({ ...assignment, ...formData });
-    onClose();
+
+    // Build update payload (only changed fields)
+    const updateData: any = {};
+    
+    if (formData.description && formData.description !== assignment.description) {
+      updateData.description = formData.description;
+    }
+    if (formData.startTime) {
+      updateData.startTime = formData.startTime;
+    }
+    if (formData.endTime) {
+      updateData.endTime = formData.endTime;
+    }
+    if (formData.date) {
+      updateData.date = formData.date;
+    }
+    if (formData.endDate) {
+      updateData.endDate = formData.endDate;
+    }
+    if (formData.guardIds.length > 0) {
+      updateData.guardIds = formData.guardIds;
+    }
+
+    // Check if anything changed
+    if (Object.keys(updateData).length === 0) {
+      toast.error("No changes detected");
+      return;
+    }
+
+    try {
+      const result = await editSchedule({
+        id: assignment.shiftId,
+        data: updateData,
+      }).unwrap();
+
+      toast.success(result.message || "Shift updated successfully!");
+      onSave(result.data); // Call parent callback
+      onClose(); // Close dialog
+    } catch (error: any) {
+      console.error("Edit error:", error);
+      toast.error(error?.data?.message || "Failed to update shift");
+    }
   };
 
   const handleViewDetails = () => {
-    navigate(`/scheduling/${assignment.id}`);
+    if (!assignment.shiftId) {
+      toast.error("Shift ID not found");
+      console.error("Assignment data:", assignment);
+      return;
+    }
+    
+    console.log("Navigating with shiftId:", assignment.shiftId);
+    navigate(`/scheduling/${assignment.shiftId}`);
     onClose();
   };
 
   if (!assignment) return null;
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (status?.toLowerCase()) {
       case "ongoing":
+      case "active":
         return "bg-blue-100 text-blue-700 border-blue-300";
       case "completed":
         return "bg-green-100 text-green-700 border-green-300";
@@ -112,68 +176,51 @@ export default function EditAssignmentDialog({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-bold">Edit Assignment</DialogTitle>
-            <Badge className={getStatusColor(formData.status)}>
-              {formData.status}
+            <Badge className={getStatusColor(assignment.status)}>
+              {assignment.status || "pending"}
             </Badge>
           </div>
           <DialogDescription>
-            Update assignment details or view full information
+            Update shift details (only fill fields you want to change)
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Guard Selection */}
+          {/* Description */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Guard
+              <FileText className="h-4 w-4" />
+              Description
             </Label>
-            <Select value={formData.guardId} onValueChange={(val:any) => setFormData({ ...formData, guardId: val })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select guard" />
-              </SelectTrigger>
-              <SelectContent>
-                {guards.map((guard) => (
-                  <SelectItem key={guard.id} value={guard.id}>
-                    {guard.name} - {guard.email}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Add notes or special instructions..."
+              rows={3}
+              disabled={isSaving}
+            />
           </div>
 
-          {/* Order Selection */}
-          <div className="space-y-2">
-            <Label className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              Order/Location
-            </Label>
-            <Select value={formData.orderId} onValueChange={(val:any) => setFormData({ ...formData, orderId: val })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select order" />
-              </SelectTrigger>
-              <SelectContent>
-                {orders.map((order) => (
-                  <SelectItem key={order.id} value={order.id}>
-                    {order.locationName} - {order.locationAddress}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Type Selection */}
-          <div className="space-y-2">
-            <Label>Assignment Type</Label>
-            <Select value={formData.type} onValueChange={(val:any) => setFormData({ ...formData, type: val })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="guard">Guard Duty</SelectItem>
-                <SelectItem value="patrol">Patrol</SelectItem>
-              </SelectContent>
-            </Select>
+          {/* Date Range */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Start Date</Label>
+              <Input
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                disabled={isSaving}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>End Date</Label>
+              <Input
+                type="date"
+                value={formData.endDate}
+                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                disabled={isSaving}
+              />
+            </div>
           </div>
 
           {/* Time Range */}
@@ -187,6 +234,7 @@ export default function EditAssignmentDialog({
                 type="time"
                 value={formData.startTime}
                 onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                disabled={isSaving}
               />
             </div>
             <div className="space-y-2">
@@ -198,38 +246,106 @@ export default function EditAssignmentDialog({
                 type="time"
                 value={formData.endTime}
                 onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                disabled={isSaving}
               />
             </div>
           </div>
 
-          {/* Status */}
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <Select value={formData.status} onValueChange={(val:any) => setFormData({ ...formData, status: val })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="ongoing">Ongoing</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Description */}
+          {/* Multi-select Guards */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Description
+              <User className="h-4 w-4" />
+              Select Guards (Multiple)
             </Label>
-            <Textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Add notes or special instructions..."
-              rows={3}
-            />
+            <Select open={guardsOpen} onOpenChange={setGuardsOpen}>
+              <SelectTrigger disabled={isSaving}>
+                <SelectValue
+                  placeholder={
+                    formData.guardIds.length > 0
+                      ? `${formData.guardIds.length} guard(s) selected`
+                      : "Select Guards"
+                  }
+                />
+              </SelectTrigger>
+
+              <SelectContent
+                className="max-h-56 overflow-y-auto z-50"
+                style={{ maxHeight: "14rem", overflowY: "auto" }}
+              >
+                {guards && guards.length > 0 ? (
+                  guards.map((guard: any) => {
+                    const isChecked = formData.guardIds.includes(guard.id);
+
+                    return (
+                      <div
+                        key={guard.id}
+                        className="flex items-center px-2 py-1 space-x-2 cursor-pointer hover:bg-gray-100 rounded-md"
+                        onClick={(e) => {
+                          e.stopPropagation();
+
+                          if (isChecked) {
+                            setFormData({
+                              ...formData,
+                              guardIds: formData.guardIds.filter(
+                                (id: string) => id !== guard.id
+                              ),
+                            });
+                          } else {
+                            setFormData({
+                              ...formData,
+                              guardIds: [...formData.guardIds, guard.id],
+                            });
+                          }
+                        }}
+                      >
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked: any) => {
+                            if (checked) {
+                              setFormData({
+                                ...formData,
+                                guardIds: [...formData.guardIds, guard.id],
+                              });
+                            } else {
+                              setFormData({
+                                ...formData,
+                                guardIds: formData.guardIds.filter(
+                                  (id: string) => id !== guard.id
+                                ),
+                              });
+                            }
+                          }}
+                          onClick={(e: { stopPropagation: () => any }) =>
+                            e.stopPropagation()
+                          }
+                        />
+
+                        <span className="text-sm">
+                          {guard.name} ({guard.mobile || guard.email})
+                        </span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="p-3 text-sm text-gray-500">
+                    No Guards available
+                  </div>
+                )}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500">
+              Leave empty to keep current guard assignments
+            </p>
+          </div>
+
+          {/* Current Assignment Info */}
+          <div className="bg-gray-50 rounded-lg p-4 space-y-2 border">
+            <h4 className="font-semibold text-sm text-gray-700">Current Assignment Info</h4>
+            <div className="space-y-1 text-sm text-gray-600">
+              <p><strong>Guard:</strong> {assignment.guardName || assignment.name}</p>
+              <p><strong>Location:</strong> {assignment.orderLocationName || assignment.orderName || "N/A"}</p>
+              <p><strong>Current Time:</strong> {assignment.time}</p>
+            </div>
           </div>
         </div>
 
@@ -238,16 +354,32 @@ export default function EditAssignmentDialog({
             variant="outline"
             onClick={handleViewDetails}
             className="flex items-center gap-2"
+            disabled={isSaving}
           >
             <ExternalLink className="h-4 w-4" />
             View Full Details
           </Button>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose}>
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              disabled={isSaving}
+            >
               Cancel
             </Button>
-            <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
-              Save Changes
+            <Button 
+              onClick={handleSave} 
+              className="bg-blue-600 hover:bg-blue-700"
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </div>
         </DialogFooter>

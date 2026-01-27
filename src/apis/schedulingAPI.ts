@@ -45,6 +45,7 @@ export interface Client {
 }
 
 export interface OrderDetails {
+  id: any;
   serviceType: string;
   locationName: string;
   locationAddress: string;
@@ -88,6 +89,7 @@ export interface GuardAssignment {
 }
 
 export interface ShiftDetails {
+  orderId: any;
   id: string;
   type: string;
   description: string;
@@ -135,6 +137,26 @@ export interface CreateScheduleResponse {
 export interface DeleteScheduleResponse {
   success: boolean;
   message: string;
+}
+
+
+export interface UpdateScheduleDto {
+  description?: string;
+  startTime?: string;
+  endTime?: string;
+  date?: string;
+  endDate?: string;
+  guardIds?: string[];
+}
+
+export interface UpdateScheduleResponse {
+  success: boolean;
+  message: string;
+  data: Schedule;
+}
+
+export interface DeleteScheduleDto {
+  id: string;
 }
 
 // --------------------------------------------------
@@ -220,7 +242,26 @@ export const schedulingApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, id) => [{ type: "Schedules", id }],
     }),
 
-    deleteSchedule: builder.mutation<DeleteScheduleResponse, { id: string }>({
+    // -------------------------------
+    // EDIT SCHEDULE
+    // -------------------------------
+      editSchedule: builder.mutation<
+      UpdateScheduleResponse,
+      { id: string; data: UpdateScheduleDto }
+    >({
+      query: ({ id, data }) => ({
+        url: `/scheduling/editSchedule/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        "Schedules",
+        { type: "Schedules", id },
+      ],
+    }),
+
+    // ✅ EXISTING: DELETE SCHEDULE (POST) - Already correct
+    deleteSchedule: builder.mutation<DeleteScheduleResponse, DeleteScheduleDto>({
       query: (body) => ({
         url: `/scheduling/deleteSchedule`,
         method: "POST",
@@ -240,4 +281,5 @@ export const {
   useCreateScheduleMutation,
    useDeleteScheduleMutation,
    useGetStaticShiftDetailsForAdminQuery,
+    useEditScheduleMutation
 } = schedulingApi;
