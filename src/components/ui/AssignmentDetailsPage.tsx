@@ -1,8 +1,8 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 import {
   ArrowLeft,
   User,
@@ -14,62 +14,91 @@ import {
   Mail,
   Edit,
   Trash2,
+  Loader2,
+  ImageIcon,
 } from "lucide-react";
+import { useGetStaticShiftDetailsForAdminQuery } from "../../apis/schedulingAPI";
 
 export default function AssignmentDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // TODO: Fetch assignment by ID from your API
-  // const { data: assignment } = useGetAssignmentByIdQuery(id);
+  // ✅ Fetch from API using RTK Query
+  const { data: response, isLoading, isError } = useGetStaticShiftDetailsForAdminQuery(id || "");
 
-  // Dummy data for now
-  const assignment = {
-    id: id,
-    guardName: "Deepak Guard1",
-    guardEmail: "deepak@example.com",
-    guardPhone: "+91 9876543210",
-    orderName: "Aparna Hills Security",
-    locationAddress: "Aparna Hills, Hyderabad, India",
-    type: "guard",
-    status: "upcoming",
-    startTime: "15:38",
-    endTime: "16:38",
-    date: "2026-01-23",
-    description: "Regular security shift at main entrance",
-    createdAt: "2026-01-20",
-  };
-
+  // Helper functions
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "ongoing":
-        return "bg-blue-100 text-blue-700 border-blue-300";
-      case "completed":
-        return "bg-green-100 text-green-700 border-green-300";
-      case "cancelled":
-        return "bg-red-100 text-red-700 border-red-300";
-      case "upcoming":
-        return "bg-purple-100 text-purple-700 border-purple-300";
-      default:
-        return "bg-yellow-100 text-yellow-700 border-yellow-300";
-    }
+    const statusMap: Record<string, string> = {
+      active: "bg-blue-100 text-blue-700 border-blue-300",
+      ongoing: "bg-blue-100 text-blue-700 border-blue-300",
+      completed: "bg-green-100 text-green-700 border-green-300",
+      cancelled: "bg-red-100 text-red-700 border-red-300",
+      pending: "bg-yellow-100 text-yellow-700 border-yellow-300",
+      upcoming: "bg-purple-100 text-purple-700 border-purple-300",
+    };
+    return statusMap[status?.toLowerCase()] || "bg-gray-100 text-gray-700 border-gray-300";
   };
 
   const getTypeColor = (type: string) => {
-    return type === "patrol"
+    return type?.toLowerCase() === "patrol"
       ? "bg-orange-100 text-orange-700 border-orange-300"
       : "bg-green-100 text-green-700 border-green-300";
   };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600">Loading shift details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError || !response?.data) {
+    return (
+      <div className="space-y-4">
+        <Button variant="outline" onClick={() => navigate("/scheduling")} className="flex items-center gap-2">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Schedule
+        </Button>
+        <Card className="border-red-200">
+          <CardContent className="p-6 text-center">
+            <p className="text-red-600 font-semibold mb-2">Failed to load shift details</p>
+            <p className="text-gray-600 text-sm">Shift not found or an error occurred</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { shift, client, order, guards } = response.data;
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Button
-          variant="outline"
-          onClick={() => navigate("/scheduling")}
-          className="flex items-center gap-2"
-        >
+        <Button variant="outline" onClick={() => navigate("/scheduling")} className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Schedule
         </Button>
@@ -90,42 +119,96 @@ export default function AssignmentDetailsPage() {
         <CardHeader>
           <div className="flex items-start justify-between">
             <div>
-              <CardTitle className="text-2xl font-bold mb-2">
-                Assignment Details
-              </CardTitle>
+              <CardTitle className="text-2xl font-bold mb-2">Shift Assignment Details</CardTitle>
               <div className="flex gap-2">
-                <Badge className={getStatusColor(assignment.status)}>
-                  {assignment.status}
-                </Badge>
-                <Badge className={getTypeColor(assignment.type)}>
-                  {assignment.type}
-                </Badge>
+                <Badge className={getStatusColor(shift.status)}>{shift.status}</Badge>
+                <Badge className={getTypeColor(shift.type)}>{shift.type}</Badge>
               </div>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Guard Information */}
+          {/* Client Information */}
           <div>
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <User className="h-5 w-5 text-blue-600" />
-              Guard Information
+              <User className="h-5 w-5 text-purple-600" />
+              Client Information
             </h3>
-            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+            <div className="bg-purple-50 rounded-lg p-4 space-y-2">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4 text-gray-500" />
-                <span className="font-medium">{assignment.guardName}</span>
+                <span className="font-medium">{client.name}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-gray-500" />
-                <span className="text-gray-600">{assignment.guardEmail}</span>
+                <span className="text-gray-600">{client.email}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-gray-500" />
-                <span className="text-gray-600">{assignment.guardPhone}</span>
+                <span className="text-gray-600">{client.mobile}</span>
               </div>
             </div>
           </div>
+
+          {/* Guards Information */}
+          {guards.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <User className="h-5 w-5 text-blue-600" />
+                Assigned Guards ({guards.length})
+              </h3>
+              <div className="space-y-3">
+                {guards.map((guard) => (
+                  <div key={guard.id} className="bg-blue-50 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-gray-500" />
+                        <span className="font-medium">{guard.name}</span>
+                      </div>
+                      <Badge className={getStatusColor(guard.assignmentStatus)}>
+                        {guard.assignmentStatus}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-gray-500" />
+                      <span className="text-gray-600">{guard.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-gray-500" />
+                      <span className="text-gray-600">{guard.phone}</span>
+                    </div>
+
+                    {/* Timesheet */}
+                    <div className="mt-3 pt-3 border-t border-blue-200">
+                      <div className="text-sm font-medium text-gray-700 mb-2">Timesheet</div>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="text-gray-500">Clock In:</span>{" "}
+                          <span className="font-medium">
+                            {guard.timesheet.clockInTime ? formatTime(guard.timesheet.clockInTime) : "Not clocked in"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Clock Out:</span>{" "}
+                          <span className="font-medium">
+                            {guard.timesheet.clockOutTime ? formatTime(guard.timesheet.clockOutTime) : "Not clocked out"}
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Total Hours:</span>{" "}
+                          <span className="font-medium">{guard.timesheet.totalHours} hrs</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Overtime:</span>{" "}
+                          <span className="font-medium">{guard.timesheet.overtime.hours} hrs</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Location Information */}
           <div>
@@ -133,57 +216,94 @@ export default function AssignmentDetailsPage() {
               <MapPin className="h-5 w-5 text-green-600" />
               Location Details
             </h3>
-            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-              <div className="font-medium">{assignment.orderName}</div>
-              <div className="text-gray-600">{assignment.locationAddress}</div>
+            <div className="bg-green-50 rounded-lg p-4 space-y-3">
+              <div>
+                <div className="font-medium text-lg">{order.locationName}</div>
+                <div className="text-gray-600">{order.locationAddress}</div>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <Badge variant="outline" className="bg-white">{order.serviceType}</Badge>
+                <Badge variant="outline" className="bg-white">
+                  {order.guardsRequired} Guard{order.guardsRequired > 1 ? "s" : ""} Required
+                </Badge>
+              </div>
+              {order.siteService?.coordinates && (
+                <div className="text-sm text-gray-500">
+                  <span className="font-medium">Coordinates:</span> {order.siteService.coordinates[1]}, {order.siteService.coordinates[0]}
+                </div>
+              )}
+              {order.images?.length > 0 && (
+                <div className="mt-3">
+                  <div className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4" />
+                    Site Images ({order.images.length})
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {order.images.map((img, idx) => (
+                      <a
+                        key={idx}
+                        href={img}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline text-sm"
+                      >
+                        Image {idx + 1}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Time & Date */}
+          {/* Schedule */}
           <div>
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <Clock className="h-5 w-5 text-purple-600" />
               Schedule
             </h3>
-            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-gray-500" />
-                <span className="font-medium">Date:</span>
-                <span className="text-gray-600">
-                  {new Date(assignment.date).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
+            <div className="bg-purple-50 rounded-lg p-4 space-y-3">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm text-gray-500">Start Date</div>
+                  <div className="font-medium">{formatDate(shift.date)}</div>
+                </div>
+                {shift.endDate && shift.endDate !== shift.date && (
+                  <div>
+                    <div className="text-sm text-gray-500">End Date</div>
+                    <div className="font-medium">{formatDate(shift.endDate)}</div>
+                  </div>
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-gray-500" />
-                <span className="font-medium">Time:</span>
-                <span className="text-gray-600">
-                  {assignment.startTime} - {assignment.endTime}
-                </span>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-sm text-gray-500">Start Time</div>
+                  <div className="font-medium">{formatTime(shift.startTime)}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-gray-500">End Time</div>
+                  <div className="font-medium">{formatTime(shift.endTime)}</div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Description */}
-          <div>
-            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-orange-600" />
-              Description & Notes
-            </h3>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-gray-700">{assignment.description}</p>
+          {shift.description && (
+            <div>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <FileText className="h-5 w-5 text-orange-600" />
+                Description
+              </h3>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-gray-700">{shift.description}</p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Metadata */}
-          <div className="pt-4 border-t">
-            <p className="text-sm text-gray-500">
-              Created on: {new Date(assignment.createdAt).toLocaleDateString()}
-            </p>
+          <div className="pt-4 border-t text-sm text-gray-500">
+            Created on: {formatDate(shift.createdAt)}
           </div>
         </CardContent>
       </Card>

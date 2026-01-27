@@ -37,6 +37,79 @@ export interface Guard {
   };
 }
 
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  mobile: string;
+}
+
+export interface OrderDetails {
+  serviceType: string;
+  locationName: string;
+  locationAddress: string;
+  images: string[];
+  siteService: {
+    crs: {
+      type: string;
+      properties: {
+        name: string;
+      };
+    };
+    type: string;
+    coordinates: [number, number];
+  };
+  guardsRequired: number;
+  description: string;
+  startDate: string;
+  endDate: string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface GuardTimesheet {
+  clockInTime: string | null;
+  clockOutTime: string | null;
+  totalHours: number;
+  overtime: {
+    startTime: string | null;
+    endTime: string | null;
+    hours: number;
+  };
+}
+
+export interface GuardAssignment {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  assignmentStatus: string;
+  timesheet: GuardTimesheet;
+}
+
+export interface ShiftDetails {
+  id: string;
+  type: string;
+  description: string;
+  date: string;
+  endDate: string;
+  status: string;
+  startTime: string;
+  endTime: string;
+  createdAt: string;
+}
+
+export interface ShiftDetailsResponse {
+  success: boolean;
+  message: string;
+  data: {
+    shift: ShiftDetails;
+    client: Client;
+    order: OrderDetails;
+    guards: GuardAssignment[];
+    incidents: any[];
+  };
+}
 
 
 export interface CreateScheduleDto {
@@ -138,6 +211,15 @@ export const schedulingApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Schedules"],
     }),
+
+    getStaticShiftDetailsForAdmin: builder.query<ShiftDetailsResponse, string>({
+      query: (id: string) => ({
+        url: `/scheduling/getStaticShiftDetailsForAdmin/${id}`,
+        method: "GET",
+      }),
+      providesTags: (_result, _error, id) => [{ type: "Schedules", id }],
+    }),
+
     deleteSchedule: builder.mutation<DeleteScheduleResponse, { id: string }>({
       query: (body) => ({
         url: `/scheduling/deleteSchedule`,
@@ -157,4 +239,5 @@ export const {
   useGetAllSchedulesQuery, 
   useCreateScheduleMutation,
    useDeleteScheduleMutation,
+   useGetStaticShiftDetailsForAdminQuery,
 } = schedulingApi;

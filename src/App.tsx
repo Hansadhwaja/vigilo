@@ -37,6 +37,7 @@ import {
 import { isSameMonthNow } from "./utils/helpers";
 import ProtectedRoute from "./components/ProtectedRoute/ProctedRoute";
 import { toast, Toaster } from "sonner";
+import AssignmentDetailsPage from "./components/ui/AssignmentDetailsPage";
 
 // -------------------- Types --------------------
 export interface Guard {
@@ -264,6 +265,7 @@ function MainLayout() {
             <Route path="/scheduling" element={<SchedulingPage />} />
             <Route path="/clients" element={<ClientsPage />} />
             <Route path="/clients/:id" element={<OrderDetailsPage />} />
+            <Route path="/scheduling/:id" element={<AssignmentDetailsPage />} />
             <Route 
               path="/incidents" 
               element={
