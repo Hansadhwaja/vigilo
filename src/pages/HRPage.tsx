@@ -13,7 +13,6 @@ import { useNavigate } from "react-router-dom";
 import { useCreateGuardByAdminMutation, useGetAllGuardsQuery } from "../apis/guardsApi";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
 
-// Sample compliance data (keep this as it's not coming from API yet)
 const complianceItems = [
   {
     id: "COMP-001",
@@ -67,83 +66,71 @@ export default function HRPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const [createGuardByAdmin] =
-        useCreateGuardByAdminMutation();
-
+  const [createGuardByAdmin] = useCreateGuardByAdminMutation();
 
   const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    mobile: "",
+    password: "",
+    address: "",
+  });
+
+  const handleChange = (field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleAddingGuard = async () => {
+    if (!formData.name || !formData.email || !formData.password) {
+      alert("Name, Email & Password are required!");
+      return;
+    }
+
+    try {
+      const res = await createGuardByAdmin(formData).unwrap();
+      console.log("Guard created:", res);
+      setShowAddDialog(false);
+
+      // Reset form
+      setFormData({
         name: "",
         email: "",
         mobile: "",
-        address: "",
         password: "",
+        address: "",
       });
+    } catch (err) {
+      console.error("Error creating guard:", err);
+      alert("Failed to create guard");
+    }
+  };
 
-      const handleChange = (
-        field: string,
-        value: string
-      ) => {
-        setFormData((prev) => ({
-          ...prev,
-          [field]: value,
-        }));
-      };
-
-       const handleAddingGuard = async () => {
-        if (!formData.name || !formData.email || !formData.password) {
-          alert("Name, Email & Password are required!");
-          return;
-        }
-
-        try {
-          const res = await createGuardByAdmin(formData).unwrap();
-          console.log("Guard created:", res);
-          setShowAddDialog(false);
-
-          // Reset form
-          setFormData({
-            name: "",
-            email: "",
-            mobile: "",
-            address: "",
-            password: "",
-          });
-
-        } catch (err) {
-          console.error("Error creating guard:", err);
-          alert("Failed to create guard");
-        }
-      };
-
-  // Debounce search input
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchTerm);
-      if (currentPage !== 1) {
-        setCurrentPage(1);
-      }
+      setCurrentPage(1); // Reset to page 1 on search
     }, 500);
 
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Fetch guards from API with pagination and search
+  // ✅ FIX: Pass page and limit correctly
   const { data: guardsResponse, isLoading, isError, error, isFetching } = useGetAllGuardsQuery(
     {
       limit: itemsPerPage,
       page: currentPage,
       search: debouncedSearch || undefined,
-    },
-    {
-      refetchOnMountOrArgChange: true,
     }
   );
 
-  // Extract guards data from API response
   const guards = guardsResponse?.data || [];
   const apiPagination = guardsResponse?.pagination;
 
-  // Filter compliance items
+  // Filter compliance
   const filteredCompliance = useMemo(() => {
     return compliance.filter(item => {
       const matchesSearch = item.guardName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -154,12 +141,11 @@ export default function HRPage() {
     });
   }, [compliance, searchTerm, complianceFilter]);
 
-  // Calculate metrics
+  // Metrics
   const totalGuards = apiPagination?.total || guards.length;
   const activeGuards = guards.length;
   const pendingCompliance = compliance.filter(c => ["Pending", "Overdue"].includes(c.status)).length;
 
-  // Use API pagination
   const totalPages = apiPagination?.totalPages || 1;
 
   const handleAddGuard = () => {
@@ -214,16 +200,14 @@ export default function HRPage() {
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      {/* FIXED HEADER - No scrolling */}
+      {/* FIXED HEADER */}
       <div className="flex-shrink-0 space-y-3 pb-3">
-        {/* Compact Header with Inline Summary */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div className="flex-1">
             <h1 className="mb-1">HR & Compliance</h1>
             <p className="text-gray-600 text-xl">Manage guards, assignments & compliance</p>
           </div>
           
-          {/* Inline Summary Badges */}
           <div className="flex flex-wrap gap-3">
             <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
               <User className="h-4 w-4 text-blue-600" />
@@ -256,25 +240,19 @@ export default function HRPage() {
           </div>
         </div>
 
-        {/* Tabs Header - Fixed */}
         <Tabs defaultValue="guards" className="space-y-3">
           <TabsList>
             <TabsTrigger value="guards">Guard Management</TabsTrigger>
             <TabsTrigger value="compliance">Compliance Tracking</TabsTrigger>
           </TabsList>
 
-          {/* Guards Tab */}
           <TabsContent value="guards" className="m-0">
             <Card>
               <CardHeader className="py-1"> 
                 <div className="flex items-center justify-between">
-                  
-                  {/* LEFT SIDE = Heading + Filters */}
                   <div className="flex items-center gap-4 mt-2">
-                    {/* Heading */}
                     <CardTitle className="text-lg font-semibold">Guard Directory</CardTitle>
 
-                    {/* Filters Row */}
                     <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border">
                       <Filter className="h-4 w-4 text-gray-500" />
 
@@ -307,20 +285,16 @@ export default function HRPage() {
                       </Button>
                     </div>
                   </div>
-
-                  <div></div>
                 </div>
               </CardHeader>
             </Card>
           </TabsContent>
 
-          {/* Compliance Tab Header */}
           <TabsContent value="compliance" className="m-0">
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg">Compliance Tracking</CardTitle>
                 
-                {/* Compact Filters */}
                 <div className="flex flex-wrap gap-2 items-center bg-gray-50 p-3 rounded-lg border">
                   <Filter className="h-4 w-4 text-gray-500" />
                   <div className="relative">
@@ -362,15 +336,13 @@ export default function HRPage() {
         </Tabs>
       </div>
 
-      {/* SCROLLABLE CONTENT AREA */}
+      {/* SCROLLABLE CONTENT */}
       <div className="flex-1 overflow-y-auto">
         <Tabs defaultValue="guards">
-          {/* Guards Tab Content - Scrollable */}
           <TabsContent value="guards">
             <Card>
               <CardContent className="pt-4">
 
-                {/* Loading State */}
                 {isLoading && (
                   <div className="text-center py-8">
                     <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
@@ -378,7 +350,6 @@ export default function HRPage() {
                   </div>
                 )}
 
-                {/* Error State */}
                 {isError && (
                   <div className="text-center py-8">
                     <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-2" />
@@ -389,7 +360,6 @@ export default function HRPage() {
                   </div>
                 )}
 
-                {/* Empty State */}
                 {!isLoading && !isError && guards.length === 0 && (
                   <div className="text-center py-8">
                     <User className="h-12 w-12 text-gray-400 mx-auto mb-2" />
@@ -400,10 +370,8 @@ export default function HRPage() {
                   </div>
                 )}
 
-                {/* Guard List */}
                 {!isLoading && !isError && guards.length > 0 && (
                   <>
-                    {/* Guard List Table */}
                     <div className="border border-gray-200 rounded-lg overflow-hidden">
                       <Table>
                         <TableHeader>
@@ -423,15 +391,12 @@ export default function HRPage() {
                               key={guard.id} 
                               className="border-b border-gray-100 hover:bg-gray-50 transition"
                             >
-                              
-                              {/* Name */}
                               <TableCell className="py-4">
                                 <div className="text-gray-900 font-medium text-lg truncate max-w-40">
                                   {guard.name}
                                 </div>
                               </TableCell>
 
-                              {/* Email */}
                               <TableCell className="py-4">
                                 <div className="flex items-center gap-2 truncate max-w-52">
                                   <span className="text-lg text-gray-700 truncate">
@@ -440,7 +405,6 @@ export default function HRPage() {
                                 </div>
                               </TableCell>
 
-                              {/* Mobile */}
                               <TableCell className="py-4">
                                 <div className="flex items-center gap-2 truncate max-w-32">
                                   <span className="text-lg text-gray-700 truncate">
@@ -449,21 +413,18 @@ export default function HRPage() {
                                 </div>
                               </TableCell>
 
-                              {/* Address */}
                               <TableCell className="py-4">
                                 <span className="text-lg text-gray-600 truncate block max-w-60">
                                   {guard.address || "—"}
                                 </span>
                               </TableCell>
 
-                              {/* Joined */}
                               <TableCell className="py-4">
                                 <span className="text-lg text-gray-600">
                                   {formatDate(guard.createdAt)}
                                 </span>
                               </TableCell>
 
-                              {/* Actions */}
                               <TableCell className="py-4 text-right">
                                 <div className="flex justify-end gap-2">
                                   <Button
@@ -476,16 +437,15 @@ export default function HRPage() {
                                   </Button>
                                 </div>
                               </TableCell>
-
                             </TableRow>
                           ))}
                         </TableBody>
                       </Table>
                     </div>
 
-                    {/* Pagination */}
+                    {/* ✅ FIXED PAGINATION */}
                     {totalPages > 1 && (
-                      <div className="flex justify-center mt-4">
+                      <div className="flex justify-center mt-6">
                         <Pagination>
                           <PaginationContent>
                             <PaginationItem>
@@ -493,10 +453,10 @@ export default function HRPage() {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   if (currentPage > 1) {
-                                    setCurrentPage(prev => prev - 1);
+                                    setCurrentPage(currentPage - 1);
                                   }
                                 }}
-                                className={currentPage === 1 ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                                className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                               />
                             </PaginationItem>
                             
@@ -520,10 +480,10 @@ export default function HRPage() {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   if (currentPage < totalPages) {
-                                    setCurrentPage(prev => prev + 1);
+                                    setCurrentPage(currentPage + 1);
                                   }
                                 }}
-                                className={currentPage === totalPages ? "pointer-events-none opacity-50 cursor-not-allowed" : "cursor-pointer"}
+                                className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                               />
                             </PaginationItem>
                           </PaginationContent>
@@ -536,11 +496,9 @@ export default function HRPage() {
             </Card>
           </TabsContent>
 
-          {/* Compliance Tab Content - Scrollable */}
           <TabsContent value="compliance">
             <Card>
               <CardContent className="pt-4">
-                {/* Compliance Table */}
                 <div className="border border-gray-200 rounded-lg overflow-hidden">
                   <Table>
                     <TableHeader>
@@ -596,7 +554,7 @@ export default function HRPage() {
 
       {/* Add Guard Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="max-w-3xl h-auto">
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Add New Guard</DialogTitle>
             <DialogDescription>
@@ -646,7 +604,7 @@ export default function HRPage() {
               />
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1 col-span-2">
               <Label htmlFor="guardAddress">Address</Label>
               <Input
                 id="guardAddress"
@@ -660,7 +618,7 @@ export default function HRPage() {
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={() =>{handleAddingGuard(); setShowAddDialog(false)}}>
+            <Button onClick={handleAddingGuard}>
               Add Guard
             </Button>
           </div>

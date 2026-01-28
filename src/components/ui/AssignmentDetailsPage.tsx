@@ -629,7 +629,7 @@ export default function AssignmentDetailsPage() {
         onClose={() => setIsEditDialogOpen(false)}
         onSave={handleEditSuccess}
         guards={guards || []}
-        orders={[order] || []}
+        orders={[order]}
       />
     </div>
   );
