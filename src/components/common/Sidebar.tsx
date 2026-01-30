@@ -59,13 +59,14 @@ function SideItem({ icon, label, active, onClick, open }: SideItemProps) {
     <button
       onClick={onClick}
       className={classNames(
-        "w-full flex items-center gap-3 px-3 py-2 text-lg font-bold transition-all duration-200",
-        active ? "bg-white/15" : "hover:bg-white/10"
+        "w-full flex items-center gap-3 px-3 py-2 text-lg font-bold transition-all duration-200 rounded-lg",
+        active ? "bg-white/15" : "hover:bg-white/10",
+        !open && "justify-center"
       )}
     >
       <span
         className={classNames(
-          "h-5 w-5 transition-all duration-200 filter",
+          "h-6 w-6 transition-all duration-200 filter flex-shrink-0",
           "drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)] hover:drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]",
           "transform hover:scale-110 hover:-translate-y-0.5",
           active && "drop-shadow-[0_0_12px_rgba(255,255,255,0.4)] scale-105"
@@ -73,7 +74,7 @@ function SideItem({ icon, label, active, onClick, open }: SideItemProps) {
       >
         {icon}
       </span>
-      {open && <span className="font-bold">{label}</span>}
+      {open && <span className="font-bold whitespace-nowrap">{label}</span>}
     </button>
   );
 }
@@ -105,30 +106,40 @@ export default function Sidebar({
         isOpen ? "w-72" : "w-20"
       )}
       style={{
-        background: "linear-gradient(180deg, #2360FF 0%, #1850CC 100%)"
+        backgroundColor: "#011F6B"
       }}
     >
       {/* Header */}
       <div className="flex items-center gap-3 p-3 border-b border-white/10">
         <div
           onClick={() => navigate("/dashboard", { replace: true })}
-          className="h-10 w-10 rounded-xl bg-white/20 backdrop-blur-sm
+          className="h-10 w-10 rounded-xl backdrop-blur-sm
                      grid place-items-center shadow-lg cursor-pointer 
-                     hover:scale-105 transition-transform"
+                     hover:scale-105 transition-transform flex-shrink-0"
+          style={{ backgroundColor: "#2360FF" }}
         >
           <Shield className="h-6 w-6 text-white" />
         </div>
         {isOpen && (
-          <div>
-            <div className="text-lg font-semibold tracking-wide">VIGILO</div>
-            <div className="text-sm text-white/70">Workforce & Monitoring</div>
+          <>
+            <div>
+              <div className="text-lg font-semibold tracking-wide">VIGILO</div>
+              <div className="text-sm text-white/70">Workforce & Monitoring</div>
+            </div>
+            <div className="ml-auto">
+              <Button size="icon" variant="ghost" className="text-white hover:bg-white/10" onClick={onToggle}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+          </>
+        )}
+        {!isOpen && (
+          <div className="ml-auto">
+            <Button size="icon" variant="ghost" className="text-white hover:bg-white/10" onClick={onToggle}>
+              <Menu className="h-5 w-5" />
+            </Button>
           </div>
         )}
-        <div className="ml-auto">
-          <Button size="icon" variant="ghost" className="text-white hover:bg-white/10" onClick={onToggle}>
-            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        </div>
       </div>
 
       {/* System Status */}
@@ -154,7 +165,7 @@ export default function Sidebar({
 
       {/* Navigation - HIDDEN SCROLLBAR */}
       <nav 
-        className="flex-1 overflow-y-auto py-2"
+        className="flex-1 overflow-y-auto py-2 px-2"
         style={{
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
@@ -167,77 +178,77 @@ export default function Sidebar({
         `}</style>
 
         <SideItem
-          icon={<img src={DashboardIcon} className="h-5 w-5"/> }
+          icon={<img src={DashboardIcon} className="h-6 w-6"/> }
           label="Dashboard"
           active={activeTab === "dashboard"}
           onClick={() => onTabChange("dashboard")}
           open={isOpen}
         />
         <SideItem
-          icon={<img src={SchedulingIcon} className="h-5 w-5"/>}
+          icon={<img src={SchedulingIcon} className="h-6 w-6"/>}
           label="Scheduling"
           active={activeTab === "scheduling"}
           onClick={() => onTabChange("scheduling")}
           open={isOpen}
         />
         <SideItem
-          icon={<img src={ClientIcon} className="h-5 w-5"/>}
+          icon={<img src={ClientIcon} className="h-6 w-6"/>}
           label="Clients Management"
           active={activeTab === "clients"}
           onClick={() => onTabChange("clients")}
           open={isOpen}
         />
         <SideItem
-          icon={<img src={IncidentIcon} className="h-5 w-5"/>}
+          icon={<img src={IncidentIcon} className="h-6 w-6"/>}
           label="Incidents"
           active={activeTab === "incidents"}
           onClick={() => onTabChange("incidents")}
           open={isOpen}
         />
         <SideItem
-          icon={<img src={AlarmIcon} className="h-5 w-5"/>}
+          icon={<img src={AlarmIcon} className="h-6 w-6"/>}
           label="Alarms"
           active={activeTab === "alarms"}
           onClick={() => onTabChange("alarms")}
           open={isOpen}
         />
         <SideItem
-          icon={<img src={MapIcon} className="h-5 w-5"/>}
+          icon={<img src={MapIcon} className="h-6 w-6"/>}
           label="Map"
           active={activeTab === "map"}
           onClick={() => onTabChange("map")}
           open={isOpen}
         />
         <SideItem
-          icon={<img src={MessageIcon} className="h-5 w-5"/>}
+          icon={<img src={MessageIcon} className="h-6 w-6"/>}
           label="Messages"
           active={activeTab === "messages"}
           onClick={() => onTabChange("messages")}
           open={isOpen}
         />
         <SideItem
-          icon={<img src={PatrolingIcon} className="h-5 w-5"/>}
+          icon={<img src={PatrolingIcon} className="h-6 w-6"/>}
           label="Patrolling"
           active={activeTab === "patrol"}
           onClick={() => onTabChange("patrol")}
           open={isOpen}
         />
         <SideItem
-          icon={<img src={HRIcon} className="h-5 w-5"/>}
+          icon={<img src={HRIcon} className="h-6 w-6"/>}
           label="HR & Compliance"
           active={activeTab === "hr"}
           onClick={() => onTabChange("hr")}
           open={isOpen}
         />
         <SideItem
-          icon={<img src={InvoicingIcon} className="h-5 w-5"/>}
+          icon={<img src={InvoicingIcon} className="h-6 w-6"/>}
           label="Invoicing"
           active={activeTab === "invoicing"}
           onClick={() => onTabChange("invoicing")}
           open={isOpen}
         />
         <SideItem
-          icon={<img src={SettingsIcon} className="h-5 w-5"/>}
+          icon={<img src={SettingsIcon} className="h-6 w-6"/>}
           label="Settings"
           active={activeTab === "settings"}
           onClick={() => onTabChange("settings")}
@@ -249,7 +260,8 @@ export default function Sidebar({
       <div className="p-3 border-t border-white/10">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-lg font-semibold bg-red-600 hover:bg-red-700 transition-all duration-200"
+          className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-lg font-semibold hover:opacity-90 transition-all duration-200"
+          style={{ backgroundColor: "#FC0000" }}
         >
           <LogOut className="h-4 w-4" />
           {isOpen && <span>Logout</span>}
