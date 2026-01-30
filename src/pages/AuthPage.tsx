@@ -121,10 +121,7 @@ export default function AuthPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 required
-                className="mt-1 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 bg-white"
-                style={{ 
-                  focusRing: "#2360FF" 
-                }}
+                className="mt-1 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 bg-white"
               />
               {email && !isEmailValid && (
                 <p 
