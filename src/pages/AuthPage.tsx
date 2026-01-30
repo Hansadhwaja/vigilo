@@ -52,14 +52,33 @@ export default function AuthPage() {
     <div 
       className="h-screen w-screen flex items-center justify-center p-4 overflow-hidden relative"
     >
-      {/* Multi-layer gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-500 to-purple-600"></div>
-      <div className="absolute inset-0 bg-gradient-to-tl from-cyan-400/30 via-transparent to-blue-800/50"></div>
+      {/* Multi-layer gradient background with new colors */}
+      <div 
+        className="absolute inset-0" 
+        style={{ 
+          background: "linear-gradient(135deg, #011F6B 0%, #2360FF 50%, #011F6B 100%)" 
+        }}
+      ></div>
+      <div 
+        className="absolute inset-0 opacity-30" 
+        style={{ 
+          background: "linear-gradient(225deg, #2360FF 0%, transparent 50%, #011F6B 100%)" 
+        }}
+      ></div>
       
-      {/* Animated floating shapes */}
-      <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-      <div className="absolute top-40 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-      <div className="absolute -bottom-8 left-1/3 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+      {/* Animated floating shapes with new primary color */}
+      <div 
+        className="absolute top-20 left-10 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"
+        style={{ backgroundColor: "#2360FF" }}
+      ></div>
+      <div 
+        className="absolute top-40 right-10 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"
+        style={{ backgroundColor: "#011F6B" }}
+      ></div>
+      <div 
+        className="absolute -bottom-8 left-1/3 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"
+        style={{ backgroundColor: "#2360FF" }}
+      ></div>
       
       {/* Geometric patterns */}
       <div className="absolute top-0 left-0 w-full h-full opacity-10">
@@ -72,7 +91,10 @@ export default function AuthPage() {
       <Card className="w-full max-w-md bg-white text-gray-900 shadow-2xl p-8 relative z-10">
         <CardHeader className="text-center space-y-3">
           <div className="flex justify-center items-center gap-3">
-            <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 grid place-items-center shadow-lg">
+            <div 
+              className="h-12 w-12 rounded-xl grid place-items-center shadow-lg"
+              style={{ backgroundColor: "#2360FF" }}
+            >
               <Shield className="h-6 w-6 text-white" />
             </div>
             <CardTitle className="text-2xl font-semibold tracking-wide text-gray-900">
@@ -99,10 +121,16 @@ export default function AuthPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 required
-                className="mt-1 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 bg-white"
+                className="mt-1 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 bg-white"
+                style={{ 
+                  focusRing: "#2360FF" 
+                }}
               />
               {email && !isEmailValid && (
-                <p className="text-sm text-red-500 mt-1">
+                <p 
+                  className="text-sm mt-1"
+                  style={{ color: "#FC0000" }}
+                >
                   Please enter a valid email address
                 </p>
               )}
@@ -124,7 +152,7 @@ export default function AuthPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="pl-4 pr-10 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="pl-4 pr-10 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 bg-white"
                 />
                 <div
                   className={`absolute inset-y-0 right-3 flex items-center ${
