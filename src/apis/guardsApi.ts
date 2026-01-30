@@ -1,9 +1,8 @@
 // guardsApi.ts
 import { baseApi } from "./baseApi";
 
-// Basic guard interface (from getAllGuards)
+// Basic guard interface
 export interface Guard {
-  roles: never[];
   id: string;
   name: string;
   email: string;
@@ -12,46 +11,41 @@ export interface Guard {
   createdAt: string;
 }
 
-export interface Order {
-  id: string;
+// Order interface for activity
+export interface ActivityOrder {
   serviceType: string;
+  locationName: string;
   locationAddress: string;
-  status: string;
 }
 
-export interface LatestStatic {
-  id: string;
-  orderId: string;
-  type: string;
-  status: string;
-  description: string;
+// Timesheet interface
+export interface Timesheet {
+  clockInTime: string | null;
+  clockOutTime: string | null;
+  totalHours: number;
+  overtime: {
+    startTime: string;
+    endTime: string;
+    hours: number;
+  };
+}
+
+// Activity interface (shift history)
+export interface Activity {
+  shiftId: string;
+  date: string;
   startTime: string;
   endTime: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-  Order: Order;
+  shiftStatus: string;
+  order: ActivityOrder;
+  assignmentStatus: string;
+  timesheet: Timesheet;
 }
 
-export interface CreateGuardAdminRequest {
-  name: string;
-  email: string;
-  password: string;
-  address: string;
-  mobile?: string;
-  avatar?: string;
-}
-
-export interface CreateGuardAdminResponse {
-  success: boolean;
-  message: string;
-  guard?: Guard;
-}
-
-
-// Extended guard interface with latest static (from getGuardById)
-export interface GuardWithStatic extends Guard {
-  latestStatic: LatestStatic | null;
+// ✅ CORRECT: Guard details response with activity array
+export interface GuardDetailsData {
+  guard: Guard;
+  activity: Activity[];
 }
 
 export interface Pagination {
@@ -69,17 +63,33 @@ export interface GetAllGuardsResponse {
   pagination: Pagination;
 }
 
+// ✅ CORRECT: This matches your API response
 export interface GetGuardByIdResponse {
   success: boolean;
   message: string;
-  data: GuardWithStatic;
+  data: GuardDetailsData;
 }
 
-// Query parameters interface for getAllGuards
+// Query parameters
 export interface GetAllGuardsParams {
   limit?: number;
   page?: number;
   search?: string;
+}
+
+// Create guard request
+export interface CreateGuardAdminRequest {
+  name: string;
+  email: string;
+  password: string;
+  address?: string;
+  mobile?: string;
+}
+
+export interface CreateGuardAdminResponse {
+  success: boolean;
+  message: string;
+  guard?: Guard;
 }
 
 export const guardsApi = baseApi.injectEndpoints({
@@ -111,15 +121,18 @@ export const guardsApi = baseApi.injectEndpoints({
     }),
 
     createGuardByAdmin: builder.mutation<CreateGuardAdminResponse, CreateGuardAdminRequest>({
-  query: (body) => ({
-    url: "/users/createGuardByAdmin",
-    method: "POST",
-    body,
-  }),
-  invalidatesTags: ["Guards"],
-}),
-
+      query: (body) => ({
+        url: "/users/createGuardByAdmin",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Guards"],
+    }),
   }),
 });
 
-export const { useGetAllGuardsQuery, useGetGuardByIdQuery, useCreateGuardByAdminMutation, } = guardsApi;
+export const { 
+  useGetAllGuardsQuery, 
+  useGetGuardByIdQuery, 
+  useCreateGuardByAdminMutation 
+} = guardsApi;
