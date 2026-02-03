@@ -1968,7 +1968,7 @@ export default function ShiftPage() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select order" />
+                  <SelectValue placeholder="Select Address" />
                 </SelectTrigger>
 
                 <SelectContent
@@ -2011,7 +2011,7 @@ export default function ShiftPage() {
                 }
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select order" />
+                  <SelectValue placeholder="Select name" />
                 </SelectTrigger>
 
                 <SelectContent
