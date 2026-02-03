@@ -24,6 +24,7 @@ import { Calendar, Clock, User, MapPin, FileText, ExternalLink, Loader2 } from "
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useEditScheduleMutation } from "../../apis/schedulingAPI";
+import { getStatusColor, getStatusStyle } from "../../utils/statusColors";
 
 interface EditAssignmentDialogProps {
   assignment: any;
@@ -45,7 +46,6 @@ export default function EditAssignmentDialog({
   const navigate = useNavigate();
   const [guardsOpen, setGuardsOpen] = useState(false);
   
-  // ✅ RTK Query mutation hook
   const [editSchedule, { isLoading: isSaving }] = useEditScheduleMutation();
 
   const [formData, setFormData] = useState({
@@ -57,10 +57,8 @@ export default function EditAssignmentDialog({
     guardIds: [] as string[],
   });
 
-  // ✅ Populate form when assignment changes
   useEffect(() => {
     if (assignment && open) {
-      // Extract date from ISO string
       const extractDate = (isoString: string): string => {
         if (!isoString) return "";
         try {
@@ -70,12 +68,11 @@ export default function EditAssignmentDialog({
         }
       };
 
-      // Extract time in HH:mm format
       const extractTime = (isoString: string): string => {
         if (!isoString) return "";
         try {
           const date = new Date(isoString);
-          return date.toTimeString().slice(0, 5); // "HH:mm"
+          return date.toTimeString().slice(0, 5);
         } catch {
           return "";
         }
@@ -92,14 +89,12 @@ export default function EditAssignmentDialog({
     }
   }, [assignment, open]);
 
-  // ✅ Handle save with API call
   const handleSave = async () => {
     if (!assignment?.shiftId) {
       toast.error("Shift ID not found");
       return;
     }
 
-    // Build update payload (only changed fields)
     const updateData: any = {};
     
     if (formData.description && formData.description !== assignment.description) {
@@ -121,7 +116,6 @@ export default function EditAssignmentDialog({
       updateData.guardIds = formData.guardIds;
     }
 
-    // Check if anything changed
     if (Object.keys(updateData).length === 0) {
       toast.error("No changes detected");
       return;
@@ -134,8 +128,8 @@ export default function EditAssignmentDialog({
       }).unwrap();
 
       toast.success(result.message || "Shift updated successfully!");
-      onSave(result.data); // Call parent callback
-      onClose(); // Close dialog
+      onSave(result.data);
+      onClose();
     } catch (error: any) {
       console.error("Edit error:", error);
       toast.error(error?.data?.message || "Failed to update shift");
@@ -156,19 +150,8 @@ export default function EditAssignmentDialog({
 
   if (!assignment) return null;
 
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "ongoing":
-      case "active":
-        return "bg-blue-100 text-blue-700 border-blue-300";
-      case "completed":
-        return "bg-green-100 text-green-700 border-green-300";
-      case "cancelled":
-        return "bg-red-100 text-red-700 border-red-300";
-      default:
-        return "bg-yellow-100 text-yellow-700 border-yellow-300";
-    }
-  };
+  // ✅ FIX: Get status from assignment
+  const currentStatus = assignment.guardStatus || assignment.status || "pending";
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -176,8 +159,12 @@ export default function EditAssignmentDialog({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-bold">Edit Assignment</DialogTitle>
-            <Badge className={getStatusColor(assignment.status)}>
-              {assignment.status || "pending"}
+            {/* ✅ FIXED: Use currentStatus variable */}
+            <Badge 
+              className="border-2"
+              style={getStatusStyle(currentStatus)}
+            >
+              {getStatusColor(currentStatus).label}
             </Badge>
           </div>
           <DialogDescription>
@@ -338,13 +325,23 @@ export default function EditAssignmentDialog({
             </p>
           </div>
 
-          {/* Current Assignment Info */}
+          {/* Current Assignment Info with Status */}
           <div className="bg-gray-50 rounded-lg p-4 space-y-2 border">
             <h4 className="font-semibold text-sm text-gray-700">Current Assignment Info</h4>
             <div className="space-y-1 text-sm text-gray-600">
               <p><strong>Guard:</strong> {assignment.guardName || assignment.name}</p>
               <p><strong>Location:</strong> {assignment.orderLocationName || assignment.orderName || "N/A"}</p>
               <p><strong>Current Time:</strong> {assignment.time}</p>
+              <div className="flex items-center gap-2 pt-1">
+                <strong>Status:</strong> 
+                <Badge 
+                  size="sm"
+                  className="border"
+                  style={getStatusStyle(currentStatus)}
+                >
+                  {getStatusColor(currentStatus).label}
+                </Badge>
+              </div>
             </div>
           </div>
         </div>
@@ -368,9 +365,10 @@ export default function EditAssignmentDialog({
               Cancel
             </Button>
             <Button 
-              onClick={handleSave} 
-              className="bg-blue-600 hover:bg-blue-700"
+              onClick={handleSave}
               disabled={isSaving}
+              style={{ backgroundColor: "#2360FF" }}
+              className="hover:opacity-90"
             >
               {isSaving ? (
                 <>
