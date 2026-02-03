@@ -856,81 +856,92 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
             <CardContent className="pt-0">
               {!isLoading && !isError && clientsList.length > 0 && (
                 <div className="overflow-x-auto rounded-lg border border-gray-200">
-                  <table className="w-full text-lg text-left">
-                    <thead className="bg-gray-50 border-b">
-                      <tr>
-                        <th className="px-4 py-3 font-medium text-gray-700">Name</th>
-                        <th className="px-4 py-3 font-medium text-gray-700">Email</th>
-                        <th className="px-4 py-3 font-medium text-gray-700">Phone</th>
-                        <th className="px-4 py-3 font-medium text-gray-700">Address</th>
-                        <th className="px-4 py-3 font-medium text-gray-700 text-right">Actions</th>
-                      </tr>
-                    </thead>
+  <table className="w-full text-lg text-left table-fixed">
+    <thead className="bg-gray-50 border-b">
+      <tr>
+        <th className="px-4 py-3 font-medium text-gray-700 w-[20%]">Name</th>
+        <th className="px-4 py-3 font-medium text-gray-700 w-[25%]">Email</th>
+        <th className="px-4 py-3 font-medium text-gray-700 w-[15%]">Phone</th>
+        <th className="px-4 py-3 font-medium text-gray-700 w-[25%]">Address</th>
+        <th className="px-4 py-3 font-medium text-gray-700 text-right w-[15%]">Actions</th>
+      </tr>
+    </thead>
 
-                    <tbody className="divide-y">
-                     {filteredClients.map((client) => (
+    <tbody className="divide-y">
+      {filteredClients.map((client) => (
+        <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+          <td className="px-4 py-3 font-medium text-gray-900">
+            <div className="truncate" title={client.name}>
+              {client.name}
+            </div>
+          </td>
 
-                        <tr key={client.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-4 py-3 font-medium text-gray-900">
-                            {client.name}
-                          </td>
+          <td className="px-4 py-3 text-gray-700">
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <span 
+                className="truncate cursor-help" 
+                title={client.email}
+              >
+                {client.email}
+              </span>
+            </div>
+          </td>
 
-                          <td className="px-4 py-3 text-gray-700 max-w-50 truncate">
-                            <div className="flex items-center gap-1">
-                              <Mail className="h-4 w-4 text-gray-400" />
-                              {client.email}
-                            </div>
-                          </td>
+          <td className="px-4 py-3 text-gray-700">
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <span className="truncate" title={client.mobile}>
+                {client.mobile}
+              </span>
+            </div>
+          </td>
 
-                          <td className="px-4 py-3 text-gray-700 max-w-37.5 truncate">
-                            <div className="flex items-center gap-1">
-                              <Phone className="h-4 w-4 text-gray-400" />
-                              {client.mobile}
-                            </div>
-                          </td>
+          <td className="px-4 py-3 text-gray-600">
+            <div className="truncate" title={client.address || "—"}>
+              {client.address || "—"}
+            </div>
+          </td>
 
-                          <td className="px-4 py-3 text-gray-600 max-w-55 truncate">
-                            {client.address || "—"}
-                          </td>
+          <td className="px-4 py-3 text-right">
+            <div className="flex justify-end gap-2">
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={() => {
+                  setSelectedClient(client);
+                  setShowClientDialog(true);
+                }}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
 
-                          <td className="px-4 py-3 text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                size="lg"
-                                variant="outline"
-                                className="h-8 w-8 p-0"
-                                onClick={() => {
-                                  setSelectedClient(client);
-                                  setShowClientDialog(true);
-                                }}
-                              >
-                                <Eye className="h-4 w-4" />
-                              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                onClick={() => handleDeleteClient(client.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  
+  {filteredClients.length === 0 && (
+    <div className="text-center py-8">
+      <p className="text-gray-600">No clients found</p>
+      {clientSearchTerm && (
+        <p className="text-sm text-gray-500 mt-1">Try adjusting your search</p>
+      )}
+    </div>
+  )}
+</div>
 
-                              <Button
-                                size="lg"
-                                variant="outline"
-                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                onClick={() => handleDeleteClient(client.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {filteredClients.length === 0 && (
-  <div className="text-center py-8">
-    <p className="text-gray-600">No clients found</p>
-    {clientSearchTerm && (
-      <p className="text-sm text-gray-500 mt-1">Try adjusting your search</p>
-    )}
-  </div>
-)}
-
-                </div>
               )}
             </CardContent>
           </Card>
