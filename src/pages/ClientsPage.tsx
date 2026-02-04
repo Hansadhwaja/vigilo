@@ -29,6 +29,7 @@ import { AlertCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { Toast } from "@heroui/react";
+import { getStatusColor, getStatusStyle } from "../utils/statusColors";
 
 export default function ClientsPage() {
   const [isEditingClient, setIsEditingClient] = useState(false);
@@ -292,23 +293,6 @@ const filteredClients = useMemo(() => {
     } catch (err: any) {
       console.error("Failed to update order:", err);
       toast.error(err?.data?.message || "Failed to update order");
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "ongoing":
-        return "bg-green-100 text-green-800";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "upcoming":
-        return "bg-blue-100 text-blue-800";
-      case "completed":
-        return "bg-gray-100 text-gray-800";
-      case "cancelled":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -628,6 +612,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
           {orders.map((order) => {
             const urgency = getOrderUrgency(order);
             
+
             return (
               <tr 
                 key={order.id} 
@@ -689,9 +674,12 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 </td>
 
                 <td className="px-6 py-4">
-                  <Badge className={`${getStatusColor(order.status)} font-medium`}>
-                    {order.status}
-                  </Badge>
+                  <Badge 
+                      className="font-medium border-2"
+                       style={getStatusStyle(order.status)}
+                                                        >
+                            {getStatusColor(order.status).label}
+                                </Badge>
                 </td>
 
                 <td className="px-6 py-4">
