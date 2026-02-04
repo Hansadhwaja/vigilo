@@ -124,7 +124,7 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
     label: "Missed"
   },
   order_missed: {
-    bg: "#B91C1C", // Dark red
+    bg: "#B91C1C", 
     text: "#FFFFFF",
     border: "#991B1B",
     label: "Order Missed"
@@ -139,7 +139,7 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
     bg: "#7F1D1D",
     text: "#FFFFFF",
     border: "#991B1B",
-    label: "Missed End OT"
+    label: "Missed EndOvertime"
   },
   
   // ============================================
@@ -161,13 +161,13 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
     bg: "#F97316",
     text: "#FFFFFF",
     border: "#EA580C",
-    label: "OT Started"
+    label: "Overtime Started"
   },
   overtime_ended: {
     bg: "#FB923C",
     text: "#FFFFFF",
     border: "#F97316",
-    label: "OT Ended"
+    label: "Overtime Ended"
   }
 };
 

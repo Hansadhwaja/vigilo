@@ -383,30 +383,34 @@ export default function AssignmentDetailsPage() {
                 <CardTitle className="text-xl font-bold text-gray-900">Location Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+              <div className="space-y-3">
                 <div>
-                  <div className="flex items-start gap-3">
-                    <MapPin className="h-5 w-5 text-green-600 mt-1 flex-shrink-0" />
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-lg">{order.locationName}</h3>
-                      <p className="text-gray-600 mt-1">{order.locationAddress}</p>
-                    </div>
-                  </div>
+                <p className="text-lg text-gray-900 mb-1">Location Name</p>
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-green-600 mt-1 shrink-0" />
+                  <h3 className="font-semibold text-gray-900 text-lg">{order.locationName}</h3>
                 </div>
-
-                <div className="flex gap-3 flex-wrap">
-                  <Badge variant="outline" className="px-3 py-1 capitalize">
-                    {order.serviceType}
-                  </Badge>
-                  <Badge variant="outline" className="px-3 py-1">
-                    {order.guardsRequired} Guard{order.guardsRequired > 1 ? 's' : ''} Required
-                  </Badge>
                 </div>
+                <div>
+                <p className="text-lg text-gray-900 mb-1">Location Address</p>
+                <p className="text-gray-700">{order.locationAddress}</p>
+                </div>
+              </div>
 
-                {order.description && (
-                  <div className="pt-3 border-t">
-                    <p className="text-xl text-gray-600">{order.description}</p>
-                  </div>
-                )}
+              <div className="flex gap-3 flex-wrap">
+                <Badge variant="outline" className="px-3 py-1 capitalize">
+                {order.serviceType}
+                </Badge>
+                <Badge variant="outline" className="px-3 py-1">
+                {order.guardsRequired} Guard{order.guardsRequired > 1 ? 's' : ''} Required
+                </Badge>
+              </div>
+
+              {order.description && (
+                <div className="pt-3 border-t">
+                <p className="text-gray-700">{order.description}</p>
+                </div>
+              )}
               </CardContent>
             </Card>
 

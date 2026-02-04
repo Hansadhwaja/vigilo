@@ -133,66 +133,121 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
   };
 
   scheduleList.forEach((shift) => {
+    // ✅ FIX: Extract dates from startTime and endTime ISO strings
+    const startDateStr = shift.startTime.split('T')[0];  // "2026-01-29"
+    const endDateStr = shift.endTime.split('T')[0];      // "2026-01-31"
+
+    console.log("📅 Processing shift:", {
+      startDate: startDateStr,
+      endDate: endDateStr,
+      startTime: shift.startTime,
+      endTime: shift.endTime
+    });
+
+    // For time display, use toLocalTime
     const start = toLocalTime(shift.startTime);
     const end = toLocalTime(shift.endTime);
 
-    const dateKey = start.toISOString().split("T")[0];
+    // Parse dates properly
+    const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+    
+    const startDateObj = new Date(startYear, startMonth - 1, startDay);
+    const endDateObj = new Date(endYear, endMonth - 1, endDay);
+    
+    const daysDiff = Math.floor((endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24));
 
-    // ❗ FIX — use LOCAL TIME for comparison (not UTC)
-    const shiftStartHHMM = getTimeHHMM(start);
-    const shiftStartMin = toMinutes(shiftStartHHMM);
+    console.log("📆 Date range:", {
+      startDateObj: startDateObj.toDateString(),
+      endDateObj: endDateObj.toDateString(),
+      daysDiff,
+      willCreateDays: daysDiff + 1
+    });
 
-    // find matching slot
-    let matchedSlot: string | null = null;
+    // ✅ Loop through each day (inclusive)
+    for (let dayOffset = 0; dayOffset <= daysDiff; dayOffset++) {
+      const currentDateObj = new Date(startDateObj);
+      currentDateObj.setDate(startDateObj.getDate() + dayOffset);
+      
+      // Format date manually (avoid timezone issues)
+      const year = currentDateObj.getFullYear();
+      const month = String(currentDateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDateObj.getDate()).padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`;
 
-    for (let i = 0; i < timeSlots.length; i++) {
-      const curr = toMinutes(timeSlots[i].time);
-      const next =
-        i < timeSlots.length - 1 ? toMinutes(timeSlots[i + 1].time) : 9999;
+      console.log(`  ➡️ Day ${dayOffset + 1}/${daysDiff + 1}: Creating entry for ${dateKey}`);
 
-      if (shiftStartMin >= curr && shiftStartMin < next) {
-        matchedSlot = timeSlots[i].time;
-        break;
+      // Use LOCAL TIME for comparison
+      const shiftStartHHMM = getTimeHHMM(start);
+      const shiftStartMin = toMinutes(shiftStartHHMM);
+
+      // Find matching slot
+      let matchedSlot: string | null = null;
+
+      for (let i = 0; i < timeSlots.length; i++) {
+        const curr = toMinutes(timeSlots[i].time);
+        const next =
+          i < timeSlots.length - 1 ? toMinutes(timeSlots[i + 1].time) : 9999;
+
+        if (shiftStartMin >= curr && shiftStartMin < next) {
+          matchedSlot = timeSlots[i].time;
+          break;
+        }
       }
+
+      if (!matchedSlot) {
+        console.log(`    ❌ No matching slot for ${shiftStartHHMM}`);
+        continue;
+      }
+
+      if (!organized[dateKey]) organized[dateKey] = {};
+      if (!organized[dateKey][matchedSlot]) organized[dateKey][matchedSlot] = [];
+
+      // Add guard-based assignments for this day
+      shift.guards.forEach((guard: any) => {
+        organized[dateKey][matchedSlot].push({
+          shiftId: shift.id,
+          guardId: guard.id,
+          id: `${shift.id}-${guard.id}-${dateKey}`,
+
+          guardName: guard.name,
+          guardEmail: guard.email,
+          guardStatus: guard.StaticGuards?.status || shift.status,
+
+          orderId: shift.orderId,
+          orderLocationName: shift.locationName || "Unknown Location",
+          orderName: shift.orderName || "Unknown Location",
+
+          description: shift.description,
+          type: shift.type,
+          status: shift.status,
+
+          statusColors: getStatusColor(shift.status),
+
+          timeSlot: matchedSlot,
+          start,
+          end,
+          duration: getDuration(shift.startTime, shift.endTime),
+          
+          displayDate: dateKey,
+          originalStartDate: shift.startTime,
+          originalEndDate: shift.endTime,
+        });
+      });
     }
 
-    if (!matchedSlot) return;
-
-    if (!organized[dateKey]) organized[dateKey] = {};
-    if (!organized[dateKey][matchedSlot]) organized[dateKey][matchedSlot] = [];
-
-    // add guard-based assignments
-    shift.guards.forEach((guard: any) => {
-      organized[dateKey][matchedSlot].push({
-        shiftId: shift.id,
-        guardId: guard.id,
-        id: `${shift.id}-${guard.id}`,
-
-        guardName: guard.name,
-        guardEmail: guard.email,
-        guardStatus: guard.StaticGuards?.status || shift.status,
-
-        orderId: shift.orderId,
-        orderLocationName: shift.locationName || "Unknown Location",
-        orderName: shift.orderName || "Unknown Location",
-
-        description: shift.description,
-        type: shift.type,
-        status: shift.status,
-
-        // Add color info directly
-        statusColors: getStatusColor(shift.status),
-
-        timeSlot: matchedSlot,
-        start,
-        end,
-        duration: getDuration(shift.startTime, shift.endTime),
-      });
-    });
+    console.log("✅ Shift processing complete\n");
   });
 
   return organized;
 };
+
+
+
+
+
+
+
 
 export default function ShiftPage() {
   const today = new Date();
@@ -1370,9 +1425,9 @@ export default function ShiftPage() {
                   p-3 border-r border-gray-200 text-center cursor-pointer transition-all
                   ${
                     isSelected
-                      ? "bg-blue-500 text-white"
+                      ? "bg-blue-900 text-white"
                       : isToday
-                        ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                        ? "bg-blue-100 text-blue-900 hover:bg-blue-200"
                         : "hover:bg-gray-200"
                   }
                 `}
@@ -1488,8 +1543,8 @@ export default function ShiftPage() {
                               p-2 rounded-md text-lg cursor-pointer transition-all border group-hover:shadow-sm
                               ${
                                 assignment.type === "patrol"
-                                  ? "bg-gradient-to-r from-orange-100 to-orange-50 text-orange-900 border-orange-200 hover:from-orange-200 hover:to-orange-100"
-                                  : "bg-gradient-to-r from-green-100 to-green-50 text-green-900 border-green-200 hover:from-green-200 hover:to-green-100"
+                                  ? "bg-linear-to-r from-orange-100 to-orange-50 text-orange-900 border-orange-200 hover:from-orange-200 hover:to-orange-100"
+                                  : "bg-linear-to-r from-green-100 to-green-50 text-green-900 border-green-200 hover:from-green-200 hover:to-green-100"
                               }
                             `}
                                     onClick={(e) => {
@@ -1583,7 +1638,6 @@ export default function ShiftPage() {
           orders={orders || []} // Pass your orders array
         />
 
-        {/* Selected Date Summary Bar */}
         {/* Selected Date Summary Bar */}
         {viewMode === "weekly" && (
           <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
