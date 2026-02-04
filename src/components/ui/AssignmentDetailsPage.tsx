@@ -274,79 +274,79 @@ export default function AssignmentDetailsPage() {
           {/* Left Column - Main Info */}
           <div className="lg:col-span-2 space-y-6">
             {/* Shift Information Card */}
-            <Card className="shadow-sm">
-              <CardHeader className="pb-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-xl font-bold text-gray-900">Shift Information</CardTitle>
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge className={`${getTypeBadge(shift.type)} text-xl px-3 py-1 capitalize`}>
-                      {shift.type}
-                    </Badge>
-                    <Badge className={`${getStatusColor(shift.status)} text-xl px-3 py-1`}>
-                      {shift.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </Badge>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Shift Date & Times */}
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <p className="text-xl text-gray-500 mb-1">Shift Date</p>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-gray-400" />
-                      <p className="font-semibold text-gray-900">{formatDate(shift.date)}</p>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xl text-gray-500 mb-1">Guards Assigned</p>
-                    <div className="flex items-center gap-2">
-                      <Users className="h-5 w-5 text-gray-400" />
-                      <p className="font-semibold text-gray-900">
-                        {guards.length} {guards.length === 1 ? 'Guard' : 'Guards'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+ <Card className="shadow-sm">
+  <CardHeader className="pb-4">
+    <div className="flex items-start justify-between">
+      <div>
+        <CardTitle className="text-xl font-semibold text-gray-900">Shift Information</CardTitle>
+      </div>
+      <div className="flex gap-2">
+        <Badge className={`${getTypeBadge(shift.type)} text-xl px-3 py-1 capitalize`}>
+          {shift.type}
+        </Badge>
+        <Badge className={`${getStatusColor(shift.status)} text-xl px-3 py-1`}>
+          {shift.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+        </Badge>
+      </div>
+    </div>
+  </CardHeader>
+  <CardContent className="space-y-6">
+    {/* Shift Date & Times */}
+    <div className="grid grid-cols-2 gap-6">
+      <div>
+        <p className="text-lg font-semibold text-gray-900 mb-1">Shift Date</p>
+        <div className="flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-gray-400" />
+          <p className="text-lg text-gray-500">{formatDate(shift.date)}</p>
+        </div>
+      </div>
+      <div>
+        <p className="text-lg font-semibold text-gray-900 mb-1">Guards Assigned</p>
+        <div className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-gray-400" />
+          <p className="text-lg text-gray-500">
+            {guards.length} {guards.length === 1 ? 'Guard' : 'Guards'}
+          </p>
+        </div>
+      </div>
+    </div>
 
-                {/* Shift Times */}
-                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                  <h4 className="font-semibold text-gray-900 text-xl mb-3">Shift Times</h4>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-lg text-gray-500 mb-1">Start</p>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-gray-400" />
-                        <p className="font-medium text-gray-900">{formatTime(shift.startTime)}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-lg text-gray-500 mb-1">End</p>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-gray-400" />
-                        <p className="font-medium text-gray-900">{formatTime(shift.endTime)}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-lg text-gray-500 mb-1">Duration</p>
-                      <p className="font-medium text-gray-900">
-                        {calculations?.durationHours.toFixed(1)}h
-                      </p>
-                    </div>
-                  </div>
-                </div>
+    {/* Shift Times */}
+    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+      <h4 className="text-lg font-semibold text-gray-900 mb-3">Shift Times</h4>
+      <div className="grid grid-cols-3 gap-4">
+        <div>
+          <p className="text-lg font-semibold text-gray-900 mb-1">Start</p>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-gray-400" />
+            <p className="text-lg text-gray-500">{formatTime(shift.startTime)}</p>
+          </div>
+        </div>
+        <div>
+          <p className="text-lg font-semibold text-gray-900 mb-1">End</p>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-gray-400" />
+            <p className="text-lg text-gray-500">{formatTime(shift.endTime)}</p>
+          </div>
+        </div>
+        <div>
+          <p className="text-lg font-semibold text-gray-900 mb-1">Duration</p>
+          <p className="text-lg text-gray-500">
+            {calculations?.durationHours.toFixed(1)}h
+          </p>
+        </div>
+      </div>
+    </div>
 
-                {/* Description */}
-                {shift.description && (
-                  <div>
-                    <h4 className="font-semibold text-gray-900 text-xl mb-2">Description</h4>
-                    <p className="text-gray-700 leading-relaxed">{shift.description}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+    {/* Description */}
+    {shift.description && (
+      <div>
+        <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
+        <p className="text-lg text-gray-500 leading-relaxed">{shift.description}</p>
+      </div>
+    )}
+  </CardContent>
+</Card>
 
             {/* Client Information Card */}
             <Card className="shadow-sm">
