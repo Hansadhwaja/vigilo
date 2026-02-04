@@ -1048,6 +1048,9 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
           value={editFormData.endDate}
           onChange={(e) => handleEditFormChange("endDate", e.target.value)}
         />
+        {editFormData.endDate && editFormData.startDate && new Date(editFormData.endDate) < new Date(editFormData.startDate) && (
+          <p className="text-red-600 text-sm font-medium">End date must be after start date</p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -1070,6 +1073,9 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
           value={editFormData.endTime}
           onChange={(e) => handleEditFormChange("endTime", e.target.value)}
         />
+        {editFormData.endTime && editFormData.startTime && editFormData.startDate === editFormData.endDate && editFormData.endTime <= editFormData.startTime && (
+          <p className="text-red-600 text-sm font-medium">End time must be after start time</p>
+        )}
       </div>
 
       <div className="space-y-2 md:col-span-2">
@@ -1095,8 +1101,8 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       </Button>
       <Button
         onClick={handleEditSubmit}
-        disabled={isEditing}
-        className="bg-blue-600 hover:bg-blue-700"
+        disabled={isEditing || (editFormData.endDate && editFormData.startDate && new Date(editFormData.endDate) < new Date(editFormData.startDate)) || (editFormData.endTime && editFormData.startTime && editFormData.startDate === editFormData.endDate && editFormData.endTime <= editFormData.startTime)}
+        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isEditing && (
           <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
