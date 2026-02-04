@@ -495,6 +495,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="ongoing">Ongoing</SelectItem>
                 <SelectItem value="upcoming">Upcoming</SelectItem>
+                <SelectItem value="missed">Missed</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
