@@ -20,7 +20,7 @@ import {
 } from "../ui/select";
 import { Badge } from "../ui/badge";
 import { Checkbox } from "../ui/checkbox";
-import { Calendar, Clock, User, MapPin, FileText, ExternalLink, Loader2 } from "lucide-react";
+import { Calendar, Clock, User, MapPin, FileText, ExternalLink, Loader2, AlertCircle, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useEditScheduleMutation } from "../../apis/schedulingAPI";
@@ -57,6 +57,8 @@ export default function EditAssignmentDialog({
     guardIds: [] as string[],
   });
 
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
   useEffect(() => {
     if (assignment && open) {
       const extractDate = (isoString: string): string => {
@@ -86,8 +88,63 @@ export default function EditAssignmentDialog({
         endDate: extractDate(assignment.rawEndISO || assignment.end),
         guardIds: assignment.guardId ? [assignment.guardId] : [],
       });
+      
+      setErrors({});
     }
   }, [assignment, open]);
+
+  const validateForm = (): boolean => {
+    const newErrors: { [key: string]: string } = {};
+
+    if (!formData.description || formData.description.trim() === "") {
+      newErrors.description = "Description is required";
+    }
+
+    if (!formData.date) {
+      newErrors.date = "Start date is required";
+    }
+
+    if (!formData.endDate) {
+      newErrors.endDate = "End date is required";
+    }
+
+    if (!formData.startTime) {
+      newErrors.startTime = "Start time is required";
+    }
+
+    if (!formData.endTime) {
+      newErrors.endTime = "End time is required";
+    }
+
+    if (formData.guardIds.length === 0) {
+      newErrors.guardIds = "At least one guard must be selected";
+    }
+
+    if (formData.date && formData.endDate) {
+      const startDate = new Date(formData.date);
+      const endDate = new Date(formData.endDate);
+      
+      if (endDate < startDate) {
+        newErrors.endDate = "End date cannot be before start date";
+      }
+    }
+
+    if (formData.date && formData.endDate && formData.date === formData.endDate) {
+      if (formData.startTime && formData.endTime) {
+        const [startHour, startMinute] = formData.startTime.split(':').map(Number);
+        const [endHour, endMinute] = formData.endTime.split(':').map(Number);
+        const startMinutes = startHour * 60 + startMinute;
+        const endMinutes = endHour * 60 + endMinute;
+        
+        if (endMinutes <= startMinutes) {
+          newErrors.endTime = "End time must be after start time";
+        }
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSave = async () => {
     if (!assignment?.shiftId) {
@@ -95,31 +152,20 @@ export default function EditAssignmentDialog({
       return;
     }
 
-    const updateData: any = {};
-    
-    if (formData.description && formData.description !== assignment.description) {
-      updateData.description = formData.description;
-    }
-    if (formData.startTime) {
-      updateData.startTime = formData.startTime;
-    }
-    if (formData.endTime) {
-      updateData.endTime = formData.endTime;
-    }
-    if (formData.date) {
-      updateData.date = formData.date;
-    }
-    if (formData.endDate) {
-      updateData.endDate = formData.endDate;
-    }
-    if (formData.guardIds.length > 0) {
-      updateData.guardIds = formData.guardIds;
-    }
-
-    if (Object.keys(updateData).length === 0) {
-      toast.error("No changes detected");
+    if (!validateForm()) {
+      toast.error("Please fill in all required fields correctly");
       return;
     }
+
+    const updateData: any = {
+      description: formData.description,
+      startTime: formData.startTime,
+      endTime: formData.endTime,
+      date: formData.date,
+      endDate: formData.endDate,
+      guardIds: formData.guardIds,
+      guardId: assignment.guardId,
+    };
 
     try {
       const result = await editSchedule({
@@ -127,7 +173,7 @@ export default function EditAssignmentDialog({
         data: updateData,
       }).unwrap();
 
-      toast.success(result.message || "Shift updated successfully!");
+      toast.success("Shift updated successfully!");
       onSave(result.data);
       onClose();
     } catch (error: any) {
@@ -150,102 +196,162 @@ export default function EditAssignmentDialog({
 
   if (!assignment) return null;
 
-  // ✅ FIX: Get status from assignment
   const currentStatus = assignment.guardStatus || assignment.status || "pending";
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      {/* ✅ Made dialog wider: max-w-3xl, removed max-h to avoid scrolling */}
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <div className="flex items-center justify-between">
+          {/* ✅ Title and Badge on same line with spacing */}
+          <div className="flex items-center justify-between gap-4 pr-8">
             <DialogTitle className="text-xl font-bold">Edit Assignment</DialogTitle>
-            {/* ✅ FIXED: Use currentStatus variable */}
             <Badge 
-              className="border-2"
+              className="border-2 shrink-0"
               style={getStatusStyle(currentStatus)}
             >
               {getStatusColor(currentStatus).label}
             </Badge>
           </div>
-          <DialogDescription>
-            Update shift details (only fill fields you want to change)
+          <DialogDescription className="text-base">
+            All fields are required. Update shift details carefully.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           {/* Description */}
           <div className="space-y-2">
-            <Label className="flex items-center gap-2">
+            <Label className="flex items-center gap-2 text-base font-medium">
               <FileText className="h-4 w-4" />
-              Description
+              Description <span className="text-red-500">*</span>
             </Label>
             <Textarea
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, description: e.target.value });
+                if (errors.description) setErrors({ ...errors, description: "" });
+              }}
               placeholder="Add notes or special instructions..."
               rows={3}
               disabled={isSaving}
+              className={`text-base ${errors.description ? "border-red-500" : ""}`}
             />
+            {errors.description && (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.description}
+              </p>
+            )}
           </div>
 
-          {/* Date Range */}
+          {/* Date and Time - 2x2 Grid */}
           <div className="grid grid-cols-2 gap-4">
+            {/* Start Date */}
             <div className="space-y-2">
-              <Label>Start Date</Label>
+              <Label className="text-base font-medium">
+                Start Date <span className="text-red-500">*</span>
+              </Label>
               <Input
                 type="date"
                 value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, date: e.target.value });
+                  if (errors.date) setErrors({ ...errors, date: "" });
+                }}
                 disabled={isSaving}
+                className={`text-base ${errors.date ? "border-red-500" : ""}`}
               />
+              {errors.date && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.date}
+                </p>
+              )}
             </div>
+
+            {/* End Date */}
             <div className="space-y-2">
-              <Label>End Date</Label>
+              <Label className="text-base font-medium">
+                End Date <span className="text-red-500">*</span>
+              </Label>
               <Input
                 type="date"
                 value={formData.endDate}
-                onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, endDate: e.target.value });
+                  if (errors.endDate) setErrors({ ...errors, endDate: "" });
+                }}
                 disabled={isSaving}
+                className={`text-base ${errors.endDate ? "border-red-500" : ""}`}
               />
+              {errors.endDate && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.endDate}
+                </p>
+              )}
             </div>
-          </div>
 
-          {/* Time Range */}
-          <div className="grid grid-cols-2 gap-4">
+            {/* Start Time */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2">
+              <Label className="flex items-center gap-2 text-base font-medium">
                 <Clock className="h-4 w-4" />
-                Start Time
+                Start Time <span className="text-red-500">*</span>
               </Label>
               <Input
                 type="time"
                 value={formData.startTime}
-                onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, startTime: e.target.value });
+                  if (errors.startTime) setErrors({ ...errors, startTime: "" });
+                }}
                 disabled={isSaving}
+                className={`text-base ${errors.startTime ? "border-red-500" : ""}`}
               />
+              {errors.startTime && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.startTime}
+                </p>
+              )}
             </div>
+
+            {/* End Time */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2">
+              <Label className="flex items-center gap-2 text-base font-medium">
                 <Clock className="h-4 w-4" />
-                End Time
+                End Time <span className="text-red-500">*</span>
               </Label>
               <Input
                 type="time"
                 value={formData.endTime}
-                onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, endTime: e.target.value });
+                  if (errors.endTime) setErrors({ ...errors, endTime: "" });
+                }}
                 disabled={isSaving}
+                className={`text-base ${errors.endTime ? "border-red-500" : ""}`}
               />
+              {errors.endTime && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.endTime}
+                </p>
+              )}
             </div>
           </div>
 
           {/* Multi-select Guards */}
           <div className="space-y-2">
-            <Label className="flex items-center gap-2">
+            <Label className="flex items-center gap-2 text-base font-medium">
               <User className="h-4 w-4" />
-              Select Guards (Multiple)
+              Select Guards (Multiple) <span className="text-red-500">*</span>
             </Label>
             <Select open={guardsOpen} onOpenChange={setGuardsOpen}>
-              <SelectTrigger disabled={isSaving}>
+              <SelectTrigger 
+                disabled={isSaving}
+                className={`text-base ${errors.guardIds ? "border-red-500" : ""}`}
+              >
                 <SelectValue
                   placeholder={
                     formData.guardIds.length > 0
@@ -283,6 +389,8 @@ export default function EditAssignmentDialog({
                               guardIds: [...formData.guardIds, guard.id],
                             });
                           }
+                          
+                          if (errors.guardIds) setErrors({ ...errors, guardIds: "" });
                         }}
                       >
                         <Checkbox
@@ -301,39 +409,46 @@ export default function EditAssignmentDialog({
                                 ),
                               });
                             }
+                            
+                            if (errors.guardIds) setErrors({ ...errors, guardIds: "" });
                           }}
                           onClick={(e: { stopPropagation: () => any }) =>
                             e.stopPropagation()
                           }
                         />
 
-                        <span className="text-sm">
+                        <span className="text-base">
                           {guard.name} ({guard.mobile || guard.email})
                         </span>
                       </div>
                     );
                   })
                 ) : (
-                  <div className="p-3 text-sm text-gray-500">
+                  <div className="p-3 text-base text-gray-500">
                     No Guards available
                   </div>
                 )}
               </SelectContent>
             </Select>
+            {errors.guardIds && (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.guardIds}
+              </p>
+            )}
           </div>
 
-          {/* Current Assignment Info with Status */}
+          {/* Current Assignment Info */}
           <div className="bg-gray-50 rounded-lg p-4 space-y-2 border">
-            <h4 className="font-semibold text-sm text-gray-700">Current Assignment Info</h4>
-            <div className="space-y-1 text-sm text-gray-600">
+            <h4 className="font-semibold text-base text-gray-700">Current Assignment Info</h4>
+            <div className="space-y-1 text-base text-gray-600">
               <p><strong>Guard:</strong> {assignment.guardName || assignment.name}</p>
               <p><strong>Location:</strong> {assignment.orderLocationName || assignment.orderName || "N/A"}</p>
               <p><strong>Current Time:</strong> {assignment.time}</p>
               <div className="flex items-center gap-2 pt-1">
                 <strong>Status:</strong> 
                 <Badge 
-                  size="sm"
-                  className="border"
+                  className="border text-sm"
                   style={getStatusStyle(currentStatus)}
                 >
                   {getStatusColor(currentStatus).label}
