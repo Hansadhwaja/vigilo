@@ -320,9 +320,6 @@ export default function EditAssignmentDialog({
                 )}
               </SelectContent>
             </Select>
-            <p className="text-xs text-gray-500">
-              Leave empty to keep current guard assignments
-            </p>
           </div>
 
           {/* Current Assignment Info with Status */}
