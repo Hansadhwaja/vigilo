@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft, MapPin, Clock, User, Camera, FileText, Badge as BadgeIcon, Edit, Save, X, Mail, Phone, MapPinIcon } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, User, Camera, FileText, Badge as BadgeIcon, Edit, Save, X, Mail, Phone, MapPinIcon, Upload, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Label } from "../components/ui/label";
@@ -10,7 +10,9 @@ import { Textarea } from "../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetOrderByIdQuery, useEditOrderMutation } from "../apis/ordersApi";
+import { useUploadImageMutation } from "../apis/usersApi";
 import { toast } from "react-hot-toast";
+import { getStatusColor, getStatusStyle } from "../utils/statusColors";
 
 // Helper functions
 const formatDate = (iso?: string) => {
@@ -46,24 +48,6 @@ const formatTime = (isoOrTime?: string) => {
   return isoOrTime;
 };
 
-const getStatusColor = (status: string) => {
-  switch ((status || "").toLowerCase()) {
-    case "pending":
-      return "bg-amber-100 text-amber-800 border-amber-300";
-    case "ongoing":
-      return "bg-blue-100 text-blue-800 border-blue-300";
-    case "upcoming":
-      return "bg-purple-100 text-purple-800 border-purple-300";
-    case "completed":
-      return "bg-emerald-100 text-emerald-800 border-emerald-300";
-    case "cancelled":
-    case "rejected":
-      return "bg-red-100 text-red-800 border-red-300";
-    default:
-      return "bg-gray-100 text-gray-800 border-gray-300";
-  }
-};
-
 export default function OrderDetailsPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -81,13 +65,18 @@ export default function OrderDetailsPage() {
     endDate: "",
     startTime: "",
     endTime: "",
+    images: [] as string[], // ✅ Added images array
   });
+
+  // ✅ Image upload state
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const { data: orderResponse, isLoading, isError } = useGetOrderByIdQuery(id || "", {
     skip: !id,
   });
 
   const [editOrder, { isLoading: isEditing }] = useEditOrderMutation();
+  const [uploadImage] = useUploadImageMutation(); // ✅ Upload mutation
 
   const order = orderResponse?.data ?? orderResponse ?? null;
 
@@ -113,6 +102,7 @@ export default function OrderDetailsPage() {
       endDate: formatDateForInput(order.endDate),
       startTime: order.startTime || "",
       endTime: order.endTime || "",
+      images: order.images || [], // ✅ Load existing images
     });
 
     setIsEditMode(true);
@@ -127,6 +117,55 @@ export default function OrderDetailsPage() {
       ...prev,
       [field]: value
     }));
+  };
+
+  // ✅ Handle image upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validation
+    if (!file.type.startsWith("image")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB");
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      
+      const formData = new FormData();
+      formData.append("image", file);
+      
+      const response = await uploadImage(formData).unwrap();
+      
+      // Add new image to the array
+      setEditFormData(prev => ({
+        ...prev,
+        images: [...prev.images, response.imageUrl]
+      }));
+      
+      toast.success("Image uploaded successfully");
+      e.target.value = ""; // Reset input
+    } catch (err: any) {
+      console.error("Failed to upload image:", err);
+      toast.error(err?.data?.message || "Failed to upload image");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // ✅ Handle image delete
+  const handleImageDelete = (indexToDelete: number) => {
+    setEditFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, index) => index !== indexToDelete)
+    }));
+    toast.success("Image removed");
   };
 
   const handleSaveEdit = async () => {
@@ -151,6 +190,9 @@ export default function OrderDetailsPage() {
           lng: parseFloat(editFormData.siteServiceLng)
         };
       }
+
+      // ✅ Include images in payload
+      payload.images = editFormData.images;
 
       await editOrder({
         id: order.id,
@@ -195,7 +237,7 @@ export default function OrderDetailsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-8xl mx-auto px-0 py-0">
         
-        {/* Header - BIGGER */}
+        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
@@ -214,8 +256,11 @@ export default function OrderDetailsPage() {
                 <div className="flex items-center gap-4">
                   <FileText className="h-7 w-7 text-gray-700" />
                   <h1 className="text-3xl font-bold text-gray-900">Complete Order Details</h1>
-                  <Badge className={`${getStatusColor(order.status)} border-2 text-lg font-semibold px-4 py-1.5`}>
-                    {order.status}
+                  <Badge 
+                    className="border-2 text-lg font-semibold px-4 py-1.5"
+                    style={getStatusStyle(order.status)}
+                  >
+                    {getStatusColor(order.status).label}
                   </Badge>
                 </div>
                 <p className="text-lg text-gray-600 mt-2 ml-11">
@@ -224,7 +269,7 @@ export default function OrderDetailsPage() {
               </div>
             </div>
 
-            {/* Action Buttons - BIGGER */}
+            {/* Action Buttons */}
             <div className="flex gap-3">
               {!isEditMode ? (
                 <Button 
@@ -268,13 +313,13 @@ export default function OrderDetailsPage() {
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* LEFT - Main Content (2 columns) */}
+          {/* LEFT - Main Content */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* Service Information Card - BIGGER TEXT */}
+            {/* Service Information Card */}
             <Card className="border-2 border-gray-200 shadow-sm bg-white">
               <CardHeader className="border-b-2 border-gray-200 pb-4">
-                <CardTitle className="text-lg font-bold flex items-center gap-3 text-gray-900">
+                <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
                   <FileText className="h-6 w-6" />
                   Service Information
                 </CardTitle>
@@ -284,9 +329,9 @@ export default function OrderDetailsPage() {
                   
                   {/* Service Type */}
                   <div>
-                    <Label className="text-lg font-semibold text-gray-700 mb-2 block">Service Type</Label>
+                    <Label className="text-base font-semibold text-gray-900 mb-2 block">Service Type</Label>
                     {!isEditMode ? (
-                      <div className="font-semibold text-gray-900 text-lg capitalize">
+                      <div className="text-base text-gray-700 capitalize">
                         {order.serviceType?.replace(/([A-Z])/g, " $1").trim()}
                       </div>
                     ) : (
@@ -294,7 +339,7 @@ export default function OrderDetailsPage() {
                         value={editFormData.serviceType}
                         onValueChange={(value) => handleFormChange("serviceType", value)}
                       >
-                        <SelectTrigger className="h-11 text-lg">
+                        <SelectTrigger className="h-11 text-base">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -311,16 +356,16 @@ export default function OrderDetailsPage() {
 
                   {/* Guards Required */}
                   <div>
-                    <Label className="text-lg font-semibold text-gray-700 mb-2 block">Guards Required</Label>
+                    <Label className="text-base font-semibold text-gray-900 mb-2 block">Guards Required</Label>
                     {!isEditMode ? (
-                      <div className="font-semibold text-gray-900 text-lg">{order.guardsRequired ?? "—"}</div>
+                      <div className="text-base text-gray-700">{order.guardsRequired ?? "—"}</div>
                     ) : (
                       <Input
                         type="number"
                         min="1"
                         value={editFormData.guardsRequired}
                         onChange={(e) => handleFormChange("guardsRequired", e.target.value)}
-                        className="h-11 text-lg"
+                        className="h-11 text-base"
                       />
                     )}
                   </div>
@@ -328,14 +373,14 @@ export default function OrderDetailsPage() {
                   {/* Location Name */}
                   {(order.locationName || isEditMode) && (
                     <div className="col-span-2">
-                      <Label className="text-lg font-semibold text-gray-700 mb-2 block">Location Name</Label>
+                      <Label className="text-base font-semibold text-gray-900 mb-2 block">Location Name</Label>
                       {!isEditMode ? (
-                        <div className="text-gray-900 text-lg font-medium">{order.locationName ?? "—"}</div>
+                        <div className="text-base text-gray-700">{order.locationName ?? "—"}</div>
                       ) : (
                         <Input
                           value={editFormData.locationName}
                           onChange={(e) => handleFormChange("locationName", e.target.value)}
-                          className="h-11 text-lg"
+                          className="h-11 text-base"
                           placeholder="e.g., Mumbai Central Office"
                         />
                       )}
@@ -344,14 +389,14 @@ export default function OrderDetailsPage() {
 
                   {/* Location Address */}
                   <div className="col-span-2">
-                    <Label className="text-lg font-semibold text-gray-700 mb-2 block">Location Address</Label>
+                    <Label className="text-base font-semibold text-gray-900 mb-2 block">Location Address</Label>
                     {!isEditMode ? (
-                      <div className="text-gray-900 text-lg">{order.locationAddress ?? "—"}</div>
+                      <div className="text-base text-gray-700">{order.locationAddress ?? "—"}</div>
                     ) : (
                       <Input
                         value={editFormData.locationAddress}
                         onChange={(e) => handleFormChange("locationAddress", e.target.value)}
-                        className="h-11 text-lg"
+                        className="h-11 text-base"
                         placeholder="Full address"
                       />
                     )}
@@ -359,9 +404,9 @@ export default function OrderDetailsPage() {
 
                   {/* Coordinates */}
                   <div className="col-span-2">
-                    <Label className="text-lg font-semibold text-gray-700 mb-2 block">Coordinates</Label>
+                    <Label className="text-base font-semibold text-gray-900 mb-2 block">Coordinates</Label>
                     {!isEditMode ? (
-                      <div className="text-lg text-gray-600 font-mono">
+                      <div className="text-base text-gray-600 font-mono">
                         Lat: {order.siteService?.coordinates?.[1] ?? "—"}, Lng: {order.siteService?.coordinates?.[0] ?? "—"}
                       </div>
                     ) : (
@@ -372,7 +417,7 @@ export default function OrderDetailsPage() {
                           value={editFormData.siteServiceLat}
                           onChange={(e) => handleFormChange("siteServiceLat", e.target.value)}
                           placeholder="Latitude"
-                          className="h-11 text-lg"
+                          className="h-11 text-base"
                         />
                         <Input
                           type="number"
@@ -380,7 +425,7 @@ export default function OrderDetailsPage() {
                           value={editFormData.siteServiceLng}
                           onChange={(e) => handleFormChange("siteServiceLng", e.target.value)}
                           placeholder="Longitude"
-                          className="h-11 text-lg"
+                          className="h-11 text-base"
                         />
                       </div>
                     )}
@@ -391,16 +436,16 @@ export default function OrderDetailsPage() {
 
                 {/* Description */}
                 <div>
-                  <Label className="text-lg font-semibold text-gray-700 mb-2 block">Description</Label>
+                  <Label className="text-base font-semibold text-gray-900 mb-2 block">Description</Label>
                   {!isEditMode ? (
                     <div className="mt-3 p-5 bg-gray-50 rounded-lg border-2 border-gray-100">
-                      <p className="text-lg text-gray-800 leading-relaxed">{order.description || "No description provided"}</p>
+                      <p className="text-base text-gray-700 leading-relaxed">{order.description || "No description provided"}</p>
                     </div>
                   ) : (
                     <Textarea
                       value={editFormData.description}
                       onChange={(e) => handleFormChange("description", e.target.value)}
-                      className="mt-2 text-lg min-h-[100px]"
+                      className="mt-2 text-base min-h-[100px]"
                       rows={4}
                       placeholder="Standard patrol services for industrial estate and warehouse units"
                     />
@@ -409,39 +454,102 @@ export default function OrderDetailsPage() {
               </CardContent>
             </Card>
 
-            {/* Location Images Card - BIGGER */}
-            {order.images && order.images.length > 0 && (
-              <Card className="border-2 border-gray-200 shadow-sm bg-white">
-                <CardHeader className="border-b-2 border-gray-200 pb-4">
-                  <CardTitle className="text-lg font-bold flex items-center gap-3 text-gray-900">
+            {/* ✅ Location Images Card - WITH UPLOAD/DELETE */}
+            <Card className="border-2 border-gray-200 shadow-sm bg-white">
+              <CardHeader className="border-b-2 border-gray-200 pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
                     <Camera className="h-6 w-6" />
                     Location Images
                   </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
+                  
+                  {/* ✅ Upload button in edit mode */}
+                  {isEditMode && (
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploadingImage}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingImage}
+                        className="flex items-center gap-2"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.currentTarget.previousElementSibling?.click();
+                        }}
+                      >
+                        {uploadingImage ? (
+                          <>
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="h-4 w-4" />
+                            Upload Image
+                          </>
+                        )}
+                      </Button>
+                    </label>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                {editFormData.images.length > 0 || (!isEditMode && order.images?.length > 0) ? (
                   <div className="grid grid-cols-3 gap-4">
-                    {order.images.map((src: string, idx: number) => (
+                    {(isEditMode ? editFormData.images : order.images || []).map((src: string, idx: number) => (
                       <div 
                         key={idx} 
-                        className="relative aspect-video rounded-lg overflow-hidden border-2 border-gray-200 hover:border-gray-400 transition-all group cursor-pointer"
+                        className="relative aspect-video rounded-lg overflow-hidden border-2 border-gray-200 hover:border-gray-400 transition-all group"
                       >
                         <img 
                           src={src} 
                           alt={`Location ${idx + 1}`} 
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
                         />
+                        
+                        {/* ✅ Delete button in edit mode */}
+                        {isEditMode && (
+                          <button
+                            onClick={() => handleImageDelete(idx)}
+                            className="absolute top-2 right-2 h-8 w-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors opacity-0 group-hover:opacity-100"
+                            type="button"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                ) : (
+                  <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                    <Camera className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-base text-gray-600">No images uploaded</p>
+                    {isEditMode && (
+                      <p className="text-sm text-gray-500 mt-1">Click "Upload Image" to add photos</p>
+                    )}
+                  </div>
+                )}
+                
+                {isEditMode && editFormData.images.length > 0 && (
+                  <p className="text-sm text-gray-500 mt-3">
+                    Max size: 5MB per image. Hover over an image to delete it.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
 
-            {/* Client Information Card - BIGGER */}
+            {/* Client Information Card */}
             {order.client && (
               <Card className="border-2 border-gray-200 shadow-sm bg-white">
                 <CardHeader className="border-b-2 border-gray-200 pb-4">
-                  <CardTitle className="text-lg font-bold flex items-center gap-3 text-gray-900">
+                  <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
                     <User className="h-6 w-6" />
                     Client Information
                   </CardTitle>
@@ -449,20 +557,20 @@ export default function OrderDetailsPage() {
                 <CardContent className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-start gap-4">
-                      <div className="text-lg font-semibold text-gray-700 w-24">Name:</div>
-                      <div className="text-lg font-semibold text-gray-900">{order.client.name}</div>
+                      <div className="text-base font-semibold text-gray-900 w-24">Name:</div>
+                      <div className="text-base text-gray-700">{order.client.name}</div>
                     </div>
                     <div className="flex items-start gap-4">
-                      <div className="text-lg font-semibold text-gray-700 w-24">Email:</div>
-                      <div className="text-lg text-gray-800">{order.client.email}</div>
+                      <div className="text-base font-semibold text-gray-900 w-24">Email:</div>
+                      <div className="text-base text-gray-700">{order.client.email}</div>
                     </div>
                     <div className="flex items-start gap-4">
-                      <div className="text-lg font-semibold text-gray-700 w-24">Mobile:</div>
-                      <div className="text-lg text-gray-800">{order.client.mobile}</div>
+                      <div className="text-base font-semibold text-gray-900 w-24">Mobile:</div>
+                      <div className="text-base text-gray-700">{order.client.mobile}</div>
                     </div>
                     <div className="flex items-start gap-4">
-                      <div className="text-lg font-semibold text-gray-700 w-24">Address:</div>
-                      <div className="text-lg text-gray-800 flex-1">{order.client.address}</div>
+                      <div className="text-base font-semibold text-gray-900 w-24">Address:</div>
+                      <div className="text-base text-gray-700 flex-1">{order.client.address}</div>
                     </div>
                   </div>
                 </CardContent>
@@ -470,13 +578,13 @@ export default function OrderDetailsPage() {
             )}
           </div>
 
-          {/* RIGHT - Sidebar - BIGGER */}
+          {/* RIGHT - Sidebar */}
           <div className="space-y-6">
             
             {/* Schedule Card */}
             <Card className="border-2 border-gray-200 shadow-sm bg-white">
               <CardHeader className="border-b-2 border-gray-200 pb-4">
-                <CardTitle className="text-lg font-bold flex items-center gap-3 text-gray-900">
+                <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
                   <Clock className="h-6 w-6" />
                   Schedule
                 </CardTitle>
@@ -485,30 +593,30 @@ export default function OrderDetailsPage() {
                 
                 {/* Start Date */}
                 <div>
-                  <Label className="text-lg font-semibold text-gray-700 mb-2 block">Start Date</Label>
+                  <Label className="text-base font-semibold text-gray-900 mb-2 block">Start Date</Label>
                   {!isEditMode ? (
-                    <div className="font-semibold text-gray-900 text-lg">{formatDate(order.startDate)}</div>
+                    <div className="text-base text-gray-700">{formatDate(order.startDate)}</div>
                   ) : (
                     <Input
                       type="date"
                       value={editFormData.startDate}
                       onChange={(e) => handleFormChange("startDate", e.target.value)}
-                      className="h-11 text-lg"
+                      className="h-11 text-base"
                     />
                   )}
                 </div>
 
                 {/* End Date */}
                 <div>
-                  <Label className="text-lg font-semibold text-gray-700 mb-2 block">End Date</Label>
+                  <Label className="text-base font-semibold text-gray-900 mb-2 block">End Date</Label>
                   {!isEditMode ? (
-                    <div className="font-semibold text-gray-900 text-lg">{formatDate(order.endDate)}</div>
+                    <div className="text-base text-gray-700">{formatDate(order.endDate)}</div>
                   ) : (
                     <Input
                       type="date"
                       value={editFormData.endDate}
                       onChange={(e) => handleFormChange("endDate", e.target.value)}
-                      className="h-11 text-lg"
+                      className="h-11 text-base"
                     />
                   )}
                 </div>
@@ -517,62 +625,65 @@ export default function OrderDetailsPage() {
 
                 {/* Start Time */}
                 <div>
-                  <Label className="text-lg font-semibold text-gray-700 mb-2 block">Start Time</Label>
+                  <Label className="text-base font-semibold text-gray-900 mb-2 block">Start Time</Label>
                   {!isEditMode ? (
-                    <div className="font-semibold text-gray-900 text-lg">{formatTime(order.startTime)}</div>
+                    <div className="text-base text-gray-700">{formatTime(order.startTime)}</div>
                   ) : (
                     <Input
                       type="time"
                       value={editFormData.startTime}
                       onChange={(e) => handleFormChange("startTime", e.target.value)}
-                      className="h-11 text-lg"
+                      className="h-11 text-base"
                     />
                   )}
                 </div>
 
                 {/* End Time */}
                 <div>
-                  <Label className="text-lg font-semibold text-gray-700 mb-2 block">End Time</Label>
+                  <Label className="text-base font-semibold text-gray-900 mb-2 block">End Time</Label>
                   {!isEditMode ? (
-                    <div className="font-semibold text-gray-900 text-lg">{formatTime(order.endTime)}</div>
+                    <div className="text-base text-gray-700">{formatTime(order.endTime)}</div>
                   ) : (
                     <Input
                       type="time"
                       value={editFormData.endTime}
                       onChange={(e) => handleFormChange("endTime", e.target.value)}
-                      className="h-11 text-lg"
+                      className="h-11 text-base"
                     />
                   )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Order Status Card - BIGGER */}
+            {/* Order Status Card */}
             <Card className="border-2 border-gray-200 shadow-sm bg-white">
               <CardHeader className="border-b-2 border-gray-200 pb-4">
-                <CardTitle className="text-lg font-bold flex items-center gap-3 text-gray-900">
+                <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
                   <BadgeIcon className="h-6 w-6" />
                   Order Status
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-lg font-semibold text-gray-700">Status:</Label>
-                  <Badge className={`${getStatusColor(order.status)} text-lg font-bold px-4 py-1.5 border-2`}>
-                    {order.status}
+                  <Label className="text-base font-semibold text-gray-900">Status:</Label>
+                  <Badge 
+                    className="text-base font-semibold px-4 py-1.5 border-2"
+                    style={getStatusStyle(order.status)}
+                  >
+                    {getStatusColor(order.status).label}
                   </Badge>
                 </div>
                 <div>
-                  <Label className="text-lg font-semibold text-gray-700 mb-2 block">Created:</Label>
-                  <div className="text-lg text-gray-800">{formatDate(order.createdAt)}</div>
+                  <Label className="text-base font-semibold text-gray-900 mb-2 block">Created:</Label>
+                  <div className="text-base text-gray-700">{formatDate(order.createdAt)}</div>
                 </div>
                 <div>
-                  <Label className="text-lg font-semibold text-gray-700 mb-2 block">Last Updated:</Label>
-                  <div className="text-lg text-gray-800">{formatDate(order.updatedAt)}</div>
+                  <Label className="text-base font-semibold text-gray-900 mb-2 block">Last Updated:</Label>
+                  <div className="text-base text-gray-700">{formatDate(order.updatedAt)}</div>
                 </div>
                 <div>
-                  <Label className="text-lg font-semibold text-gray-700 mb-2 block">Order ID:</Label>
-                  <div className="text-lg text-gray-600 font-mono break-all leading-relaxed">{order.id}</div>
+                  <Label className="text-base font-semibold text-gray-900 mb-2 block">Order ID:</Label>
+                  <div className="text-sm text-gray-600 font-mono break-all leading-relaxed">{order.id}</div>
                 </div>
               </CardContent>
             </Card>
