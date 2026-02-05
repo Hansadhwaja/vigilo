@@ -328,10 +328,30 @@ export default function ShiftPage() {
       toast.error("Something went wrong");
     }
   };
-  const handleOpenEditDialog = (assignment: any) => {
-    setSelectedAssignment(assignment);
-    setShowEditDialog(true);
-  };
+  // In your calendar/scheduling component where you call handleOpenEditDialog
+
+const handleOpenEditDialog = (assignment: any) => {
+  const shiftId = assignment.shiftId;
+  
+  // Find all assignments with the same shiftId
+  const allAssignmentsForShift = scheduleData
+    .flatMap(day => day.guards)
+    .filter(a => a.shiftId === shiftId);
+  
+  // ✅ Extract unique guard IDs (remove duplicates)
+  const allGuardIds = [...new Set(allAssignmentsForShift.map(a => a.guardId))];
+  
+  console.log("All guard IDs for shift:", allGuardIds); // ✅ Debug log
+  
+  setSelectedAssignment({
+    ...assignment,
+    allGuardIdsForShift: allGuardIds, // ✅ No duplicates
+  });
+  
+  setShowEditDialog(true);
+};
+
+
   // Helpers: timezone constants & formatters
   const TIMEZONE = "Asia/Kolkata";
 

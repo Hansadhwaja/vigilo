@@ -1234,22 +1234,6 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                           </div>
                         </label>
                       </div>
-
-                      {/* OR divider */}
-                      <div className="flex items-center gap-2 my-3">
-                        <div className="flex-1 h-px bg-gray-200"></div>
-                        <span className="text-lg text-gray-500 font-medium">OR</span>
-                        <div className="flex-1 h-px bg-gray-200"></div>
-                      </div>
-
-                      {/* URL Input (as fallback) */}
-                      <Input
-                        value={editClientData.avatar}
-                        onChange={(e) => handleClientFormChange("avatar", e.target.value)}
-                        placeholder="Paste image URL here"
-                        className="h-11 text-base"
-                        disabled={uploadingAvatar}
-                      />
                       <p className="text-lg text-gray-500 mt-1.5">
                         Max size: 5MB • Supported: JPG, PNG, GIF, WebP
                       </p>

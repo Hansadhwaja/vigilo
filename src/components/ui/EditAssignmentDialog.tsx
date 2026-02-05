@@ -20,7 +20,7 @@ import {
 } from "../ui/select";
 import { Badge } from "../ui/badge";
 import { Checkbox } from "../ui/checkbox";
-import { Calendar, Clock, User, MapPin, FileText, ExternalLink, Loader2, AlertCircle, X } from "lucide-react";
+import { Calendar, Clock, User, MapPin, FileText, ExternalLink, Loader2, AlertCircle, X, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useEditScheduleMutation } from "../../apis/schedulingAPI";
@@ -80,13 +80,16 @@ export default function EditAssignmentDialog({
         }
       };
 
+      // ✅ PRE-SELECT ALL GUARDS FOR THIS SHIFT
+      const allGuardsForThisShift = assignment.allGuardIdsForShift || [assignment.guardId];
+
       setFormData({
         description: assignment.description || "",
         startTime: extractTime(assignment.rawStartISO || assignment.start),
         endTime: extractTime(assignment.rawEndISO || assignment.end),
         date: extractDate(assignment.rawStartISO || assignment.start),
         endDate: extractDate(assignment.rawEndISO || assignment.end),
-        guardIds: assignment.guardId ? [assignment.guardId] : [],
+        guardIds: allGuardsForThisShift, // ✅ ALL guards, not just one!
       });
       
       setErrors({});
@@ -163,8 +166,7 @@ export default function EditAssignmentDialog({
       endTime: formData.endTime,
       date: formData.date,
       endDate: formData.endDate,
-      guardIds: formData.guardIds,
-      guardId: assignment.guardId,
+      guardIds: formData.guardIds, // ✅ Sends ALL selected guards
     };
 
     try {
@@ -200,12 +202,10 @@ export default function EditAssignmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      {/* ✅ Made dialog wider: max-w-3xl, removed max-h to avoid scrolling */}
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          {/* ✅ Title and Badge on same line with spacing */}
           <div className="flex items-center justify-between gap-4 pr-8">
-            <DialogTitle className="text-xl font-bold">Edit Assignment</DialogTitle>
+            <DialogTitle className="text-xl font-bold">Edit Shift Assignment</DialogTitle>
             <Badge 
               className="border-2 shrink-0"
               style={getStatusStyle(currentStatus)}
@@ -213,8 +213,10 @@ export default function EditAssignmentDialog({
               {getStatusColor(currentStatus).label}
             </Badge>
           </div>
-          <DialogDescription className="text-base">
-            All fields are required. Update shift details carefully.
+          <DialogDescription className="text-base flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Editing shift with <strong>{formData.guardIds.length} guard(s)</strong> assigned. 
+            You can add or remove guards from this shift.
           </DialogDescription>
         </DialogHeader>
 
@@ -345,7 +347,7 @@ export default function EditAssignmentDialog({
           <div className="space-y-2">
             <Label className="flex items-center gap-2 text-base font-medium">
               <User className="h-4 w-4" />
-              Select Guards (Multiple) <span className="text-red-500">*</span>
+              Assign Guards (Multiple) <span className="text-red-500">*</span>
             </Label>
             <Select open={guardsOpen} onOpenChange={setGuardsOpen}>
               <SelectTrigger 
@@ -442,7 +444,6 @@ export default function EditAssignmentDialog({
           <div className="bg-gray-50 rounded-lg p-4 space-y-2 border">
             <h4 className="font-semibold text-base text-gray-700">Current Assignment Info</h4>
             <div className="space-y-1 text-base text-gray-600">
-              <p><strong>Guard:</strong> {assignment.guardName || assignment.name}</p>
               <p><strong>Location:</strong> {assignment.orderLocationName || assignment.orderName || "N/A"}</p>
               <p><strong>Current Time:</strong> {assignment.time}</p>
               <div className="flex items-center gap-2 pt-1">
@@ -453,6 +454,20 @@ export default function EditAssignmentDialog({
                 >
                   {getStatusColor(currentStatus).label}
                 </Badge>
+              </div>
+              {/* ✅ Show all currently assigned guards */}
+              <div className="pt-2 border-t">
+                <strong>Currently Assigned Guards:</strong>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {formData.guardIds.map(guardId => {
+                    const guard = guards.find(g => g.id === guardId);
+                    return (
+                      <Badge key={guardId} variant="outline" className="text-sm">
+                        {guard?.name || guardId}
+                      </Badge>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>

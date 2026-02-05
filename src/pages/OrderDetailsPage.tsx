@@ -337,7 +337,7 @@ export default function OrderDetailsPage() {
                     ) : (
                       <Select
                         value={editFormData.serviceType}
-                        onValueChange={(value) => handleFormChange("serviceType", value)}
+                        onValueChange={(value: string) => handleFormChange("serviceType", value)}
                       >
                         <SelectTrigger className="h-11 text-base">
                           <SelectValue />
@@ -445,7 +445,7 @@ export default function OrderDetailsPage() {
                     <Textarea
                       value={editFormData.description}
                       onChange={(e) => handleFormChange("description", e.target.value)}
-                      className="mt-2 text-base min-h-[100px]"
+                      className="mt-2 text-base min-h-25"
                       rows={4}
                       placeholder="Standard patrol services for industrial estate and warehouse units"
                     />
@@ -479,7 +479,7 @@ export default function OrderDetailsPage() {
                         size="sm"
                         disabled={uploadingImage}
                         className="flex items-center gap-2"
-                        onClick={(e) => {
+                        onClick={(e: { preventDefault: () => void; currentTarget: { previousElementSibling: { click: () => void; }; }; }) => {
                           e.preventDefault();
                           e.currentTarget.previousElementSibling?.click();
                         }}
