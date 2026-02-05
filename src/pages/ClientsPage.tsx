@@ -867,7 +867,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
           <td className="px-4 py-3 text-gray-700">
             <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <Mail className="h-4 w-4 text-gray-400 shrink-0" />
               <span 
                 className="truncate cursor-help" 
                 title={client.email}
@@ -879,7 +879,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
           <td className="px-4 py-3 text-gray-700">
             <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              <Phone className="h-4 w-4 text-gray-400 shrink-0" />
               <span className="truncate" title={client.mobile}>
                 {client.mobile}
               </span>
@@ -937,7 +937,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         </TabsContent>
       </Tabs>
 
-      {/* ===== EDIT ORDER DIALOG ===== */}
+{/* ===== EDIT ORDER DIALOG ===== */}
 <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
   <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
     <DialogHeader>
@@ -980,25 +980,27 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 md:col-span-2">
         <Label htmlFor="edit-locationName">Location Name</Label>
-        <Input
+        <Textarea
           id="edit-locationName"
-          className="text-lg"
+          className="text-lg font-semibold text-black leading-relaxed resize-none"
           value={editFormData.locationName}
           onChange={(e) => handleEditFormChange("locationName", e.target.value)}
           placeholder="e.g., Mumbai Central Office"
+          rows={2}
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 md:col-span-2">
         <Label htmlFor="edit-locationAddress">Location Address</Label>
-        <Input
+        <Textarea
           id="edit-locationAddress"
-          className="text-lg"
+          className="text-lg font-semibold text-black leading-relaxed resize-none"
           value={editFormData.locationAddress}
           onChange={(e) => handleEditFormChange("locationAddress", e.target.value)}
           placeholder="Full address"
+          rows={3}
         />
       </div>
 
@@ -1082,11 +1084,11 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         <Label htmlFor="edit-description">Description</Label>
         <Textarea
           id="edit-description"
-          className="text-lg"
+          className="text-lg leading-relaxed resize-none"
           value={editFormData.description}
           onChange={(e) => handleEditFormChange("description", e.target.value)}
           placeholder="Order description and requirements..."
-          rows={3}
+          rows={4}
         />
       </div>
     </div>
@@ -1112,6 +1114,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     </DialogFooter>
   </DialogContent>
 </Dialog>
+
 
 
       {/* PREMIUM Client Details Dialog with Avatar Upload & Edit */}
