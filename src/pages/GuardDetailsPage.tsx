@@ -6,6 +6,7 @@ import { Badge } from "../components/ui/badge";
 import { Separator } from "../components/ui/separator";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetGuardByIdQuery } from "../apis/guardsApi";
+import { getStatusColor, getStatusStyle } from "../utils/statusColors";
 
 export default function GuardDetailsPage() {
   const navigate = useNavigate();
@@ -49,20 +50,20 @@ export default function GuardDetailsPage() {
     });
   };
 
-  const getStatusColor = (status: string) => {
-    const statusMap: Record<string, string> = {
-      active: "bg-blue-500 text-white",
-      ongoing: "bg-blue-500 text-white",
-      completed: "bg-green-500 text-white",
-      cancelled: "bg-red-500 text-white",
-      pending: "bg-yellow-600 text-white",
-      scheduled: "bg-indigo-500 text-white",
-      accepted: "bg-green-500 text-white",
-      upcoming: "bg-purple-500 text-white",
-      overtime_ended: "bg-orange-500 text-white",
-    };
-    return statusMap[status?.toLowerCase().replace(/\s+/g, '_')] || "bg-gray-500 text-white";
-  };
+  // const getStatusColor = (status: string) => {
+  //   const statusMap: Record<string, string> = {
+  //     active: "bg-blue-500 text-white",
+  //     ongoing: "bg-blue-500 text-white",
+  //     completed: "bg-green-500 text-white",
+  //     cancelled: "bg-red-500 text-white",
+  //     pending: "bg-yellow-600 text-white",
+  //     scheduled: "bg-indigo-500 text-white",
+  //     accepted: "bg-green-500 text-white",
+  //     upcoming: "bg-purple-500 text-white",
+  //     overtime_ended: "bg-orange-500 text-white",
+  //   };
+  //   return statusMap[status?.toLowerCase().replace(/\s+/g, '_')] || "bg-gray-500 text-white";
+  // };
 
   if (isLoading) {
     return (
@@ -283,9 +284,13 @@ export default function GuardDetailsPage() {
                             <div className="flex items-center gap-2 mb-1">
                               <Building className="h-4 w-4 text-blue-600" />
                               <h3 className="text-lg font-bold text-gray-900">{shift.order.locationName}</h3>
-                              <Badge className={`${getStatusColor(shift.assignmentStatus)} text-lg px-2 py-0.5`}>
-                                {shift.assignmentStatus.replace(/_/g, ' ').toUpperCase()}
-                              </Badge>
+                              <Badge 
+  className="text-lg px-2 py-0.5 border-2"
+  style={getStatusStyle(shift.assignmentStatus)}
+>
+  {getStatusColor(shift.assignmentStatus).label}
+</Badge>
+
                             </div>
                             <div className="flex items-center gap-2 text-xl text-gray-600 ml-6">
                               <MapPin className="h-3 w-3" />

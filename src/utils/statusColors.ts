@@ -36,43 +36,43 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
   // ACTIVE/POSITIVE STATES - Blue/Green Family
   // ============================================
   ongoing: {
-    bg: "#2360FF",
-    text: "#FFFFFF",
-    border: "#1850CC",
+    bg: "#EFF6FF",        // Very light blue
+    text: "#1E40AF",      // Deep blue
+    border: "#3B82F6",    // Medium blue
     label: "Ongoing"
   },
   completed: {
-    bg: "#10B981",
-    text: "#FFFFFF",
-    border: "#059669",
+    bg: "#F0FDF5",        // Very light emerald
+    text: "#047857",      // Deep emerald
+    border: "#10B981",    // Medium emerald
     label: "Completed"
   },
   upcoming: {
-    bg: "#3B82F6",
-    text: "#FFFFFF",
-    border: "#2563EB",
+    bg: "#F0F9FF",        // Very light sky blue
+    text: "#0369A1",      // Deep sky blue
+    border: "#0EA5E9",    // Medium sky blue
     label: "Upcoming"
   },
   accepted: {
-    bg: "#22C55E", // Bright green
-    text: "#FFFFFF",
-    border: "#16A34A",
+    bg: "#F0FDF4",        // Very light green
+    text: "#15803D",      // Deep green
+    border: "#22C55E",    // Medium green
     label: "Accepted"
   },
   
   // ============================================
-  // PENDING/WAITING STATES - Amber/Yellow Family
+  // PENDING/WAITING STATES - Amber Family
   // ============================================
   pending: {
-    bg: "#F59E0B",
-    text: "#FFFFFF",
-    border: "#D97706",
+    bg: "#FFFBEB",        // Very light amber
+    text: "#B45309",      // Deep amber
+    border: "#F59E0B",    // Medium amber
     label: "Pending"
   },
   request_off_pending: {
-    bg: "#FBBF24", // Lighter amber
-    text: "#92400E", // Dark amber text for contrast
-    border: "#F59E0B",
+    bg: "#FEF3C7",        // Light amber
+    text: "#92400E",      // Deep amber brown
+    border: "#F59E0B",    // Medium amber
     label: "Request Off Pending"
   },
   
@@ -80,9 +80,9 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
   // APPROVED/SUCCESS STATES - Green Family
   // ============================================
   request_off_approved: {
-    bg: "#34D399", // Emerald green
-    text: "#FFFFFF",
-    border: "#10B981",
+    bg: "#D1FAE5",        // Light emerald
+    text: "#065F46",      // Deep emerald
+    border: "#10B981",    // Medium emerald
     label: "Request Off Approved"
   },
   
@@ -90,83 +90,83 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
   // REJECTED/NEGATIVE STATES - Red Family
   // ============================================
   rejected: {
-    bg: "#EF4444",
-    text: "#FFFFFF",
-    border: "#DC2626",
+    bg: "#FEF2F2",        // Very light red
+    text: "#B91C1C",      // Deep red
+    border: "#EF4444",    // Medium red
     label: "Rejected"
   },
   request_off_rejected: {
-    bg: "#F87171", // Light red
-    text: "#FFFFFF",
-    border: "#EF4444",
+    bg: "#FEE2E2",        // Light red
+    text: "#991B1B",      // Deep dark red
+    border: "#DC2626",    // Medium dark red
     label: "Request Off Rejected"
   },
   
   // ============================================
-  // CRITICAL/URGENT STATES - Red Family (Brand Red)
+  // CRITICAL/URGENT STATES - Red Family (Distinct shades)
   // ============================================
   absent: {
-    bg: "#FC0000",
-    text: "#FFFFFF",
-    border: "#DC0000",
+    bg: "#FEE2E2",        // Light red
+    text: "#7F1D1D",      // Very deep red
+    border: "#DC2626",    // Medium dark red
     label: "Absent"
   },
   cancelled: {
-    bg: "#EF4444",
-    text: "#FFFFFF",
-    border: "#DC2626",
+    bg: "#FEF2F2",        // Very light red
+    text: "#991B1B",      // Deep dark red
+    border: "#EF4444",    // Medium red
     label: "Cancelled"
   },
   missed: {
-    bg: "#DC2626",
-    text: "#FFFFFF",
-    border: "#B91C1C",
+    bg: "#FEE2E2",        // Light red
+    text: "#991B1B",      // Deep dark red
+    border: "#DC2626",    // Medium dark red
     label: "Missed"
   },
   order_missed: {
-    bg: "#B91C1C", 
-    text: "#FFFFFF",
-    border: "#991B1B",
+    bg: "#FECACA",        // Medium light red
+    text: "#7F1D1D",      // Very deep red
+    border: "#B91C1C",    // Deep red
     label: "Order Missed"
   },
   missed_respond: {
-    bg: "#B91C1C",
-    text: "#FFFFFF",
-    border: "#991B1B",
+    bg: "#FEE2E2",        // Light red
+    text: "#7F1D1D",      // Very deep red
+    border: "#B91C1C",    // Deep red
     label: "Missed Response"
   },
   missed_endovertime: {
-    bg: "#7F1D1D",
-    text: "#FFFFFF",
-    border: "#991B1B",
-    label: "Missed EndOvertime"
+    bg: "#FECACA",        // Medium light red
+    text: "#7F1D1D",      // Very deep red
+    border: "#991B1B",    // Deep dark red
+    label: "Missed End Overtime"
   },
   
   // ============================================
   // SPECIAL STATES - Purple/Orange Family
   // ============================================
   ended_early: {
-    bg: "#8B5CF6",
-    text: "#FFFFFF",
-    border: "#7C3AED",
+    bg: "#F5F3FF",        // Very light purple
+    text: "#6B21A8",      // Deep purple
+    border: "#A855F7",    // Medium purple
     label: "Ended Early"
   },
   overtime: {
-    bg: "#FB923C", // Orange
-    text: "#FFFFFF",
-    border: "#F97316",
+    bg: "#FFF7ED",        // Very light orange
+    text: "#C2410C",      // Deep orange
+    border: "#F97316",    // Medium orange
     label: "Overtime"
   },
   overtime_started: {
-    bg: "#F97316",
-    text: "#FFFFFF",
-    border: "#EA580C",
+    bg: "#FFEDD5",        // Light orange
+    text: "#9A3412",      // Deep dark orange
+    border: "#EA580C",    // Medium dark orange
     label: "Overtime Started"
   },
   overtime_ended: {
-    bg: "#FB923C",
-    text: "#FFFFFF",
-    border: "#F97316",
+    bg: "#FFF7ED",        // Very light orange
+    text: "#C2410C",      // Deep orange
+    border: "#FB923C",    // Light orange
     label: "Overtime Ended"
   }
 };
