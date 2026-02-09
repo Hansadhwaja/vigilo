@@ -444,8 +444,9 @@ export default function EditAssignmentDialog({
           <div className="bg-gray-50 rounded-lg p-4 space-y-2 border">
             <h4 className="font-semibold text-base text-gray-700">Current Assignment Info</h4>
             <div className="space-y-1 text-base text-gray-600">
-              <p><strong>Location:</strong> {assignment.orderLocationName || assignment.orderName || "N/A"}</p>
-              <p><strong>Current Time:</strong> {assignment.time}</p>
+              <p><strong>Location Name:</strong> {assignment.orderName || "N/A"}</p>
+    <p><strong>Location Address:</strong> {assignment.orderAddress || "N/A"}</p>
+
               <div className="flex items-center gap-2 pt-1">
                 <strong>Status:</strong> 
                 <Badge 

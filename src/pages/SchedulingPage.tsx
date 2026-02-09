@@ -136,14 +136,6 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
     // ✅ FIX: Extract dates from startTime and endTime ISO strings
     const startDateStr = shift.startTime.split('T')[0];  // "2026-01-29"
     const endDateStr = shift.endTime.split('T')[0];      // "2026-01-31"
-
-    console.log("📅 Processing shift:", {
-      startDate: startDateStr,
-      endDate: endDateStr,
-      startTime: shift.startTime,
-      endTime: shift.endTime
-    });
-
     // For time display, use toLocalTime
     const start = toLocalTime(shift.startTime);
     const end = toLocalTime(shift.endTime);
@@ -157,12 +149,6 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
     
     const daysDiff = Math.floor((endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24));
 
-    console.log("📆 Date range:", {
-      startDateObj: startDateObj.toDateString(),
-      endDateObj: endDateObj.toDateString(),
-      daysDiff,
-      willCreateDays: daysDiff + 1
-    });
 
     // ✅ Loop through each day (inclusive)
     for (let dayOffset = 0; dayOffset <= daysDiff; dayOffset++) {
@@ -175,7 +161,6 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
       const day = String(currentDateObj.getDate()).padStart(2, '0');
       const dateKey = `${year}-${month}-${day}`;
 
-      console.log(`  ➡️ Day ${dayOffset + 1}/${daysDiff + 1}: Creating entry for ${dateKey}`);
 
       // Use LOCAL TIME for comparison
       const shiftStartHHMM = getTimeHHMM(start);
@@ -217,6 +202,7 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
           orderId: shift.orderId,
           orderLocationName: shift.locationName || "Unknown Location",
           orderName: shift.orderName || "Unknown Location",
+           orderAddress: shift.orderAddress || "Address not available",
 
           description: shift.description,
           type: shift.type,
@@ -232,11 +218,11 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
           displayDate: dateKey,
           originalStartDate: shift.startTime,
           originalEndDate: shift.endTime,
+          allGuardIdsForShift: shift.guards.map((g: any) => g.id),
         });
       });
     }
 
-    console.log("✅ Shift processing complete\n");
   });
 
   return organized;

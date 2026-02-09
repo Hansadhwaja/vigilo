@@ -7,6 +7,7 @@ import { baseApi } from "./baseApi";
 
 export interface Schedule {
   id: string;
+  orderAddress: string | null;
   orderName: string | null;
   orderId: string;
   date: string;  
@@ -177,10 +178,13 @@ export const schedulingApi = baseApi.injectEndpoints({
 
       transformResponse: (response: any): GetAllSchedulesResponse => {
           // Map data to a UI-friendly shape while preserving nested fields
+           console.log("🔍 Raw backend response:", response.data[0]);
+  console.log("📦 Available fields:", Object.keys(response.data[0] || {}));
           const mapped = response.data.map((item: any) => ({
             id: item.id,
             orderId: item.orderId,
-            orderName: item.orderLocationAddress || null,
+            orderName: item.orderLocationName || null,        // <-- Location NAME
+            orderAddress: item.orderLocationAddress || "shubham",
             date: item.date,
             type: item.type,
             description: item.description,
