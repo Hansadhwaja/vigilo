@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ArrowLeft, MapPin, Clock, User, Camera, FileText, Badge as BadgeIcon, Edit, Save, X, Mail, Phone, MapPinIcon, Upload, Trash2 } from "lucide-react";
+import { ArrowLeft, MapPin, Clock, User, Camera, FileText, Badge as BadgeIcon, Edit, Save, X, Mail, Phone, MapPinIcon, Upload, Trash2, ZoomIn, ChevronLeft, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Label } from "../components/ui/label";
@@ -8,6 +8,7 @@ import { Separator } from "../components/ui/separator";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Dialog, DialogContent } from "../components/ui/dialog";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetOrderByIdQuery, useEditOrderMutation } from "../apis/ordersApi";
 import { useUploadImageMutation } from "../apis/usersApi";
@@ -65,10 +66,12 @@ export default function OrderDetailsPage() {
     endDate: "",
     startTime: "",
     endTime: "",
-    images: [] as string[], // ✅ Added images array
+    images: [] as string[],
   });
 
-  // ✅ Image upload state
+  // ✅ Image viewer state
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [uploadingImage, setUploadingImage] = useState(false);
 
   const { data: orderResponse, isLoading, isError } = useGetOrderByIdQuery(id || "", {
@@ -76,7 +79,7 @@ export default function OrderDetailsPage() {
   });
 
   const [editOrder, { isLoading: isEditing }] = useEditOrderMutation();
-  const [uploadImage] = useUploadImageMutation(); // ✅ Upload mutation
+  const [uploadImage] = useUploadImageMutation();
 
   const order = orderResponse?.data ?? orderResponse ?? null;
 
@@ -102,7 +105,7 @@ export default function OrderDetailsPage() {
       endDate: formatDateForInput(order.endDate),
       startTime: order.startTime || "",
       endTime: order.endTime || "",
-      images: order.images || [], // ✅ Load existing images
+      images: order.images || [],
     });
 
     setIsEditMode(true);
@@ -124,7 +127,6 @@ export default function OrderDetailsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validation
     if (!file.type.startsWith("image")) {
       toast.error("Please upload an image file");
       return;
@@ -143,14 +145,13 @@ export default function OrderDetailsPage() {
       
       const response = await uploadImage(formData).unwrap();
       
-      // Add new image to the array
       setEditFormData(prev => ({
         ...prev,
         images: [...prev.images, response.imageUrl]
       }));
       
       toast.success("Image uploaded successfully");
-      e.target.value = ""; // Reset input
+      e.target.value = "";
     } catch (err: any) {
       console.error("Failed to upload image:", err);
       toast.error(err?.data?.message || "Failed to upload image");
@@ -166,6 +167,23 @@ export default function OrderDetailsPage() {
       images: prev.images.filter((_, index) => index !== indexToDelete)
     }));
     toast.success("Image removed");
+  };
+
+  // ✅ Open image viewer
+  const openImageViewer = (index: number) => {
+    setCurrentImageIndex(index);
+    setViewerOpen(true);
+  };
+
+  // ✅ Navigate images in viewer
+  const goToNextImage = () => {
+    const images = isEditMode ? editFormData.images : (order.images || []);
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const goToPreviousImage = () => {
+    const images = isEditMode ? editFormData.images : (order.images || []);
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
   const handleSaveEdit = async () => {
@@ -191,7 +209,6 @@ export default function OrderDetailsPage() {
         };
       }
 
-      // ✅ Include images in payload
       payload.images = editFormData.images;
 
       await editOrder({
@@ -232,6 +249,8 @@ export default function OrderDetailsPage() {
       </div>
     );
   }
+
+  const currentImages = isEditMode ? editFormData.images : (order.images || []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -454,7 +473,7 @@ export default function OrderDetailsPage() {
               </CardContent>
             </Card>
 
-            {/* ✅ Location Images Card - WITH UPLOAD/DELETE */}
+            {/* ✅ IMPROVED Location Images Card */}
             <Card className="border-2 border-gray-200 shadow-sm bg-white">
               <CardHeader className="border-b-2 border-gray-200 pb-4">
                 <div className="flex items-center justify-between">
@@ -463,7 +482,7 @@ export default function OrderDetailsPage() {
                     Location Images
                   </CardTitle>
                   
-                  {/* ✅ Upload button in edit mode */}
+                  {/* Upload button in edit mode */}
                   {isEditMode && (
                     <label className="cursor-pointer">
                       <input
@@ -479,51 +498,66 @@ export default function OrderDetailsPage() {
                         size="sm"
                         disabled={uploadingImage}
                         className="flex items-center gap-2"
-                        onClick={(e: { preventDefault: () => void; currentTarget: { previousElementSibling: { click: () => void; }; }; }) => {
-                          e.preventDefault();
-                          e.currentTarget.previousElementSibling?.click();
-                        }}
+                        asChild
                       >
-                        {uploadingImage ? (
-                          <>
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
-                            Uploading...
-                          </>
-                        ) : (
-                          <>
-                            <Upload className="h-4 w-4" />
-                            Upload Image
-                          </>
-                        )}
+                        <span>
+                          {uploadingImage ? (
+                            <>
+                              <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="h-4 w-4" />
+                              Upload Image
+                            </>
+                          )}
+                        </span>
                       </Button>
                     </label>
                   )}
                 </div>
               </CardHeader>
               <CardContent className="p-6">
-                {editFormData.images.length > 0 || (!isEditMode && order.images?.length > 0) ? (
-                  <div className="grid grid-cols-3 gap-4">
-                    {(isEditMode ? editFormData.images : order.images || []).map((src: string, idx: number) => (
+                {currentImages.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {currentImages.map((src: string, idx: number) => (
                       <div 
                         key={idx} 
-                        className="relative aspect-video rounded-lg overflow-hidden border-2 border-gray-200 hover:border-gray-400 transition-all group"
+                        className="relative aspect-video rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-400 transition-all group cursor-pointer"
+                        onClick={() => !isEditMode && openImageViewer(idx)}
                       >
                         <img 
                           src={src} 
                           alt={`Location ${idx + 1}`} 
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                         />
                         
-                        {/* ✅ Delete button in edit mode */}
+                        {/* View icon overlay (non-edit mode) */}
+                        {!isEditMode && (
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <ZoomIn className="h-8 w-8 text-white" />
+                          </div>
+                        )}
+                        
+                        {/* Delete button (edit mode) */}
                         {isEditMode && (
                           <button
-                            onClick={() => handleImageDelete(idx)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleImageDelete(idx);
+                            }}
                             className="absolute top-2 right-2 h-8 w-8 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg transition-colors opacity-0 group-hover:opacity-100"
                             type="button"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
                         )}
+                        
+                        {/* Image counter */}
+                        <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                          {idx + 1} / {currentImages.length}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -537,9 +571,15 @@ export default function OrderDetailsPage() {
                   </div>
                 )}
                 
-                {isEditMode && editFormData.images.length > 0 && (
+                {isEditMode && currentImages.length > 0 && (
                   <p className="text-sm text-gray-500 mt-3">
                     Max size: 5MB per image. Hover over an image to delete it.
+                  </p>
+                )}
+                
+                {!isEditMode && currentImages.length > 0 && (
+                  <p className="text-sm text-gray-500 mt-3">
+                    Click on any image to view in full screen
                   </p>
                 )}
               </CardContent>
@@ -690,6 +730,53 @@ export default function OrderDetailsPage() {
           </div>
         </div>
       </div>
+
+      {/* ✅ FULL SCREEN IMAGE VIEWER MODAL */}
+      <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none">
+          <div className="relative w-full h-[95vh] flex items-center justify-center">
+            {/* Close button */}
+            <button
+              onClick={() => setViewerOpen(false)}
+              className="absolute top-4 right-4 z-50 h-10 w-10 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+
+            {/* Image counter */}
+            <div className="absolute top-4 left-4 z-50 bg-black/60 text-white px-4 py-2 rounded-lg text-sm font-medium">
+              {currentImageIndex + 1} / {currentImages.length}
+            </div>
+
+            {/* Previous button */}
+            {currentImages.length > 1 && (
+              <button
+                onClick={goToPreviousImage}
+                className="absolute left-4 z-50 h-12 w-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </button>
+            )}
+
+            {/* Main image */}
+            <img
+              src={currentImages[currentImageIndex]}
+              alt={`Location ${currentImageIndex + 1}`}
+              className="max-w-full max-h-full object-contain"
+            />
+
+            {/* Next button */}
+            {currentImages.length > 1 && (
+              <button
+                onClick={goToNextImage}
+                className="absolute right-4 z-50 h-12 w-12 bg-white/10 hover:bg-white/20 text-white rounded-full flex items-center justify-center transition-colors"
+              >
+                <ChevronRight className="h-6 w-6" />
+              </button>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
