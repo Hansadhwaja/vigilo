@@ -1634,7 +1634,6 @@ const handleOpenEditDialog = (assignment: any) => {
           }}
           onSave={(updatedData) => {
             // TODO: Call your update API here
-            console.log("Saving assignment:", updatedData);
             toast.success("Assignment updated successfully!");
             setShowEditDialog(false);
             setSelectedAssignment(null);

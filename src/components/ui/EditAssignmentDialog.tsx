@@ -174,8 +174,6 @@ export default function EditAssignmentDialog({
         id: assignment.shiftId,
         data: updateData,
       }).unwrap();
-
-      toast.success("Shift updated successfully!");
       onSave(result.data);
       onClose();
     } catch (error: any) {
