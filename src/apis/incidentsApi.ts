@@ -1,33 +1,46 @@
 // incidentsApi.ts
-import { stat } from "fs";
 import { baseApi } from "./baseApi";
 
 // ---- Interfaces for Incident Structure ----
-export interface IncidentLocation {
+export interface IncidentReporter {
+  id: string;
   name: string;
-  lat?: number;
-  lng?: number;
-  coordinates:number;
+}
+
+export interface IncidentShift {
+  id: string;
+  type: string;
 }
 
 export interface Incident {
   id: string;
-  site: string;
-  type: string;
-  severity: string;
-  status: string;
-  assigned?: string;
-  time: string;
-  location: IncidentLocation;
-  priorityLevel:string;
-  guardMessage:string;
-  description:string;
-  actionsTaken:string;
+  name: string;
+  location: string; // ← STRING, not object
+  description: string;
+  images: string[];
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  shiftId: string;
   reportedBy: string;
-  reporterName: string;
-  photo:string;
-  clientNotified:boolean;
-
+  assignedGuard: string | null;
+  assignedGuardUser: any | null;
+  reporter: IncidentReporter;
+  shift: IncidentShift;
+  
+  // For UI convenience (these don't exist in API, added for display)
+  site?: string;
+  type?: string;
+  severity?: string;
+  status?: string;
+  assigned?: string;
+  time?: string;
+  priorityLevel?: string;
+  guardMessage?: string;
+  actionsTaken?: string;
+  reporterName?: string;
+  photo?: string;
+  clientNotified?: boolean;
 }
 
 export interface Pagination {
@@ -54,7 +67,7 @@ export interface GetIncidentByIdResponse {
 export interface GetAllIncidentsParams {
   limit?: number;
   page?: number;
-  status?: string;   // pending, resolved, in progress
+  status?: string;
   type?: string;
   severity?: string;
   search?: string;
@@ -87,42 +100,44 @@ export const incidentsApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-        transformResponse: (response: any): GetAllIncidentsResponse => {
-    const mappedData = response.data.map((i: any) => ({
-      id: i.id,
-      site: i.name || "Unknown Site",
-      type: i.name || "Incident",
-      severity: i.severity || "Low",
-      status: i.status || "Pending",
-      assigned: i.reporter
-  ? `${i.reporter.name} `
-    : "Not Assigned",
-      time: i.createdAt,
-      location: {
-        name: i.location || "Unknown",
-        coordinates: 0,
-        lat: 0,
-        lng: 0,
+      transformResponse: (response: any): GetAllIncidentsResponse => {
+        const mappedData = response.data.map((i: any) => ({
+          // ✅ Real API fields
+          id: i.id,
+          name: i.name,
+          location: i.location,
+          description: i.description,
+          images: i.images || [],
+          createdAt: i.createdAt,
+          updatedAt: i.updatedAt,
+          deletedAt: i.deletedAt,
+          shiftId: i.shiftId,
+          reportedBy: i.reportedBy,
+          assignedGuard: i.assignedGuard,
+          assignedGuardUser: i.assignedGuardUser,
+          reporter: i.reporter || { id: "", name: "Unknown" },
+          shift: i.shift || { id: "", type: "Unknown" },
+          
+          // ✅ UI convenience fields
+          site: i.name || "Unknown Site",
+          type: i.name || "Incident",
+          severity: i.severity || "Low",
+          status: i.status || "Pending",
+          assigned: i.reporter ? i.reporter.name : "Not Assigned",
+          time: i.createdAt,
+          priorityLevel: i.priorityLevel || "Normal",
+          guardMessage: i.guardMessage || "",
+          actionsTaken: i.actionsTaken || "",
+          reporterName: i.reporter?.name || "Unknown Reporter",
+          photo: i.images?.[0] || "",
+          clientNotified: i.clientNotified || false,
+        }));
+
+        return {
+          ...response,
+          data: mappedData,
+        };
       },
-      priorityLevel: i.priorityLevel || "Normal",
-      guardMessage: i.guardMessage || "",
-      description: i.description || "",
-      actionsTaken: i.actionsTaken || "",
-      reportedBy: i.reportedBy || "",
-      reporterName: i.reporter
-  ? `${i.reporter.name} `
-  : "Unknown Reporter",
-
-      photo: i.images?.[0] || "",
-      clientNotified: false,
-    }));
-
-    return {
-      ...response,
-      data: mappedData,
-    };
-  },
-
       providesTags: (result) =>
         result
           ? [
@@ -142,56 +157,42 @@ export const incidentsApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       transformResponse: (res: any): GetIncidentByIdResponse => {
-    const i = res.data;
+        const i = res.data;
 
-    const mapped = {
-      id: i.id,
-      status: i.status || "Pending",
-      type: i.name || "Incident",
-      site: i.name || "Unknown Site",
-      location: {
-        name: i.location || "Unknown",
-        coordinates: 0,
-        lat: 0,
-        lng: 0,
+        const mapped: Incident = {
+          // ✅ Real API fields (exactly as they come from API)
+          id: i.id,
+          name: i.name,
+          location: i.location,
+          description: i.description,
+          images: i.images || [],
+          createdAt: i.createdAt,
+          updatedAt: i.updatedAt,
+          deletedAt: i.deletedAt,
+          shiftId: i.shiftId,
+          reportedBy: i.reportedBy,
+          assignedGuard: i.assignedGuard,
+          assignedGuardUser: i.assignedGuardUser,
+          reporter: i.reporter || { id: "", name: "Unknown" },
+          shift: i.shift || { id: "", type: "Unknown" },
+          
+          // ✅ UI convenience fields (for backward compatibility)
+          site: i.name || "Unknown Site",
+          type: i.name || "Incident",
+          severity: i.severity || "Medium",
+          status: i.status || "Pending",
+          assigned: i.reporter ? i.reporter.name : "Not Assigned",
+          time: i.createdAt,
+          priorityLevel: i.priorityLevel || "Normal",
+          guardMessage: i.guardMessage || i.description || "",
+          actionsTaken: i.actionsTaken || "",
+          reporterName: i.reporter?.name || "Unknown Reporter",
+          photo: i.images?.[0] || "",
+          clientNotified: i.clientNotified !== undefined ? i.clientNotified : true,
+        };
+
+        return { ...res, data: mapped };
       },
-    name: i.name,
-    description: i.description,
-    images: i.images || [],
-    actionsTaken: i.actionsTaken || "Action Tokens",
-    time: i.createdAt,
-    updatedAt: i.updatedAt,
-    deletedAt: i.deletedAt,
-    guardMessage: i.guardMessage || i.description || "",
-    clientNotified:i.clientNotified || true,
-
-    shiftId: i.shiftId,
-    reportedBy: i.reporterName || "",
-    assigned: i.reporter
-  ? `${i.reporter.name} `
-    : "Not Assigned",
-
-    reporter: i.reporter
-      ? {
-          id: i.reporter.id,
-          name: i.reporter.name,
-        }
-      : null,
-
-    shift: i.shift
-      ? {
-          id: i.shift.id,
-          type: i.shift.type,
-        }
-      : null,
-
-    // UI-friendly fields
-    reporterName: i.reporter?.name || "Unknown Reporter",
-    photo: i.images?.[0] || "",
-  };
-
-  return { ...res, data: mapped };
-  },
       providesTags: (_result, _error, id) => [
         { type: "Incidents", id },
       ],
