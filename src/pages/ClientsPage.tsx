@@ -1385,51 +1385,56 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         </DialogContent>
       </Dialog>
 
-      {/* Action Dialog */}
       <Dialog open={showActionDialog} onOpenChange={setShowActionDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {actionType === "accept" && "Accept Order"}
-              {actionType === "reject" && "Reject Order"}
-            </DialogTitle>
-            <DialogDescription>
-              {actionType === "accept" && "Confirm accepting this order and starting the service."}
-              {actionType === "reject" && "Provide a reason for rejecting this order."}
-            </DialogDescription>
-          </DialogHeader>
-                    
-          {actionType === "reject" && (
-            <div className="space-y-4">
-              <Label htmlFor="message">Rejection Reason</Label>
-              <Textarea
-                id="message"
-                placeholder="Please provide a reason for rejection..."
-                value={actionMessage}
-                onChange={(e) => setActionMessage(e.target.value)}
-                rows={3}
-              />
-            </div>
-          )}
-                    
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={() => setShowActionDialog(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAcceptReject}
-              className={actionType === "reject" ? "bg-red-600 hover:bg-red-700" : ""}
-              disabled={isAccepting || isCancelling}
-            >
-              {(isAccepting || isCancelling) && (
-                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
-              )}
-              {actionType === "accept" && "Accept Order"}
-              {actionType === "reject" && "Reject Order"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+  <DialogContent className="sm:max-w-md rounded-xl">
+    <DialogHeader>
+      <DialogTitle>
+        {actionType === "accept" && "Accept Order"}
+        {actionType === "reject" && "Reject Order"}
+      </DialogTitle>
+      <DialogDescription>
+        {actionType === "accept" &&
+          "Confirm accepting this order and starting the service."}
+        {actionType === "reject" &&
+          "Provide a reason for rejecting this order."}
+      </DialogDescription>
+    </DialogHeader>
+
+    {actionType === "reject" && (
+      <div className="space-y-4 pt-2">
+        <Label htmlFor="message">Rejection Reason</Label>
+        <Textarea
+          id="message"
+          placeholder="Please provide a reason for rejection..."
+          value={actionMessage}
+          onChange={(e) => setActionMessage(e.target.value)}
+          rows={3}
+        />
+      </div>
+    )}
+
+    <div className="flex justify-end gap-2 pt-6">
+      <Button
+        variant="outline"
+        onClick={() => setShowActionDialog(false)}
+      >
+        Cancel
+      </Button>
+
+      <Button
+        onClick={handleAcceptReject}
+        className={actionType === "reject" ? "bg-red-600 hover:bg-red-700" : ""}
+        disabled={isAccepting || isCancelling}
+      >
+        {(isAccepting || isCancelling) && (
+          <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
+        )}
+        {actionType === "accept" && "Accept Order"}
+        {actionType === "reject" && "Reject Order"}
+      </Button>
+    </div>
+  </DialogContent>
+</Dialog>
     </div>
   );
 
