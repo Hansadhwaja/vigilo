@@ -189,15 +189,14 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-50 border-b border-gray-200">
-                  {/* <TableHead className="text-xl text-gray-700">Incident ID</TableHead> */}
-                  <TableHead className="text-xl text-gray-700">Location</TableHead>
-                  <TableHead className="text-xl text-gray-700">Description</TableHead>
-                  <TableHead className="text-xl text-gray-700">Assigned Guard</TableHead>
-                  <TableHead className="text-xl text-gray-700">Date/Time</TableHead>
-                  <TableHead className="text-xl text-gray-700 text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
+  <TableRow className="bg-gray-50 border-b border-gray-200">
+    <TableHead className="w-[20%] text-xl text-gray-700">Location</TableHead>
+    <TableHead className="w-[30%] text-xl text-gray-700">Description</TableHead>
+    <TableHead className="w-[20%] text-xl text-gray-700">Assigned Guard</TableHead>
+    <TableHead className="w-[20%] text-xl text-gray-700">Date/Time</TableHead>
+    <TableHead className="w-[10%] text-xl text-gray-700 text-right">Actions</TableHead>
+  </TableRow>
+</TableHeader>
               <TableBody>
                 {currentIncidents.map((incident: any) => (
                   <TableRow key={incident.id} className="border-b border-gray-100 hover:bg-gray-50">
@@ -216,7 +215,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                     </TableCell>             
                     
                     <TableCell className="py-4">
-                      <div className="font-medium text-gray-900">{incident.description}</div>
+                      <div className="font-medium text-gray-900 truncate">{incident.description}</div>
                     </TableCell>
                     
                     <TableCell className="py-4">
