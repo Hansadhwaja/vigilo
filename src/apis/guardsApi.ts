@@ -81,7 +81,7 @@ export interface GetAllGuardsParams {
 export interface CreateGuardAdminRequest {
   name: string;
   email: string;
-  password: string;
+  password?: string;
   address?: string;
   mobile?: string;
 }

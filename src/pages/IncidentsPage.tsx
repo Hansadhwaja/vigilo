@@ -210,21 +210,21 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                         
                         <div className="text-lg text-gray-900 flex items-center gap-1 mt-0.5">
                           <MapPin className="h-3 w-3" />
-                          {incident.location?.name}
+                          {incident.location}
                         </div>
                       </div>
                     </TableCell>             
                     
                     <TableCell className="py-4">
-                      <div className="font-medium text-gray-900">{incident.site}</div>
+                      <div className="font-medium text-gray-900">{incident.description}</div>
                     </TableCell>
                     
                     <TableCell className="py-4">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
                            <span className="text-white font-medium text-lg">
-                            {incident.assigned
-                              ? incident.assigned
+                            {incident.reporter.name
+                              ? incident.reporter.name
                                   .split(" ")
                                   .map((n: string) => n[0])
                                   .join("")
@@ -232,7 +232,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
                               : "NA"}
                           </span>
                         </div>
-                        <span className="text-xl text-gray-700">{incident.assigned || "Not Assigned"}</span>
+                        <span className="text-xl text-gray-700">{incident.reporter.name || "Not Assigned"}</span>
                       </div>
                     </TableCell>
                     
