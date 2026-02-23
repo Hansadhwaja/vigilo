@@ -50,7 +50,7 @@ import { Progress } from "../components/ui/progress";
 import { sampleVehicles, availableGuards, clientList } from "../data/sampleData";
 import { toast } from "sonner";
 import { useGetAllClientsQuery } from "./../apis/usersApi";
-import { useCreatePatrolSiteMutation } from "./../apis/patrollingAPI";
+import { PatrolCheckpoint, useCreatePatrolSiteMutation, useGetAllPatrolSitesQuery } from "./../apis/patrollingAPI";
 
 // Enhanced patrol data structure
 const samplePatrols = [
@@ -361,6 +361,11 @@ const [
   { isLoading: isCreatingSite }
 ] = useCreatePatrolSiteMutation();
 
+const { data, isLoading, isError } = useGetAllPatrolSitesQuery({
+  page: 1,
+  limit: 50,
+});
+
   // Form state for creating patrol
   const [formData, setFormData] = useState({
     patrolId: "",
@@ -403,74 +408,45 @@ const [
   });
 
   // Enhanced available sites with comprehensive structure
-  const [availableSites, setAvailableSites] = useState([
-    {
-      id: "site-1",
-      name: "Harbour Group Tower",
-      address: "123 Collins Street, Melbourne VIC 3000",
-      coordinates: { lat: -37.8136, lng: 144.9631 },
-      clientId: "c1",
-      description: "Commercial office building with 24/7 security requirements",
-      subsites: [
-        {
-          id: "subsite-1-1",
-          name: "Main Building Complex",
-          unitPrice: 150,
-          estimatedDuration: 60,
-          description: "Primary building area including lobbies and common areas",
-          checkpoints: [
-            {
-              id: "cp-001",
-              name: "Main Entrance Lobby",
-              coordinates: { lat: -37.8136, lng: 144.9631 },
-              range: 20,
-              qrCode: "QR-HGT-ME-001",
-              description: "Primary entrance checkpoint",
-              priority: "high"
-            },
-            {
-              id: "cp-002", 
-              name: "Parking Garage B1",
-              coordinates: { lat: -37.8138, lng: 144.9633 },
-              range: 25,
-              qrCode: "QR-HGT-PG-002",
-              description: "Underground parking security point",
-              priority: "medium"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      id: "site-2",
-      name: "CBD Mall Complex",
-      address: "456 Bourke Street Mall, Melbourne VIC 3000",
-      coordinates: { lat: -37.8150, lng: 144.9700 },
-      clientId: "c2",
-      description: "Large retail complex with multiple zones",
-      subsites: [
-        {
-          id: "subsite-2-1",
-          name: "Shopping Center",
-          unitPrice: 200,
-          estimatedDuration: 90,
-          description: "Main retail area with high foot traffic",
-          checkpoints: [
-            {
-              id: "cp-003",
-              name: "Food Court",
-              coordinates: { lat: -37.8150, lng: 144.9700 },
-              range: 30,
-              qrCode: "QR-CBD-FC-003",
-              description: "Food court security checkpoint",
-              priority: "medium"
-            }
-          ]
-        }
-      ]
-    }
-  ]);
+const availableSites = data?.data?.map((site) => ({
+  id: site.id,
+  name: site.name,
+  address: site.address,
 
+  // map subSites -> subsites (UI friendly)
+  subsites: site.subSites.map((sub) => ({
+    id: sub.id,
+    name: sub.name,
+    description: "",
+    unitPrice: sub.unitPrice,
+    checkpoints: sub.checkpoints.map((cp) => ({
+      id: cp.id,
+      name: cp.name,
+      qrCode: cp.qr?.qrUrl || "No QR",
+      range: cp.verificationRange,
+      latitude: cp.latitude || 0,
+      longitude: cp.longitude || 0,
+      verificationRange: cp.verificationRange || 20,
+      priorityLevel: cp.priorityLevel || "medium",
+      description: cp.description || "",
+      qr: cp.qr,
+    })),
+  })),
+
+  // direct site checkpoints (important)
+  checkpoints: site.checkpoints.map((cp) => ({
+    id: cp.id,
+    name: cp.name,
+    qrCode: cp.qr?.qrUrl || "No QR",
+    range: cp.verificationRange,
+    latitude: cp.latitude || 0,
+    longitude: cp.longitude || 0,
+    verificationRange: cp.verificationRange || 20,
+    priorityLevel: cp.priorityLevel || "medium",
+    description: cp.description || "",
+    qr: cp.qr,
+  })),
+})) || [];
   // Enhanced GPS tracking simulation
   useEffect(() => {
     const interval = setInterval(() => {
@@ -872,23 +848,40 @@ const [
     });
   };
 
-  const generateQRCodeForCheckpoint = (checkpoint: any) => {
-    // Simulate QR code generation
-    const qrData = {
-      checkpointId: checkpoint.id,
-      qrCode: checkpoint.qrCode,
-      coordinates: checkpoint.coordinates,
-      range: checkpoint.range,
-      timestamp: new Date().toISOString()
-    };
-    
-    // In production, this would generate an actual QR code image
-    navigator.clipboard.writeText(JSON.stringify(qrData)).then(() => {
+const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
+
+  console.log("CHECKPOINT DATA 👉", checkpoint);
+
+  const qrData = {
+    checkpointId: checkpoint.id,
+
+    qrId: checkpoint.qr?.id ?? null,
+    qrCode: checkpoint.qr?.qrUrl ?? null,
+
+    latitude:
+      checkpoint.qr?.latitude ??
+      checkpoint.latitude ??
+      null,
+
+    longitude:
+      checkpoint.qr?.longitude ??
+      checkpoint.longitude ??
+      null,
+
+    range: checkpoint.verificationRange ?? null,
+
+    timestamp: new Date().toISOString(),
+  };
+
+  navigator.clipboard
+    .writeText(JSON.stringify(qrData, null, 2))
+    .then(() => {
       toast.success("QR code data copied", {
-        description: "QR code information copied to clipboard for printing"
+        description:
+          "QR code information copied to clipboard for printing",
       });
     });
-  };
+};
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -1509,126 +1502,258 @@ const [
                     <Building className="h-4 w-4" />
                     Create Site
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => setShowSiteManager(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <Settings className="h-4 w-4" />
-                    Manage Sites
-                  </Button>
                 </div>
               </div>
 
               {/* Available Sites */}
-              <div className="space-y-3 max-h-60 overflow-y-auto">
-                {availableSites.map((site) => (
-                  <Card key={site.id} className="border border-gray-200">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Building className="h-4 w-4 text-blue-600" />
-                            <h4 className="font-medium text-gray-900">{site.name}</h4>
-                            <Badge variant="outline" className="text-lg">
-                              {site.subsites.length} sub-sites
-                            </Badge>
-                          </div>
-                          <p className="text-xl text-gray-600 mb-2">{site.address}</p>
-                          
-                          {/* Sub-sites */}
-                          <div className="space-y-2">
-                            {site.subsites.map((subsite) => (
-                              <div key={subsite.id} className="ml-4 p-2 bg-gray-50 rounded border-l-2 border-blue-200">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <Target className="h-3 w-3 text-green-600" />
-                                      <span className="text-xl font-medium">{subsite.name}</span>
-                                      <Badge variant="outline" className="text-lg bg-green-50">
-                                        ${subsite.unitPrice}
-                                      </Badge>
-                                      <Badge variant="outline" className="text-lg">
-                                        {subsite.checkpoints.length} checkpoints
-                                      </Badge>
-                                    </div>
-                                    <p className="text-lg text-gray-600 ml-5">{subsite.description}</p>
-                                    
-                                    {/* Checkpoints */}
-                                    <div className="ml-5 mt-2 space-y-1">
-                                      {subsite.checkpoints.map((checkpoint) => (
-                                        <div key={checkpoint.id} className="flex items-center gap-2 text-lg">
-                                          <Crosshair className="h-3 w-3 text-orange-500" />
-                                          <span>{checkpoint.name}</span>
-                                          <Badge variant="outline" className="text-lg bg-orange-50">
-                                            QR: {checkpoint.qrCode}
-                                          </Badge>
-                                          <Badge variant="outline" className="text-lg bg-purple-50">
-                                            {checkpoint.range}m range
-                                          </Badge>
-                                          <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            className="h-5 w-5 p-0"
-                                            onClick={() => generateQRCodeForCheckpoint(checkpoint)}
-                                          >
-                                            <QrCode className="h-3 w-3" />
-                                          </Button>
-                                        </div>
-                                      ))}
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        className="h-6 text-lg text-blue-600 hover:text-blue-700"
-                                        onClick={() => handleAddCheckpoint(site.id, subsite.id)}
-                                      >
-                                        <Plus className="h-3 w-3 mr-1" />
-                                        Add Checkpoint
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="ml-4 h-6 text-lg text-green-600 hover:text-green-700"
-                              onClick={() => handleAddSubSite(site.id)}
-                            >
-                              <Plus className="h-3 w-3 mr-1" />
-                              Add Sub-Site
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-col gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleAddSiteToPatrol(site)}
-                            className="text-lg"
-                            disabled={formData.sites.some(s => s.id === site.id)}
-                          >
-                            {formData.sites.some(s => s.id === site.id) ? (
-                              <>
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Added
-                              </>
-                            ) : (
-                              <>
-                                <Plus className="h-3 w-3 mr-1" />
-                                Add Site
-                              </>
-                            )}
-                          </Button>
-                        </div>
+<div className="space-y-5 max-h-[500px] overflow-y-auto pr-2">
+
+  {availableSites.map((site) => (
+    <Card
+      key={site.id}
+      className="w-full border border-gray-200 shadow-sm hover:shadow-md transition"
+    >
+      <CardContent className="p-5">
+
+        {/* =========================
+            SITE HEADER
+        ========================== */}
+        <div className="flex justify-between items-start gap-4">
+
+          <div className="flex-1 min-w-0">
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <Building className="h-5 w-5 text-blue-600 flex-shrink-0" />
+
+              <h3 className="text-lg font-semibold text-gray-900 truncate">
+                {site.name}
+              </h3>
+
+              <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
+                {site.subsites.length} Sub-Sites
+              </Badge>
+
+              {site.checkpoints.length > 0 && (
+                <Badge className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
+                  {site.checkpoints.length} Site Check points
+                </Badge>
+              )}
+            </div>
+
+            <p className="text-sm text-gray-500 mt-1 truncate">
+              {site.address}
+            </p>
+          </div>
+
+          {/* Add Site Button */}
+          <Button
+            size="sm"
+            variant="outline"
+            className="whitespace-nowrap"
+            onClick={() => handleAddSiteToPatrol(site)}
+            disabled={formData.sites.some((s) => s.id === site.id)}
+          >
+            {formData.sites.some((s) => s.id === site.id) ? (
+              <>
+                <CheckCircle className="h-4 w-4 mr-1 text-green-600" />
+                Added
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4 mr-1" />
+                Add Site
+              </>
+            )}
+          </Button>
+        </div>
+
+        {/* =========================
+            SITE CHECKPOINTS
+        ========================== */}
+        {site.checkpoints.length > 0 && (
+          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+
+            <div className="text-sm font-semibold text-yellow-800 mb-3">
+              Site Level Checkpoints
+            </div>
+
+            <div className="space-y-2">
+              {site.checkpoints.map((checkpoint) => (
+                <div
+                  key={checkpoint.id}
+                  className="flex items-center justify-between bg-white p-3 rounded-md border"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+
+                    <Crosshair className="h-4 w-4 text-orange-500 flex-shrink-0" />
+
+                    <div className="min-w-0">
+                      <div className="font-medium text-sm truncate">
+                        {checkpoint.name}
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+
+                      <div 
+                      className="flex items-center gap-2 mt-1 flex-wrap "
+                      >
+                        <Badge onClick={() => {
+                            navigator.clipboard.writeText(checkpoint.qr!.qrUrl);
+                            toast.success("QR URL copied"); 
+                          }}
+                         className="text-xs bg-gray-500 truncate max-w-[500px] hover:cursor-pointer">
+                          QR: {checkpoint.qrCode}
+                        </Badge>
+
+                        <Badge className="text-xs bg-purple-50 text-purple-700">
+                          {checkpoint.range}m
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => generateQRCodeForCheckpoint(checkpoint)}
+                  >
+                    <QrCode className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-blue-600 hover:text-blue-700"
+                      onClick={() =>
+                        handleAddCheckpoint(site.id, site.id)
+                      }
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Site Checkpoint
+                    </Button>
+            </div>
+          </div>
+        )}
+
+        {/* =========================
+            SUB SITES
+        ========================== */}
+        {site.subsites.length > 0 && (
+          <div className="mt-5 space-y-4">
+
+            {site.subsites.map((subsite) => (
+              <div
+                key={subsite.id}
+                className="p-4 bg-gray-50 border border-gray-200 rounded-lg"
+              >
+                {/* Subsite Header */}
+                <div className="flex items-center justify-between">
+
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Target className="h-4 w-4 text-green-600 flex-shrink-0" />
+
+                    <div className="min-w-0">
+                      <div className="font-semibold text-sm truncate">
+                        {subsite.name}
+                      </div>
+
+                      {subsite.description && (
+                        <p className="text-xs text-gray-500 truncate">
+                          {subsite.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-green-50 text-green-700 text-xs">
+                      ${subsite.unitPrice}
+                    </Badge>
+
+                    <Badge className="text-xs">
+                      {subsite.checkpoints.length} CP
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Subsite Checkpoints */}
+                {subsite.checkpoints.length > 0 && (
+                  <div className="mt-3 space-y-2">
+
+                    {subsite.checkpoints.map((checkpoint) => (
+                      <div
+                        key={checkpoint.id}
+                        className="flex items-center justify-between bg-white p-3 rounded-md border"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+
+                          <Crosshair className="h-4 w-4 text-orange-500 flex-shrink-0" />
+
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium truncate">
+                              {checkpoint.name}
+                            </div>
+
+                            <div 
+                      className="flex items-center gap-2 mt-1 flex-wrap "
+                      >
+                        <Badge onClick={() => {
+                            navigator.clipboard.writeText(checkpoint.qr!.qrUrl);
+                            toast.success("QR URL copied"); 
+                          }}
+                         className="text-xs bg-gray-500 truncate max-w-[500px] hover:cursor-pointer">
+                          QR: {checkpoint.qrCode}
+                        </Badge>
+
+                        <Badge className="text-xs bg-purple-50 text-purple-700">
+                          {checkpoint.range}m
+                        </Badge>
+                      </div>
+                          </div>
+                        </div>
+
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() =>
+                            generateQRCodeForCheckpoint(checkpoint)
+                          }
+                        >
+                          <QrCode className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-blue-600 hover:text-blue-700"
+                      onClick={() =>
+                        handleAddCheckpoint(site.id, subsite.id)
+                      }
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add SubSite Checkpoint
+                    </Button>
+                  </div>
+                )}
               </div>
+            ))}
+
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-green-600 hover:text-green-700"
+              onClick={() => handleAddSubSite(site.id)}
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add Sub-Site
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  ))}
+</div>
 
               {/* Selected Sites Summary */}
               {formData.sites.length > 0 && (
