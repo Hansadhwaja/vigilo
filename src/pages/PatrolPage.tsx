@@ -52,6 +52,7 @@ import { toast } from "sonner";
 import { useGetAllClientsQuery } from "./../apis/usersApi";
 import { PatrolCheckpoint, useCreatePatrolSiteMutation, useGetAllPatrolSitesQuery } from "./../apis/patrollingAPI";
 
+
 // Enhanced patrol data structure
 const samplePatrols = [
   {
@@ -972,7 +973,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
             Export
           </Button>
           
-          <Button onClick={handleCreatePatrol} className="flex items-center gap-2">
+          <Button onClick={handleCreatePatrol} disabled={isLoading} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             Create Patrol
           </Button>
