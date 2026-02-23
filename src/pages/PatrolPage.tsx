@@ -49,6 +49,8 @@ import { Textarea } from "../components/ui/textarea";
 import { Progress } from "../components/ui/progress";
 import { sampleVehicles, availableGuards, clientList } from "../data/sampleData";
 import { toast } from "sonner";
+import { useGetAllClientsQuery } from "./../apis/usersApi";
+import { useCreatePatrolSiteMutation } from "./../apis/patrollingAPI";
 
 // Enhanced patrol data structure
 const samplePatrols = [
@@ -345,6 +347,19 @@ export default function PatrolPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [liveTracking, setLiveTracking] = useState<{[key: string]: any}>({});
+
+  const {
+  data: clientsResponse,
+  isLoading: clientsLoading,
+  isError: clientsError,
+} = useGetAllClientsQuery();
+
+const clientList = clientsResponse?.data || [];
+
+const [
+  createPatrolSite,
+  { isLoading: isCreatingSite }
+] = useCreatePatrolSiteMutation();
 
   // Form state for creating patrol
   const [formData, setFormData] = useState({
@@ -713,27 +728,49 @@ export default function PatrolPage() {
     setShowSiteManager(true);
   };
 
-  const handleSaveSite = () => {
-    const newSite = {
-      id: `site-${Date.now()}`,
+  const handleSaveSite = async () => {
+  try {
+    // Basic validation
+    if (
+      !siteFormData.name ||
+      !siteFormData.address ||
+      !siteFormData.coordinates.lat ||
+      !siteFormData.coordinates.lng ||
+      !siteFormData.clientId
+    ) {
+      alert("Please fill all required fields");
+      return;
+    }
+
+    const payload = {
       name: siteFormData.name,
       address: siteFormData.address,
-      coordinates: {
-        lat: parseFloat(siteFormData.coordinates.lat),
-        lng: parseFloat(siteFormData.coordinates.lng)
-      },
+      latitude: Number(siteFormData.coordinates.lat),
+      longitude: Number(siteFormData.coordinates.lng),
       clientId: siteFormData.clientId,
-      description: siteFormData.description,
-      subsites: []
+      description: siteFormData.description || undefined,
     };
 
-    setAvailableSites(prev => [...prev, newSite]);
+    const response = await createPatrolSite(payload).unwrap();
+
+    console.log("Site created:", response);
+
+    // ✅ Close dialog
     setShowSiteManager(false);
-    
-    toast.success("Site created successfully", {
-      description: `${siteFormData.name} added to available patrol sites`
+
+    // ✅ Reset form
+    setSiteFormData({
+      name: "",
+      address: "",
+      coordinates: { lat: "", lng: "" },
+      clientId: "",
+      description: "",
     });
-  };
+
+  } catch (error) {
+    console.error("Create site failed:", error);
+  }
+};
 
   const handleAddSubSite = (siteId: string) => {
     const site = availableSites.find(s => s.id === siteId);
@@ -1883,12 +1920,32 @@ export default function PatrolPage() {
                   <SelectValue placeholder="Select client" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clientList.map(client => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+  {clientsLoading && (
+    <SelectItem value="loading" disabled>
+      Loading clients...
+    </SelectItem>
+  )}
+
+  {clientsError && (
+    <SelectItem value="error" disabled>
+      Failed to load clients
+    </SelectItem>
+  )}
+
+  {!clientsLoading && !clientsError && clientList.length === 0 && (
+    <SelectItem value="empty" disabled>
+      No clients found
+    </SelectItem>
+  )}
+
+  {!clientsLoading &&
+    !clientsError &&
+    clientList.map((client) => (
+      <SelectItem key={client.id} value={client.id}>
+        {client.name}
+      </SelectItem>
+    ))}
+</SelectContent>
               </Select>
             </div>
             
@@ -1908,8 +1965,18 @@ export default function PatrolPage() {
             <Button variant="outline" onClick={() => setShowSiteManager(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveSite}>
-              Create Site
+            <Button
+              onClick={handleSaveSite}
+              disabled={
+                isCreatingSite ||
+                !siteFormData.name ||
+                !siteFormData.address ||
+                !siteFormData.coordinates.lat ||
+                !siteFormData.coordinates.lng ||
+                !siteFormData.clientId
+              }
+            >
+              {isCreatingSite ? "Creating..." : "Create Site"}
             </Button>
           </div>
         </DialogContent>
