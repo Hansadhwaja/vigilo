@@ -204,7 +204,7 @@ createSubSite: builder.mutation<
   CreateSubSiteRequest
 >({
   query: (body) => ({
-    url: "/patrolling/createSubSite", // adjust if route differs
+    url: "/patrolling/createPatrolSubSite", // adjust if route differs
     method: "POST",
     body,
   }),

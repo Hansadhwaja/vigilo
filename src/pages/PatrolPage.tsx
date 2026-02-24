@@ -36,7 +36,8 @@ import {
   Wifi,
   DollarSign,
   Copy,
-  Settings
+  Settings,
+  Loader2
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -50,7 +51,7 @@ import { Progress } from "../components/ui/progress";
 import { sampleVehicles, availableGuards, clientList } from "../data/sampleData";
 import { toast } from "sonner";
 import { useGetAllClientsQuery } from "./../apis/usersApi";
-import { PatrolCheckpoint, useCreatePatrolSiteMutation, useGetAllPatrolSitesQuery } from "./../apis/patrollingAPI";
+import { PatrolCheckpoint, useCreatePatrolSiteMutation, useGetAllPatrolSitesQuery, useCreateSubSiteMutation } from "./../apis/patrollingAPI";
 
 
 // Enhanced patrol data structure
@@ -367,6 +368,9 @@ const { data, isLoading, isError } = useGetAllPatrolSitesQuery({
   limit: 50,
 });
 
+const [createSubSite, { isLoading: isCreatingSubSite }] =
+  useCreateSubSiteMutation();
+
   // Form state for creating patrol
   const [formData, setFormData] = useState({
     patrolId: "",
@@ -429,7 +433,7 @@ const availableSites = data?.data?.map((site) => ({
       longitude: cp.longitude || 0,
       verificationRange: cp.verificationRange || 20,
       priorityLevel: cp.priorityLevel || "medium",
-      description: cp.description || "",
+      
       qr: cp.qr,
     })),
   })),
@@ -444,7 +448,7 @@ const availableSites = data?.data?.map((site) => ({
     longitude: cp.longitude || 0,
     verificationRange: cp.verificationRange || 20,
     priorityLevel: cp.priorityLevel || "medium",
-    description: cp.description || "",
+    
     qr: cp.qr,
   })),
 })) || [];
@@ -761,30 +765,48 @@ const availableSites = data?.data?.map((site) => ({
     setShowSubSiteDialog(true);
   };
 
-  const handleSaveSubSite = () => {
-    if (!selectedSite) return;
+  const handleSaveSubSite = async () => {
+  if (!selectedSite) {
+    toast.error("No site selected");
+    return;
+  }
 
-    const newSubSite = {
-      id: `subsite-${Date.now()}`,
+  // Basic validation
+  if (!subSiteFormData.name.trim()) {
+    toast.error("Sub-site name is required");
+    return;
+  }
+
+  try {
+    const payload = {
+      siteId: selectedSite.id,
       name: subSiteFormData.name,
-      unitPrice: parseFloat(subSiteFormData.unitPrice),
-      estimatedDuration: parseInt(subSiteFormData.estimatedDuration),
+      unitPrice: Number(subSiteFormData.unitPrice),
+      estimatedDuration: Number(subSiteFormData.estimatedDuration),
       description: subSiteFormData.description,
-      checkpoints: []
     };
 
-    setAvailableSites(prev => prev.map(site =>
-      site.id === selectedSite.id
-        ? { ...site, subsites: [...site.subsites, newSubSite] }
-        : site
-    ));
+    const response = await createSubSite(payload).unwrap();
 
+    toast.success(response.message || "Sub-site created successfully");
+
+    // Close dialog
     setShowSubSiteDialog(false);
-    
-    toast.success("Sub-site created successfully", {
-      description: `${subSiteFormData.name} added to ${selectedSite.name}`
+
+    // Reset form
+    setSubSiteFormData({
+      name: "",
+      unitPrice: "",
+      description: "",
+      estimatedDuration: "",
     });
-  };
+
+  } catch (error: any) {
+    toast.error(
+      error?.data?.message || "Failed to create sub-site"
+    );
+  }
+};
 
   const handleAddCheckpoint = (siteId: string, subSiteId: string) => {
     const site = availableSites.find(s => s.id === siteId);
@@ -1677,66 +1699,67 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                 </div>
 
                 {/* Subsite Checkpoints */}
-                {subsite.checkpoints.length > 0 && (
-                  <div className="mt-3 space-y-2">
+<div className="mt-3 space-y-2">
 
-                    {subsite.checkpoints.map((checkpoint) => (
-                      <div
-                        key={checkpoint.id}
-                        className="flex items-center justify-between bg-white p-3 rounded-md border"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
+  {subsite.checkpoints.length > 0 ? (
+    subsite.checkpoints.map((checkpoint) => (
+      <div
+        key={checkpoint.id}
+        className="flex items-center justify-between bg-white p-3 rounded-md border"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <Crosshair className="h-4 w-4 text-orange-500 flex-shrink-0" />
 
-                          <Crosshair className="h-4 w-4 text-orange-500 flex-shrink-0" />
+          <div className="min-w-0">
+            <div className="text-sm font-medium truncate">
+              {checkpoint.name}
+            </div>
 
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium truncate">
-                              {checkpoint.name}
-                            </div>
+            <div className="flex items-center gap-2 mt-1 flex-wrap">
+              <Badge
+                onClick={() => {
+                  navigator.clipboard.writeText(checkpoint.qr!.qrUrl);
+                  toast.success("QR URL copied");
+                }}
+                className="text-xs bg-gray-500 truncate max-w-[500px] hover:cursor-pointer"
+              >
+                QR: {checkpoint.qrCode}
+              </Badge>
 
-                            <div 
-                      className="flex items-center gap-2 mt-1 flex-wrap "
-                      >
-                        <Badge onClick={() => {
-                            navigator.clipboard.writeText(checkpoint.qr!.qrUrl);
-                            toast.success("QR URL copied"); 
-                          }}
-                         className="text-xs bg-gray-500 truncate max-w-[500px] hover:cursor-pointer">
-                          QR: {checkpoint.qrCode}
-                        </Badge>
+              <Badge className="text-xs bg-purple-50 text-purple-700">
+                {checkpoint.range}m
+              </Badge>
+            </div>
+          </div>
+        </div>
 
-                        <Badge className="text-xs bg-purple-50 text-purple-700">
-                          {checkpoint.range}m
-                        </Badge>
-                      </div>
-                          </div>
-                        </div>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => generateQRCodeForCheckpoint(checkpoint)}
+        >
+          <QrCode className="h-4 w-4" />
+        </Button>
+      </div>
+    ))
+  ) : (
+    <div className="text-xs text-gray-400 italic">
+      No checkpoints added yet
+    </div>
+  )}
 
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() =>
-                            generateQRCodeForCheckpoint(checkpoint)
-                          }
-                        >
-                          <QrCode className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+  {/* ALWAYS show Add Checkpoint button */}
+  <Button
+    size="sm"
+    variant="ghost"
+    className="text-blue-600 hover:text-blue-700"
+    onClick={() => handleAddCheckpoint(site.id, subsite.id)}
+  >
+    <Plus className="h-4 w-4 mr-1" />
+    Add SubSite Checkpoint
+  </Button>
 
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-blue-600 hover:text-blue-700"
-                      onClick={() =>
-                        handleAddCheckpoint(site.id, subsite.id)
-                      }
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add SubSite Checkpoint
-                    </Button>
-                  </div>
-                )}
+</div>
               </div>
             ))}
 
@@ -2177,9 +2200,16 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
             <Button variant="outline" onClick={() => setShowSubSiteDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveSubSite}>
-              Create Sub-Site
-            </Button>
+            <Button
+  onClick={handleSaveSubSite}
+  disabled={isCreatingSubSite}
+  className="flex items-center gap-2"
+>
+  {isCreatingSubSite && (
+    <Loader2 className="h-4 w-4 animate-spin" />
+  )}
+  {isCreatingSubSite ? "Creating..." : "Create Sub-Site"}
+</Button>
           </div>
         </DialogContent>
       </Dialog>
