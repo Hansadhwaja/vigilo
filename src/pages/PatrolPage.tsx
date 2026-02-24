@@ -1445,7 +1445,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
 
       {/* Enhanced Create Patrol Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl w-[95vw] max-h-[95vh] p-8 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Patrol Run</DialogTitle>
             <DialogDescription>
@@ -1472,7 +1472,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
               <Label htmlFor="guard">Assign Guard</Label>
               <Select
                 value={formData.guardId}
-                onValueChange={(value) =>
+                onValueChange={(value: any) =>
                   setFormData({ ...formData, guardId: value })
                 }
               >
@@ -1497,7 +1497,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
               <Label htmlFor="vehicle">Assign Vehicle</Label>
               <Select
                 value={formData.vehicleId}
-                onValueChange={(value) =>
+                onValueChange={(value: any) =>
                   setFormData({ ...formData, vehicleId: value })
                 }
               >
@@ -1522,7 +1522,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                 <Label htmlFor="order">Assign Order</Label>
                 <Select
                   value={formData.orderId}
-                  onValueChange={(value) =>
+                  onValueChange={(value: any) =>
                     setFormData({ ...formData, orderId: value })
                   }
                 >
@@ -1639,6 +1639,20 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
             </p>
           </div>
 
+          <div className="flex items-center gap-2">
+
+    {/* Delete Site */}
+    <Button
+      size="icon"
+      variant="ghost"
+      className="text-red-500 hover:text-red-600"
+      onClick={() => {
+        console.log("Delete Site:", site.id);
+      }}
+    >
+      <Trash2 className="h-4 w-4" />
+    </Button>
+
           {/* Add Site Button */}
           <Button
             size="sm"
@@ -1659,6 +1673,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
               </>
             )}
           </Button>
+        </div>
         </div>
 
         {/* =========================
@@ -1693,7 +1708,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                             navigator.clipboard.writeText(checkpoint.qr!.qrUrl);
                             toast.success("QR URL copied"); 
                           }}
-                         className="text-xs bg-gray-500 truncate max-w-[500px] hover:cursor-pointer">
+                         className="text-xs bg-gray-500 max-w-[650px] hover:cursor-pointer">
                           QR: {checkpoint.qrCode}
                         </Badge>
 
@@ -1704,13 +1719,28 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                     </div>
                   </div>
 
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => generateQRCodeForCheckpoint(checkpoint)}
-                  >
-                    <QrCode className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+  
+  <Button
+    size="lg"
+    variant="ghost"
+    onClick={() => generateQRCodeForCheckpoint(checkpoint)}
+  >
+    <QrCode className="h-10 w-10" />
+  </Button>
+
+  <Button
+    size="icon"
+    variant="ghost"
+    className="text-red-500 hover:text-red-600"
+    onClick={() => {
+      console.log("Delete Site Checkpoint:", checkpoint.id);
+    }}
+  >
+    <Trash2 className="h-4 w-4" />
+  </Button>
+
+</div>
                 </div>
               ))}
               <Button
@@ -1757,14 +1787,28 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-green-50 text-green-700 text-xs">
-                      ${subsite.unitPrice}
-                    </Badge>
 
-                    <Badge className="text-xs">
-                      {subsite.checkpoints.length} CP
-                    </Badge>
-                  </div>
+  <Badge className="bg-green-50 text-green-700 text-xs">
+    ${subsite.unitPrice}
+  </Badge>
+
+  <Badge className="text-xs">
+    {subsite.checkpoints.length} CP
+  </Badge>
+
+  {/* Delete SubSite */}
+  <Button
+    size="icon"
+    variant="ghost"
+    className="text-red-500 hover:text-red-600"
+    onClick={() => {
+      console.log("Delete SubSite:", subsite.id);
+    }}
+  >
+    <Trash2 className="h-4 w-4" />
+  </Button>
+
+</div>
                 </div>
 
                 {/* Subsite Checkpoints */}
@@ -1790,7 +1834,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                                     navigator.clipboard.writeText(checkpoint.qr!.qrUrl);
                                     toast.success("QR URL copied");
                                   }}
-                                  className="text-xs bg-gray-500 truncate max-w-[500px] hover:cursor-pointer"
+                                  className="text-xs bg-gray-500  max-w-[650px] hover:cursor-pointer"
                                 >
                                   QR: {checkpoint.qrCode}
                                 </Badge>
@@ -1802,13 +1846,28 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                             </div>
                           </div>
 
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => generateQRCodeForCheckpoint(checkpoint)}
-                          >
-                            <QrCode className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center gap-2">
+
+  <Button
+    size="lg"
+    variant="ghost"
+    onClick={() => generateQRCodeForCheckpoint(checkpoint)}
+  >
+    <QrCode className="h-4 w-4" />
+  </Button>
+
+  <Button
+    size="icon"
+    variant="ghost"
+    className="text-red-500 hover:text-red-600"
+    onClick={() => {
+      console.log("Delete SubSite Checkpoint:", checkpoint.id);
+    }}
+  >
+    <Trash2 className="h-4 w-4" />
+  </Button>
+
+</div>
                         </div>
                       ))
                     ) : (
@@ -2145,7 +2204,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
             
             <div>
               <Label htmlFor="siteClient">Client</Label>
-              <Select value={siteFormData.clientId} onValueChange={(value) => setSiteFormData({...siteFormData, clientId: value})}>
+              <Select value={siteFormData.clientId} onValueChange={(value: any) => setSiteFormData({...siteFormData, clientId: value})}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select client" />
                 </SelectTrigger>
@@ -2375,7 +2434,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
               
               <div>
                 <Label htmlFor="priority">Priority Level</Label>
-                <Select value={checkpointFormData.priority} onValueChange={(value) => setCheckpointFormData({...checkpointFormData, priority: value})}>
+                <Select value={checkpointFormData.priority} onValueChange={(value: any) => setCheckpointFormData({...checkpointFormData, priority: value})}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select priority" />
                   </SelectTrigger>
