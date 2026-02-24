@@ -51,7 +51,8 @@ import { Progress } from "../components/ui/progress";
 import { sampleVehicles, availableGuards, clientList } from "../data/sampleData";
 import { toast } from "sonner";
 import { useGetAllClientsQuery } from "./../apis/usersApi";
-import { PatrolCheckpoint, useCreatePatrolSiteMutation, useGetAllPatrolSitesQuery, useCreateSubSiteMutation, useCreateCheckpointMutation } from "./../apis/patrollingAPI";
+import { PatrolCheckpoint, useCreatePatrolSiteMutation, useGetAllPatrolSitesQuery, useCreateSubSiteMutation, useCreateCheckpointMutation, useCreatePatrolRunMutation } from "./../apis/patrollingAPI";
+import { useGetAllGuardsQuery } from "../apis/guardsApi";
 
 
 // Enhanced patrol data structure
@@ -337,6 +338,12 @@ const generateProofOfService = (patrol: any) => {
   };
 };
 
+const dummyVehicles = [
+  { id: crypto.randomUUID(), callsign: "V-Alpha" },
+  { id: crypto.randomUUID(), callsign: "V-Bravo" },
+  { id: crypto.randomUUID(), callsign: "V-Charlie" },
+];
+
 export default function PatrolPage() {
   const [patrols, setPatrols] = useState(samplePatrols);
   const [selectedPatrol, setSelectedPatrol] = useState<any>(null);
@@ -374,12 +381,21 @@ const [createSubSite, { isLoading: isCreatingSubSite }] =
   const [createCheckpoint, { isLoading: isCreatingCheckpoint }] =
   useCreateCheckpointMutation();
 
+  const { data: guardsResponse } = useGetAllGuardsQuery({
+  limit: 50,
+  page: 1,
+});
+
+const guards = guardsResponse?.data || [];
+
+const [createPatrolRun, { isLoading: isCreating }] =
+  useCreatePatrolRunMutation();
+
   // Form state for creating patrol
   const [formData, setFormData] = useState({
     patrolId: "",
     guardId: "",
     vehicleId: "", 
-    status: "Scheduled",
     startTime: "",
     estimatedCompletion: "",
     sites: [] as any[],
@@ -522,10 +538,10 @@ const availableSites = data?.data?.map((site) => ({
 
   const handleCreatePatrol = () => { 
     setFormData({
-      patrolId: `P-2024-${String(patrols.length + 1).padStart(3, '0')}`,
+      patrolId: `P-2026-${String(patrols.length + 1).padStart(3, '0')}`,
       guardId: "",
       vehicleId: "",
-      status: "Scheduled",
+      status: "pending",
       startTime: "",
       estimatedCompletion: "",
       sites: [],
@@ -534,53 +550,53 @@ const availableSites = data?.data?.map((site) => ({
     setShowCreateDialog(true);
   };
 
-  const handleSavePatrol = () => {
-    const guard = availableGuards.find(g => g.id === formData.guardId);
-    const vehicle = availableVehicles.find(v => v.id === formData.vehicleId);
-    
-    if (!guard || !vehicle) return;
+  const handleSavePatrol = async () => {
+  try {
+    if (
+      !formData.guardId ||
+      !formData.vehicleId ||
+      formData.sites.length === 0
+    ) {
+      toast.error("Please fill all required fields");
+      return;
+    }
 
-    const newPatrol = {
-      id: `PAT-${String(patrols.length + 1).padStart(3, '0')}`,
+    const payload = {
       patrolId: formData.patrolId,
-      guardName: guard.name,
       guardId: formData.guardId,
       vehicleId: formData.vehicleId,
-      vehicle: vehicle.callsign,
-      status: formData.status,
-      clientId: "c1",
-      clientName: "Harbour Group",
-      startTime: formData.startTime,
-      estimatedCompletion: formData.estimatedCompletion,
-      actualStartTime: formData.status === "Active" ? new Date().toISOString() : null,
-      actualEndTime: null,
-      currentLocation: formData.status === "Active" ? "Departing base" : null,
-      routeDeviation: false,
-      sites: formData.sites,
-      totalCheckpoints: formData.sites.reduce((sum: number, site: any) => 
-        sum + (site.checkpoints ? site.checkpoints.length : 0), 0),
-      completedCheckpoints: 0,
-      issuesFound: 0,
-      proofOfService: {
-        qrScans: 0,
-        photos: 0,
-        notes: 0
-      },
-      billing: {
-        hourlyRate: 45,
-        estimatedHours: 4,
-        actualHours: null,
-        clientInvoiced: false
-      }
+      startTime: new Date(formData.startTime).toISOString(),
+      endTime: new Date(formData.estimatedCompletion).toISOString(),
+      description: formData.notes || "",
+      siteIds: formData.sites.map((site: any) => site.id),
     };
 
-    setPatrols(prev => [...prev, newPatrol]);
-    setShowCreateDialog(false);
-    
+    const response = await createPatrolRun(payload).unwrap();
+
     toast.success("Patrol created successfully", {
-      description: `${formData.patrolId} assigned to ${guard.name}`
+      description: `Patrol ID: ${response?.data?.patrol?.patrolId}`,
     });
-  };
+
+    // Reset form
+    setFormData({
+      patrolId: "",
+      guardId: "",
+      vehicleId: "",
+      startTime: "",
+      estimatedCompletion: "",
+      notes: "",
+      sites: [],
+    });
+
+    setShowCreateDialog(false);
+
+  } catch (error: any) {
+    console.error(error);
+    toast.error(
+      error?.data?.message || "Failed to create patrol"
+    );
+  }
+};
 
   // Enhanced patrol operations
   const handleStartPatrol = useCallback((patrol: any) => {
@@ -1443,44 +1459,56 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
               </div>
               
               <div>
-                <Label htmlFor="guard">Assign Guard</Label>
-                <Select value={formData.guardId} onValueChange={(value) => setFormData({...formData, guardId: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select guard" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableGuards.map(guard => (
-                      <SelectItem key={guard.id} value={guard.id}>
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4" />
-                          {guard.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Label htmlFor="guard">Assign Guard</Label>
+              <Select
+                value={formData.guardId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, guardId: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select guard" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {guards.map((guard: any) => (
+                    <SelectItem key={guard.id} value={guard.id}>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        {guard.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
               
-              <div>
-                <Label htmlFor="vehicle">Assign Vehicle</Label>
-                <Select value={formData.vehicleId} onValueChange={(value) => setFormData({...formData, vehicleId: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select vehicle" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableVehicles.filter(v => v.status === "Available").map(vehicle => (
-                      <SelectItem key={vehicle.id} value={vehicle.id}>
-                        <div className="flex items-center gap-2">
-                          <Car className="h-4 w-4" />
-                          {vehicle.callsign} ({vehicle.id})
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+                          <div>
+              <Label htmlFor="vehicle">Assign Vehicle</Label>
+              <Select
+                value={formData.vehicleId}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, vehicleId: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select vehicle" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {dummyVehicles.map((vehicle) => (
+                    <SelectItem key={vehicle.id} value={vehicle.id}>
+                      <div className="flex items-center gap-2">
+                        <Car className="h-4 w-4" />
+                        {vehicle.callsign}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
               
-              <div>
+              {/* <div>
                 <Label htmlFor="status">Initial Status</Label>
                 <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
                   <SelectTrigger>
@@ -1491,7 +1519,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                     <SelectItem value="Active">Active</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
               
               <div>
                 <Label htmlFor="startTime">Start Date & Time</Label>
@@ -1794,7 +1822,14 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                           <Building className="h-4 w-4 text-blue-600" />
                           <span>{site.name}</span>
                           <Badge variant="outline" className="text-lg">
-                            {site.subsites.reduce((total: number, subsite: any) => total + subsite.checkpoints.length, 0)} checkpoints
+                            {(
+                              (site.checkpoints?.length || 0) +
+                              site.subsites.reduce(
+                                (total: number, subsite: any) =>
+                                  total + (subsite.checkpoints?.length || 0),
+                                0
+                              )
+                            )} checkpoints
                           </Badge>
                         </div>
                         <Button
@@ -1834,7 +1869,11 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
             </Button>
             <Button 
               onClick={handleSavePatrol}
-              disabled={!formData.guardId || !formData.vehicleId || formData.sites.length === 0}
+              disabled={
+                !formData.guardId ||
+                !formData.vehicleId ||
+                formData.sites.length === 0
+              }
             >
               Create Patrol Run
             </Button>

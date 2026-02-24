@@ -165,6 +165,109 @@ export interface CreateCheckpointResponse {
   };
 }
 
+export interface CreatePatrolRunResponse {
+  success: boolean;
+  type: string;
+  data: {
+    patrol: Patrol;
+    order: PatrolOrder;
+    guard: PatrolGuard;
+    sites: PatrolSite[];
+  };
+}
+
+export interface Patrol {
+  id: string;
+  patrolId: string;
+  vehicleId: string;
+  description: string;
+  status: string;
+  startTime: string;
+  endTime: string;
+  totalSites: number;
+  totalSubSites: number;
+  totalCheckpoints: number;
+  completedSites: number;
+  completedSubSites: number;
+  completedCheckpoints: number;
+}
+
+export interface PatrolOrder {
+  id: string;
+  serviceType: string;
+  locationName: string;
+  locationAddress: string;
+  guardsRequired: number;
+  description: string;
+  startDate: string;
+  endDate: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  images: string[];
+  userId: string;
+}
+
+export interface PatrolGuard {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  mobile: string;
+  isVerified: boolean;
+  blocked: boolean;
+}
+
+export interface PatrolCheckpoint {
+  id: string;
+  name: string;
+  latitude: string;
+  longitude: string;
+  verificationRange: number;
+  priorityLevel: "low" | "medium" | "high";
+  description: string;
+  status: string;
+  scannedAt: string | null;
+  scannedBy: string | null;
+}
+
+export interface PatrolSubSite {
+  id: string;
+  name: string;
+  unitPrice: string;
+  estimatedDuration: number;
+  description: string;
+  status: string;
+  checkpoints: PatrolCheckpoint[];
+}
+
+export interface PatrolSite {
+  id: string;
+  name: string;
+  address: string;
+  latitude: string;
+  longitude: string;
+  description: string;
+  status: string;
+  subSites: PatrolSubSite[];
+  checkpoints: PatrolCheckpoint[];
+}
+
+/* =====================================================
+   📌 CREATE PATROL RUN INTERFACES
+===================================================== */
+
+export interface CreatePatrolRunRequest {
+  patrolId: string;
+  orderId: string;
+  guardId: string;
+  vehicleId: string;
+  startDateTime: string;
+  estimatedCompletion: string;
+  notes?: string;
+  siteIds: string[];
+}
+
 
 /* =====================================================
    🚓 PATROLLING API
@@ -206,6 +309,8 @@ export const patrollingApi = baseApi.injectEndpoints({
           createdAt: site.createdAt,
           updatedAt: site.updatedAt,
           deletedAt: site.deletedAt,
+          subSites: [],
+          checkpoints: []
         };
 
         return {
@@ -296,6 +401,9 @@ createCheckpoint: builder.mutation<
       priorityLevel: checkpoint.priorityLevel,
       status: checkpoint.status,
       createdAt: checkpoint.createdAt,
+      description: checkpoint.description || "",
+      scannedAt: checkpoint.scannedAt || null,
+      scannedBy: checkpoint.scannedBy || null,
       qr: {
         id: qr.id,
         qrUrl: qr.qrUrl,
@@ -317,6 +425,18 @@ createCheckpoint: builder.mutation<
 
   invalidatesTags: [{ type: "Patrol", id: "LIST" }],
 }),
+
+createPatrolRun: builder.mutation<
+  CreatePatrolRunResponse,
+  CreatePatrolRunRequest
+>({
+  query: (body) => ({
+    url: "/patrolling/createPatrolRun",
+    method: "POST",
+    body,
+  }),
+  invalidatesTags: [{ type: "Patrol", id: "LIST" }],
+}),
   }),
 });
 
@@ -329,4 +449,5 @@ export const {
   useCreateSubSiteMutation,
   useGetAllPatrolSitesQuery,
   useCreateCheckpointMutation,
+  useCreatePatrolRunMutation,
 } = patrollingApi;
