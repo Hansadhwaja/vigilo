@@ -546,7 +546,7 @@ const availableSites = data?.data?.map((site) => ({
 
   const handleCreatePatrol = () => { 
     setFormData({
-      patrolId: `P-2026-${String(patrols.length + 1).padStart(3, '0')}`,
+      patrolId: crypto.randomUUID(),
       orderId: "", // Placeholder for order association
       guardId: "",
       vehicleId: "",
@@ -1480,7 +1480,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                   <SelectValue placeholder="Select guard" />
                 </SelectTrigger>
 
-                <SelectContent>
+                <SelectContent className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
                   {guards.map((guard: any) => (
                     <SelectItem key={guard.id} value={guard.id}>
                       <div className="flex items-center gap-2">
@@ -1505,7 +1505,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                   <SelectValue placeholder="Select vehicle" />
                 </SelectTrigger>
 
-                <SelectContent>
+                <SelectContent className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
                   {dummyVehicles.map((vehicle) => (
                     <SelectItem key={vehicle.id} value={vehicle.id}>
                       <div className="flex items-center gap-2">
@@ -1530,12 +1530,12 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                     <SelectValue placeholder="Select order" />
                   </SelectTrigger>
 
-                  <SelectContent>
+                  <SelectContent className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
                     {orders.map((order: any) => (
                       <SelectItem key={order.id} value={order.id}>
                         <div className="flex items-center gap-2">
                           <FileText className="h-4 w-4" />
-                          <span className="font-medium max-w-xs truncate">
+                          <span className="font-medium max-w-xs flex-1">
                             {order.locationName || order.locationAddress}
                           </span>
                         </div>
