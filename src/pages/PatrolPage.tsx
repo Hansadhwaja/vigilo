@@ -53,6 +53,7 @@ import { toast } from "sonner";
 import { useGetAllClientsQuery } from "./../apis/usersApi";
 import { PatrolCheckpoint, useCreatePatrolSiteMutation, useGetAllPatrolSitesQuery, useCreateSubSiteMutation, useCreateCheckpointMutation, useCreatePatrolRunMutation } from "./../apis/patrollingAPI";
 import { useGetAllGuardsQuery } from "../apis/guardsApi";
+import { useGetAllOrdersQuery } from "../apis/ordersApi";
 
 
 // Enhanced patrol data structure
@@ -391,12 +392,19 @@ const guards = guardsResponse?.data || [];
 const [createPatrolRun, { isLoading: isCreating }] =
   useCreatePatrolRunMutation();
 
+  const { data: ordersResponse } = useGetAllOrdersQuery({
+  
+});
+
+const orders = ordersResponse?.data || [];
+
   // Form state for creating patrol
   const [formData, setFormData] = useState({
     patrolId: "",
+    orderId: "",
     guardId: "",
     vehicleId: "", 
-    startTime: "",
+    startDateTime: "",
     estimatedCompletion: "",
     sites: [] as any[],
     notes: ""
@@ -539,10 +547,10 @@ const availableSites = data?.data?.map((site) => ({
   const handleCreatePatrol = () => { 
     setFormData({
       patrolId: `P-2026-${String(patrols.length + 1).padStart(3, '0')}`,
+      orderId: "", // Placeholder for order association
       guardId: "",
       vehicleId: "",
-      status: "pending",
-      startTime: "",
+      startDateTime: "",
       estimatedCompletion: "",
       sites: [],
       notes: ""
@@ -562,11 +570,12 @@ const availableSites = data?.data?.map((site) => ({
     }
 
     const payload = {
+      orderId: formData.orderId,
       patrolId: formData.patrolId,
       guardId: formData.guardId,
       vehicleId: formData.vehicleId,
-      startTime: new Date(formData.startTime).toISOString(),
-      endTime: new Date(formData.estimatedCompletion).toISOString(),
+      startDateTime: new Date(formData.startDateTime).toISOString(),
+      estimatedCompletion: new Date(formData.estimatedCompletion).toISOString(),
       description: formData.notes || "",
       siteIds: formData.sites.map((site: any) => site.id),
     };
@@ -580,9 +589,10 @@ const availableSites = data?.data?.map((site) => ({
     // Reset form
     setFormData({
       patrolId: "",
+      orderId: "",
       guardId: "",
       vehicleId: "",
-      startTime: "",
+      startDateTime: "",
       estimatedCompletion: "",
       notes: "",
       sites: [],
@@ -1507,6 +1517,33 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                 </SelectContent>
               </Select>
             </div>
+
+                          <div>
+                <Label htmlFor="order">Assign Order</Label>
+                <Select
+                  value={formData.orderId}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, orderId: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select order" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {orders.map((order: any) => (
+                      <SelectItem key={order.id} value={order.id}>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          <span className="font-medium max-w-xs truncate">
+                            {order.locationName || order.locationAddress}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               
               {/* <div>
                 <Label htmlFor="status">Initial Status</Label>
@@ -1526,8 +1563,8 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                 <Input
                   id="startTime"
                   type="datetime-local"
-                  value={formData.startTime}
-                  onChange={(e) => setFormData({...formData, startTime: e.target.value})}
+                  value={formData.startDateTime}
+                  onChange={(e) => setFormData({...formData, startDateTime: e.target.value})}
                 />
               </div>
               
@@ -1872,6 +1909,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
               disabled={
                 !formData.guardId ||
                 !formData.vehicleId ||
+                !formData.orderId ||
                 formData.sites.length === 0
               }
             >
