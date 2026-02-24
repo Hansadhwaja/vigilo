@@ -145,6 +145,26 @@ export interface GetAllPatrolSitesResponse {
   data: PatrolSiteFull[];
 }
 
+export interface CreateCheckpointRequest {
+  siteId?: string;      // optional
+  subSiteId?: string;   // optional
+  name: string;
+  latitude: number;
+  longitude: number;
+  verificationRange: number;
+  priorityLevel: "low" | "medium" | "high";
+  description?: string;
+}
+
+export interface CreateCheckpointResponse {
+  success: boolean;
+  message: string;
+  data: {
+    checkpoint: PatrolCheckpoint;
+    qr: QRData;
+  };
+}
+
 
 /* =====================================================
    🚓 PATROLLING API
@@ -249,6 +269,54 @@ getAllPatrolSites: builder.query<
 
   providesTags: [{ type: "Patrol", id: "LIST" }],
 }),
+
+// ===============================
+// 🟢 CREATE CHECKPOINT
+// ===============================
+createCheckpoint: builder.mutation<
+  CreateCheckpointResponse,
+  CreateCheckpointRequest
+>({
+  query: (body) => ({
+    url: "/patrolling/createCheckpoint", // adjust if needed
+    method: "POST",
+    body,
+  }),
+
+  transformResponse: (response: any): CreateCheckpointResponse => {
+    const checkpoint = response.data.checkpoint;
+    const qr = response.data.qr;
+
+    const mappedCheckpoint: PatrolCheckpoint = {
+      id: checkpoint.id,
+      name: checkpoint.name,
+      latitude: checkpoint.latitude,
+      longitude: checkpoint.longitude,
+      verificationRange: checkpoint.verificationRange,
+      priorityLevel: checkpoint.priorityLevel,
+      status: checkpoint.status,
+      createdAt: checkpoint.createdAt,
+      qr: {
+        id: qr.id,
+        qrUrl: qr.qrUrl,
+        latitude: qr.latitude,
+        longitude: qr.longitude,
+        createdAt: qr.createdAt,
+      },
+    };
+
+    return {
+      success: response.success,
+      message: response.message,
+      data: {
+        checkpoint: mappedCheckpoint,
+        qr: mappedCheckpoint.qr!,
+      },
+    };
+  },
+
+  invalidatesTags: [{ type: "Patrol", id: "LIST" }],
+}),
   }),
 });
 
@@ -260,4 +328,5 @@ export const {
   useCreatePatrolSiteMutation,
   useCreateSubSiteMutation,
   useGetAllPatrolSitesQuery,
+  useCreateCheckpointMutation,
 } = patrollingApi;

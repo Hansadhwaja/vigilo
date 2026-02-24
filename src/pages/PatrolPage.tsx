@@ -51,7 +51,7 @@ import { Progress } from "../components/ui/progress";
 import { sampleVehicles, availableGuards, clientList } from "../data/sampleData";
 import { toast } from "sonner";
 import { useGetAllClientsQuery } from "./../apis/usersApi";
-import { PatrolCheckpoint, useCreatePatrolSiteMutation, useGetAllPatrolSitesQuery, useCreateSubSiteMutation } from "./../apis/patrollingAPI";
+import { PatrolCheckpoint, useCreatePatrolSiteMutation, useGetAllPatrolSitesQuery, useCreateSubSiteMutation, useCreateCheckpointMutation } from "./../apis/patrollingAPI";
 
 
 // Enhanced patrol data structure
@@ -370,6 +370,9 @@ const { data, isLoading, isError } = useGetAllPatrolSitesQuery({
 
 const [createSubSite, { isLoading: isCreatingSubSite }] =
   useCreateSubSiteMutation();
+
+  const [createCheckpoint, { isLoading: isCreatingCheckpoint }] =
+  useCreateCheckpointMutation();
 
   // Form state for creating patrol
   const [formData, setFormData] = useState({
@@ -808,57 +811,60 @@ const availableSites = data?.data?.map((site) => ({
   }
 };
 
-  const handleAddCheckpoint = (siteId: string, subSiteId: string) => {
-    const site = availableSites.find(s => s.id === siteId);
-    const subSite = site?.subsites.find(ss => ss.id === subSiteId);
-    
-    setSelectedSite(site);
-    setSelectedSubSite(subSite);
-    setCheckpointFormData({
-      name: "",
-      coordinates: { lat: "", lng: "" },
-      range: "20",
-      description: "",
-      priority: "medium"
-    });
-    setShowCheckpointDialog(true);
-  };
+  const handleAddCheckpoint = (
+  siteId: string,
+  subSiteId?: string
+) => {
+  const site = availableSites.find(s => s.id === siteId);
 
-  const handleSaveCheckpoint = () => {
-    if (!selectedSite || !selectedSubSite) return;
+  const subSite = subSiteId
+    ? site?.subsites.find(ss => ss.id === subSiteId)
+    : undefined;
 
-    const newCheckpoint = {
-      id: `cp-${Date.now()}`,
+  setSelectedSite(site);
+  setSelectedSubSite(subSite);
+
+  setCheckpointFormData({
+    name: "",
+    coordinates: { lat: "", lng: "" },
+    range: "20",
+    description: "",
+    priority: "medium"
+  });
+
+  setShowCheckpointDialog(true);
+};
+
+  const handleSaveCheckpoint = async () => {
+  if (!selectedSite) return;
+
+  try {
+    const payload: any = {
       name: checkpointFormData.name,
-      coordinates: {
-        lat: parseFloat(checkpointFormData.coordinates.lat),
-        lng: parseFloat(checkpointFormData.coordinates.lng)
-      },
-      range: parseInt(checkpointFormData.range),
-      qrCode: `QR-${selectedSite.name.substring(0,3).toUpperCase()}-${checkpointFormData.name.substring(0,2).toUpperCase()}-${Date.now().toString().slice(-3)}`,
+      latitude: Number(checkpointFormData.coordinates.lat),
+      longitude: Number(checkpointFormData.coordinates.lng),
+      verificationRange: Number(checkpointFormData.range),
+      priorityLevel: checkpointFormData.priority,
       description: checkpointFormData.description,
-      priority: checkpointFormData.priority
     };
 
-    setAvailableSites(prev => prev.map(site =>
-      site.id === selectedSite.id
-        ? {
-            ...site,
-            subsites: site.subsites.map(subsite =>
-              subsite.id === selectedSubSite.id
-                ? { ...subsite, checkpoints: [...subsite.checkpoints, newCheckpoint] }
-                : subsite
-            )
-          }
-        : site
-    ));
+    // 🔥 Decide automatically
+    if (selectedSubSite) {
+      payload.subSiteId = selectedSubSite.id;
+    } else {
+      payload.siteId = selectedSite.id;
+    }
+
+    await createCheckpoint(payload).unwrap();
+
+    toast.success("Checkpoint created successfully");
 
     setShowCheckpointDialog(false);
-    
-    toast.success("Checkpoint created successfully", {
-      description: `${checkpointFormData.name} added with QR code: ${newCheckpoint.qrCode}`
-    });
-  };
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to create checkpoint");
+  }
+};
 
   const handleAddSiteToPatrol = (site: any) => {
     setFormData(prev => ({
@@ -1646,9 +1652,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                       size="sm"
                       variant="ghost"
                       className="text-blue-600 hover:text-blue-700"
-                      onClick={() =>
-                        handleAddCheckpoint(site.id, site.id)
-                      }
+                      onClick={() => handleAddCheckpoint(site.id, undefined)}
                     >
                       <Plus className="h-4 w-4 mr-1" />
                       Add Site Checkpoint
@@ -1699,67 +1703,67 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                 </div>
 
                 {/* Subsite Checkpoints */}
-<div className="mt-3 space-y-2">
+                  <div className="mt-3 space-y-2">
 
-  {subsite.checkpoints.length > 0 ? (
-    subsite.checkpoints.map((checkpoint) => (
-      <div
-        key={checkpoint.id}
-        className="flex items-center justify-between bg-white p-3 rounded-md border"
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          <Crosshair className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                    {subsite.checkpoints.length > 0 ? (
+                      subsite.checkpoints.map((checkpoint) => (
+                        <div
+                          key={checkpoint.id}
+                          className="flex items-center justify-between bg-white p-3 rounded-md border"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Crosshair className="h-4 w-4 text-orange-500 flex-shrink-0" />
 
-          <div className="min-w-0">
-            <div className="text-sm font-medium truncate">
-              {checkpoint.name}
-            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium truncate">
+                                {checkpoint.name}
+                              </div>
 
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <Badge
-                onClick={() => {
-                  navigator.clipboard.writeText(checkpoint.qr!.qrUrl);
-                  toast.success("QR URL copied");
-                }}
-                className="text-xs bg-gray-500 truncate max-w-[500px] hover:cursor-pointer"
-              >
-                QR: {checkpoint.qrCode}
-              </Badge>
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                <Badge
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(checkpoint.qr!.qrUrl);
+                                    toast.success("QR URL copied");
+                                  }}
+                                  className="text-xs bg-gray-500 truncate max-w-[500px] hover:cursor-pointer"
+                                >
+                                  QR: {checkpoint.qrCode}
+                                </Badge>
 
-              <Badge className="text-xs bg-purple-50 text-purple-700">
-                {checkpoint.range}m
-              </Badge>
-            </div>
-          </div>
-        </div>
+                                <Badge className="text-xs bg-purple-50 text-purple-700">
+                                  {checkpoint.range}m
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
 
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => generateQRCodeForCheckpoint(checkpoint)}
-        >
-          <QrCode className="h-4 w-4" />
-        </Button>
-      </div>
-    ))
-  ) : (
-    <div className="text-xs text-gray-400 italic">
-      No checkpoints added yet
-    </div>
-  )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => generateQRCodeForCheckpoint(checkpoint)}
+                          >
+                            <QrCode className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-xs text-gray-400 italic">
+                        No checkpoints added yet
+                      </div>
+                    )}
 
-  {/* ALWAYS show Add Checkpoint button */}
-  <Button
-    size="sm"
-    variant="ghost"
-    className="text-blue-600 hover:text-blue-700"
-    onClick={() => handleAddCheckpoint(site.id, subsite.id)}
-  >
-    <Plus className="h-4 w-4 mr-1" />
-    Add SubSite Checkpoint
-  </Button>
+                    {/* ALWAYS show Add Checkpoint button */}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-blue-600 hover:text-blue-700"
+                      onClick={() => handleAddCheckpoint(site.id, subsite.id)}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add SubSite Checkpoint
+                    </Button>
 
-</div>
+                  </div>
               </div>
             ))}
 
@@ -2220,7 +2224,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
           <DialogHeader>
             <DialogTitle>Create Checkpoint</DialogTitle>
             <DialogDescription>
-              Add a checkpoint to {selectedSubSite?.name} with GPS coordinates and QR code
+              Add a checkpoint to {selectedSubSite?.name || selectedSite?.name} with GPS coordinates and QR code
             </DialogDescription>
           </DialogHeader>
           
@@ -2319,7 +2323,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
             </div>
 
             {/* QR Code Preview */}
-            {checkpointFormData.name && (
+            {/* {checkpointFormData.name && (
               <div className="p-4 bg-gray-50 rounded-lg border">
                 <div className="flex items-center gap-2 mb-2">
                   <QrCode className="h-4 w-4 text-blue-600" />
@@ -2330,14 +2334,20 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                 </div>
                 <p className="text-lg text-gray-500 mt-1">This QR code will be auto-generated and linked to GPS coordinates</p>
               </div>
-            )}
+            )} */}
           </div>
           
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => setShowCheckpointDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveCheckpoint}>
+            <Button onClick={handleSaveCheckpoint}
+            isLoading={isCreatingCheckpoint}
+            className="flex items-center gap-2"
+            >
+              {isCreatingCheckpoint && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
               Create Checkpoint
             </Button>
           </div>
