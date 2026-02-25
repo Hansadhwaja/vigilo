@@ -58,6 +58,8 @@ import {
   useDeletePatrolSiteMutation,
   useDeletePatrolSubSiteMutation,
   useDeleteCheckpointMutation,
+    useDeletePatrolRunMutation,
+    useGetAllPatrolRunsForAdminQuery
 } from "./../apis/patrollingAPI";
 
 // Enhanced patrol data structure
@@ -410,6 +412,16 @@ const [deleteSubSiteApi, { isLoading: deletingSubSite }] =
 
 const [deleteCheckpointApi, { isLoading: deletingCheckpoint }] =
   useDeleteCheckpointMutation();
+
+  const {
+  data: patrolResponse,
+  isFetching,
+} = useGetAllPatrolRunsForAdminQuery({
+  page: 1,
+  limit: 10,
+});
+
+const Patrols = patrolResponse?.data || [];
 
   // Form state for creating patrol
   const [formData, setFormData] = useState({
@@ -1117,153 +1129,139 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
           <CardTitle className="text-lg">Patrol Operations</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          {/* Patrol List */}
-          <div className="space-y-3">
-            {filteredPatrols.map((patrol) => (
-              <Card key={patrol.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
-                      {/* Patrol Info */}
-                      <div>
-                        <div className="font-medium text-gray-900">{patrol.patrolId}</div>
-                        <div className="text-xl text-gray-600">{patrol.guardName}</div>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Car className="h-3 w-3 text-gray-400" />
-                          <span className="text-lg text-gray-600">{patrol.vehicle}</span>
-                        </div>
-                      </div>
-                      
-                      {/* Client & Location */}
-                      <div>
-                        <div className="text-xl text-gray-900">{patrol.clientName}</div>
-                        {patrol.currentLocation && (
-                          <div className="flex items-center gap-1">
-                            <MapPin className="h-3 w-3 text-gray-400" />
-                            <span className="text-lg text-gray-600">{patrol.currentLocation}</span>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-1 mt-1">
-                          <Clock className="h-3 w-3 text-gray-400" />
-                          <span className="text-lg text-gray-600">
-                            {new Date(patrol.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      {/* Enhanced Progress & Details */}
-                      <div>
-                        <div className="text-xl text-gray-900 mb-1">
-                          {patrol.completedCheckpoints}/{patrol.totalCheckpoints} Checkpoints
-                        </div>
-                        <Progress 
-                          value={patrol.totalCheckpoints > 0 ? (patrol.completedCheckpoints / patrol.totalCheckpoints) * 100 : 0} 
-                          className="h-2"
-                        />
-                        <div className="flex items-center gap-3 mt-1 text-lg text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Building className="h-3 w-3" />
-                            <span>{patrol.sites.length} sites</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Target className="h-3 w-3" />
-                            <span>{patrol.sites.reduce((total: number, site: any) => total + site.subsites.length, 0)} sub-sites</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <QrCode className="h-3 w-3" />
-                            <span>{patrol.proofOfService.qrScans} scanned</span>
-                          </div>
-                        </div>
-                        {patrol.issuesFound > 0 && (
-                          <div className="flex items-center gap-1 mt-1">
-                            <AlertTriangle className="h-3 w-3 text-orange-500" />
-                            <span className="text-lg text-orange-600">{patrol.issuesFound} issue{patrol.issuesFound > 1 ? 's' : ''}</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {/* Status & Actions */}
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <Badge className={getStatusColor(patrol.status)}>
-                            {patrol.status}
-                          </Badge>
-                          {patrol.routeDeviation && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <Route className="h-3 w-3 text-red-500" />
-                              <span className="text-lg text-red-600">Route deviation</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* Action Buttons */}
-                        <div className="flex gap-1">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleViewDetails(patrol)}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                          {patrol.status === "Active" && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="h-8 px-2 text-lg"
-                                onClick={() => {
-                                  const tracking = liveTracking[patrol.id];
-                                  if (tracking) {
-                                    toast.info(`Live tracking: ${tracking.speed}km/h`, {
-                                      description: `GPS: ${tracking.gpsSignal} | ETA: ${tracking.etaToNext}min`
-                                    });
-                                  }
-                                }}
-                              >
-                                <Navigation className="h-3 w-3 mr-1" />
-                                Track
-                              </Button>
-                              <Button
-                                size="sm"
-                                className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
-                                onClick={() => handleCompletePatrol(patrol)}
-                              >
-                                <CheckCircle className="h-3 w-3 mr-1" />
-                                Complete
-                              </Button>
-                            </>
-                          )}
-                          {patrol.status === "Scheduled" && (
-                            <Button
-                              size="sm"
-                              className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
-                              onClick={() => handleStartPatrol(patrol)}
-                            >
-                              <Play className="h-3 w-3 mr-1" />
-                              Start
-                            </Button>
-                          )}
-                          {patrol.status === "Completed" && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 px-2 text-lg"
-                              onClick={() => handleGenerateProofOfService(patrol)}
-                            >
-                              <FileText className="h-3 w-3 mr-1" />
-                              Proof
-                            </Button>
-                          )}
-                        </div>
-                      </div>
+
+  {/* Loader */}
+  {isFetching && (
+    <div className="text-center py-8">
+      <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
+      <p className="mt-2 text-gray-600">Loading patrols...</p>
+    </div>
+  )}
+
+  {/* Patrol List */}
+  {!isFetching && (
+    <div className="space-y-3">
+      {Patrols.map((patrol) => (
+        <Card
+          key={patrol.id}
+          className="border border-gray-200 hover:border-gray-300 transition-colors"
+        >
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                {/* Patrol Info */}
+                <div>
+                  <div className="font-medium text-gray-900 max-w-[200px] truncate pt-2 ">
+                    {patrol.patrolId}
+                  </div>
+
+                  <div className="text-xl text-gray-600">
+                    {patrol.guards?.[0]?.name || "No Guard Assigned"}
+                  </div>
+
+                  <div className="flex items-center gap-1 mt-1">
+                    <Car className="h-5 w-5 text-gray-400" />
+                    <span className="text-lg text-gray-600 max-w-[200px] truncate">
+                      {patrol.vehicleId || "N/A"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Client & Location */}
+                <div>
+                  <div className="text-xl text-gray-900 max-w-[200px] truncate">
+                    {patrol.clientName}
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-10 w-10 text-gray-400" />
+                    <span className="text-lg text-gray-600 max-w-[300px] truncate">
+                      {patrol.locationName}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1 mt-1">
+                    <Clock className="h-5 w-5 text-gray-400" />
+                    <span className="text-lg text-gray-600">
+                      {new Date(patrol.startDateTime).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Progress & Details */}
+                <div className="pl-5">
+                  <div className="text-xl text-gray-900 mb-1">
+                    {patrol.completedCheckpoints}/{patrol.totalCheckpoints} Checkpoints
+                  </div>
+
+                  <Progress
+                    value={patrol.completionPercentage || 0}
+                    className="h-2"
+                  />
+
+                  <div className="flex items-center gap-3 mt-1 text-lg text-gray-600">
+                    <div className="flex items-center gap-1">
+                      <Building className="h-3 w-3" />
+                      <span>{patrol.totalSites} sites</span>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <Target className="h-3 w-3" />
+                      <span>{patrol.totalSubSites} sub-sites</span>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <QrCode className="h-3 w-3" />
+                      <span>{patrol.completedCheckpoints} scanned</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
+                </div>
+
+                {/* Status & Actions */}
+                <div className="flex items-center justify-between">
+                  <div className="pl-5">
+                    <Badge className={getStatusColor(patrol.status)}>
+                      {patrol.status}
+                    </Badge>
+                  </div>
+
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleViewDetails(patrol)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Eye className="h-3 w-3" />
+                    </Button>
+
+                    {patrol.status?.toLowerCase() === "completed" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 px-2 text-lg"
+                        onClick={() => handleGenerateProofOfService(patrol)}
+                      >
+                        <FileText className="h-3 w-3 mr-1" />
+                        Proof
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )}
+
+</CardContent>
       </Card>
 
       {/* Patrol Details Dialog */}

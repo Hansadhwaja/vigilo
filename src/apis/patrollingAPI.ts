@@ -268,6 +268,48 @@ export interface CreatePatrolRunRequest {
   siteIds: string[];
 }
 
+export interface AdminPatrolGuard {
+  id: string;
+  name: string;
+  status: string;
+  clockInTime: string | null;
+  clockOutTime: string | null;
+  totalHours: number | null;
+}
+
+export interface AdminPatrolRun {
+  id: string;
+  patrolId: string;
+  status: string;
+  vehicleId: string;
+  clientName: string;
+  clientEmail: string;
+  locationName: string;
+  orderStartTime: string;
+  orderStartDate: string;
+  orderStatus: string;
+
+  totalSites: number;
+  completedSites: number;
+  totalSubSites: number;
+  completedSubSites: number;
+  totalCheckpoints: number;
+  completedCheckpoints: number;
+  completionPercentage: number;
+  hasDeviation: boolean;
+
+  startDateTime: string;
+  estimatedCompletion: string;
+
+  guards: AdminPatrolGuard[];
+}
+
+export interface GetAllPatrolRunsForAdminResponse {
+  success: boolean;
+  total: number;
+  data: AdminPatrolRun[];
+}
+
 
 /* =====================================================
    🚓 PATROLLING API
@@ -492,6 +534,21 @@ deletePatrolRun: builder.mutation<
   }),
   invalidatesTags: [{ type: "Patrol", id: "LIST" }],
 }),
+// ===============================
+// 🟢 GET ALL PATROL RUNS (ADMIN)
+// ===============================
+getAllPatrolRunsForAdmin: builder.query<
+  GetAllPatrolRunsForAdminResponse,
+  { page?: number; limit?: number }
+>({
+  query: ({ page = 1, limit = 10 }) => ({
+    url: `/patrolling/getAllPatrolRunsForAdmin?page=${page}&limit=${limit}`,
+    method: "GET",
+  }),
+
+  providesTags: [{ type: "Patrol", id: "LIST" }],
+}),
+
   }),
 });
 
@@ -509,4 +566,5 @@ export const {
   useDeletePatrolSubSiteMutation,
   useDeleteCheckpointMutation,
   useDeletePatrolRunMutation,
+  useGetAllPatrolRunsForAdminQuery,
 } = patrollingApi;
