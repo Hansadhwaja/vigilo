@@ -363,6 +363,10 @@ export default function PatrolPage() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [liveTracking, setLiveTracking] = useState<{[key: string]: any}>({});
+const [debouncedSearch, setDebouncedSearch] = useState("");
+const [currentPage, setCurrentPage] = useState(1);
+
+
 
   const {
   data: clientsResponse,
@@ -417,11 +421,47 @@ const [deleteCheckpointApi, { isLoading: deletingCheckpoint }] =
   data: patrolResponse,
   isFetching,
 } = useGetAllPatrolRunsForAdminQuery({
-  page: 1,
+  page: currentPage,
   limit: 10,
+  status: filterStatus,
+  search: debouncedSearch,
 });
 
 const Patrols = patrolResponse?.data || [];
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedSearch(searchTerm);
+    setCurrentPage(1); // reset page on new search
+  }, 500);
+
+  return () => clearTimeout(timer);
+}, [searchTerm]);
+
+  const today = new Date().toISOString().split("T")[0];
+
+// Filter only today's patrol runs
+const todayPatrols = Patrols.filter(
+  p => p.startDateTime?.split("T")[0] === today
+);
+
+const totalPatrols = todayPatrols.length;
+
+// Sum of completion percentages
+const totalCompletion = todayPatrols.reduce(
+  (sum, patrol) => sum + (patrol.completionPercentage || 0),
+  0
+);
+
+
+
+  const activePatrols = Patrols.filter(p => p.status === "ongoing").length;
+  const pendingPatrols=Patrols.filter(p=> p.status === "pending").length;
+  const completionRate =
+  totalPatrols > 0
+    ? (totalCompletion / totalPatrols).toFixed(2)
+    : 0;
+
 
   // Form state for creating patrol
   const [formData, setFormData] = useState({
@@ -557,7 +597,7 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
 
   // Calculate enhanced metrics
   const metrics = useMemo(() => {
-    const activePatrols = patrols.filter(p => p.status === "Active").length;
+    const activePatrols = Patrols.filter(p => p.status === "Active").length;
     const scheduledPatrols = patrols.filter(p => p.status === "Scheduled").length;
     const completedToday = patrols.filter(p => p.status === "Completed" && 
       new Date(p.actualEndTime || p.estimatedCompletion).toDateString() === new Date().toDateString()).length;
@@ -992,8 +1032,8 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Active":
-        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
       case "Scheduled":
         return "bg-blue-100 text-blue-800";
       case "Completed":
@@ -1032,7 +1072,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
           <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
             <Activity className="h-4 w-4 text-green-600" />
             <div>
-              <div className="font-bold text-green-700">{metrics.activePatrols}</div>
+              <div className="font-bold text-green-700">{activePatrols}</div>
               <div className="text-lg text-green-600">Active</div>
             </div>
           </div>
@@ -1040,15 +1080,15 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
           <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
             <Clock className="h-4 w-4 text-blue-600" />
             <div>
-              <div className="font-bold text-blue-700">{metrics.scheduledPatrols}</div>
-              <div className="text-lg text-blue-600">Scheduled</div>
+              <div className="font-bold text-blue-700">{pendingPatrols}</div>
+              <div className="text-lg text-blue-600">Pending</div>
             </div>
           </div>
           
           <div className="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200">
             <Shield className="h-4 w-4 text-purple-600" />
             <div>
-              <div className="font-bold text-purple-700">{metrics.completionRate}%</div>
+              <div className="font-bold text-purple-700">{completionRate}%</div>
               <div className="text-lg text-purple-600">Completion</div>
             </div>
           </div>
@@ -1061,13 +1101,13 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
             </div>
           </div>
           
-          <div className="flex items-center gap-2 bg-yellow-50 px-3 py-2 rounded-lg border border-yellow-200">
+          {/* <div className="flex items-center gap-2 bg-yellow-50 px-3 py-2 rounded-lg border border-yellow-200">
             <Route className="h-4 w-4 text-yellow-600" />
             <div>
               <div className="font-bold text-yellow-700">{metrics.routeDeviations}</div>
               <div className="text-lg text-yellow-600">Deviations</div>
             </div>
-          </div>
+          </div> */}
           
           <Button 
             variant="outline" 
@@ -1088,40 +1128,67 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
 
       {/* Compact Filters Row */}
       <div className="flex flex-wrap gap-2 items-center bg-white p-3 rounded-lg border">
-        <Filter className="h-4 w-4 text-gray-500" />
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
-          <Input
-            placeholder="Search patrols..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 w-40 h-8"
-          />
-        </div>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-32 h-8">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="scheduled">Scheduled</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => {
-            setFilterStatus("all");
-            setSearchTerm("");
-          }}
-          className="h-8"
-        >
-          Clear
-        </Button>
+  <Filter className="h-4 w-4 text-gray-500" />
+
+  {/* Search */}
+  <div className="relative">
+    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
+
+    <Input
+      placeholder="Search patrols..."
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="pl-9 w-40 h-8"
+    />
+
+    {isFetching && (
+      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+        <div className="h-3 w-3 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
       </div>
+    )}
+  </div>
+
+  {/* Status Filter */}
+  <Select
+    value={filterStatus}
+    onValueChange={(value) => {
+  setFilterStatus(value);
+  setCurrentPage(1);
+}}
+  >
+    <SelectTrigger className="w-38 h-8">
+      <SelectValue placeholder="Status" />
+    </SelectTrigger>
+    <SelectContent>
+  <SelectItem value="all">All Status</SelectItem>
+  <SelectItem value="accepted">Accepted</SelectItem>
+  <SelectItem value="rejected">Rejected</SelectItem>
+  <SelectItem value="pending">Pending</SelectItem>
+  <SelectItem value="upcoming">Upcoming</SelectItem>
+  <SelectItem value="ongoing">Ongoing</SelectItem>
+  <SelectItem value="delayed">Delayed</SelectItem>
+  <SelectItem value="absent">Absent</SelectItem>
+  <SelectItem value="scheduled">Scheduled</SelectItem>
+  <SelectItem value="active">Active</SelectItem>
+  <SelectItem value="completed">Completed</SelectItem>
+</SelectContent>
+  </Select>
+
+  {/* Clear Button */}
+  <Button
+    variant="outline"
+    size="sm"
+    onClick={() => {
+  setFilterStatus("all");
+  setSearchTerm("");
+  setDebouncedSearch("");
+  setCurrentPage(1);
+}}
+    className="h-8"
+  >
+    Clear
+  </Button>
+</div>
 
       {/* Main Patrol List - Compact Layout */}
       <Card>

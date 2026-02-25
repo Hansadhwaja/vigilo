@@ -539,16 +539,40 @@ deletePatrolRun: builder.mutation<
 // ===============================
 getAllPatrolRunsForAdmin: builder.query<
   GetAllPatrolRunsForAdminResponse,
-  { page?: number; limit?: number }
+  {
+    page?: number;
+    limit?: number;
+    status?: string;
+    search?: string;
+  }
 >({
-  query: ({ page = 1, limit = 10 }) => ({
-    url: `/patrolling/getAllPatrolRunsForAdmin?page=${page}&limit=${limit}`,
-    method: "GET",
-  }),
+  query: ({
+    page = 1,
+    limit = 10,
+    status,
+    search,
+  }) => {
+    const params = new URLSearchParams();
+
+    params.append("page", String(page));
+    params.append("limit", String(limit));
+
+    if (status && status !== "all") {
+      params.append("status", status);
+    }
+
+    if (search && search.trim() !== "") {
+      params.append("search", search.trim());
+    }
+
+    return {
+      url: `/patrolling/getAllPatrolRunsForAdmin?${params.toString()}`,
+      method: "GET",
+    };
+  },
 
   providesTags: [{ type: "Patrol", id: "LIST" }],
 }),
-
   }),
 });
 
