@@ -437,6 +437,61 @@ createPatrolRun: builder.mutation<
   }),
   invalidatesTags: [{ type: "Patrol", id: "LIST" }],
 }),
+// ===============================
+// 🔴 DELETE PATROL SITE
+// ===============================
+deletePatrolSite: builder.mutation<
+  { success: boolean; message: string },
+  string
+>({
+  query: (siteId) => ({
+    url: `/patrolling/deletePatrolSite/${siteId}`,
+    method: "DELETE",
+  }),
+  invalidatesTags: [{ type: "Patrol", id: "LIST" }],
+}),
+
+// ===============================
+// 🔴 DELETE PATROL SUB SITE
+// ===============================
+deletePatrolSubSite: builder.mutation<
+  { success: boolean; message: string },
+  string
+>({
+  query: (subSiteId) => ({
+    url: `/patrolling/deletePatrolSubSite/${subSiteId}`,
+    method: "DELETE",
+  }),
+  invalidatesTags: [{ type: "Patrol", id: "LIST" }],
+}),
+
+// ===============================
+// 🔴 DELETE CHECKPOINT
+// ===============================
+deleteCheckpoint: builder.mutation<
+  { success: boolean; message: string },
+  string
+>({
+  query: (checkpointId) => ({
+    url: `/patrolling/deleteCheckpoint/${checkpointId}`,
+    method: "DELETE",
+  }),
+  invalidatesTags: [{ type: "Patrol", id: "LIST" }],
+}),
+
+// ===============================
+// 🔴 DELETE PATROL RUN
+// ===============================
+deletePatrolRun: builder.mutation<
+  { success: boolean; message: string },
+  string
+>({
+  query: (patrolId) => ({
+    url: `/patrolling/deletePatrolRun/${patrolId}`,
+    method: "DELETE",
+  }),
+  invalidatesTags: [{ type: "Patrol", id: "LIST" }],
+}),
   }),
 });
 
@@ -450,4 +505,8 @@ export const {
   useGetAllPatrolSitesQuery,
   useCreateCheckpointMutation,
   useCreatePatrolRunMutation,
+  useDeletePatrolSiteMutation,
+  useDeletePatrolSubSiteMutation,
+  useDeleteCheckpointMutation,
+  useDeletePatrolRunMutation,
 } = patrollingApi;

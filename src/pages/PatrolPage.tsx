@@ -54,7 +54,11 @@ import { useGetAllClientsQuery } from "./../apis/usersApi";
 import { PatrolCheckpoint, useCreatePatrolSiteMutation, useGetAllPatrolSitesQuery, useCreateSubSiteMutation, useCreateCheckpointMutation, useCreatePatrolRunMutation } from "./../apis/patrollingAPI";
 import { useGetAllGuardsQuery } from "../apis/guardsApi";
 import { useGetAllOrdersQuery } from "../apis/ordersApi";
-
+import {
+  useDeletePatrolSiteMutation,
+  useDeletePatrolSubSiteMutation,
+  useDeleteCheckpointMutation,
+} from "./../apis/patrollingAPI";
 
 // Enhanced patrol data structure
 const samplePatrols = [
@@ -398,6 +402,15 @@ const [createPatrolRun, { isLoading: isCreating }] =
 
 const orders = ordersResponse?.data || [];
 
+const [deleteSiteApi, { isLoading: deletingSite }] =
+  useDeletePatrolSiteMutation();
+
+const [deleteSubSiteApi, { isLoading: deletingSubSite }] =
+  useDeletePatrolSubSiteMutation();
+
+const [deleteCheckpointApi, { isLoading: deletingCheckpoint }] =
+  useDeleteCheckpointMutation();
+
   // Form state for creating patrol
   const [formData, setFormData] = useState({
     patrolId: "",
@@ -502,6 +515,33 @@ const availableSites = data?.data?.map((site) => ({
 
     return () => clearInterval(interval);
   }, [patrols]);
+
+  const handleDeleteSite = async (siteId: string) => {
+  try {
+    await deleteSiteApi(siteId).unwrap();
+    toast.success("Site deleted successfully");
+  } catch (error: any) {
+    toast.error(error?.data?.message || "Failed to delete site");
+  }
+};
+
+const handleDeleteSubSite = async (subSiteId: string) => {
+  try {
+    await deleteSubSiteApi(subSiteId).unwrap();
+    toast.success("Sub-site deleted successfully");
+  } catch (error: any) {
+    toast.error(error?.data?.message || "Failed to delete sub-site");
+  }
+};
+
+const handleDeleteCheckpoint = async (checkpointId: string) => {
+  try {
+    await deleteCheckpointApi(checkpointId).unwrap();
+    toast.success("Checkpoint deleted successfully");
+  } catch (error: any) {
+    toast.error(error?.data?.message || "Failed to delete checkpoint");
+  }
+};
 
   // Calculate enhanced metrics
   const metrics = useMemo(() => {
@@ -1646,9 +1686,8 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
       size="icon"
       variant="ghost"
       className="text-red-500 hover:text-red-600"
-      onClick={() => {
-        console.log("Delete Site:", site.id);
-      }}
+      onClick={() => handleDeleteSite(site.id)}
+disabled={deletingSite}
     >
       <Trash2 className="h-4 w-4" />
     </Button>
@@ -1679,7 +1718,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
         {/* =========================
             SITE CHECKPOINTS
         ========================== */}
-        {site.checkpoints.length > 0 && (
+        {site.checkpoints.length >= 0 && (
           <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
 
             <div className="text-sm font-semibold text-yellow-800 mb-3">
@@ -1733,9 +1772,8 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
     size="icon"
     variant="ghost"
     className="text-red-500 hover:text-red-600"
-    onClick={() => {
-      console.log("Delete Site Checkpoint:", checkpoint.id);
-    }}
+    onClick={() => handleDeleteCheckpoint(checkpoint.id)}
+disabled={deletingCheckpoint}
   >
     <Trash2 className="h-4 w-4" />
   </Button>
@@ -1759,7 +1797,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
         {/* =========================
             SUB SITES
         ========================== */}
-        {site.subsites.length > 0 && (
+        {site.subsites.length >= 0 && (
           <div className="mt-5 space-y-4">
 
             {site.subsites.map((subsite) => (
@@ -1801,9 +1839,8 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
     size="icon"
     variant="ghost"
     className="text-red-500 hover:text-red-600"
-    onClick={() => {
-      console.log("Delete SubSite:", subsite.id);
-    }}
+    onClick={() => handleDeleteSubSite(subsite.id)}
+disabled={deletingSubSite}
   >
     <Trash2 className="h-4 w-4" />
   </Button>
@@ -1860,9 +1897,8 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
     size="icon"
     variant="ghost"
     className="text-red-500 hover:text-red-600"
-    onClick={() => {
-      console.log("Delete SubSite Checkpoint:", checkpoint.id);
-    }}
+    onClick={() => handleDeleteCheckpoint(checkpoint.id)}
+disabled={deletingCheckpoint}
   >
     <Trash2 className="h-4 w-4" />
   </Button>
