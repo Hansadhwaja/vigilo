@@ -26,6 +26,7 @@ import MessagesPage from "./pages/MessagesPage";
 import InvoicingPage from "./pages/InvoicingPage";
 import { AuthPage, GuardDetailsPage } from "./pages";
 import OrderDetailsPage from "./pages/OrderDetailsPage";
+import PatrolDetailsPage from "./pages/PatrolDetailsPage";
 
 // Data and utilities
 import {
@@ -295,6 +296,7 @@ function MainLayout() {
             />
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/patrol" element={<PatrolPage />} />
+            <Route path="/patrol/:id" element={<PatrolDetailsPage />} />
             <Route path="/hr" element={<HRPage />} />
             <Route path="/guard-details/:id" element={<GuardDetailsPage />} />
             <Route path="/invoicing" element={<InvoicingPage />} />

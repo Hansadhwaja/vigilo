@@ -310,7 +310,111 @@ export interface GetAllPatrolRunsForAdminResponse {
   data: AdminPatrolRun[];
 }
 
+/* =====================================================
+   📌 GET PATROL RUN BY ID (ADMIN)
+===================================================== */
 
+export interface AdminPatrolRunDetailsResponse {
+  success: boolean;
+  type: string;
+  data: {
+    patrol: {
+      id: string;
+      patrolId: string;
+      vehicleId: string;
+      description: string | null;
+      status: string;
+      startTime: string;
+      estimatedCompletion: string;
+      completionPercentage: number;
+      totalSites: number;
+      completedSites: number;
+      totalSubSites: number;
+      completedSubSites: number;
+      totalCheckpoints: number;
+      completedCheckpoints: number;
+      missedCheckpoints: number;
+      hasDeviation: boolean;
+      createdAt: string;
+      updatedAt: string;
+    };
+
+    order: {
+      id: string;
+      locationName: string;
+      locationAddress: string;
+      images: string[];
+      serviceType: string;
+      startDate: string;
+      startTime: string;
+      status: string;
+      user: {
+        id: string;
+        name: string;
+        email: string;
+        mobile: string;
+      };
+    };
+
+    client: {
+      id: string;
+      name: string;
+      email: string;
+      mobile: string;
+    };
+
+    guards: {
+      id: string;
+      name: string;
+      email: string;
+      guardStatus: string;
+      clockInTime: string | null;
+      clockOutTime: string | null;
+      overtimeStartTime: string | null;
+      overtimeEndTime: string | null;
+      overtimeHours: number | null;
+      totalHours: number | null;
+      assignedAt: string;
+    }[];
+
+    sites: PatrolSite[];
+  };
+}
+
+/* =====================================================
+   📌 EDIT PATROL RUN
+===================================================== */
+
+export interface EditPatrolRunRequest {
+  addSites?: string[];
+  removeSiteIds?: string[];
+  addSubSites?: string[];
+  removeSubSiteIds?: string[];
+  addCheckpoints?: string[];
+  removeCheckpointIds?: string[];
+  newGuardId?: string;
+}
+
+export interface EditPatrolRunResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface GetAllPatrolSubSitesResponse {
+  success: boolean;
+  total: number;
+  page: number;
+  totalPages: number;
+  data: any[]; // you can strongly type this later
+}
+
+export interface GetAllPatrolCheckpointsResponse {
+  success: boolean;
+  total: number;
+  page: number;
+  totalPages: number;
+  data: any[];
+}
 /* =====================================================
    🚓 PATROLLING API
 ===================================================== */
@@ -573,6 +677,113 @@ getAllPatrolRunsForAdmin: builder.query<
 
   providesTags: [{ type: "Patrol", id: "LIST" }],
 }),
+// ===============================
+// 🟢 GET PATROL RUN BY ID (ADMIN)
+// ===============================
+getPatrolRunByIdForAdmin: builder.query<
+  AdminPatrolRunDetailsResponse,
+  string
+>({
+  query: (patrolRunId) => ({
+    url: `/patrolling/getPatrolRunByIdForAdmin/${patrolRunId}`,
+    method: "GET",
+  }),
+
+  providesTags: (result, error, id) => [
+    { type: "Patrol", id },
+  ],
+}),
+// ===============================
+// 🟡 EDIT PATROL RUN
+// ===============================
+editPatrolRun: builder.mutation<
+  EditPatrolRunResponse,
+  { patrolRunId: string; body: EditPatrolRunRequest }
+>({
+  query: ({ patrolRunId, body }) => ({
+    url: `/patrolling/editPatrolRun/${patrolRunId}`,
+    method: "PUT",
+    body,
+  }),
+
+  invalidatesTags: (result, error, arg) => [
+    { type: "Patrol", id: arg.patrolRunId },
+    { type: "Patrol", id: "LIST" },
+  ],
+}),
+// ===============================
+// 🟢 GET ALL PATROL SUB-SITES
+// ===============================
+getAllPatrolSubSites: builder.query<
+  GetAllPatrolSubSitesResponse,
+  {
+    page?: number;
+    limit?: number;
+    siteId?: string;
+  }
+>({
+  query: ({
+    page = 1,
+    limit = 10,
+    siteId,
+  }) => {
+    const params = new URLSearchParams();
+
+    params.append("page", String(page));
+    params.append("limit", String(limit));
+
+    if (siteId) {
+      params.append("siteId", siteId);
+    }
+
+    return {
+      url: `/patrolling/getAllPatrolSubSites?${params.toString()}`,
+      method: "GET",
+    };
+  },
+
+  providesTags: [{ type: "Patrol", id: "SUBSITE_LIST" }],
+}),
+
+// ===============================
+// 🟢 GET ALL PATROL CHECKPOINTS
+// ===============================
+getAllPatrolCheckpoints: builder.query<
+  GetAllPatrolCheckpointsResponse,
+  {
+    page?: number;
+    limit?: number;
+    siteId?: string;
+    subSiteId?: string;
+  }
+>({
+  query: ({
+    page = 1,
+    limit = 10,
+    siteId,
+    subSiteId,
+  }) => {
+    const params = new URLSearchParams();
+
+    params.append("page", String(page));
+    params.append("limit", String(limit));
+
+    if (siteId) {
+      params.append("siteId", siteId);
+    }
+
+    if (subSiteId) {
+      params.append("subSiteId", subSiteId);
+    }
+
+    return {
+      url: `/patrolling/getAllPatrolCheckpoints?${params.toString()}`,
+      method: "GET",
+    };
+  },
+
+  providesTags: [{ type: "Patrol", id: "CHECKPOINT_LIST" }],
+}),
   }),
 });
 
@@ -591,4 +802,8 @@ export const {
   useDeleteCheckpointMutation,
   useDeletePatrolRunMutation,
   useGetAllPatrolRunsForAdminQuery,
+  useGetPatrolRunByIdForAdminQuery,
+useEditPatrolRunMutation,
+useGetAllPatrolSubSitesQuery,
+  useGetAllPatrolCheckpointsQuery,
 } = patrollingApi;

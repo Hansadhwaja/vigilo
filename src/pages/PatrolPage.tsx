@@ -62,6 +62,9 @@ import {
     useGetAllPatrolRunsForAdminQuery
 } from "./../apis/patrollingAPI";
 import { getStatusColor, getStatusStyle } from "../utils/statusColors";
+import { useNavigate } from "react-router-dom";
+  
+
 
 
 // Enhanced patrol data structure
@@ -367,6 +370,7 @@ export default function PatrolPage() {
   const [liveTracking, setLiveTracking] = useState<{[key: string]: any}>({});
 const [debouncedSearch, setDebouncedSearch] = useState("");
 const [currentPage, setCurrentPage] = useState(1);
+const navigate = useNavigate();
 
 
 
@@ -809,9 +813,8 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
     });
   };
 
-  const handleViewDetails = (patrol: any) => {
-    setSelectedPatrol(patrol);
-    setShowDetailsDialog(true);
+  const handleViewDetails = (patrolId: string) => {
+    navigate(`/patrol/${patrolId}`);
   };
 
   const handleViewQR = (checkpoint: any) => {
@@ -1305,7 +1308,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleViewDetails(patrol)}
+                      onClick={() => handleViewDetails(patrol.id)}
                       className="h-8 w-8 p-0"
                     >
                       <Eye className="h-3 w-3" />
