@@ -61,6 +61,8 @@ import {
     useDeletePatrolRunMutation,
     useGetAllPatrolRunsForAdminQuery
 } from "./../apis/patrollingAPI";
+import { getStatusColor, getStatusStyle } from "../utils/statusColors";
+
 
 // Enhanced patrol data structure
 const samplePatrols = [
@@ -1291,9 +1293,12 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                 {/* Status & Actions */}
                 <div className="flex items-center justify-between">
                   <div className="pl-5">
-                    <Badge className={getStatusColor(patrol.status)}>
-                      {patrol.status}
-                    </Badge>
+                    <Badge 
+                                          className="font-medium border-2"
+                                           style={getStatusStyle(patrol.status)}
+                                                                            >
+                                                {patrol.status}
+                                                    </Badge>
                   </div>
 
                   <div className="flex gap-1">
@@ -1786,9 +1791,15 @@ disabled={deletingSite}
         {site.checkpoints.length >= 0 && (
           <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
 
-            <div className="text-sm font-semibold text-yellow-800 mb-3">
+            <div className="text-sm font-semibold text-yellow-800 mb-3 flex justify-between items-center">
               Site Level Checkpoints
+
+              <Badge className="text-xs ">
+    {site.checkpoints.length} CP
+  </Badge>
             </div>
+
+            
 
             <div className="space-y-2">
               {site.checkpoints.map((checkpoint) => (
