@@ -473,12 +473,13 @@ const totalCompletion = todayPatrols.reduce(
   const [formData, setFormData] = useState({
     patrolId: "",
     orderId: "",
-    guardId: "",
+    guardIds: [] as string[],
     vehicleId: "", 
     startDateTime: "",
     estimatedCompletion: "",
     sites: [] as any[],
-    notes: ""
+    notes: "",
+    unitPrice: 0
   });
 
   // Enhanced site and checkpoint management
@@ -646,12 +647,13 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
     setFormData({
       patrolId: crypto.randomUUID(),
       orderId: "", // Placeholder for order association
-      guardId: "",
+      guardIds: [],
       vehicleId: "",
       startDateTime: "",
       estimatedCompletion: "",
       sites: [],
-      notes: ""
+      notes: "",
+      unitPrice: 0
     });
     setShowCreateDialog(true);
   };
@@ -659,7 +661,7 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
   const handleSavePatrol = async () => {
   try {
     if (
-      !formData.guardId ||
+      !formData.guardIds ||
       !formData.vehicleId ||
       formData.sites.length === 0
     ) {
@@ -670,7 +672,8 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
     const payload = {
       orderId: formData.orderId,
       patrolId: formData.patrolId,
-      guardId: formData.guardId,
+      guardIds: formData.guardIds,
+      unitPrice:formData.unitPrice,
       vehicleId: formData.vehicleId,
       startDateTime: new Date(formData.startDateTime).toISOString(),
       estimatedCompletion: new Date(formData.estimatedCompletion).toISOString(),
@@ -688,11 +691,12 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
     setFormData({
       patrolId: "",
       orderId: "",
-      guardId: "",
+      guardIds: [],
       vehicleId: "",
       startDateTime: "",
       estimatedCompletion: "",
       notes: "",
+      unitPrice: 0,
       sites: [],
     });
 
@@ -1247,7 +1251,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                   </div>
 
                   <div className="flex items-center gap-1">
-                    <MapPin className="h-10 w-10 text-gray-400" />
+                    <MapPin className="h-5 w-5 text-gray-400 shrink-0" />
                     <span className="text-lg text-gray-600 max-w-[300px] truncate">
                       {patrol.locationName}
                     </span>
@@ -1582,29 +1586,56 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
               </div>
               
               <div>
-              <Label htmlFor="guard">Assign Guard</Label>
-              <Select
-                value={formData.guardId}
-                onValueChange={(value: any) =>
-                  setFormData({ ...formData, guardId: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select guard" />
-                </SelectTrigger>
+  <Label>Assign Guards</Label>
 
-                <SelectContent className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
-                  {guards.map((guard: any) => (
-                    <SelectItem key={guard.id} value={guard.id}>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4" />
-                        {guard.name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+  <Select>
+    <SelectTrigger>
+      <SelectValue
+        placeholder={
+          formData.guardIds.length > 0
+            ? `${formData.guardIds.length} guard(s) selected`
+            : "Select guards"
+        }
+      />
+    </SelectTrigger>
+
+    <SelectContent className="max-h-80 overflow-y-auto">
+      {guards.map((guard: any) => {
+        const isSelected = formData.guardIds.includes(guard.id);
+
+        return (
+          <div
+            key={guard.id}
+            className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100"
+            onClick={() => {
+              if (isSelected) {
+                setFormData({
+                  ...formData,
+                  guardIds: formData.guardIds.filter(
+                    (id) => id !== guard.id
+                  ),
+                });
+              } else {
+                setFormData({
+                  ...formData,
+                  guardIds: [...formData.guardIds, guard.id],
+                });
+              }
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={isSelected}
+              readOnly
+            />
+            <User className="h-4 w-4" />
+            {guard.name}
+          </div>
+        );
+      })}
+    </SelectContent>
+  </Select>
+</div>
               
                           <div>
               <Label htmlFor="vehicle">Assign Vehicle</Label>
@@ -1690,6 +1721,22 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                   onChange={(e) => setFormData({...formData, estimatedCompletion: e.target.value})}
                 />
               </div>
+              <div>
+  <Label htmlFor="unitPrice">Unit Price (₹ per hour)</Label>
+  <Input
+    id="unitPrice"
+    type="number"
+    min="0"
+    placeholder="Enter unit price"
+    value={formData.unitPrice}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        unitPrice: Number(e.target.value),
+      })
+    }
+  />
+</div>
             </div>
 
             {/* Site Management Section */}
@@ -2081,10 +2128,11 @@ disabled={deletingCheckpoint}
             <Button 
               onClick={handleSavePatrol}
               disabled={
-                !formData.guardId ||
+                formData.guardIds.length === 0 ||
                 !formData.vehicleId ||
                 !formData.orderId ||
-                formData.sites.length === 0
+                formData.sites.length === 0 ||
+                formData.unitPrice <= 0
               }
             >
               Create Patrol Run

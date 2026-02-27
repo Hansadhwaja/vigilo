@@ -1,278 +1,600 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Progress } from "../components/ui/progress";
+import { Separator } from "../components/ui/separator";
+import { Dialog, DialogContent } from "../components/ui/dialog";
+import {
+  Activity,
   ArrowLeft,
   MapPin,
+  Clock,
+  User,
+  CheckCircle,
+  AlertTriangle,
+  Shield,
+  RefreshCw,
+  FileText,
+  Flag,
   Mail,
   Phone,
-  Clock,
-  Calendar,
-  Shield,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
+  Eye,
+  Navigation,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { useGetPatrolRunByIdForAdminQuery } from "../apis/patrollingAPI";
 
-interface PageProps {
-  params: { id: string };
-}
+export default function PatrolDetailsPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
-export default function PatrolRunDetailsPage({ params }: PageProps) {
-  const [data, setData] = useState<any>(null);
-  const [expandedSites, setExpandedSites] = useState<string[]>([]);
+  const { data, isLoading } =
+    useGetPatrolRunByIdForAdminQuery(id as string, {
+      skip: !id,
+    });
 
-  useEffect(() => {
-    fetchPatrol();
-  }, []);
+  const patrolData = data?.data;
+  const patrol = patrolData?.patrol;
+  const order = patrolData?.order;
+  const client = patrolData?.client;
+  const guards = patrolData?.guards || [];
+  const sites = patrolData?.sites || [];
 
-  const fetchPatrol = async () => {
-    try {
-      const res = await axios.get<any>(
-        `http://localhost:9000/api/v1/patrolling/getPatrolRunById/${params.id}`
-      );
-      setData(res.data.data);
-    } catch (err) {
-      console.error(err);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [open, setOpen] = useState(false)
+
+  if (isLoading) return <div className="p-6">Loading...</div>;
+  if (!patrol) return <div className="p-6">No data found.</div>;
+
+  const formatDate = (date?: string | null) =>
+    date ? new Date(date).toLocaleString() : "-";
+
+  const statusColor = (status: string) => {
+    switch (status) {
+      case "completed":
+        return "bg-green-100 text-green-700";
+      case "pending":
+        return "bg-yellow-100 text-yellow-700";
+      case "missed":
+        return "bg-red-100 text-red-700";
+      case "absent":
+        return "bg-red-100 text-red-800";  
+      default:
+        return "bg-gray-100 text-gray-700";
     }
   };
 
-  const toggleSite = (id: string) => {
-    setExpandedSites((prev) =>
-      prev.includes(id)
-        ? prev.filter((s) => s !== id)
-        : [...prev, id]
-    );
-  };
-
-  if (!data) return <div className="p-10">Loading...</div>;
-
-  const { patrol, order, client, guards, sites } = data;
-
-  const statusBadge = (status: string) => {
-    const base = "px-3 py-1 text-xs rounded-full font-medium";
-    if (status === "completed")
-      return <span className={`${base} bg-green-100 text-green-700`}>completed</span>;
-    if (status === "missed")
-      return <span className={`${base} bg-red-100 text-red-700`}>missed</span>;
-    return <span className={`${base} bg-yellow-100 text-yellow-700`}>pending</span>;
+  const openImageViewer = (index: number) => {
+    setCurrentImageIndex(index);
+    setViewerOpen(true);
   };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
+    <div className="p-6 space-y-6 bg-gray-50 min-h-screen">
 
       {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button className="p-2 rounded-lg bg-white shadow">
-            <ArrowLeft size={18} />
-          </button>
+          <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+
           <div>
-            <h1 className="text-xl font-semibold">
+            <h1 className="text-2xl font-semibold flex items-center gap-2">
+              <Shield className="w-6 h-6 text-purple-600" />
               Patrol Run Details
+              <span className="text-gray-500 font-medium">
+                {patrol.patrolId}
+              </span>
             </h1>
-            <p className="text-sm text-gray-500">
-              Comprehensive patrol monitoring and progress tracking
+            <p className="text-sm text-muted-foreground">
+              Comprehensive patrol run monitoring and progress tracking
             </p>
           </div>
-          {statusBadge(patrol.status)}
         </div>
+
+        <Badge className={statusColor(patrol.status)}>
+          {patrol.status}
+        </Badge>
       </div>
 
-      {/* OVERALL PROGRESS */}
-      <div className="bg-white rounded-2xl shadow p-6 mb-6">
-        <h2 className="text-sm text-gray-500 mb-2">Overall Progress</h2>
-        <div className="flex items-center gap-6">
-          <div className="text-4xl font-bold text-purple-600">
-            {patrol.completionPercentage}%
-          </div>
-          <div className="flex-1 bg-gray-200 h-3 rounded-full">
-            <div
-              className="bg-purple-600 h-3 rounded-full"
-              style={{ width: `${patrol.completionPercentage}%` }}
-            />
-          </div>
-        </div>
+      {/* PROGRESS SECTION */}
+      <Card>
+        <CardContent className="space-y-6 pt-6">
 
-        <div className="grid grid-cols-4 gap-4 mt-6">
-          <StatCard label="Sites" value={`${patrol.completedSites}/${patrol.totalSites}`} />
-          <StatCard label="Sub-Sites" value={`${patrol.completedSubSites}/${patrol.totalSubSites}`} />
-          <StatCard label="Checkpoints" value={`${patrol.completedCheckpoints}/${patrol.totalCheckpoints}`} />
-          <StatCard label="Missed" value={patrol.missedCheckpoints} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-6">
-
-        {/* LEFT COLUMN */}
-        <div className="col-span-2 space-y-6">
-
-          {/* PATROL INFO */}
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h3 className="font-semibold mb-4">Patrol Information</h3>
-
-            <div className="grid grid-cols-2 gap-6 text-sm">
-              <InfoItem icon={<Calendar size={16} />} label="Start Date" value={new Date(patrol.startTime).toLocaleDateString()} />
-              <InfoItem icon={<Clock size={16} />} label="Estimated Completion" value={new Date(patrol.estimatedCompletion).toLocaleTimeString()} />
-              <InfoItem icon={<Shield size={16} />} label="Vehicle ID" value={patrol.vehicleId} />
-              <InfoItem icon={<Calendar size={16} />} label="Created At" value={new Date(patrol.createdAt).toLocaleString()} />
+          <div>
+            <p className="text-sm text-muted-foreground">Overall Progress</p>
+            <div className="flex items-center gap-4 mt-2">
+              <span className="text-3xl font-bold text-purple-600">
+                {patrol.completionPercentage}%
+              </span>
+              <Progress value={patrol.completionPercentage} className="w-64" />
             </div>
           </div>
 
-          {/* LOCATION DETAILS */}
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h3 className="font-semibold mb-4">Location Details</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
 
-            <p className="font-medium">{order.locationName}</p>
-            <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-              <MapPin size={14} />
-              {order.locationAddress}
-            </div>
+            <StatCard title="Sites"
+              value={`${patrol.completedSites}/${patrol.totalSites}`} />
 
-            <div className="grid grid-cols-2 gap-4 mt-4">
-              {order.images.map((img: string, index: number) => (
-                <img
-                  key={index}
-                  src={img}
-                  className="rounded-xl h-40 object-cover w-full"
-                />
-              ))}
-            </div>
+            <StatCard title="Sub-Sites"
+              value={`${patrol.completedSubSites}/${patrol.totalSubSites}`} />
+
+            <StatCard title="Checkpoints"
+              value={`${patrol.completedCheckpoints}/${patrol.totalCheckpoints}`} />
+
+            <StatCard title="Missed"
+              value={patrol.totalCheckpoints - patrol.completedCheckpoints }
+              danger />
           </div>
+        </CardContent>
+      </Card>
 
-          {/* SITES & CHECKPOINTS */}
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h3 className="font-semibold mb-4">
-              Sites & Checkpoints ({sites.length} sites)
-            </h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {sites.map((site: any, index: number) => (
-              <div key={site.id} className="border rounded-xl mb-4">
-                <div
-                  onClick={() => toggleSite(site.id)}
-                  className="flex justify-between items-center p-4 cursor-pointer"
-                >
-                  <div>
-                    <div className="font-medium">{site.name}</div>
-                    <div className="text-xs text-gray-500">{site.address}</div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {statusBadge(site.status)}
-                    {expandedSites.includes(site.id) ? (
-                      <ChevronUp size={18} />
-                    ) : (
-                      <ChevronDown size={18} />
-                    )}
-                  </div>
+        {/* LEFT CONTENT */}
+        <div className="lg:col-span-2 space-y-6">
+
+          {/* Patrol Info */}
+          <Card>
+            <CardHeader className="flex">
+              <CardTitle className="flex"><Activity className="h-4 w-4 " />Patrol Information</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+              <Info label="Description" value={patrol.description} />
+              <Info label="Start Time" value={formatDate(patrol.startTime)} />
+              <Info label="Estimated Completion"
+                value={formatDate(patrol.estimatedCompletion)} />
+              <Info label="Created At"
+                value={formatDate(patrol.createdAt)} />
+              <Info label="Vehicle ID"
+                value={patrol.vehicleId} />
+            </CardContent>
+          </Card>
+
+          {/* Location Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Location Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm">
+              <Info label="Location Name" value={order?.locationName} />
+              <Info label="Address" value={order?.locationAddress} />
+              <Info label="Service Type" value={order?.serviceType} />
+
+              {order?.images?.length > 0 && (
+                <div className="grid grid-cols-2 gap-4">
+                  {order.images.map((img: string, index: number) => (
+                    <img
+                      key={index}
+                      src={img}
+                      onClick={() => openImageViewer(index)}
+                      className="rounded-lg object-cover h-52 w-full cursor-pointer"
+                    />
+                  ))}
                 </div>
+              )}
+            </CardContent>
+          </Card>
 
-                {expandedSites.includes(site.id) && (
-                  <div className="p-4 border-t bg-gray-50 space-y-4">
+          {/* ======================= SITES & CHECKPOINTS ======================= */}
 
-                    {/* SITE CHECKPOINTS */}
-                    {site.checkpoints.map((cp: any) => (
-                      <CheckpointCard key={cp.id} cp={cp} />
-                    ))}
+<Card className="rounded-2xl shadow-sm">
+  <CardHeader>
+    <CardTitle>
+      Sites & Checkpoints ({sites.length} sites)
+    </CardTitle>
+  </CardHeader>
 
-                    {/* SUB SITES */}
-                    {site.subSites.map((sub: any) => (
-                      <div key={sub.id} className="ml-6 border rounded-xl p-4 bg-white">
-                        <div className="font-medium mb-2">{sub.name}</div>
+  <CardContent className="space-y-6">
+    {sites.map((site: any, i: number) => {
+      
 
-                        {sub.checkpoints.map((scp: any) => (
-                          <CheckpointCard key={scp.id} cp={scp} />
-                        ))}
-                      </div>
-                    ))}
+      const totalCheckpoints =
+        (site.checkpoints?.length || 0) +
+        (site.subSites?.reduce(
+          (acc: number, sub: any) =>
+            acc + (sub.checkpoints?.length || 0),
+          0
+        ) || 0)
 
-                  </div>
-                )}
+      const completedCheckpoints = 0 // You can calculate dynamically later
+
+      return (
+        <div
+          key={site.id}
+          className="border rounded-xl bg-white"
+        >
+          {/* ================= SITE HEADER ================= */}
+          <div className="flex justify-between items-center p-5">
+            <div className="flex gap-3 items-center">
+              <div className="w-9 h-9 flex items-center justify-center rounded-full bg-orange-500 text-white font-semibold">
+                {i + 1}
               </div>
-            ))}
+
+              <div>
+                <p className="font-semibold">{site.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {site.address}
+                </p>
+              </div>
+            </div>
+
+            {/* RIGHT SIDE */}
+            <div className="flex items-center gap-4">
+              <Badge className={statusColor(site.status)}>
+                {site.status}
+              </Badge>
+
+              <p className="text-sm text-muted-foreground">
+                {completedCheckpoints}/{totalCheckpoints} completed
+              </p>
+
+              <button
+                onClick={() => setOpen(!open)}
+                className="p-1 rounded-md hover:bg-muted transition"
+              >
+                {open ? (
+                  <ChevronUp className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
+
+          {/* ================= COLLAPSIBLE CONTENT ================= */}
+          {open && (
+            <div className="px-5 pb-5 space-y-5 border-t">
+              
+              {/* SITE DESCRIPTION */}
+              {site.description && (
+                <div className="bg-muted/40 rounded-lg p-3 text-sm">
+                  <p className="text-muted-foreground text-xs mb-1">
+                    Description
+                  </p>
+                  <p>{site.description}</p>
+                </div>
+              )}
+
+              {/* LAT LNG */}
+              <p className="text-xs text-muted-foreground">
+                Lat: {site.latitude} | Lng: {site.longitude}
+              </p>
+
+              {/* SUB SITES */}
+              {site.subSites?.length > 0 && (
+                <div className="space-y-4">
+                  <p className="text-sm font-medium">
+                    Sub-Sites ({site.subSites.length})
+                  </p>
+
+                  {site.subSites.map((sub: any) => (
+                    <div
+                      key={sub.id}
+                      className="border rounded-xl p-4 bg-blue-50/40 space-y-3"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium">{sub.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {sub.description}
+                          </p>
+                          <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                            <span>₹ {sub.unitPrice}</span>
+                            <span>{sub.estimatedDuration} min</span>
+                          </div>
+                        </div>
+
+                        <Badge className={statusColor(sub.status)}>
+                          {sub.status}
+                        </Badge>
+                      </div>
+
+                      {/* SubSite Checkpoints */}
+                      {sub.checkpoints?.map((cp: any) => (
+                        <div
+                          key={cp.id}
+                          className="border rounded-lg p-3 bg-white space-y-2"
+                        >
+                          <div className="flex justify-between">
+                            <div>
+                              <p className="font-medium text-sm">
+                                {cp.name}
+                              </p>
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="outline">
+                                  {cp.priorityLevel}
+                                </Badge>
+                                <Badge className={statusColor(cp.status)}>
+                                  {cp.status}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-muted-foreground">
+                            {cp.description}
+                          </p>
+
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>
+                              {cp.latitude}, {cp.longitude}
+                            </span>
+                            <span>
+                              Range: {cp.verificationRange}m
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* SITE LEVEL CHECKPOINTS */}
+              {site.checkpoints?.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">
+                    Site Checkpoints ({site.checkpoints.length})
+                  </p>
+
+                  {site.checkpoints.map((cp: any) => (
+                    <div
+                      key={cp.id}
+                      className="border rounded-lg p-3 bg-white space-y-2"
+                    >
+                      <p className="font-medium text-sm">
+                        {cp.name}
+                      </p>
+
+                      <div className="flex gap-2">
+                        <Badge variant="outline">
+                          {cp.priorityLevel}
+                        </Badge>
+                        <Badge className={statusColor(cp.status)}>
+                          {cp.status}
+                        </Badge>
+                      </div>
+
+                      <p className="text-xs text-muted-foreground">
+                        {cp.description}
+                      </p>
+
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>
+                          {cp.latitude}, {cp.longitude}
+                        </span>
+                        <span>
+                          Range: {cp.verificationRange}m
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )
+    })}
+  </CardContent>
+</Card>
         </div>
 
-        {/* RIGHT COLUMN */}
+        {/* RIGHT SIDEBAR */}
         <div className="space-y-6">
 
-          {/* CLIENT INFO */}
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h3 className="font-semibold mb-4">Client Information</h3>
-            <p className="font-medium">{client.name}</p>
-            <div className="flex items-center gap-2 text-sm mt-2">
-              <Mail size={14} /> {client.email}
-            </div>
-            <div className="flex items-center gap-2 text-sm mt-2">
-              <Phone size={14} /> {client.mobile}
-            </div>
-          </div>
+          {/* Client Info */}
+          <Card className="rounded-2xl shadow-sm">
+  <CardHeader className="flex flex-row items-center gap-2">
+    <User className="h-5 w-5 text-muted-foreground" />
+    <CardTitle>Client Information</CardTitle>
+  </CardHeader>
 
-          {/* GUARD */}
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h3 className="font-semibold mb-4">
-              Assigned Guard ({guards.length})
-            </h3>
-
-            {guards.map((g: any) => (
-              <div key={g.id} className="border rounded-xl p-4">
-                <p className="font-medium">{g.name}</p>
-                <p className="text-xs text-gray-500">{g.email}</p>
-                <div className="mt-2">{statusBadge(g.guardStatus)}</div>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ================= COMPONENTS ================= */
-
-function StatCard({ label, value }: any) {
-  return (
-    <div className="border rounded-xl p-4 text-center bg-gray-50">
-      <div className="text-lg font-semibold">{value}</div>
-      <div className="text-xs text-gray-500">{label}</div>
-    </div>
-  );
-}
-
-function InfoItem({ icon, label, value }: any) {
-  return (
+  <CardContent className="space-y-4 text-sm">
+    {/* Avatar + Name */}
     <div className="flex items-center gap-3">
-      {icon}
+      <img
+        src={client?.avatar || "https://via.placeholder.com/48"}
+        alt={client?.name}
+        className="h-12 w-12 rounded-full object-cover border"
+      />
       <div>
-        <p className="text-xs text-gray-500">{label}</p>
-        <p className="text-sm font-medium">{value}</p>
-      </div>
-    </div>
-  );
-}
-
-function CheckpointCard({ cp }: any) {
-  const statusColor =
-    cp.status === "completed"
-      ? "text-green-600"
-      : cp.status === "missed"
-      ? "text-red-600"
-      : "text-yellow-600";
-
-  return (
-    <div className="border rounded-lg p-3 flex justify-between items-center bg-white">
-      <div>
-        <p className="text-sm font-medium">{cp.name}</p>
-        <p className="text-xs text-gray-500">
-          Priority: {cp.priorityLevel}
+        <p className="font-semibold text-base">{client?.name}</p>
+        <p className="text-muted-foreground text-xs">
+          {client?.id}
         </p>
       </div>
-      <div className={`text-xs font-medium ${statusColor}`}>
-        {cp.status}
+    </div>
+
+    {/* Email */}
+    <div className="flex items-center gap-2 text-muted-foreground">
+      <Mail className="h-4 w-4" />
+      <span>{client?.email}</span>
+    </div>
+
+    {/* Phone */}
+    <div className="flex items-center gap-2 text-muted-foreground">
+      <Phone className="h-4 w-4" />
+      <span>{client?.mobile}</span>
+    </div>
+
+    {/* Action Buttons */}
+    <div className="space-y-2 pt-2">
+      <Button variant="outline" className="w-full justify-start gap-2">
+        <Mail className="h-4 w-4" />
+        Send Email
+      </Button>
+
+      <Button variant="outline" className="w-full justify-start gap-2">
+        <Phone className="h-4 w-4" />
+        Call Client
+      </Button>
+    </div>
+  </CardContent>
+</Card>
+
+{/* ================= ASSIGNED GUARDS ================= */}
+<Card className="rounded-2xl shadow-sm">
+  <CardHeader className="flex flex-row items-center gap-2">
+    <User className="h-5 w-5 text-muted-foreground" />
+    <CardTitle>
+      Assigned Guards ({guards.length})
+    </CardTitle>
+  </CardHeader>
+
+  <CardContent className="space-y-4">
+    {guards.map((guard: any) => (
+      <div
+        key={guard.id}
+        className="border rounded-xl p-4 space-y-3"
+      >
+        {/* Avatar + Name */}
+        <div className="flex items-center gap-3">
+          <img
+            src={guard?.avatar || "https://via.placeholder.com/40"}
+            alt={guard?.name}
+            className="h-10 w-10 rounded-full object-cover border"
+          />
+          <div>
+            <p className="font-medium">{guard.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {guard.email}
+            </p>
+          </div>
+        </div>
+
+        {/* Status Badge */}
+        <Badge className={statusColor(guard.guardStatus)}>
+          {guard.guardStatus}
+        </Badge>
+
+        {/* Assigned Date (optional if you have it) */}
+        {guard.assignedAt && (
+  <p className="text-xs text-muted-foreground">
+    Assigned:{" "}
+    {new Date(guard.assignedAt).toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })}
+  </p>
+)}
       </div>
+    ))}
+  </CardContent>
+</Card>
+
+          {/* Quick Statistics */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Statistics</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm space-y-2">
+              <StatRow label="Total Sites" value={patrol.totalSites} />
+              <StatRow label="Total Sub-Sites" value={patrol.totalSubSites} />
+              <StatRow label="Total Checkpoints" value={patrol.totalCheckpoints} />
+              <Separator />
+              <StatRow label="Completed"
+                value={patrol.completedCheckpoints}
+                green />
+              <StatRow label="Pending"
+                value={patrol.totalCheckpoints - patrol.completedCheckpoints}
+                yellow />
+              <StatRow label="Missed"
+                value={patrol.totalCheckpoints - patrol.completedCheckpoints}
+                red />
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button variant="outline" className="w-full justify-start">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh Status
+              </Button>
+
+              <Button variant="outline" className="w-full justify-start">
+                <FileText className="w-4 h-4 mr-2" />
+                Generate Report
+              </Button>
+
+              <Button variant="outline" className="w-full justify-start">
+                <Flag className="w-4 h-4 mr-2" />
+                Report Issue
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Image Modal */}
+      <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
+        <DialogContent className="max-w-3xl">
+          {order?.images && (
+            <img
+              src={order.images[currentImageIndex]}
+              className="rounded-md w-full"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+/* Reusable Components */
+
+function Info({ label, value }: any) {
+  return (
+    <div>
+      <p className="text-muted-foreground text-xs">{label}</p>
+      <p className="font-medium">{value || "-"}</p>
+    </div>
+  );
+}
+
+function StatCard({ title, value, danger }: any) {
+  return (
+    <div className={`rounded-lg p-4 border text-center
+      ${danger ? "bg-red-50 text-red-600" : "bg-gray-50"}`}>
+      <p className="text-lg font-semibold">{value}</p>
+      <p className="text-xs text-muted-foreground">{title}</p>
+    </div>
+  );
+}
+
+function StatRow({ label, value, green, yellow, red }: any) {
+  return (
+    <div className="flex justify-between">
+      <span>{label}</span>
+      <span className={
+        green ? "text-green-600" :
+        yellow ? "text-yellow-600" :
+        red ? "text-red-600" :
+        ""
+      }>
+        {value}
+      </span>
     </div>
   );
 }

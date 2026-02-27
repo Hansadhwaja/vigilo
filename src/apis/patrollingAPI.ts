@@ -171,7 +171,7 @@ export interface CreatePatrolRunResponse {
   data: {
     patrol: Patrol;
     order: PatrolOrder;
-    guard: PatrolGuard;
+    guards: PatrolGuard[];
     sites: PatrolSite[];
   };
 }
@@ -190,6 +190,10 @@ export interface Patrol {
   completedSites: number;
   completedSubSites: number;
   completedCheckpoints: number;
+    unitPrice: number;         // ✅ added
+  totalHours: number;        // ✅ added
+  totalPatrolCost: number;   // ✅ added
+  perGuardPayment: number;
 }
 
 export interface PatrolOrder {
@@ -206,6 +210,9 @@ export interface PatrolOrder {
   status: string;
   images: string[];
   userId: string;
+    createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
 }
 
 export interface PatrolGuard {
@@ -216,6 +223,7 @@ export interface PatrolGuard {
   mobile: string;
   isVerified: boolean;
   blocked: boolean;
+  avatar?: string | null;
 }
 
 export interface PatrolCheckpoint {
@@ -260,7 +268,8 @@ export interface PatrolSite {
 export interface CreatePatrolRunRequest {
   patrolId: string;
   orderId: string;
-  guardId: string;
+  guardIds:   string[];
+  unitPrice: number; 
   vehicleId: string;
   startDateTime: string;
   estimatedCompletion: string;
