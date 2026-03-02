@@ -370,6 +370,7 @@ export interface AdminPatrolRunDetailsResponse {
       name: string;
       email: string;
       mobile: string;
+      avatar?: string | null;
     };
 
     guards: {
