@@ -59,10 +59,11 @@ import {
   useDeletePatrolSubSiteMutation,
   useDeleteCheckpointMutation,
     useDeletePatrolRunMutation,
-    useGetAllPatrolRunsForAdminQuery
+    useGetAllPatrolRunsForAdminQuery,
+    useGetPatrolRunByIdForAdminQuery
 } from "./../apis/patrollingAPI";
 import { getStatusColor, getStatusStyle } from "../utils/statusColors";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
   
 
 
@@ -371,6 +372,7 @@ export default function PatrolPage() {
 const [debouncedSearch, setDebouncedSearch] = useState("");
 const [currentPage, setCurrentPage] = useState(1);
 const navigate = useNavigate();
+const { id } = useParams<{ id: string }>();
 
 
 
@@ -419,6 +421,10 @@ const [deletePatrolRun, { isLoading: isDeleting }] =
 
 const [deleteSiteApi, { isLoading: deletingSite }] =
   useDeletePatrolSiteMutation();
+  const { data: getPatrolById, isLoading: isProofLoading } =
+      useGetPatrolRunByIdForAdminQuery(id as string, {
+        skip: !id,
+      });
 
 const [deleteSubSiteApi, { isLoading: deletingSubSite }] =
   useDeletePatrolSubSiteMutation();
@@ -437,6 +443,8 @@ const [deleteCheckpointApi, { isLoading: deletingCheckpoint }] =
 });
 
 const Patrols = patrolResponse?.data || [];
+
+
 
 
 useEffect(() => {
@@ -771,6 +779,67 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
     });
   }, []);
 
+  const calculateDurationInHours = (start: string, end: string) => {
+  const diff =
+    new Date(end).getTime() - new Date(start).getTime();
+
+  return diff > 0 ? (diff / (1000 * 60 * 60)).toFixed(2) : 0;
+};
+
+  const transformPatrolForProof = (data: any) => {
+  const { patrol, client, guards, sites } = data;
+
+  const allCheckpoints = sites.flatMap((site: any) => [
+    ...site.checkpoints.map((cp: any) => ({
+      ...cp,
+      siteName: site.name,
+      subSiteName: null,
+    })),
+    ...site.subSites.flatMap((sub: any) =>
+      sub.checkpoints.map((cp: any) => ({
+        ...cp,
+        siteName: site.name,
+        subSiteName: sub.name,
+      }))
+    ),
+  ]);
+
+  const qrScans = allCheckpoints.filter(
+    (cp: any) => cp.scannedAt !== null
+  ).length;
+
+  return {
+    id: patrol.id,
+    patrolId: patrol.patrolId,
+    guardName: guards?.[0]?.name || "N/A",
+    vehicle: patrol.vehicleId,
+    clientName: client?.name || "N/A",
+    startTime: patrol.startTime,
+    endTime: patrol.estimatedCompletion,
+    totalCheckpoints: patrol.totalCheckpoints,
+    completedCheckpoints: patrol.completedCheckpoints,
+    routeDeviation: patrol.hasDeviation,
+    sites,
+    proofOfService: {
+      qrScans,
+      photos: 0, // update later if backend supports
+      notes: 0,
+    },
+    billing: {
+      actualHours: calculateDurationInHours(
+        patrol.startTime,
+        patrol.estimatedCompletion
+      ),
+      estimatedHours: calculateDurationInHours(
+        patrol.startTime,
+        patrol.estimatedCompletion
+      ),
+      hourlyRate: 0,
+      clientInvoiced: false,
+    },
+  };
+};
+
   const handleSimulateQRScan = (checkpoint: any, patrol: any) => {
     // Simulate QR code scanning
     const updatedCheckpoint = {
@@ -787,11 +856,21 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
     setShowQRDialog(false);
   };
 
-  const handleGenerateProofOfService = (patrol: any) => {
-    const proof = generateProofOfService(patrol);
-    setSelectedPatrol({ ...patrol, proofOfService: proof });
+  const handleGenerateProofOfService = async (patrol: any) => {
+  try {
+    if (!getPatrolById) {
+      toast.error("Patrol data not available");
+      return;
+    }
+
+    const transformedData = transformPatrolForProof(getPatrolById);
+
+    setSelectedPatrol(transformedData);
     setShowProofDialog(true);
-  };
+  } catch (error: any) {
+    toast.error(error?.data?.message || "Failed to fetch patrol details");
+  }
+};
 
   const handleExportPatrolData = (format: 'csv' | 'pdf') => {
     const exportData = filteredPatrols.map(patrol => ({
@@ -1180,7 +1259,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
   {/* Status Filter */}
   <Select
     value={filterStatus}
-    onValueChange={(value) => {
+    onValueChange={(value: React.SetStateAction<string>) => {
   setFilterStatus(value);
   setCurrentPage(1);
 }}
@@ -1340,14 +1419,15 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
 
                     {patrol.completedCheckpoints > 0 && (
   <Button
-    size="sm"
-    variant="outline"
-    className="h-8 px-2 text-lg"
-    onClick={() => handleGenerateProofOfService(patrol)}
-  >
-    <FileText className="h-3 w-3 mr-1" />
-    Proof
-  </Button>
+  size="sm"
+  variant="outline"
+  className="h-8 px-2 text-lg"
+  onClick={() => handleGenerateProofOfService(patrol)}
+  disabled={isProofLoading}
+>
+  <FileText className="h-3 w-3 mr-1" />
+  {isProofLoading ? "Loading..." : "Proof"}
+</Button>
 )}
 
 <Button
@@ -2253,28 +2333,51 @@ disabled={deletingCheckpoint}
               <div>
                 <h3 className="font-semibold mb-3">Checkpoint Timeline</h3>
                 <div className="space-y-2">
-                  {selectedPatrol.sites.map((site: any) => 
-                    site.subsites.map((subsite: any) => 
-                      subsite.checkpoints.map((checkpoint: any) => (
-                        <div key={checkpoint.id} className="flex items-center justify-between p-3 border rounded">
-                          <div>
-                            <div className="font-medium">{checkpoint.name}</div>
-                            <div className="text-xl text-gray-600">{site.name} - {subsite.name}</div>
-                          </div>
-                          <div className="text-right text-xl">
-                            <div className={checkpoint.status === 'completed' ? 'text-green-600' : 'text-gray-500'}>
-                              {checkpoint.status === 'completed' ? '✅ Completed' : '⏳ Pending'}
-                            </div>
-                            {checkpoint.scannedAt && (
-                              <div className="text-lg text-gray-500">
-                                {new Date(checkpoint.scannedAt).toLocaleString()}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))
-                    )
-                  )}
+                  {selectedPatrol.sites.map((site: any) => (
+  <>
+    {site.checkpoints.map((checkpoint: any) => (
+      <div key={checkpoint.id} className="flex items-center justify-between p-3 border rounded">
+        <div>
+          <div className="font-medium">{checkpoint.name}</div>
+          <div className="text-xl text-gray-600">{site.name}</div>
+        </div>
+        <div className="text-right text-xl">
+          <div className={checkpoint.scannedAt ? 'text-green-600' : 'text-gray-500'}>
+            {checkpoint.scannedAt ? '✅ Completed' : '⏳ Pending'}
+          </div>
+          {checkpoint.scannedAt && (
+            <div className="text-lg text-gray-500">
+              {new Date(checkpoint.scannedAt).toLocaleString()}
+            </div>
+          )}
+        </div>
+      </div>
+    ))}
+
+    {site.subSites.map((sub: any) =>
+      sub.checkpoints.map((checkpoint: any) => (
+        <div key={checkpoint.id} className="flex items-center justify-between p-3 border rounded">
+          <div>
+            <div className="font-medium">{checkpoint.name}</div>
+            <div className="text-xl text-gray-600">
+              {site.name} - {sub.name}
+            </div>
+          </div>
+          <div className="text-right text-xl">
+            <div className={checkpoint.scannedAt ? 'text-green-600' : 'text-gray-500'}>
+              {checkpoint.scannedAt ? '✅ Completed' : '⏳ Pending'}
+            </div>
+            {checkpoint.scannedAt && (
+              <div className="text-lg text-gray-500">
+                {new Date(checkpoint.scannedAt).toLocaleString()}
+              </div>
+            )}
+          </div>
+        </div>
+      ))
+    )}
+  </>
+))}
                 </div>
               </div>
 
