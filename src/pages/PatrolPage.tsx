@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
+import jsPDF from "jspdf";
 import { 
   Plus, 
   Clock, 
@@ -872,49 +873,150 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
   }
 };
 
-  const handleExportPatrolData = (format: 'csv' | 'pdf') => {
-    const exportData = filteredPatrols.map(patrol => ({
-      'Patrol ID': patrol.patrolId,
-      'Guard': patrol.guardName,
-      'Vehicle': patrol.vehicle,
-      'Client': patrol.clientName,
-      'Status': patrol.status,
-      'Start Time': patrol.startTime,
-      'Actual Start': patrol.actualStartTime || 'N/A',
-      'Completion Time': patrol.actualEndTime || patrol.estimatedCompletion,
-      'Duration (hrs)': patrol.billing.actualHours || patrol.billing.estimatedHours,
-      'Checkpoints Completed': `${patrol.completedCheckpoints}/${patrol.totalCheckpoints}`,
-      'Completion %': patrol.totalCheckpoints > 0 ? Math.round((patrol.completedCheckpoints / patrol.totalCheckpoints) * 100) : 0,
-      'Issues Found': patrol.issuesFound,
-      'Route Deviation': patrol.routeDeviation ? 'Yes' : 'No',
-      'Revenue': patrol.billing.actualHours ? calculatePatrolRevenue(patrol).toFixed(2) : '0.00',
-      'Invoiced': patrol.billing.clientInvoiced ? 'Yes' : 'No'
-    }));
+  const handleExportPatrolData = async (format: 'csv' | 'pdf') => {
+  if (format === 'csv') {
+    exportCSV();
+  } else {
+    await exportPDF();
+  }
 
-    if (format === 'csv') {
-      const csv = [
-        Object.keys(exportData[0]).join(','),
-        ...exportData.map(row => Object.values(row).join(','))
-      ].join('\n');
-      
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `patrol-export-${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } else {
-      toast.info("PDF proof-of-service would be generated here", {
-        description: "In production, this would create detailed patrol reports with maps and photos"
-      });
+  setShowExportDialog(false);
+};
+
+const exportDataSource = Patrols;
+
+const exportCSV = () => {
+  if (!Patrols.length) {
+    toast.error("No patrol data available");
+    return;
+  }
+
+  const exportData = Patrols.map((patrol) => {
+    const guardNames = patrol.guards?.length
+      ? patrol.guards.map((g: any) => g.name).join(" | ")
+      : "No Guard Assigned";
+
+    return {
+      "Patrol ID": patrol.patrolId,
+      "Status": patrol.status,
+      "Vehicle ID": patrol.vehicleId,
+      "Client Name": patrol.clientName,
+      "Client Email": patrol.clientEmail,
+      "Location": patrol.locationName,
+      "Order Start Date": new Date(patrol.orderStartDate).toLocaleDateString(),
+      "Order Start Time": patrol.orderStartTime,
+      "Order Status": patrol.orderStatus,
+      "Start DateTime": new Date(patrol.startDateTime).toLocaleString(),
+      "Estimated Completion": new Date(patrol.estimatedCompletion).toLocaleString(),
+      "Total Sites": patrol.totalSites,
+      "Completed Sites": patrol.completedSites,
+      "Total SubSites": patrol.totalSubSites,
+      "Completed SubSites": patrol.completedSubSites,
+      "Total Checkpoints": patrol.totalCheckpoints,
+      "Completed Checkpoints": patrol.completedCheckpoints,
+      "Completion %": patrol.completionPercentage,
+      "Route Deviation": patrol.hasDeviation ? "Yes" : "No",
+      "Guards": guardNames,
+    };
+  });
+
+  // CSV with proper escaping
+  const headers = Object.keys(exportData[0]);
+
+  const csvRows = [
+    headers.join(","),
+    ...exportData.map(row =>
+      headers
+        .map(field => `"${String((row as Record<string, any>)[field]).replace(/"/g, '""')}"`)
+        .join(",")
+    )
+  ];
+
+  const blob = new Blob([csvRows.join("\n")], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `patrol-export-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  toast.success("CSV export completed");
+};
+const exportPDF = async () => {
+  if (!Patrols.length) {
+    toast.error("No patrol data available");
+    return;
+  }
+
+  const doc = new jsPDF();
+  let y = 20;
+
+  doc.setFontSize(16);
+  doc.text("Patrol Proof of Service Report", 14, y);
+  y += 10;
+
+  doc.setFontSize(10);
+
+  Patrols.forEach((patrol, index) => {
+      const guardNames = patrol.guards?.length
+        ? patrol.guards.map((g: any) => g.name).join(" | ")
+        : "No Guard Assigned";
+  
+      doc.setFont("", "bold");
+      doc.text(`Patrol ID: ${patrol.patrolId}`, 14, y);
+      doc.setFont("", "normal");
+    y += 6;
+
+    doc.text(`Client: ${patrol.clientName}`, 14, y);
+    y += 6;
+
+    doc.text(`Location: ${patrol.locationName}`, 14, y);
+    y += 6;
+
+    doc.text(`Vehicle: ${patrol.vehicleId}`, 14, y);
+    y += 6;
+
+    doc.text(`Guards: ${guardNames}`, 14, y);
+    y += 6;
+
+    doc.text(`Status: ${patrol.status}`, 14, y);
+    y += 6;
+
+    doc.text(
+      `Checkpoints: ${patrol.completedCheckpoints}/${patrol.totalCheckpoints}`,
+      14,
+      y
+    );
+    y += 6;
+
+    doc.text(`Completion: ${patrol.completionPercentage}%`, 14, y);
+    y += 6;
+
+    doc.text(
+      `Route Deviation: ${patrol.hasDeviation ? "Yes" : "No"}`,
+      14,
+      y
+    );
+    y += 8;
+
+    doc.line(14, y, 195, y);
+    y += 10;
+
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
     }
-    
-    setShowExportDialog(false);
-    toast.success(`${format.toUpperCase()} export completed`, {
-      description: `${exportData.length} patrol records exported`
-    });
-  };
+  });
+
+  doc.save(`patrol-proof-${new Date().toISOString().slice(0, 10)}.pdf`);
+
+  toast.success("PDF exported successfully");
+};
 
   const handleViewDetails = (patrolId: string) => {
     navigate(`/patrol/${patrolId}`);
