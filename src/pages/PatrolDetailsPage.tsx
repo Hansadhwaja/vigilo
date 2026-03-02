@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Download } from "lucide-react";
+import { toast } from "react-hot-toast";
+import jsPDF from "jspdf";
 import {
   Card,
   CardContent,
@@ -12,7 +15,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Progress } from "../components/ui/progress";
 import { Separator } from "../components/ui/separator";
-import { Dialog, DialogContent } from "../components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import {
   Activity,
   ArrowLeft,
@@ -49,6 +52,8 @@ export default function PatrolDetailsPage() {
   const client = patrolData?.client;
   const guards = patrolData?.guards || [];
   const sites = patrolData?.sites || [];
+
+  const [showExportDialog, setShowExportDialog] = useState(false);
 
   const [viewerOpen, setViewerOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -95,6 +100,199 @@ const formatTimeOnly = (dateString: string) => {
     hour12: true,
   }).toLowerCase();
 };
+
+const handleExportPatrolData = async (format: 'csv' | 'pdf') => {
+  if (format === 'csv') {
+    exportCSV();
+  } else {
+    await exportPDF();
+  }
+
+  setShowExportDialog(false);
+};
+const exportCSV = () => {
+  if (!patrol) {
+    toast.error("No patrol data available");
+    return;
+  }
+
+  const guardNames = guards.length
+    ? guards.map((g: any) => `${g.name} (${g.guardStatus})`).join(" | ")
+    : "No Guards Assigned";
+
+  // Flatten Sites & Checkpoints
+  const siteDetails = sites.map((site: any) => {
+    const siteCheckpoints = site.checkpoints?.length
+      ? site.checkpoints.map((c: any) => c.name).join(" | ")
+      : "None";
+
+    const subSiteDetails = site.subSites?.length
+      ? site.subSites.map((sub: any) => {
+          const subCheckpoints = sub.checkpoints?.length
+            ? sub.checkpoints.map((c: any) => c.name).join(" | ")
+            : "None";
+          return `${sub.name} [${subCheckpoints}]`;
+        }).join(" || ")
+      : "None";
+
+    return `${site.name} | CP: ${siteCheckpoints} | SubSites: ${subSiteDetails}`;
+  }).join(" ### ");
+
+  const exportData = {
+    "Patrol ID": patrol.patrolId,
+    "Status": patrol.status,
+    "Vehicle ID": patrol.vehicleId,
+    "Start Time": patrol.startTime,
+    "Estimated Completion": patrol.estimatedCompletion,
+    "Completion %": patrol.completionPercentage,
+    "Total Sites": patrol.totalSites,
+    "Completed Sites": patrol.completedSites,
+    "Total SubSites": patrol.totalSubSites,
+    "Completed SubSites": patrol.completedSubSites,
+    "Total Checkpoints": patrol.totalCheckpoints,
+    "Completed Checkpoints": patrol.completedCheckpoints,
+    "Missed Checkpoints": patrol.missedCheckpoints,
+    "Route Deviation": patrol.hasDeviation ? "Yes" : "No",
+
+    "Order Location": order?.locationName,
+    "Order Address": order?.locationAddress,
+    "Order Service Type": order?.serviceType,
+    "Order Start Date": order?.startDate,
+    "Order Start Time": order?.startTime,
+    "Order Status": order?.status,
+
+    "Client Name": client?.name,
+    "Client Email": client?.email,
+    "Client Mobile": client?.mobile,
+
+    "Guards": guardNames,
+    "Sites & Checkpoints": siteDetails,
+    "Created At": patrol.createdAt,
+  };
+
+  const headers = Object.keys(exportData);
+
+  const csvRows = [
+    headers.join(","),
+    headers
+      .map(field =>
+        `"${String((exportData as Record<string, any>)[field] ?? "").replace(/"/g, '""')}"`
+      )
+      .join(","),
+  ];
+
+  const blob = new Blob([csvRows.join("\n")], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `patrol-${patrol.patrolId}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+
+  toast.success("CSV exported successfully");
+};
+
+const exportPDF = async () => {
+  if (!patrol) {
+    toast.error("No patrol data available");
+    return;
+  }
+
+  const doc = new jsPDF();
+  let y = 20;
+
+  const addLine = (label: string, value: any) => {
+    doc.setFont("", "bold");
+    doc.text(label, 14, y);
+    doc.setFont("", "normal");
+    doc.text(String(value ?? "N/A"), 70, y);
+    y += 7;
+
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+  };
+
+  doc.setFontSize(16);
+  doc.text("Patrol Proof of Service Report", 14, y);
+  y += 12;
+  doc.setFontSize(11);
+
+  // Patrol Section
+  addLine("Patrol ID:", patrol.patrolId);
+  addLine("Status:", patrol.status);
+  addLine("Vehicle ID:", patrol.vehicleId);
+  addLine("Start Time:", patrol.startTime);
+  addLine("Estimated Completion:", patrol.estimatedCompletion);
+  addLine("Completion %:", patrol.completionPercentage + "%");
+  addLine(
+    "Checkpoints:",
+    `${patrol.completedCheckpoints}/${patrol.totalCheckpoints}`
+  );
+  addLine("Route Deviation:", patrol.hasDeviation ? "Yes" : "No");
+
+  y += 5;
+
+  // Client Section
+  doc.setFont("", "bold");
+  doc.text("Client Details", 14, y);
+  y += 8;
+
+  addLine("Name:", client?.name);
+  addLine("Email:", client?.email);
+  addLine("Mobile:", client?.mobile);
+
+  y += 5;
+
+  // Guards Section
+  doc.setFont("", "bold");
+  doc.text("Assigned Guards", 14, y);
+  y += 8;
+
+  guards.forEach((g: any) => {
+    addLine(
+      g.name,
+      `Status: ${g.guardStatus} | ClockIn: ${g.clockInTime ?? "N/A"}`
+    );
+  });
+
+  y += 5;
+
+  // Sites Section
+  doc.setFont("", "bold");
+  doc.text("Sites & Checkpoints", 14, y);
+  y += 8;
+
+  sites.forEach((site: any) => {
+    addLine("Site:", site.name);
+
+    site.checkpoints?.forEach((cp: any) => {
+      addLine(
+        ` - CP: ${cp.name}`,
+        `Status: ${cp.status}`
+      );
+    });
+
+    site.subSites?.forEach((sub: any) => {
+      addLine(" - SubSite:", sub.name);
+
+      sub.checkpoints?.forEach((scp: any) => {
+        addLine(
+          `   • CP: ${scp.name}`,
+          `Status: ${scp.status}`
+        );
+      });
+    });
+  });
+
+  doc.save(`patrol-${patrol.patrolId}.pdf`);
+
+  toast.success("PDF exported successfully");
+};
   return (
    <div className="p-6 space-y-6 bg-gray-50 min-h-screen text-[15px]">
 
@@ -122,6 +320,15 @@ const formatTimeOnly = (dateString: string) => {
         <Badge className={statusColor(patrol.status)}>
           {patrol.status}
         </Badge>
+
+        <Button
+      onClick={() => setShowExportDialog(true)}
+      className="flex items-center gap-2"
+      variant="outline"
+    >
+      <Download className="w-4 h-4" />
+      Export
+    </Button>
       </div>
 
       {/* PROGRESS SECTION */}
@@ -615,6 +822,49 @@ const formatTimeOnly = (dateString: string) => {
   )}
 </DialogContent>
       </Dialog>
+
+      {/* Export Dialog */}
+            <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Export Patrol Data</DialogTitle>
+                  <DialogDescription>
+                    Choose format for exporting patrol records and proof-of-service reports
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="grid grid-cols-2 gap-4 py-4">
+                  <Button
+                    onClick={() => handleExportPatrolData('csv')}
+                    className="flex flex-col items-center gap-2 h-20"
+                    variant="outline"
+                  >
+                    <FileText className="h-8 w-8" />
+                    <span>Export CSV</span>
+                  </Button>
+                  
+                  <Button
+                    onClick={() => handleExportPatrolData('pdf')}
+                    className="flex flex-col items-center gap-2 h-20"
+                    variant="outline"
+                  >
+                    <Download className="h-8 w-8" />
+                    <span>Proof-of-Service PDF</span>
+                  </Button>
+                </div>
+                
+                <div className="text-xl text-gray-600">
+                  <p>CSV: Raw patrol data for analysis and billing</p>
+                  <p>PDF: Client reports with GPS tracks, QR scan proof, and photos</p>
+                </div>
+                
+                <div className="flex justify-end pt-4">
+                  <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
     </div>
   );
 }
