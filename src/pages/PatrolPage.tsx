@@ -414,6 +414,9 @@ const [createPatrolRun, { isLoading: isCreating }] =
 
 const orders = ordersResponse?.data || [];
 
+const [deletePatrolRun, { isLoading: isDeleting }] =
+  useDeletePatrolRunMutation();
+
 const [deleteSiteApi, { isLoading: deletingSite }] =
   useDeletePatrolSiteMutation();
 
@@ -434,6 +437,7 @@ const [deleteCheckpointApi, { isLoading: deletingCheckpoint }] =
 });
 
 const Patrols = patrolResponse?.data || [];
+
 
 useEffect(() => {
   const timer = setTimeout(() => {
@@ -495,6 +499,7 @@ const totalCompletion = todayPatrols.reduce(
     clientId: "",
     description: ""
   });
+  
 
   const [subSiteFormData, setSubSiteFormData] = useState({
     name: "",
@@ -574,6 +579,21 @@ const availableSites = data?.data?.map((site) => ({
 
     return () => clearInterval(interval);
   }, [patrols]);
+
+  const handleDeletePatrol = async (id: string) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this patrol run?"
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    await deletePatrolRun(id).unwrap();
+    toast.success("Patrol run deleted successfully");
+  } catch (error: any) {
+    toast.error(error?.data?.message || "Failed to delete patrol run");
+  }
+};
 
   const handleDeleteSite = async (siteId: string) => {
   try {
@@ -1318,17 +1338,27 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                       <Eye className="h-3 w-3" />
                     </Button>
 
-                    {patrol.status?.toLowerCase() === "completed" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-8 px-2 text-lg"
-                        onClick={() => handleGenerateProofOfService(patrol)}
-                      >
-                        <FileText className="h-3 w-3 mr-1" />
-                        Proof
-                      </Button>
-                    )}
+                    {patrol.completedCheckpoints > 0 && (
+  <Button
+    size="sm"
+    variant="outline"
+    className="h-8 px-2 text-lg"
+    onClick={() => handleGenerateProofOfService(patrol)}
+  >
+    <FileText className="h-3 w-3 mr-1" />
+    Proof
+  </Button>
+)}
+
+<Button
+  size="sm"
+  variant="destructive"
+  className="h-8 w-8 p-0"
+  onClick={() => handleDeletePatrol(patrol.id)}
+  disabled={isDeleting}
+>
+  <Trash2 className="h-3 w-3" />
+</Button>
                   </div>
                 </div>
 
