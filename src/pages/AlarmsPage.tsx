@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Search, Filter, Clock, User, MapPin, Bell, CheckCircle, AlertTriangle, Phone, Timer, Route, Download, FileText, Users, Zap, TrendingUp, Siren } from "lucide-react";
+import { Plus, Search, Filter, Clock, User, MapPin, Bell, CheckCircle, AlertTriangle, Phone, Timer, Route, Download, FileText, Users, Zap, TrendingUp, Siren, Loader2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -12,6 +12,10 @@ import { Progress } from "../components/ui/progress";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
 import { availableGuards, sampleGuards } from "../data/sampleData";
 import { toast } from "sonner";
+import {useCreateAlarmMutation} from "../apis/alarmsAPI";
+import {useGetAllPatrolSitesQuery} from "../apis/patrollingAPI";
+import {useGetAllGuardsQuery} from "../apis/guardsApi";
+
 
 interface AlarmsPageProps {
   alarmList: any[];
@@ -98,22 +102,36 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
   const [notifications, setNotifications] = useState<any[]>([]);
   const [escalatedAlarms, setEscalatedAlarms] = useState<Set<string>>(new Set());
   const itemsPerPage = 5;
+
+
+  const [createAlarm, { isLoading: isCreating }] = useCreateAlarmMutation();
+
+    const { data: guardsResponse, isLoading, isError, error, isFetching } = useGetAllGuardsQuery({
+      limit: itemsPerPage,
+      page: currentPage,
+    });
+  
+    const guards = guardsResponse?.data || [];
+    const apiPagination = guardsResponse?.pagination;
+
+    const { data: sitesResponse, isLoading: sitesLoading } =
+  useGetAllPatrolSitesQuery({});
+
+const sites = sitesResponse?.data || [];
   
   // Create alarm form state
   const [newAlarm, setNewAlarm] = useState({
-    title: "",
-    site: "",
-    type: "",
-    priority: "",
-    assignedGuard: "",
-    eta: "",
-    slaTime: "",
-    monitoringCompany: "",
-    licenseDetails: "",
-    description: "",
-    unitPrice: "",
-    location: ""
-  });
+  title: "",
+  siteId: "",
+  type: "",
+  priority: "",
+  guardIds: [] as string[],
+  eta: "",
+  slaTime: "",
+  description: "",
+  unitPrice: "",
+  location: "",
+});
 
   // Filter alarms based on search and filters
   const filteredAlarms = alarmList.filter(alarm => {
@@ -197,22 +215,21 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
   const currentAlarms = filteredAlarms.slice(startIndex, endIndex);
 
   const handleCreateAlarm = () => {
-    setNewAlarm({
-      title: "",
-      site: "",
-      type: "",
-      priority: "",
-      assignedGuard: "unassigned",
-      eta: "",
-      slaTime: "",
-      monitoringCompany: "",
-      licenseDetails: "",
-      description: "",
-      unitPrice: "",
-      location: ""
-    });
-    setShowCreateDialog(true);
-  };
+  setNewAlarm({
+    title: "",
+    siteId: "",
+    type: "",
+    priority: "",
+    guardIds: [],
+    eta: "",
+    slaTime: "",
+    description: "",
+    unitPrice: "",
+    location: "",
+  });
+
+  setShowCreateDialog(true);
+};
 
   // Enhanced GPS-based guard assignment
   const handleSmartAssign = useCallback((alarm: any) => {
@@ -282,14 +299,40 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
     });
   };
 
-  const handleSaveAlarm = () => {
-    // In a real app, this would make an API call
-    console.log("Creating alarm:", newAlarm);
+  const handleSaveAlarm = async () => {
+  try {
+
+    const payload = {
+      title: newAlarm.title,
+      alarmType: newAlarm.type,
+      priority: newAlarm.priority,
+      siteId: newAlarm.siteId,
+      specificLocation: newAlarm.location,
+      guardIds: newAlarm.guardIds,
+      etaMinutes: Number(newAlarm.eta),
+      slaTimeMinutes: Number(newAlarm.slaTime),
+      unitPrice: Number(newAlarm.unitPrice),
+      price: Number(newAlarm.unitPrice),
+      description: newAlarm.description,
+    };
+
+    await createAlarm(payload).unwrap();
+
+    toast.success("Alarm created successfully");
+
     setShowCreateDialog(false);
-    toast.success("New alarm created", {
-      description: `${newAlarm.type} alarm at ${newAlarm.site}`
-    });
-  };
+
+  } catch (err: any) {
+    console.error(err);
+
+    const message =
+      err?.data?.message ||
+      err?.error ||
+      "Failed to create alarm";
+
+    toast.error(message);
+  }
+};
 
   // Export functionality
   const handleExportData = (format: 'csv' | 'pdf') => {
@@ -757,14 +800,27 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
             </div>
             
             <div>
-              <Label htmlFor="site">Site</Label>
-              <Input
-                id="site"
-                value={newAlarm.site}
-                onChange={(e) => setNewAlarm({...newAlarm, site: e.target.value})}
-                placeholder="Site or location name"
-              />
-            </div>
+  <Label htmlFor="site">Site</Label>
+
+  <Select
+    value={newAlarm.siteId}
+    onValueChange={(value: string) =>
+      setNewAlarm({ ...newAlarm, siteId: value })
+    }
+  >
+    <SelectTrigger>
+      <SelectValue placeholder="Select site" />
+    </SelectTrigger>
+
+    <SelectContent>
+      {sites.map((site: any) => (
+        <SelectItem key={site.id} value={site.id}>
+          {site.name}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
             
             <div>
   <Label htmlFor="type">Alarm Type</Label>
@@ -808,23 +864,42 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
 </div>
 
 <div>
-  <Label htmlFor="assignedGuard">Assigned Guard</Label>
-  <Select
-    value={newAlarm.assignedGuard}
-    onValueChange={(value: string) =>
-      setNewAlarm({ ...newAlarm, assignedGuard: value })
-    }
-  >
+  <Label>Assigned Guards</Label>
+
+  <Select>
     <SelectTrigger>
-      <SelectValue placeholder="Select guard" />
+      <SelectValue placeholder="Select guards" />
     </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="unassigned">Unassigned</SelectItem>
-      {availableGuards.map((guard) => (
-        <SelectItem key={guard.id} value={guard.name}>
-          {guard.name}
-        </SelectItem>
-      ))}
+
+    <SelectContent className="max-h-60 overflow-y-auto">
+
+      {guards.map((guard: any) => {
+        const isSelected = newAlarm.guardIds.includes(guard.id);
+
+        return (
+          <div
+            key={guard.id}
+            className="flex items-center gap-2 px-2 py-1 cursor-pointer"
+            onClick={() => {
+              if (isSelected) {
+                setNewAlarm({
+                  ...newAlarm,
+                  guardIds: newAlarm.guardIds.filter((id) => id !== guard.id),
+                });
+              } else {
+                setNewAlarm({
+                  ...newAlarm,
+                  guardIds: [...newAlarm.guardIds, guard.id],
+                });
+              }
+            }}
+          >
+            <input type="checkbox" checked={isSelected} readOnly />
+
+            <span>{guard.name}</span>
+          </div>
+        );
+      })}
     </SelectContent>
   </Select>
 </div>
@@ -889,7 +964,12 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
             <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveAlarm}>
+            <Button onClick={handleSaveAlarm}
+            isCreating={isCreating}
+            disabled={isCreating}
+            className="flex items-center gap-2"
+          >
+            {isCreating && <Loader2 className="animate-spin h-4 w-4" />}
               Create Alarm
             </Button>
           </div>
