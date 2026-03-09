@@ -12,9 +12,10 @@ import { Progress } from "../components/ui/progress";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
 import { availableGuards, sampleGuards } from "../data/sampleData";
 import { toast } from "sonner";
-import {useCreateAlarmMutation} from "../apis/alarmsAPI";
+import {useCreateAlarmMutation, useGetAllAlarmsQuery} from "../apis/alarmsAPI";
 import {useGetAllPatrolSitesQuery} from "../apis/patrollingAPI";
 import {useGetAllGuardsQuery} from "../apis/guardsApi";
+
 
 
 interface AlarmsPageProps {
@@ -106,6 +107,10 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
 
   const [createAlarm, { isLoading: isCreating }] = useCreateAlarmMutation();
 
+  const { data } = useGetAllAlarmsQuery();
+
+const alarms = data?.data || [];
+
     const { data: guardsResponse, isLoading, isError, error, isFetching } = useGetAllGuardsQuery({
       limit: itemsPerPage,
       page: currentPage,
@@ -132,6 +137,21 @@ const sites = sitesResponse?.data || [];
   unitPrice: "",
   location: "",
 });
+
+const formatDateOnly = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatTimeOnly = (dateString: string) => {
+  return new Date(dateString).toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+};
 
   // Filter alarms based on search and filters
   const filteredAlarms = alarmList.filter(alarm => {
@@ -212,7 +232,46 @@ const sites = sitesResponse?.data || [];
   const totalPages = Math.ceil(filteredAlarms.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentAlarms = filteredAlarms.slice(startIndex, endIndex);
+
+  const currentAlarms = alarms.map((alarm) => {
+
+  const createdTime = new Date(alarm.createdAt).getTime();
+  const now = Date.now();
+
+  const sinceMins = Math.floor((now - createdTime) / 60000);
+
+  const assignedGuard = alarm.guards?.length
+    ? alarm.guards.map((g) => g.name).join(", ")
+    : null;
+
+  return {
+    id: alarm.id,
+
+    site: alarm.siteName || "Unknown Site",
+
+    type: alarm.title || alarm.alarmType,
+
+    location: alarm.specificLocation,
+
+    priority: alarm.priority,
+
+    sinceMins,
+    createdAt: alarm.createdAt,
+
+    slaTargetMins: alarm.slaTimeMinutes,
+
+    assigned: assignedGuard,
+
+    eta: alarm.etaMinutes ? `${alarm.etaMinutes} min` : null,
+
+    status: alarm.status ,
+
+    breach: alarm.breach,
+
+    original: alarm, // keep full backend data if needed
+  };
+});
+
 
   const handleCreateAlarm = () => {
   setNewAlarm({
@@ -518,16 +577,20 @@ const sites = sitesResponse?.data || [];
           Clear
         </Button>
       </div>
+      
 
       {/* Main Alarm List - Compact Layout */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">Active Alarms</CardTitle>
         </CardHeader>
+        
         <CardContent className="pt-0">
+          
           {/* Alarm List */}
           <div className="space-y-3">
             {currentAlarms.map((alarm) => (
+              
               <Card key={alarm.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
@@ -547,9 +610,15 @@ const sites = sitesResponse?.data || [];
                         <Badge className={getPriorityColor(alarm.priority)}>
                           {alarm.priority} Priority
                         </Badge>
-                        <div className="text-xl text-gray-900 mt-1">
-                          {alarm.sinceMins}min ago
-                        </div>
+                        <div>
+      <p className="text-muted-foreground text-sm"></p>
+      <p className="font-semibold text-base">
+        Created At: {formatDateOnly(alarm.createdAt)}
+      </p>
+      <p className="font-semibold text-base">
+        {formatTimeOnly(alarm.createdAt)}
+      </p>
+    </div>
                         <div className={`text-lg font-medium ${getSLAColor(alarm.sinceMins, alarm.slaTargetMins)}`}>
                           SLA: {alarm.slaTargetMins}min
                         </div>
@@ -574,18 +643,20 @@ const sites = sitesResponse?.data || [];
                       {/* Status & Actions */}
                       <div className="flex items-center justify-between">
                         <div>
-                          {alarm.completed ? (
+                          {alarm.status ? (
                             <Badge className="bg-green-100 text-green-800">
-                              Resolved
+                              {alarm.status}
                             </Badge>
                           ) : (
                             <Badge className="bg-red-100 text-red-800">
-                              Active
+                              Undefined
                             </Badge>
                           )}
-                          {alarm.slaTargetMins && alarm.sinceMins > alarm.slaTargetMins && (
-                            <div className="text-lg text-red-600 mt-1">SLA Breach</div>
-                          )}
+                          {alarm.breach && (
+  <div className="text-lg font-semibold text-red-600 mt-1">
+    🚨 SLA Breach
+  </div>
+)}
                         </div>
                         
                         {/* Action Buttons */}
@@ -598,17 +669,8 @@ const sites = sitesResponse?.data || [];
                           >
                             <Bell className="h-3 w-3" />
                           </Button>
-                          {!alarm.assigned && !alarm.completed && (
-                            <Button
-                              size="sm"
-                              onClick={() => handleSmartAssign(alarm)}
-                              className="h-8 px-2 text-lg bg-blue-600 hover:bg-blue-700"
-                            >
-                              <User className="h-3 w-3 mr-1" />
-                              Smart Assign
-                            </Button>
-                          )}
-                          {!alarm.completed && (
+                          
+                          {!alarm.status && (
                             <Button
                               size="sm"
                               onClick={() => handleResolveWithBilling(alarm)}
@@ -624,7 +686,7 @@ const sites = sitesResponse?.data || [];
                   </div>
 
                   {/* SLA Progress Bar */}
-                  {!alarm.completed && alarm.slaTargetMins > 0 && (
+                  {!alarm.status && alarm.slaTargetMins > 0 && (
                     <div className="mt-3">
                       <div className="flex items-center justify-between text-lg text-gray-600 mb-1">
                         <span>SLA Progress</span>

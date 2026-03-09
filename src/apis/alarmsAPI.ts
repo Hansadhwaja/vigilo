@@ -4,6 +4,23 @@ import { baseApi } from "./baseApi";
    Interfaces
 ================================ */
 
+export interface AlarmGuardPivot {
+  id: string;
+  status: string;
+  assignedAt: string;
+  arrivedAt?: string | null;
+  completedAt?: string | null;
+  alarmId: string;
+  guardId: string;
+}
+
+export interface AlarmGuard {
+  id: string;
+  name: string;
+  email: string;
+  AlarmGuards: AlarmGuardPivot;
+}
+
 export interface Alarm {
   id: string;
   title: string;
@@ -45,11 +62,18 @@ export interface Alarm {
 
   createdAt: string;
   updatedAt: string;
+  guards: AlarmGuard[];
 }
 
 /* ================================
    API Responses
 ================================ */
+
+export interface GetAllAlarmsResponse {
+  success: boolean;
+  count: number;
+  data: Alarm[];
+}
 
 export interface CreateAlarmResponse {
   success: boolean;
@@ -103,6 +127,15 @@ export const alarmsApi = baseApi.injectEndpoints({
 
       invalidatesTags: [{ type: "Alarms", id: "LIST" }],
     }),
+    getAllAlarms: builder.query<GetAllAlarmsResponse, void>({
+      query: () => ({
+        url: `/alarm/getAllAlarms`,
+        method: "GET",
+      }),
+
+      providesTags: [{ type: "Alarms", id: "LIST" }],
+    }),
+
 
   }),
 });
@@ -113,4 +146,5 @@ export const alarmsApi = baseApi.injectEndpoints({
 
 export const {
   useCreateAlarmMutation,
+  useGetAllAlarmsQuery,
 } = alarmsApi;
