@@ -213,9 +213,9 @@ const formatTimeOnly = (dateString: string) => {
   }, [alarmList, escalatedAlarms]);
 
   // Calculate enhanced metrics
-  const activeAlarms = alarmList.filter(a => !a.completed).length;
-  const criticalAlarms = alarmList.filter(a => !a.completed && (a.priority === "Critical" || a.priority === "High")).length;
-  const slaBreachAlarms = alarmList.filter(a => !a.completed && a.slaTargetMins && a.sinceMins > a.slaTargetMins).length;
+  // const activeAlarms = alarmList.filter(a => !a.completed).length;
+  // const criticalAlarms = alarmList.filter(a => !a.completed && (a.priority === "Critical" || a.priority === "High")).length;
+  // const slaBreachAlarms = alarmList.filter(a => !a.completed && a.slaTargetMins && a.sinceMins > a.slaTargetMins).length;
   const averageResponseTime = alarmList.reduce((sum, alarm) => {
     if (alarm.responseTime) return sum + alarm.responseTime;
     return sum;
@@ -271,6 +271,27 @@ const formatTimeOnly = (dateString: string) => {
     original: alarm,
   };
 });
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+const todaysAlarms = formattedAlarms.filter((alarm) => {
+  const created = new Date(alarm.createdAt);
+  created.setHours(0, 0, 0, 0);
+
+  return created.getTime() === today.getTime();
+});
+
+const activeAlarms = todaysAlarms.filter(
+  (alarm) => alarm.status === "ongoing"
+).length;
+
+const criticalAlarms = todaysAlarms.filter(
+  (alarm) => alarm.priority?.toLowerCase() === "high"
+).length;
+
+const slaBreachAlarms = todaysAlarms.filter(
+  (alarm) => alarm.breach === true
+).length;
 
 const alarmsPerPage = 5;
 
@@ -283,6 +304,7 @@ const currentAlarms = formattedAlarms.slice(
   indexOfFirstAlarm,
   indexOfLastAlarm
 );
+
 
 
   const handleCreateAlarm = () => {
@@ -512,13 +534,13 @@ const currentAlarms = formattedAlarms.slice(
             </div>
           </div>
           
-          <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
+          {/* <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
             <Timer className="h-4 w-4 text-blue-600" />
             <div>
               <div className="font-bold text-blue-700">{Math.round(averageResponseTime)}m</div>
               <div className="text-lg text-blue-600">Avg Response</div>
             </div>
-          </div>
+          </div> */}
           
           <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
             <TrendingUp className="h-4 w-4 text-green-600" />
@@ -794,14 +816,14 @@ const currentAlarms = formattedAlarms.slice(
                       </Badge>
                     </div>
                     <div><strong>Time Since:</strong> {selectedAlarm.sinceMins} minutes</div>
-                    <div><strong>SLA Time:</strong> {selectedAlarm.slaTime} minutes</div>
+                    <div><strong>SLA Time:</strong> {selectedAlarm.slaTargetMins} minutes</div>
                   </div>
                 </div>
                 
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-3">Response Status</h3>
                   <div className="space-y-2">
-                    <div><strong>Status:</strong> {selectedAlarm.completed ? 'Resolved' : 'Active'}</div>
+                    <div><strong>Status:</strong> {selectedAlarm.status}</div>
                     <div><strong>Assigned Guard:</strong> {selectedAlarm.assigned || 'Unassigned'}</div>
                     <div><strong>ETA:</strong> {selectedAlarm.eta || 'Not calculated'}</div>
                     {selectedAlarm.responseTime && (
