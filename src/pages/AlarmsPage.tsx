@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import {useCreateAlarmMutation, useGetAllAlarmsQuery} from "../apis/alarmsAPI";
 import {useGetAllPatrolSitesQuery} from "../apis/patrollingAPI";
 import {useGetAllGuardsQuery} from "../apis/guardsApi";
+import { getStatusStyle, getStatusColor } from "./../utils/statusColors";
 
 
 
@@ -229,12 +230,11 @@ const formatTimeOnly = (dateString: string) => {
     .reduce((sum, a) => sum + (a.unitPrice || 0), 0);
 
   // Pagination
-  const totalPages = Math.ceil(filteredAlarms.length / itemsPerPage);
+  // const totalPages = Math.ceil(filteredAlarms.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
 
-  const currentAlarms = alarms.map((alarm) => {
-
+  const formattedAlarms = alarms.map((alarm) => {
   const createdTime = new Date(alarm.createdAt).getTime();
   const now = Date.now();
 
@@ -264,13 +264,25 @@ const formatTimeOnly = (dateString: string) => {
 
     eta: alarm.etaMinutes ? `${alarm.etaMinutes} min` : null,
 
-    status: alarm.status ,
+    status: alarm.status,
 
     breach: alarm.breach,
 
-    original: alarm, // keep full backend data if needed
+    original: alarm,
   };
 });
+
+const alarmsPerPage = 5;
+
+const totalPages = Math.ceil(formattedAlarms.length / alarmsPerPage);
+
+const indexOfLastAlarm = currentPage * alarmsPerPage;
+const indexOfFirstAlarm = indexOfLastAlarm - alarmsPerPage;
+
+const currentAlarms = formattedAlarms.slice(
+  indexOfFirstAlarm,
+  indexOfLastAlarm
+);
 
 
   const handleCreateAlarm = () => {
@@ -444,11 +456,13 @@ const formatTimeOnly = (dateString: string) => {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "High":
+      case "high":
         return "bg-red-100 text-red-800";
-      case "Medium":
+      case "critical":
+        return "bg-red-100 text-red-800";
+      case "medium":
         return "bg-yellow-100 text-yellow-800";
-      case "Low":
+      case "low":
         return "bg-green-100 text-green-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -582,7 +596,7 @@ const formatTimeOnly = (dateString: string) => {
       {/* Main Alarm List - Compact Layout */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Active Alarms</CardTitle>
+          <CardTitle className="text-lg">Patrol Alarms</CardTitle>
         </CardHeader>
         
         <CardContent className="pt-0">
@@ -596,7 +610,7 @@ const formatTimeOnly = (dateString: string) => {
                   <div className="flex items-center justify-between">
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
                       {/* Alarm Info */}
-                      <div>
+                      <div className="mt-3 flex flex-col justify-between">
                         <div className="font-medium text-gray-900">{alarm.site}</div>
                         <div className="text-xl text-gray-600">{alarm.type}</div>
                         <div className="flex items-center gap-1 mt-1">
@@ -606,7 +620,7 @@ const formatTimeOnly = (dateString: string) => {
                       </div>
                       
                       {/* Priority & Timing */}
-                      <div>
+                      <div className="mt-2">
                         <Badge className={getPriorityColor(alarm.priority)}>
                           {alarm.priority} Priority
                         </Badge>
@@ -625,7 +639,7 @@ const formatTimeOnly = (dateString: string) => {
                       </div>
                       
                       {/* Assignment */}
-                      <div>
+                      <div className="mt-4 flex flex-col justify-between">
                         {alarm.assigned ? (
                           <>
                             <div className="text-xl text-gray-900">{alarm.assigned}</div>
@@ -644,14 +658,17 @@ const formatTimeOnly = (dateString: string) => {
                       <div className="flex items-center justify-between">
                         <div>
                           {alarm.status ? (
-                            <Badge className="bg-green-100 text-green-800">
-                              {alarm.status}
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-red-100 text-red-800">
-                              Undefined
-                            </Badge>
-                          )}
+  <Badge
+    style={getStatusStyle(alarm.status)}
+    className="border capitalize"
+  >
+    {getStatusColor(alarm.status).label}
+  </Badge>
+) : (
+  <Badge className="bg-gray-100 text-gray-600 border-gray-300">
+    Undefined
+  </Badge>
+)}
                           {alarm.breach && (
   <div className="text-lg font-semibold text-red-600 mt-1">
     🚨 SLA Breach
