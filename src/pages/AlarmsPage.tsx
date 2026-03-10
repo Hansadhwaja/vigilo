@@ -155,17 +155,17 @@ const formatTimeOnly = (dateString: string) => {
 };
 
   // Filter alarms based on search and filters
-  const filteredAlarms = alarmList.filter(alarm => {
-    const matchesSearch = alarm.site.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         alarm.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (alarm.assigned && alarm.assigned.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesStatus = statusFilter === "all" || 
-                         (statusFilter === "active" && !alarm.completed) ||
-                         (statusFilter === "resolved" && alarm.completed);
-    const matchesPriority = priorityFilter === "all" || alarm.priority === priorityFilter;
+  // const filteredAlarms = alarmList.filter(alarm => {
+  //   const matchesSearch = alarm.site.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //                        alarm.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //                        (alarm.assigned && alarm.assigned.toLowerCase().includes(searchTerm.toLowerCase()));
+  //   const matchesStatus = statusFilter === "all" || 
+  //                        (statusFilter === "active" && !alarm.completed) ||
+  //                        (statusFilter === "resolved" && alarm.completed);
+  //   const matchesPriority = priorityFilter === "all" || alarm.priority === priorityFilter;
     
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
+  //   return matchesSearch && matchesStatus && matchesPriority;
+  // });
 
   // Enhanced SLA monitoring and escalation
   useEffect(() => {
@@ -293,17 +293,60 @@ const slaBreachAlarms = todaysAlarms.filter(
   (alarm) => alarm.breach === true
 ).length;
 
+
+const filteredAlarms = formattedAlarms.filter((alarm) => {
+  const search = searchTerm.toLowerCase();
+
+  // SEARCH
+  const matchesSearch =
+    alarm.site?.toLowerCase().includes(search) ||
+    alarm.type?.toLowerCase().includes(search) ||
+    alarm.location?.toLowerCase().includes(search) ||
+    alarm.assigned?.toLowerCase().includes(search);
+
+  // STATUS FILTER
+  let matchesStatus = true;
+  if (statusFilter === "ongoing") {
+    matchesStatus = alarm.status === "ongoing";
+  }
+  if (statusFilter === "completed") {
+    matchesStatus = alarm.status === "completed" ;
+  }
+  if (statusFilter === "cancelled") {
+    matchesStatus = alarm.status === "cancelled";
+  }
+  if (statusFilter === "pending") {
+    matchesStatus = alarm.status === "pending";
+  }
+  if (statusFilter === "delayed") {
+    matchesStatus = alarm.status === "delayed" ;
+  }
+
+  // PRIORITY FILTER
+  let matchesPriority = true;
+  if (priorityFilter !== "all") {
+    matchesPriority =
+      alarm.priority?.toLowerCase() === priorityFilter.toLowerCase();
+  }
+
+  return matchesSearch && matchesStatus && matchesPriority;
+});
+
 const alarmsPerPage = 5;
 
-const totalPages = Math.ceil(formattedAlarms.length / alarmsPerPage);
+const totalPages = Math.ceil(filteredAlarms.length / alarmsPerPage);
 
 const indexOfLastAlarm = currentPage * alarmsPerPage;
 const indexOfFirstAlarm = indexOfLastAlarm - alarmsPerPage;
 
-const currentAlarms = formattedAlarms.slice(
+const currentAlarms = filteredAlarms.slice(
   indexOfFirstAlarm,
   indexOfLastAlarm
 );
+
+useEffect(() => {
+  setCurrentPage(1);
+}, [searchTerm, statusFilter, priorityFilter]);
 
 
 
@@ -585,8 +628,11 @@ const currentAlarms = formattedAlarms.slice(
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="resolved">Resolved</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="ongoing">Ongoing</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="delayed">Delayed</SelectItem>
           </SelectContent>
         </Select>
         <Select value={priorityFilter} onValueChange={setPriorityFilter}>
@@ -595,9 +641,10 @@ const currentAlarms = formattedAlarms.slice(
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Priority</SelectItem>
-            <SelectItem value="High">High</SelectItem>
-            <SelectItem value="Medium">Medium</SelectItem>
-            <SelectItem value="Low">Low</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="critical">Critical</SelectItem>
           </SelectContent>
         </Select>
         <Button 
