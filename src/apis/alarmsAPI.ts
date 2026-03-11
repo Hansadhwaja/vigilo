@@ -58,6 +58,10 @@ export interface Alarm {
 
   status: string;
 
+  monitoringCompany?: string;
+  license?: string;
+
+
   breach: boolean;
 
   createdAt: string;

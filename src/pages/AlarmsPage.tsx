@@ -845,93 +845,220 @@ useEffect(() => {
       </Card>
 
       {/* Alarm Details Dialog */}
-      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Alarm Details</DialogTitle>
-            <DialogDescription>
-              Comprehensive alarm information and response status
-            </DialogDescription>
-          </DialogHeader>
-          
-          {selectedAlarm && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Alarm Information</h3>
-                  <div className="space-y-2">
-                    <div><strong>Site:</strong> {selectedAlarm.site}</div>
-                    <div><strong>Type:</strong> {selectedAlarm.type}</div>
-                    <div><strong>Location:</strong> {selectedAlarm.location || 'Not specified'}</div>
-                    <div>
-                      <strong>Priority:</strong> 
-                      <Badge className={`ml-2 ${getPriorityColor(selectedAlarm.priority)}`}>
-                        {selectedAlarm.priority}
-                      </Badge>
-                    </div>
-                    <div><strong>Time Since:</strong> {selectedAlarm.sinceMins} minutes</div>
-                    <div><strong>SLA Time:</strong> {selectedAlarm.slaTargetMins} minutes</div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Response Status</h3>
-                  <div className="space-y-2">
-                    <div><strong>Status:</strong> {selectedAlarm.status}</div>
-                    <div><strong>Assigned Guard:</strong> {selectedAlarm.assigned || 'Unassigned'}</div>
-                    <div><strong>ETA:</strong> {selectedAlarm.eta || 'Not calculated'}</div>
-                    {selectedAlarm.responseTime && (
-                      <div><strong>Response Time:</strong> {selectedAlarm.responseTime} minutes</div>
-                    )}
-                    {selectedAlarm.completedAt && (
-                      <div><strong>Resolved At:</strong> {new Date(selectedAlarm.completedAt).toLocaleString()}</div>
-                    )}
-                  </div>
-                </div>
+<Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+  <DialogContent className="max-w-4xl p-6">
+    <DialogHeader>
+      <DialogTitle className="text-2xl font-bold">
+        Alarm Details
+      </DialogTitle>
+      <DialogDescription className="text-gray-500">
+        Comprehensive alarm information and response tracking
+      </DialogDescription>
+    </DialogHeader>
+
+    {selectedAlarm && (
+      <div className="space-y-6">
+
+        {/* TOP GRID */}
+        <div className="grid grid-cols-2 gap-6">
+
+          {/* Alarm Information */}
+          <div className="bg-gray-50 p-4 rounded-lg border">
+            <h3 className="font-semibold text-lg mb-3 text-gray-800">
+              Alarm Information
+            </h3>
+
+            <div className="space-y-2 text-sm">
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">Site</span>
+                <span className="font-medium">{selectedAlarm.site}</span>
               </div>
 
-              {selectedAlarm.description && (
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
-                  <p className="text-xl text-gray-600 p-3 bg-gray-50 rounded">
-                    {selectedAlarm.description}
-                  </p>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Type</span>
+                <span className="font-medium">{selectedAlarm.type}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">Location</span>
+                <span className="font-medium">
+                  {selectedAlarm.location || "Not specified"}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500">Priority</span>
+
+                <Badge className={`${getPriorityColor(selectedAlarm.priority)}`}>
+                  {selectedAlarm.priority}
+                </Badge>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">Time Since</span>
+                <span>{selectedAlarm.sinceMins} minutes</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">SLA Time</span>
+                <span>{selectedAlarm.slaTargetMins} minutes</span>
+              </div>
+
+            </div>
+          </div>
+
+
+          {/* Monitoring Details (NEW SECTION) */}
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <h3 className="font-semibold text-lg mb-3 text-blue-800">
+              Monitoring Details
+            </h3>
+
+            <div className="space-y-2 text-sm">
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">Monitoring Company</span>
+                <span className="font-medium">
+                  {selectedAlarm.monitoringCompany || "Not Provided"}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="text-gray-500">License</span>
+                <span className="font-medium">
+                  {selectedAlarm.license || "Not Provided"}
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+
+        {/* RESPONSE STATUS */}
+        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+          <h3 className="font-semibold text-lg mb-3 text-green-800">
+            Response Status
+          </h3>
+
+          <div className="grid grid-cols-2 gap-4 text-sm">
+
+            <div className="flex justify-between">
+              <span className="text-gray-500">Status -</span>
+              <span className="font-medium capitalize mr-60">
+                {selectedAlarm.status}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-gray-500">Assigned Guard -</span>
+              <span className="mr-45">
+                {selectedAlarm.assigned || "Unassigned"}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-gray-500">ETA -</span>
+              <span className="mr-65">
+                {selectedAlarm.eta || "Not calculated"}
+              </span>
+            </div>
+
+            {selectedAlarm.responseTime && (
+              <div className="flex justify-between">
+                <span className="text-gray-500">Response Time</span>
+                <span>{selectedAlarm.responseTime} minutes</span>
+              </div>
+            )}
+
+            {selectedAlarm.completedAt && (
+              <div className="flex justify-between">
+                <span className="text-gray-500">Resolved At</span>
+                <span>
+                  {new Date(selectedAlarm.completedAt).toLocaleString()}
+                </span>
+              </div>
+            )}
+
+          </div>
+        </div>
+
+
+        {/* DESCRIPTION */}
+        {selectedAlarm.description && (
+          <div className="bg-gray-50 p-4 rounded-lg border">
+            <h3 className="font-semibold text-lg mb-2">
+              Description
+            </h3>
+
+            <p className="text-sm text-gray-700">
+              {selectedAlarm.description}
+            </p>
+          </div>
+        )}
+
+
+        {/* SLA STATUS */}
+        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+          <h3 className="font-semibold text-lg mb-3 text-red-700">
+            SLA Status
+          </h3>
+
+          <div className="space-y-3">
+
+            <div className="flex justify-between text-sm">
+              <span>Time Elapsed</span>
+
+              <span
+                className={getSLAColor(
+                  selectedAlarm.sinceMins,
+                  selectedAlarm.slaTargetMins
+                )}
+              >
+                {selectedAlarm.sinceMins}m / {selectedAlarm.slaTargetMins}m
+              </span>
+            </div>
+
+            {selectedAlarm.slaTargetMins > 0 && (
+              <Progress
+                value={Math.min(
+                  (selectedAlarm.sinceMins /
+                    selectedAlarm.slaTargetMins) *
+                    100,
+                  100
+                )}
+                className="h-3"
+              />
+            )}
+
+            {selectedAlarm.slaTargetMins > 0 &&
+              selectedAlarm.sinceMins >
+                selectedAlarm.slaTargetMins && (
+                <div className="text-red-600 font-medium text-sm">
+                  ⚠️ SLA Breach:{" "}
+                  {selectedAlarm.sinceMins -
+                    selectedAlarm.slaTargetMins}{" "}
+                  minutes overdue
                 </div>
               )}
 
-              {/* SLA Status */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">SLA Status</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xl">
-                    <span>Time Elapsed:</span>
-                    <span className={getSLAColor(selectedAlarm.sinceMins, selectedAlarm.slaTargetMins)}>
-                      {selectedAlarm.sinceMins}m / {selectedAlarm.slaTargetMins}m
-                    </span>
-                  </div>
-                  {selectedAlarm.slaTargetMins > 0 && (
-                    <Progress 
-                      value={Math.min((selectedAlarm.sinceMins / selectedAlarm.slaTargetMins) * 100, 100)} 
-                      className="h-3"
-                    />
-                  )}
-                  {selectedAlarm.slaTargetMins > 0 && selectedAlarm.sinceMins > selectedAlarm.slaTargetMins && (
-                    <div className="text-xl text-red-600 font-medium">
-                      ⚠️ SLA Breach: {selectedAlarm.sinceMins - selectedAlarm.slaTargetMins} minutes overdue
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={() => setShowDetailsDialog(false)}>
-              Close
-            </Button>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+
+      </div>
+    )}
+
+    <div className="flex justify-end pt-4">
+      <Button
+        variant="outline"
+        onClick={() => setShowDetailsDialog(false)}
+      >
+        Close
+      </Button>
+    </div>
+  </DialogContent>
+</Dialog>
 
       {/* Create Alarm Dialog */}
 <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
