@@ -100,6 +100,8 @@ export interface CreateAlarmPayload {
   guardIds: string[];
   etaMinutes?: number;
   slaTimeMinutes: number;
+  monitoringCompany: string;
+  license: string;
   unitPrice: number;
   price: number;
 }

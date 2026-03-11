@@ -137,6 +137,8 @@ const sites = sitesResponse?.data || [];
   description: "",
   unitPrice: "",
   location: "",
+  monitoringCompany: "",
+  license: "",
 });
 
 const formatDateOnly = (dateString: string) => {
@@ -362,6 +364,8 @@ useEffect(() => {
     description: "",
     unitPrice: "",
     location: "",
+    monitoringCompany: "",
+    license: "",
   });
 
   setShowCreateDialog(true);
@@ -450,6 +454,9 @@ useEffect(() => {
       unitPrice: Number(newAlarm.unitPrice),
       price: Number(newAlarm.unitPrice),
       description: newAlarm.description,
+      monitoringCompany: newAlarm.monitoringCompany,
+      license: newAlarm.license,
+
     };
 
     await createAlarm(payload).unwrap();
@@ -477,7 +484,7 @@ useEffect(() => {
       'Site': alarm.site,
       'Type': alarm.type,
       'Priority': alarm.priority,
-      'Status': alarm.completed ? 'Resolved' : 'Active',
+      'Status': alarm.status ? 'Resolved' : 'Active',
       'Assigned Guard': alarm.assigned || 'Unassigned',
       'SLA Target (min)': alarm.slaTargetMins,
       'Time Since (min)': alarm.sinceMins,
@@ -927,202 +934,282 @@ useEffect(() => {
       </Dialog>
 
       {/* Create Alarm Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Create New Alarm</DialogTitle>
-            <DialogDescription>
-              Register a new security alarm and assign response parameters
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto">
-            <div>
-              <Label htmlFor="title">Alarm Title</Label>
-              <Input
-                id="title"
-                value={newAlarm.title}
-                onChange={(e) => setNewAlarm({...newAlarm, title: e.target.value})}
-                placeholder="Brief alarm description"
-              />
-            </div>
-            
-            <div>
-  <Label htmlFor="site">Site</Label>
+<Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+  <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+    
+    <DialogHeader>
+      <DialogTitle className="text-xl font-semibold">
+        Create New Alarm
+      </DialogTitle>
+      <DialogDescription>
+        Register a new security alarm and assign response parameters
+      </DialogDescription>
+    </DialogHeader>
 
-  <Select
-    value={newAlarm.siteId}
-    onValueChange={(value: string) =>
-      setNewAlarm({ ...newAlarm, siteId: value })
-    }
-  >
-    <SelectTrigger>
-      <SelectValue placeholder="Select site" />
-    </SelectTrigger>
+    {/* FORM GRID */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4">
 
-    <SelectContent>
-      {sites.map((site: any) => (
-        <SelectItem key={site.id} value={site.id}>
-          {site.name}
-        </SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-</div>
-            
-            <div>
-  <Label htmlFor="type">Alarm Type</Label>
-  <Select
-    value={newAlarm.type}
-    onValueChange={(value: string) =>
-      setNewAlarm({ ...newAlarm, type: value })
-    }
-  >
-    <SelectTrigger>
-      <SelectValue placeholder="Select type" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="Intrusion">Intrusion</SelectItem>
-      <SelectItem value="Fire">Fire Alarm</SelectItem>
-      <SelectItem value="Medical">Medical Emergency</SelectItem>
-      <SelectItem value="Security">Security Breach</SelectItem>
-      <SelectItem value="Technical">Technical Fault</SelectItem>
-      <SelectItem value="Environmental">Environmental</SelectItem>
-    </SelectContent>
-  </Select>
-</div>
+      {/* Alarm Title */}
+      <div>
+        <Label htmlFor="title">Alarm Title</Label>
+        <Input
+          id="title"
+          value={newAlarm.title}
+          onChange={(e) =>
+            setNewAlarm({ ...newAlarm, title: e.target.value })
+          }
+          placeholder="Brief alarm description"
+        />
+      </div>
 
-<div>
-  <Label htmlFor="priority">Priority</Label>
-  <Select
-    value={newAlarm.priority}
-    onValueChange={(value: string) =>
-      setNewAlarm({ ...newAlarm, priority: value })
-    }
-  >
-    <SelectTrigger>
-      <SelectValue placeholder="Select priority" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="High">High</SelectItem>
-      <SelectItem value="Medium">Medium</SelectItem>
-      <SelectItem value="Low">Low</SelectItem>
-    </SelectContent>
-  </Select>
-</div>
+      {/* Site */}
+      <div>
+        <Label htmlFor="site">Site</Label>
 
-<div>
-  <Label>Assigned Guards</Label>
+        <Select
+          value={newAlarm.siteId}
+          onValueChange={(value: string) =>
+            setNewAlarm({ ...newAlarm, siteId: value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select site" />
+          </SelectTrigger>
 
-  <Select>
-    <SelectTrigger>
-      <SelectValue placeholder="Select guards" />
-    </SelectTrigger>
+          <SelectContent>
+            {sites.map((site: any) => (
+              <SelectItem key={site.id} value={site.id}>
+                {site.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
-    <SelectContent className="max-h-60 overflow-y-auto">
+      {/* Alarm Type */}
+      <div>
+        <Label>Alarm Type</Label>
+        <Select
+          value={newAlarm.type}
+          onValueChange={(value: string) =>
+            setNewAlarm({ ...newAlarm, type: value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select type" />
+          </SelectTrigger>
 
-      {guards.map((guard: any) => {
-        const isSelected = newAlarm.guardIds.includes(guard.id);
+          <SelectContent>
+            <SelectItem value="Intrusion">Intrusion</SelectItem>
+            <SelectItem value="Fire">Fire Alarm</SelectItem>
+            <SelectItem value="Medical">Medical Emergency</SelectItem>
+            <SelectItem value="Security">Security Breach</SelectItem>
+            <SelectItem value="Technical">Technical Fault</SelectItem>
+            <SelectItem value="Environmental">Environmental</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-        return (
-          <div
-            key={guard.id}
-            className="flex items-center gap-2 px-2 py-1 cursor-pointer"
-            onClick={() => {
-              if (isSelected) {
-                setNewAlarm({
-                  ...newAlarm,
-                  guardIds: newAlarm.guardIds.filter((id) => id !== guard.id),
-                });
-              } else {
-                setNewAlarm({
-                  ...newAlarm,
-                  guardIds: [...newAlarm.guardIds, guard.id],
-                });
-              }
-            }}
-          >
-            <input type="checkbox" checked={isSelected} readOnly />
+      {/* Priority */}
+      <div>
+        <Label>Priority</Label>
 
-            <span>{guard.name}</span>
-          </div>
-        );
-      })}
-    </SelectContent>
-  </Select>
-</div>
+        <Select
+          value={newAlarm.priority}
+          onValueChange={(value: string) =>
+            setNewAlarm({ ...newAlarm, priority: value })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select priority" />
+          </SelectTrigger>
 
-            
-            <div>
-              <Label htmlFor="eta">ETA (minutes)</Label>
-              <Input
-                id="eta"
-                type="number"
-                value={newAlarm.eta}
-                onChange={(e) => setNewAlarm({...newAlarm, eta: e.target.value})}
-                placeholder="Expected arrival time"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="slaTime">SLA Time (minutes)</Label>
-              <Input
-                id="slaTime"
-                type="number"
-                value={newAlarm.slaTime}
-                onChange={(e) => setNewAlarm({...newAlarm, slaTime: e.target.value})}
-                placeholder="SLA response time"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="unitPrice">Unit Price ($)</Label>
-              <Input
-                id="unitPrice"
-                type="number"
-                value={newAlarm.unitPrice}
-                onChange={(e) => setNewAlarm({...newAlarm, unitPrice: e.target.value})}
-                placeholder="Billing rate"
-              />
-            </div>
-            
-            <div className="col-span-2">
-              <Label htmlFor="location">Specific Location</Label>
-              <Input
-                id="location"
-                value={newAlarm.location}
-                onChange={(e) => setNewAlarm({...newAlarm, location: e.target.value})}
-                placeholder="Exact location within site"
-              />
-            </div>
-            
-            <div className="col-span-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={newAlarm.description}
-                onChange={(e) => setNewAlarm({...newAlarm, description: e.target.value})}
-                placeholder="Detailed alarm description and context..."
-                rows={3}
-              />
-            </div>
-          </div>
-          
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveAlarm}
-            isCreating={isCreating}
-            disabled={isCreating}
-            className="flex items-center gap-2"
-          >
-            {isCreating && <Loader2 className="animate-spin h-4 w-4" />}
-              Create Alarm
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          <SelectContent>
+            <SelectItem value="High">High</SelectItem>
+            <SelectItem value="Medium">Medium</SelectItem>
+            <SelectItem value="Low">Low</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Assigned Guards */}
+      <div>
+        <Label>Assigned Guards</Label>
+
+        <Select>
+          <SelectTrigger>
+            <SelectValue placeholder="Select guards" />
+          </SelectTrigger>
+
+          <SelectContent className="max-h-60 overflow-y-auto">
+
+            {guards.map((guard: any) => {
+              const isSelected = newAlarm.guardIds.includes(guard.id);
+
+              return (
+                <div
+                  key={guard.id}
+                  className="flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-gray-100 rounded"
+                  onClick={() => {
+                    if (isSelected) {
+                      setNewAlarm({
+                        ...newAlarm,
+                        guardIds: newAlarm.guardIds.filter(
+                          (id) => id !== guard.id
+                        ),
+                      });
+                    } else {
+                      setNewAlarm({
+                        ...newAlarm,
+                        guardIds: [...newAlarm.guardIds, guard.id],
+                      });
+                    }
+                  }}
+                >
+                  <input type="checkbox" checked={isSelected} readOnly />
+                  <span>{guard.name}</span>
+                </div>
+              );
+            })}
+
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* ETA */}
+      <div>
+        <Label htmlFor="eta">ETA (minutes)</Label>
+        <Input
+          id="eta"
+          type="number"
+          value={newAlarm.eta}
+          onChange={(e) =>
+            setNewAlarm({ ...newAlarm, eta: e.target.value })
+          }
+          placeholder="Expected arrival time"
+        />
+      </div>
+
+      {/* SLA */}
+      <div>
+        <Label htmlFor="slaTime">SLA Time (minutes)</Label>
+        <Input
+          id="slaTime"
+          type="number"
+          value={newAlarm.slaTime}
+          onChange={(e) =>
+            setNewAlarm({ ...newAlarm, slaTime: e.target.value })
+          }
+          placeholder="SLA response time"
+        />
+      </div>
+
+      {/* Unit Price */}
+      <div>
+        <Label htmlFor="unitPrice">Unit Price ($)</Label>
+        <Input
+          id="unitPrice"
+          type="number"
+          value={newAlarm.unitPrice}
+          onChange={(e) =>
+            setNewAlarm({ ...newAlarm, unitPrice: e.target.value })
+          }
+          placeholder="Billing rate"
+        />
+      </div>
+      {/* Location */}
+      <div className="col-span-2">
+        <Label htmlFor="location">Specific Location</Label>
+        <Input
+          id="location"
+          value={newAlarm.location}
+          onChange={(e) =>
+            setNewAlarm({ ...newAlarm, location: e.target.value })
+          }
+          placeholder="Exact location within site"
+        />
+      </div>
+
+      {/* SECTION DIVIDER */}
+      <div className="col-span-2 border-t pt-4 mt-2">
+        <p className="text-sm font-semibold text-gray-600 mb-2">
+          Monitoring Details
+        </p>
+      </div>
+
+      {/* Monitoring Company */}
+      <div>
+        <Label htmlFor="monitoringCompany">Monitoring Company</Label>
+        <Input
+          id="monitoringCompany"
+          value={newAlarm.monitoringCompany}
+          onChange={(e) =>
+            setNewAlarm({
+              ...newAlarm,
+              monitoringCompany: e.target.value,
+            })
+          }
+          placeholder="Monitoring service provider"
+        />
+      </div>
+
+      {/* License */}
+      <div>
+        <Label htmlFor="license">License</Label>
+        <Input
+          id="license"
+          value={newAlarm.license}
+          onChange={(e) =>
+            setNewAlarm({
+              ...newAlarm,
+              license: e.target.value,
+            })
+          }
+          placeholder="Security license number"
+        />
+      </div>
+
+      
+
+      {/* Description */}
+      <div className="col-span-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          value={newAlarm.description}
+          onChange={(e) =>
+            setNewAlarm({ ...newAlarm, description: e.target.value })
+          }
+          placeholder="Detailed alarm description and context..."
+          rows={3}
+        />
+      </div>
+
+    </div>
+
+    {/* BUTTONS */}
+    <div className="flex justify-end gap-3 pt-6 border-t mt-4">
+      <Button
+        variant="outline"
+        onClick={() => setShowCreateDialog(false)}
+      >
+        Cancel
+      </Button>
+
+      <Button
+        onClick={handleSaveAlarm}
+        disabled={isCreating}
+        className="flex items-center gap-2 px-5"
+      >
+        {isCreating && (
+          <Loader2 className="animate-spin h-4 w-4" />
+        )}
+        Create Alarm
+      </Button>
+    </div>
+
+  </DialogContent>
+</Dialog>
 
       {/* Export Dialog */}
       <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
