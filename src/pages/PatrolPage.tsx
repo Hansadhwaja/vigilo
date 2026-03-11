@@ -1224,6 +1224,7 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
       checkpoint.qr?.longitude ??
       checkpoint.longitude ??
       null,
+    name: checkpoint.name,
 
     range: checkpoint.verificationRange ?? null,
 
