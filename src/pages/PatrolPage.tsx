@@ -553,7 +553,7 @@ const availableSites = data?.data?.map((site) => ({
 
   // direct site checkpoints (important)
   checkpoints: site.checkpoints.map((cp) => ({
-    id: cp.id,
+    id: cp.id, // ensure checkpoint ID is included
     name: cp.name,
     qrCode: cp.qr?.qrUrl || "No QR",
     range: cp.verificationRange,
