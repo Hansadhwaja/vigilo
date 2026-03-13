@@ -178,41 +178,62 @@ const filteredClients = useMemo(() => {
   };
 
   const handleAcceptReject = async () => {
-    if (!selectedOrder) return;
+  if (!selectedOrder) return;
 
-    try {
-      if (actionType === "accept") {
-        // ✅ Check if start date has passed
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const startDate = new Date(selectedOrder.startDate);
-        startDate.setHours(0, 0, 0, 0);
-        
-        if (startDate < today) {
-          const daysLate = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-          const confirmLate = window.confirm(
-            `⚠️ WARNING: This order's start date was ${daysLate} day(s) ago.\n\n` +
-            `Are you sure you want to accept an expired order?`
-          );
-          
-          if (!confirmLate) {
-            return;
-          }
-        }
-        
-        await acceptOrder(selectedOrder.id).unwrap();
-        toast.success("Order accepted successfully");
-      } else if (actionType === "reject") {
-        await cancelOrder(selectedOrder.id).unwrap();
-        toast.success("Order rejected successfully");
+  try {
+    if (actionType === "accept") {
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const startDate = new Date(selectedOrder.startDate);
+      startDate.setHours(0, 0, 0, 0);
+
+      if (startDate < today) {
+        const daysLate = Math.floor(
+          (today.getTime() - startDate.getTime()) /
+          (1000 * 60 * 60 * 24)
+        );
+
+        const confirmLate = window.confirm(
+          `⚠️ WARNING: This order's start date was ${daysLate} day(s) ago.\n\n` +
+          `Are you sure you want to accept an expired order?`
+        );
+
+        if (!confirmLate) return;
       }
-      setShowActionDialog(false);
-      setActionMessage("");
-    } catch (err: any) {
-      console.error("Failed to process order:", err);
-      toast.error(err?.data?.message || "Failed to process order");
+
+      await acceptOrder(selectedOrder.id).unwrap();
+      toast.success("Order accepted successfully");
+
+    } else if (actionType === "reject") {
+      console.log("Sending request:", {
+    id: selectedOrder.id,
+    reason: actionMessage,
+  });
+
+
+      if (!actionMessage.trim()) {
+        toast.error("Please provide a rejection reason");
+        return;
+      }
+
+      await cancelOrder({
+        id: selectedOrder.id,
+        reason: actionMessage,
+      }).unwrap();
+
+      toast.success("Order rejected successfully");
     }
-  };
+
+    setShowActionDialog(false);
+    setActionMessage("");
+
+  } catch (err: any) {
+    console.error("Failed to process order:", err);
+    toast.error(err?.data?.message || "Failed to process order");
+  }
+};
 
   // ===== EDIT ORDER FUNCTIONS =====
   const handleEditClick = (order: any) => {

@@ -137,17 +137,17 @@ export const ordersApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, id) => [{ type: "Orders", id }],
     }),
 
-    // Cancel order
-    cancelOrder: builder.mutation<CancelOrderResponse, string>({
-      query: (id: string) => ({
-        url: `/orders/cancelOrder/${id}`,
-        method: "POST",
-      }),
-      invalidatesTags: (_result, _error, id) => [
-        { type: "Orders", id },
-        { type: "Orders", id: "LIST" },
-      ],
-    }),
+    // Cancel order (Admin reject order)
+cancelOrder: builder.mutation<
+  CancelOrderResponse,
+  { id: string; reason: string }
+>({
+  query: ({ id, reason }) => ({
+    url: `/orders/adminCancelOrder/${id}`,
+    method: "POST",
+    body: { reason },
+  }),
+}),
 
     // Accept order
     acceptOrder: builder.mutation<AcceptOrderResponse, string>({
