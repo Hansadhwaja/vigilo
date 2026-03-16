@@ -501,6 +501,7 @@ const totalCompletion = todayPatrols.reduce(
   const [showCheckpointDialog, setShowCheckpointDialog] = useState(false);
   const [selectedSite, setSelectedSite] = useState<any>(null);
   const [selectedSubSite, setSelectedSubSite] = useState<any>(null);
+  const [qrPreview, setQrPreview] = useState<string | null>(null);
   const [siteFormData, setSiteFormData] = useState({
     name: "",
     address: "",
@@ -1027,6 +1028,61 @@ const exportPDF = async () => {
     setShowQRDialog(true);
   };
 
+  
+
+const downloadSiteQRPdf = async (site: any) => {
+  const pdf = new jsPDF();
+
+  const checkpoints = [
+    ...site.checkpoints,
+    ...site.subsites.flatMap((s: any) => s.checkpoints)
+  ];
+
+  for (let i = 0; i < checkpoints.length; i++) {
+    const cp = checkpoints[i];
+
+    const img = await fetch(cp.qr.qrUrl);
+    const blob = await img.blob();
+    const imgUrl = URL.createObjectURL(blob);
+
+    if (i !== 0) pdf.addPage();
+
+    pdf.setFontSize(16);
+    pdf.text(cp.name, 105, 30, { align: "center" });
+
+    pdf.addImage(imgUrl, "PNG", 55, 50, 100, 100);
+  }
+
+  pdf.save(`${site.name}-checkpoints.pdf`);
+};
+
+  const downloadQR = async (url: string, name: string) => {
+  try {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = url;
+
+    img.onload = () => {
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      // Title
+      pdf.setFontSize(16);
+      pdf.text(name, 105, 30, { align: "center" });
+
+      // Add QR Image
+      pdf.addImage(img, "PNG", 55, 50, 100, 100);
+
+      pdf.save(`${name}-QR.pdf`);
+    };
+
+  } catch (error) {
+    console.error("QR download failed", error);
+  }
+};
   // Enhanced site management functions
   const handleCreateSite = () => {
     setSiteFormData({
@@ -2014,6 +2070,14 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
 
           <div className="flex items-center gap-2">
 
+          <Button
+  size="sm"
+  variant="outline"
+  onClick={() => downloadSiteQRPdf(site)}
+>
+  Download All QR
+</Button>
+
     {/* Delete Site */}
     <Button
       size="icon"
@@ -2098,6 +2162,22 @@ disabled={deletingSite}
                   </div>
 
                   <div className="flex items-center gap-2">
+                  <Button
+  size="icon"
+  variant="ghost"
+  onClick={() => setQrPreview(checkpoint.qr?.qrUrl ?? null)}
+>
+  👁
+</Button>
+
+<Button
+  size="icon"
+  variant="ghost"
+  onClick={() => downloadQR(checkpoint.qr?.qrUrl ?? "", checkpoint.name)}
+>
+  ⬇
+</Button>
+
   
   <Button
     size="lg"
@@ -2223,6 +2303,20 @@ disabled={deletingSubSite}
                           </div>
 
                           <div className="flex items-center gap-2">
+                            <Button
+  size="icon"
+  variant="ghost"
+  onClick={() => setQrPreview(checkpoint.qr?.qrUrl ?? null)}
+>
+  👁
+</Button>
+<Button
+  size="icon"
+  variant="ghost"
+  onClick={() => downloadQR(checkpoint.qr?.qrUrl ?? "", checkpoint.name)}
+>
+  ⬇
+</Button>
 
   <Button
     size="lg"
@@ -2351,8 +2445,26 @@ disabled={deletingCheckpoint}
               Create Patrol Run
             </Button>
           </div>
+          {qrPreview && (
+  <div
+    className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100]"
+    onClick={() => setQrPreview(null)}
+  >
+    <div
+      className="bg-white p-6 rounded-xl shadow-xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <img
+        src={qrPreview}
+        alt="QR Preview"
+        className="w-72 h-72 object-contain"
+      />
+    </div>
+  </div>
+)}
         </DialogContent>
       </Dialog>
+      
 
       {/* Export Dialog */}
       <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
@@ -2888,6 +3000,7 @@ disabled={deletingCheckpoint}
           </div>
         </DialogContent>
       </Dialog>
+      
     </div>
   );
 }
