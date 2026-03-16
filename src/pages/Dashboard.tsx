@@ -64,7 +64,8 @@ export default function Dashboard({ kpi }: DashboardProps) {
 
   const allOrders = ordersResponse?.data ?? [];
 
-  const buildDateTime = (isoDate: string, time: string) => {
+  const buildDateTime = (isoDate: string | null | undefined, time: string | null | undefined) => {
+    if (!isoDate || !time) return null;
     const datePart = isoDate.split("T")[0];
     return new Date(`${datePart}T${time}:00`);
   };
@@ -76,10 +77,13 @@ export default function Dashboard({ kpi }: DashboardProps) {
       if (["cancelled", "completed"].includes(order.status)) {
         return false;
       }
-
+      // Skip if any date/time field is missing
+      if (!order.startDate || !order.startTime || !order.endDate || !order.endTime) {
+        return false;
+      }
       const startDateTime = buildDateTime(order.startDate, order.startTime);
       const endDateTime = buildDateTime(order.endDate, order.endTime);
-
+      if (!startDateTime || !endDateTime) return false;
       return now >= startDateTime && now <= endDateTime;
     }).length;
   }, [allOrders, currentTime]);
