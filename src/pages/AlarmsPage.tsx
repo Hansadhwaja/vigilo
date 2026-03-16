@@ -1127,12 +1127,12 @@ useEffect(() => {
           </SelectTrigger>
 
           <SelectContent>
-            <SelectItem value="Intrusion">Intrusion</SelectItem>
-            <SelectItem value="Fire">Fire Alarm</SelectItem>
-            <SelectItem value="Medical">Medical Emergency</SelectItem>
-            <SelectItem value="Security">Security Breach</SelectItem>
-            <SelectItem value="Technical">Technical Fault</SelectItem>
-            <SelectItem value="Environmental">Environmental</SelectItem>
+            <SelectItem value="intrusion">Intrusion</SelectItem>
+            <SelectItem value="fire">Fire Alarm</SelectItem>
+            <SelectItem value="medical">Medical Emergency</SelectItem>
+            <SelectItem value="security">Security Breach</SelectItem>
+            <SelectItem value="technical">Technical Fault</SelectItem>
+            <SelectItem value="environmental">Environmental</SelectItem>
           </SelectContent>
         </Select>
       </div>
