@@ -34,17 +34,45 @@ import {
   Navigation,
   ChevronDown,
   ChevronUp,
+  Edit,
 } from "lucide-react";
-import { useGetPatrolRunByIdForAdminQuery } from "../apis/patrollingAPI";
+import {
+  useEditPatrolRunMutation,
+  useGetAllPatrolSitesQuery,
+  useGetPatrolRunByIdForAdminQuery,
+} from "../apis/patrollingAPI";
+import { useGetAllGuardsQuery } from "../apis/guardsApi";
 
 export default function PatrolDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { data, isLoading } =
+  const { data, isLoading, refetch } =
     useGetPatrolRunByIdForAdminQuery(id as string, {
       skip: !id,
     });
+
+  const [editPatrolRun, { isLoading: isUpdatingPatrol }] =
+    useEditPatrolRunMutation();
+
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editForm, setEditForm] = useState({
+    addSites: [] as string[],
+    removeSiteIds: [] as string[],
+    removeSubSiteIds: [] as string[],
+    removeCheckpointIds: [] as string[],
+    newGuardId: "",
+  });
+
+  const { data: allSitesResponse } = useGetAllPatrolSitesQuery(
+    { page: 1, limit: 200 },
+    { skip: !showEditDialog }
+  );
+
+  const { data: allGuardsResponse } = useGetAllGuardsQuery(
+    { page: 1, limit: 200 },
+    { skip: !showEditDialog }
+  );
 
   const patrolData = data?.data;
   const patrol = patrolData?.patrol;
@@ -52,12 +80,60 @@ export default function PatrolDetailsPage() {
   const client = patrolData?.client;
   const guards = patrolData?.guards || [];
   const sites = patrolData?.sites || [];
+  const allSites = allSitesResponse?.data || [];
+  const allGuards = allGuardsResponse?.data || [];
 
   const [showExportDialog, setShowExportDialog] = useState(false);
 
   const [viewerOpen, setViewerOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [open, setOpen] = useState(false)
+
+  const toggleSelection = (key: "addSites" | "removeSiteIds" | "removeSubSiteIds" | "removeCheckpointIds", value: string) => {
+    setEditForm((prev) => {
+      const exists = prev[key].includes(value);
+      return {
+        ...prev,
+        [key]: exists ? prev[key].filter((id) => id !== value) : [...prev[key], value],
+      };
+    });
+  };
+
+  const resetEditForm = () => {
+    setEditForm({
+      addSites: [],
+      removeSiteIds: [],
+      removeSubSiteIds: [],
+      removeCheckpointIds: [],
+      newGuardId: "",
+    });
+  };
+
+  const handleSubmitEdit = async () => {
+    if (!id) return;
+
+    try {
+      await editPatrolRun({
+        patrolRunId: id,
+        body: {
+          addSites: editForm.addSites,
+          removeSiteIds: editForm.removeSiteIds,
+          addSubSites: [],
+          removeSubSiteIds: editForm.removeSubSiteIds,
+          addCheckpoints: [],
+          removeCheckpointIds: editForm.removeCheckpointIds,
+          ...(editForm.newGuardId ? { newGuardId: editForm.newGuardId } : {}),
+        },
+      }).unwrap();
+
+      toast.success("Patrol run updated successfully");
+      setShowEditDialog(false);
+      resetEditForm();
+      refetch();
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to update patrol run");
+    }
+  };
 
   if (isLoading) return <div className="p-6">Loading...</div>;
   if (!patrol) return <div className="p-6">No data found.</div>;
@@ -321,14 +397,26 @@ const exportPDF = async () => {
           {patrol.status}
         </Badge>
 
-        <Button
-      onClick={() => setShowExportDialog(true)}
-      className="flex items-center gap-2"
-      variant="outline"
-    >
-      <Download className="w-4 h-4" />
-      Export
-    </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setShowEditDialog(true)}
+            className="flex items-center gap-2"
+            variant="outline"
+            disabled={patrol.status === "completed"}
+          >
+            <Edit className="w-4 h-4" />
+            Edit
+          </Button>
+
+          <Button
+            onClick={() => setShowExportDialog(true)}
+            className="flex items-center gap-2"
+            variant="outline"
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </Button>
+        </div>
       </div>
 
       {/* PROGRESS SECTION */}
@@ -431,14 +519,14 @@ const exportPDF = async () => {
     </div>
 
     {/* Images Section */}
-    {order?.images?.length > 0 && (
+    {(order?.images?.length ?? 0) > 0 && (
       <div className="space-y-3">
         <p className="text-sm font-medium text-muted-foreground">
-          Location Images ({order.images.length})
+          Location Images ({order?.images?.length ?? 0})
         </p>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {order.images.map((img: string, index: number) => (
+          {order?.images?.map((img: string, index: number) => (
             <img
               key={index}
               src={img}
@@ -865,6 +953,133 @@ const exportPDF = async () => {
                 </div>
               </DialogContent>
             </Dialog>
+
+      {/* Edit Patrol Dialog */}
+      <Dialog
+        open={showEditDialog}
+        onOpenChange={(value) => {
+          setShowEditDialog(value);
+          if (!value) resetEditForm();
+        }}
+      >
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Patrol Run</DialogTitle>
+            <DialogDescription>
+              Update patrol assignments by selecting items to add or remove.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-5">
+            <div>
+              <p className="text-sm font-medium mb-2">Reassign Guard (Optional)</p>
+              <select
+                className="w-full border rounded-md px-3 py-2 bg-white"
+                value={editForm.newGuardId}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, newGuardId: e.target.value }))}
+              >
+                <option value="">Keep existing guard assignment</option>
+                {allGuards.map((guard: any) => (
+                  <option key={guard.id} value={guard.id}>
+                    {guard.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium mb-2">Add Sites</p>
+              <div className="space-y-2 max-h-36 overflow-y-auto border rounded-md p-3">
+                {allSites
+                  .filter((site: any) => !sites.some((current: any) => current.id === site.id))
+                  .map((site: any) => (
+                    <label key={site.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editForm.addSites.includes(site.id)}
+                        onChange={() => toggleSelection("addSites", site.id)}
+                      />
+                      {site.name}
+                    </label>
+                  ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium mb-2">Remove Sites</p>
+              <div className="space-y-2 max-h-36 overflow-y-auto border rounded-md p-3">
+                {sites.map((site: any) => (
+                  <label key={site.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editForm.removeSiteIds.includes(site.id)}
+                      onChange={() => toggleSelection("removeSiteIds", site.id)}
+                    />
+                    {site.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium mb-2">Remove Sub-Sites</p>
+              <div className="space-y-2 max-h-36 overflow-y-auto border rounded-md p-3">
+                {sites.flatMap((site: any) =>
+                  (site.subSites || []).map((sub: any) => (
+                    <label key={sub.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editForm.removeSubSiteIds.includes(sub.id)}
+                        onChange={() => toggleSelection("removeSubSiteIds", sub.id)}
+                      />
+                      {site.name} / {sub.name}
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium mb-2">Remove Checkpoints</p>
+              <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-3">
+                {sites.flatMap((site: any) => {
+                  const siteCheckpoints = (site.checkpoints || []).map((cp: any) => ({
+                    id: cp.id,
+                    label: `${site.name} / ${cp.name}`,
+                  }));
+
+                  const subSiteCheckpoints = (site.subSites || []).flatMap((sub: any) =>
+                    (sub.checkpoints || []).map((cp: any) => ({
+                      id: cp.id,
+                      label: `${site.name} / ${sub.name} / ${cp.name}`,
+                    }))
+                  );
+
+                  return [...siteCheckpoints, ...subSiteCheckpoints].map((cp) => (
+                    <label key={cp.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editForm.removeCheckpointIds.includes(cp.id)}
+                        onChange={() => toggleSelection("removeCheckpointIds", cp.id)}
+                      />
+                      {cp.label}
+                    </label>
+                  ));
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-3 border-t">
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitEdit} disabled={isUpdatingPatrol}>
+              {isUpdatingPatrol ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
