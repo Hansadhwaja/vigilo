@@ -501,7 +501,7 @@ const totalCompletion = todayPatrols.reduce(
   const [showCheckpointDialog, setShowCheckpointDialog] = useState(false);
   const [selectedSite, setSelectedSite] = useState<any>(null);
   const [selectedSubSite, setSelectedSubSite] = useState<any>(null);
-  const [qrPreview, setQrPreview] = useState<string | null>(null);
+  const [qrPreview, setQrPreview] = useState<{ url: string; name: string } | null>(null);
   const [siteFormData, setSiteFormData] = useState({
     name: "",
     address: "",
@@ -1057,30 +1057,44 @@ const downloadSiteQRPdf = async (site: any) => {
 };
 
   const downloadQR = async (url: string, name: string) => {
-  try {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = url;
+  if (!url) {
+    toast.error("QR image URL is missing");
+    return;
+  }
 
-    img.onload = () => {
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
+  try {
+    const safeName = (name || "checkpoint").replace(/[^a-zA-Z0-9-_ ]/g, "").trim();
+    const fileName = `${safeName || "checkpoint"}-QR.png`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        mode: "cors",
+        credentials: "omit",
       });
 
-      // Title
-      pdf.setFontSize(16);
-      pdf.text(name, 105, 30, { align: "center" });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch QR image: ${response.status}`);
+      }
 
-      // Add QR Image
-      pdf.addImage(img, "PNG", 55, 50, 100, 100);
+      const blob = await response.blob();
+      if (!blob || blob.size === 0) {
+        throw new Error("Downloaded QR image is empty");
+      }
 
-      pdf.save(`${name}-QR.pdf`);
-    };
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = fileName;
 
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
+
+      toast.success("QR downloaded successfully");
   } catch (error) {
     console.error("QR download failed", error);
+      toast.error("QR download blocked by server CORS policy");
   }
 };
   // Enhanced site management functions
@@ -1251,17 +1265,36 @@ const downloadSiteQRPdf = async (site: any) => {
 };
 
   const handleAddSiteToPatrol = (site: any) => {
-    setFormData(prev => ({
-      ...prev,
-      sites: [...prev.sites, site]
-    }));
+    setFormData(prev => {
+      if (prev.sites.some((existingSite: any) => existingSite.id === site.id)) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        sites: [...prev.sites, site],
+      };
+    });
     
     toast.success("Site added to patrol", {
       description: `${site.name} with ${site.subsites.length} sub-sites added`
     });
   };
 
-const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
+  const toggleSiteSelection = (site: any) => {
+    setFormData((prev) => {
+      const alreadySelected = prev.sites.some((selectedSite: any) => selectedSite.id === site.id);
+
+      return {
+        ...prev,
+        sites: alreadySelected
+          ? prev.sites.filter((selectedSite: any) => selectedSite.id !== site.id)
+          : [...prev.sites, site],
+      };
+    });
+  };
+
+const generateQRCodeForCheckpoint = (checkpoint: any) => {
 
   console.log("CHECKPOINT DATA 👉", checkpoint);
 
@@ -1295,6 +1328,18 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
           "QR code information copied to clipboard for printing",
       });
     });
+};
+
+const handleQrIconAction = (checkpoint: any) => {
+  generateQRCodeForCheckpoint(checkpoint);
+
+  const qrUrl = checkpoint.qr?.qrUrl;
+  if (qrUrl) {
+    setQrPreview({ url: qrUrl, name: checkpoint.name || "checkpoint" });
+    return;
+  }
+
+  toast.error("QR image not available for preview");
 };
 
   const getStatusColor = (status: string) => {
@@ -2028,10 +2073,48 @@ const generateQRCodeForCheckpoint = (checkpoint: PatrolCheckpoint) => {
                 </div>
               </div>
 
-              {/* Available Sites */}
+              {/* Site Selector */}
+              <div className="space-y-3">
+                <Label>Select Sites</Label>
+                <Select>
+                  <SelectTrigger className="w-full md:w-[420px]">
+                    <SelectValue
+                      placeholder={
+                        formData.sites.length > 0
+                          ? `${formData.sites.length} site(s) selected`
+                          : "Select sites"
+                      }
+                    />
+                  </SelectTrigger>
+
+                  <SelectContent className="max-h-80 overflow-y-auto">
+                    {availableSites.length === 0 ? (
+                      <div className="px-3 py-2 text-sm text-gray-500">No sites available</div>
+                    ) : (
+                      availableSites.map((site) => {
+                        const isSelected = formData.sites.some((selectedSite) => selectedSite.id === site.id);
+
+                        return (
+                          <div
+                            key={site.id}
+                            className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100"
+                            onClick={() => toggleSiteSelection(site)}
+                          >
+                            <input type="checkbox" checked={isSelected} readOnly />
+                            <Building className="h-4 w-4 text-blue-600" />
+                            <span className="truncate">{site.name}</span>
+                          </div>
+                        );
+                      })
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Selected Sites */}
 <div className="space-y-5 max-h-[500px] overflow-y-auto pr-2">
 
-  {availableSites.map((site) => (
+  {formData.sites.map((site) => (
     <Card
       key={site.id}
       className="w-full border border-gray-200 shadow-sm hover:shadow-md transition"
@@ -2089,25 +2172,14 @@ disabled={deletingSite}
       <Trash2 className="h-4 w-4" />
     </Button>
 
-          {/* Add Site Button */}
           <Button
             size="sm"
             variant="outline"
             className="whitespace-nowrap"
-            onClick={() => handleAddSiteToPatrol(site)}
-            disabled={formData.sites.some((s) => s.id === site.id)}
+            onClick={() => toggleSiteSelection(site)}
           >
-            {formData.sites.some((s) => s.id === site.id) ? (
-              <>
-                <CheckCircle className="h-4 w-4 mr-1 text-green-600" />
-                Added
-              </>
-            ) : (
-              <>
-                <Plus className="h-4 w-4 mr-1" />
-                Add Site
-              </>
-            )}
+            <CheckCircle className="h-4 w-4 mr-1 text-green-600" />
+            Selected
           </Button>
         </div>
         </div>
@@ -2129,7 +2201,7 @@ disabled={deletingSite}
             
 
             <div className="space-y-2">
-              {site.checkpoints.map((checkpoint) => (
+              {site.checkpoints.map((checkpoint: any) => (
                 <div
                   key={checkpoint.id}
                   className="flex items-center justify-between bg-white p-3 rounded-md border"
@@ -2162,27 +2234,10 @@ disabled={deletingSite}
                   </div>
 
                   <div className="flex items-center gap-2">
-                  <Button
-  size="icon"
-  variant="ghost"
-  onClick={() => setQrPreview(checkpoint.qr?.qrUrl ?? null)}
->
-  👁
-</Button>
-
-<Button
-  size="icon"
-  variant="ghost"
-  onClick={() => downloadQR(checkpoint.qr?.qrUrl ?? "", checkpoint.name)}
->
-  ⬇
-</Button>
-
-  
   <Button
     size="lg"
     variant="ghost"
-    onClick={() => generateQRCodeForCheckpoint(checkpoint)}
+    onClick={() => handleQrIconAction(checkpoint)}
   >
     <QrCode className="h-10 w-10" />
   </Button>
@@ -2219,7 +2274,7 @@ disabled={deletingCheckpoint}
         {site.subsites.length >= 0 && (
           <div className="mt-5 space-y-4">
 
-            {site.subsites.map((subsite) => (
+            {site.subsites.map((subsite: any) => (
               <div
                 key={subsite.id}
                 className="p-4 bg-gray-50 border border-gray-200 rounded-lg"
@@ -2271,7 +2326,7 @@ disabled={deletingSubSite}
                   <div className="mt-3 space-y-2">
 
                     {subsite.checkpoints.length > 0 ? (
-                      subsite.checkpoints.map((checkpoint) => (
+                      subsite.checkpoints.map((checkpoint: any) => (
                         <div
                           key={checkpoint.id}
                           className="flex items-center justify-between bg-white p-3 rounded-md border"
@@ -2303,25 +2358,10 @@ disabled={deletingSubSite}
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <Button
-  size="icon"
-  variant="ghost"
-  onClick={() => setQrPreview(checkpoint.qr?.qrUrl ?? null)}
->
-  👁
-</Button>
-<Button
-  size="icon"
-  variant="ghost"
-  onClick={() => downloadQR(checkpoint.qr?.qrUrl ?? "", checkpoint.name)}
->
-  ⬇
-</Button>
-
   <Button
     size="lg"
     variant="ghost"
-    onClick={() => generateQRCodeForCheckpoint(checkpoint)}
+    onClick={() => handleQrIconAction(checkpoint)}
   >
     <QrCode className="h-4 w-4" />
   </Button>
@@ -2455,10 +2495,20 @@ disabled={deletingCheckpoint}
       onClick={(e) => e.stopPropagation()}
     >
       <img
-        src={qrPreview}
+        src={qrPreview.url}
         alt="QR Preview"
         className="w-72 h-72 object-contain"
       />
+      <div className="mt-4 flex justify-center">
+        <Button
+          size="sm"
+          onClick={() => downloadQR(qrPreview.url, qrPreview.name)}
+          className="flex items-center gap-2"
+        >
+          <Download className="h-4 w-4" />
+          Download QR
+        </Button>
+      </div>
     </div>
   </div>
 )}
