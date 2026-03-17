@@ -61,7 +61,10 @@ import {
   useDeleteCheckpointMutation,
     useDeletePatrolRunMutation,
     useGetAllPatrolRunsForAdminQuery,
-    useGetPatrolRunByIdForAdminQuery
+    useGetPatrolRunByIdForAdminQuery,
+    useLazyDownloadQRQuery,
+    useLazyDownloadSiteQRsPdfQuery
+
 } from "./../apis/patrollingAPI";
 import { getStatusColor, getStatusStyle } from "../utils/statusColors";
 import { useNavigate, useParams } from "react-router-dom";
@@ -374,6 +377,9 @@ const [debouncedSearch, setDebouncedSearch] = useState("");
 const [currentPage, setCurrentPage] = useState(1);
 const navigate = useNavigate();
 const { id } = useParams<{ id: string }>();
+
+const [triggerDownloadQR] = useLazyDownloadQRQuery();
+const [triggerDownloadSitePdf] = useLazyDownloadSiteQRsPdfQuery();
 
 
 
@@ -1031,29 +1037,31 @@ const exportPDF = async () => {
   
 
 const downloadSiteQRPdf = async (site: any) => {
-  const pdf = new jsPDF();
-
-  const checkpoints = [
-    ...site.checkpoints,
-    ...site.subsites.flatMap((s: any) => s.checkpoints)
-  ];
-
-  for (let i = 0; i < checkpoints.length; i++) {
-    const cp = checkpoints[i];
-
-    const img = await fetch(cp.qr.qrUrl);
-    const blob = await img.blob();
-    const imgUrl = URL.createObjectURL(blob);
-
-    if (i !== 0) pdf.addPage();
-
-    pdf.setFontSize(16);
-    pdf.text(cp.name, 105, 30, { align: "center" });
-
-    pdf.addImage(imgUrl, "PNG", 55, 50, 100, 100);
+  if (!site?.id) {
+    toast.error("Site ID is missing");
+    return;
   }
 
-  pdf.save(`${site.name}-checkpoints.pdf`);
+  try {
+    const blob = await triggerDownloadSitePdf({ siteId: site.id }).unwrap();
+    const objectUrl = URL.createObjectURL(blob);
+
+    const safeName = (site.name || "site").replace(/[^a-zA-Z0-9-_ ]/g, "").trim();
+    const fileName = `${safeName || "site"}-qr.pdf`;
+
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(objectUrl);
+    toast.success("Site QR PDF downloaded");
+  } catch (error) {
+    console.error("Site QR PDF download failed", error);
+    toast.error("Failed to download site QR PDF");
+  }
 };
 
   const downloadQR = async (url: string, name: string) => {
@@ -1064,22 +1072,9 @@ const downloadSiteQRPdf = async (site: any) => {
 
   try {
     const safeName = (name || "checkpoint").replace(/[^a-zA-Z0-9-_ ]/g, "").trim();
-    const fileName = `${safeName || "checkpoint"}-QR.png`;
+    const fileName = `${safeName || "checkpoint"}-QR.svg`;
 
-      const response = await fetch(url, {
-        method: "GET",
-        mode: "cors",
-        credentials: "omit",
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch QR image: ${response.status}`);
-      }
-
-      const blob = await response.blob();
-      if (!blob || blob.size === 0) {
-        throw new Error("Downloaded QR image is empty");
-      }
+      const blob = await triggerDownloadQR({ url, name: safeName || "checkpoint" }).unwrap();
 
       const objectUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");

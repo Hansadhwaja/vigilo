@@ -794,6 +794,26 @@ getAllPatrolCheckpoints: builder.query<
 
   providesTags: [{ type: "Patrol", id: "CHECKPOINT_LIST" }],
 }),
+downloadQR: builder.query<
+  Blob,
+  { url: string; name: string }
+>({
+  query: ({ url, name }) => ({
+    url: `/patrolling/downloadQR?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`,
+    method: "GET",
+    responseHandler: async (response) => response.blob(),
+  }),
+}),
+downloadSiteQRsPdf: builder.query<
+  Blob,
+  { siteId: string }
+>({
+  query: ({ siteId }) => ({
+    url: `/patrolling/downloadSiteQRsPdf/${siteId}`,
+    method: "GET",
+    responseHandler: async (response) => response.blob(),
+  }),
+}),
   }),
 });
 
@@ -816,4 +836,6 @@ export const {
 useEditPatrolRunMutation,
 useGetAllPatrolSubSitesQuery,
   useGetAllPatrolCheckpointsQuery,
+  useLazyDownloadQRQuery,
+useLazyDownloadSiteQRsPdfQuery,
 } = patrollingApi;
