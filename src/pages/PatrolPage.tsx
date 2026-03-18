@@ -49,6 +49,14 @@ import { Label } from "../components/ui/label";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Progress } from "../components/ui/progress";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../components/ui/pagination";
 import { sampleVehicles, availableGuards, clientList } from "../data/sampleData";
 import { toast } from "sonner";
 import { useGetAllClientsQuery } from "./../apis/usersApi";
@@ -450,6 +458,8 @@ const [deleteCheckpointApi, { isLoading: deletingCheckpoint }] =
 });
 
 const Patrols = patrolResponse?.data || [];
+const apiPagination = patrolResponse?.pagination;
+const totalPages = apiPagination?.totalPages || 1;
 
 
 
@@ -462,6 +472,12 @@ useEffect(() => {
 
   return () => clearTimeout(timer);
 }, [searchTerm]);
+
+useEffect(() => {
+  if (currentPage > totalPages) {
+    setCurrentPage(totalPages || 1);
+  }
+}, [currentPage, totalPages]);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -654,8 +670,12 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
       .reduce((sum, p) => sum + calculatePatrolRevenue(p), 0);
     
     const routeDeviations = patrols.filter(p => p.routeDeviation).length;
-    const onTimeCompletion = patrols.filter(p => p.status === "Completed" && 
-      new Date(p.actualEndTime) <= new Date(p.estimatedCompletion)).length;
+    const onTimeCompletion = patrols.filter(
+      (p) =>
+        p.status === "Completed" &&
+        p.actualEndTime &&
+        new Date(p.actualEndTime) <= new Date(p.estimatedCompletion)
+    ).length;
 
     return {
       activePatrols,
@@ -1515,6 +1535,12 @@ const handleQrIconAction = (checkpoint: any) => {
   {/* Patrol List */}
   {!isFetching && (
     <div className="space-y-3">
+      {Patrols.length === 0 && (
+        <div className="text-center py-8 border rounded-lg bg-gray-50 text-gray-600">
+          No patrol runs found
+        </div>
+      )}
+
       {Patrols.map((patrol) => (
         <Card
           key={patrol.id}
@@ -1646,6 +1672,65 @@ const handleQrIconAction = (checkpoint: any) => {
           </CardContent>
         </Card>
       ))}
+
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <Pagination>
+            <PaginationContent className="gap-1">
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage > 1) {
+                      setCurrentPage((prev) => prev - 1);
+                    }
+                  }}
+                  className={`${
+                    currentPage === 1
+                      ? "pointer-events-none opacity-40 cursor-not-allowed"
+                      : "cursor-pointer hover:bg-gray-100"
+                  } transition-colors`}
+                />
+              </PaginationItem>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage(page);
+                    }}
+                    isActive={page === currentPage}
+                    className={`cursor-pointer transition-all ${
+                      page === currentPage
+                        ? "bg-gray-900 text-white hover:bg-gray-800"
+                        : "hover:bg-gray-100"
+                    }`}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (currentPage < totalPages) {
+                      setCurrentPage((prev) => prev + 1);
+                    }
+                  }}
+                  className={`${
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-40 cursor-not-allowed"
+                      : "cursor-pointer hover:bg-gray-100"
+                  } transition-colors`}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   )}
 

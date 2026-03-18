@@ -315,8 +315,14 @@ export interface AdminPatrolRun {
 
 export interface GetAllPatrolRunsForAdminResponse {
   success: boolean;
-  total: number;
   data: AdminPatrolRun[];
+  message?: string;
+  pagination: {
+    total: number;
+    page: number;
+    totalPages: number;
+    limit: number;
+  };
 }
 
 /* =====================================================
