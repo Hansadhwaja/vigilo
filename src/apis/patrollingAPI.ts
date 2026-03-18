@@ -396,13 +396,54 @@ export interface AdminPatrolRunDetailsResponse {
 ===================================================== */
 
 export interface EditPatrolRunRequest {
+  startDateTime?: string;
+  estimatedCompletion?: string;
   addSites?: string[];
   removeSiteIds?: string[];
-  addSubSites?: string[];
+  addSubSites?: Array<{
+    parentSiteId: string;
+    subSiteId: string;
+  }>;
   removeSubSiteIds?: string[];
-  addCheckpoints?: string[];
+  addCheckpoints?: Array<{
+    parentType: "site" | "subSite";
+    parentId: string;
+    checkpointId: string;
+  }>;
   removeCheckpointIds?: string[];
-  newGuardId?: string;
+  updateSites?: Array<{
+    siteId?: string;
+    id?: string;
+    name?: string;
+    address?: string;
+    latitude?: string | number;
+    longitude?: string | number;
+    description?: string;
+    status?: string;
+  }>;
+  updateSubSites?: Array<{
+    subSiteId?: string;
+    id?: string;
+    name?: string;
+    description?: string;
+    status?: string;
+    unitPrice?: string | number;
+    estimatedDuration?: string | number;
+    latitude?: string | number;
+    longitude?: string | number;
+  }>;
+  updateCheckpoints?: Array<{
+    checkpointId?: string;
+    id?: string;
+    name?: string;
+    latitude?: string | number;
+    longitude?: string | number;
+    verificationRange?: string | number;
+    priorityLevel?: "low" | "medium" | "high";
+    description?: string;
+    status?: string;
+  }>;
+  guardIds?: string[];
 }
 
 export interface EditPatrolRunResponse {

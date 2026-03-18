@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import {
   useEditPatrolRunMutation,
+  EditPatrolRunRequest,
   useGetAllPatrolSitesQuery,
   useGetPatrolRunByIdForAdminQuery,
 } from "../apis/patrollingAPI";
@@ -57,11 +58,57 @@ export default function PatrolDetailsPage() {
 
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editForm, setEditForm] = useState({
+    startDateTime: "",
+    estimatedCompletion: "",
     addSites: [] as string[],
+    addSubSites: [] as Array<{
+      parentSiteId: string;
+      subSiteId: string;
+    }>,
+    addCheckpoints: [] as Array<{
+      parentType: "site" | "subSite";
+      parentId: string;
+      checkpointId: string;
+    }>,
     removeSiteIds: [] as string[],
     removeSubSiteIds: [] as string[],
     removeCheckpointIds: [] as string[],
-    newGuardId: "",
+    updateSites: {} as Record<
+      string,
+      {
+        name: string;
+        address: string;
+        latitude: string;
+        longitude: string;
+        description: string;
+        // status: string;
+      }
+    >,
+    updateSubSites: {} as Record<
+      string,
+      {
+        name: string;
+        description: string;
+        // status: string;
+        unitPrice: string;
+        estimatedDuration: string;
+        latitude: string;
+        longitude: string;
+      }
+    >,
+    updateCheckpoints: {} as Record<
+      string,
+      {
+        name: string;
+        latitude: string;
+        longitude: string;
+        verificationRange: string;
+        priorityLevel: "low" | "medium" | "high";
+        description: string;
+        // status: string;
+      }
+    >,
+    guardIds: [] as string[],
   });
 
   const { data: allSitesResponse } = useGetAllPatrolSitesQuery(
@@ -99,31 +146,251 @@ export default function PatrolDetailsPage() {
     });
   };
 
+  const toggleAddSubSite = (parentSiteId: string, subSiteId: string) => {
+    setEditForm((prev) => {
+      const exists = prev.addSubSites.some(
+        (item) => item.parentSiteId === parentSiteId && item.subSiteId === subSiteId
+      );
+
+      return {
+        ...prev,
+        addSubSites: exists
+          ? prev.addSubSites.filter(
+              (item) => !(item.parentSiteId === parentSiteId && item.subSiteId === subSiteId)
+            )
+          : [...prev.addSubSites, { parentSiteId, subSiteId }],
+      };
+    });
+  };
+
+  const toggleAddCheckpoint = (
+    parentType: "site" | "subSite",
+    parentId: string,
+    checkpointId: string
+  ) => {
+    setEditForm((prev) => {
+      const exists = prev.addCheckpoints.some(
+        (item) =>
+          item.parentType === parentType &&
+          item.parentId === parentId &&
+          item.checkpointId === checkpointId
+      );
+
+      return {
+        ...prev,
+        addCheckpoints: exists
+          ? prev.addCheckpoints.filter(
+              (item) =>
+                !(
+                  item.parentType === parentType &&
+                  item.parentId === parentId &&
+                  item.checkpointId === checkpointId
+                )
+            )
+          : [...prev.addCheckpoints, { parentType, parentId, checkpointId }],
+      };
+    });
+  };
+
+  const toggleGuardSelection = (guardId: string) => {
+    setEditForm((prev) => {
+      const exists = prev.guardIds.includes(guardId);
+      return {
+        ...prev,
+        guardIds: exists
+          ? prev.guardIds.filter((id) => id !== guardId)
+          : [...prev.guardIds, guardId],
+      };
+    });
+  };
+
   const resetEditForm = () => {
     setEditForm({
+      startDateTime: "",
+      estimatedCompletion: "",
       addSites: [],
+      addSubSites: [],
+      addCheckpoints: [],
       removeSiteIds: [],
       removeSubSiteIds: [],
       removeCheckpointIds: [],
-      newGuardId: "",
+      updateSites: {},
+      updateSubSites: {},
+      updateCheckpoints: {},
+      guardIds: [],
     });
+  };
+
+  const toDateTimeLocalValue = (dateString?: string | null) => {
+    if (!dateString) return "";
+
+    const parsedDate = new Date(dateString);
+    if (Number.isNaN(parsedDate.getTime())) return "";
+
+    const year = parsedDate.getFullYear();
+    const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+    const day = String(parsedDate.getDate()).padStart(2, "0");
+    const hours = String(parsedDate.getHours()).padStart(2, "0");
+    const minutes = String(parsedDate.getMinutes()).padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
+
+  const parseNumberField = (value: string) => {
+    if (value === "") return undefined;
+    const parsedValue = Number(value);
+    return Number.isNaN(parsedValue) ? undefined : parsedValue;
+  };
+
+  const handleOpenEditDialog = () => {
+    const siteUpdates = Object.fromEntries(
+      sites.map((site: any) => [
+        site.id,
+        {
+          name: site.name || "",
+          address: site.address || "",
+          latitude: String(site.latitude ?? ""),
+          longitude: String(site.longitude ?? ""),
+          description: site.description || "",
+          status: site.status || "pending",
+        },
+      ])
+    );
+
+    const subSiteUpdates = Object.fromEntries(
+      sites.flatMap((site: any) =>
+        (site.subSites || []).map((sub: any) => [
+          sub.id,
+          {
+            name: sub.name || "",
+            description: sub.description || "",
+            status: sub.status || "pending",
+            unitPrice: String(sub.unitPrice ?? ""),
+            estimatedDuration: String(sub.estimatedDuration ?? ""),
+            latitude: String(sub.latitude ?? ""),
+            longitude: String(sub.longitude ?? ""),
+          },
+        ])
+      )
+    );
+
+    const checkpointUpdates = Object.fromEntries(
+      sites.flatMap((site: any) => {
+        const siteCheckpoints = (site.checkpoints || []).map((cp: any) => [
+          cp.id,
+          {
+            name: cp.name || "",
+            latitude: String(cp.latitude ?? ""),
+            longitude: String(cp.longitude ?? ""),
+            verificationRange: String(cp.verificationRange ?? ""),
+            priorityLevel: (cp.priorityLevel || "low") as "low" | "medium" | "high",
+            description: cp.description || "",
+            status: cp.status || "pending",
+          },
+        ]);
+
+        const subSiteCheckpoints = (site.subSites || []).flatMap((sub: any) =>
+          (sub.checkpoints || []).map((cp: any) => [
+            cp.id,
+            {
+              name: cp.name || "",
+              latitude: String(cp.latitude ?? ""),
+              longitude: String(cp.longitude ?? ""),
+              verificationRange: String(cp.verificationRange ?? ""),
+              priorityLevel: (cp.priorityLevel || "low") as "low" | "medium" | "high",
+              description: cp.description || "",
+              status: cp.status || "pending",
+            },
+          ])
+        );
+
+        return [...siteCheckpoints, ...subSiteCheckpoints];
+      })
+    );
+
+    setEditForm({
+      startDateTime: toDateTimeLocalValue(patrol?.startTime),
+      estimatedCompletion: toDateTimeLocalValue(patrol?.estimatedCompletion),
+      addSites: [],
+      addSubSites: [],
+      addCheckpoints: [],
+      removeSiteIds: [],
+      removeSubSiteIds: [],
+      removeCheckpointIds: [],
+      updateSites: siteUpdates,
+      updateSubSites: subSiteUpdates,
+      updateCheckpoints: checkpointUpdates,
+      guardIds: guards.map((guard: any) => guard.id),
+    });
+    setShowEditDialog(true);
   };
 
   const handleSubmitEdit = async () => {
     if (!id) return;
 
     try {
+      const updateSitesPayload = Object.entries(editForm.updateSites).map(
+        ([siteId, site]) => ({
+          siteId,
+          ...site,
+          latitude: parseNumberField(site.latitude),
+          longitude: parseNumberField(site.longitude),
+        })
+      );
+
+      const updateSubSitesPayload = Object.entries(editForm.updateSubSites).map(
+        ([subSiteId, subSite]) => ({
+          subSiteId,
+          ...subSite,
+          unitPrice: parseNumberField(subSite.unitPrice),
+          estimatedDuration: parseNumberField(subSite.estimatedDuration),
+          latitude: parseNumberField(subSite.latitude),
+          longitude: parseNumberField(subSite.longitude),
+        })
+      );
+
+      const updateCheckpointsPayload = Object.entries(editForm.updateCheckpoints).map(
+        ([checkpointId, checkpoint]) => ({
+          checkpointId,
+          ...checkpoint,
+          latitude: parseNumberField(checkpoint.latitude),
+          longitude: parseNumberField(checkpoint.longitude),
+          verificationRange: parseNumberField(checkpoint.verificationRange),
+        })
+      );
+
+      const payload: EditPatrolRunRequest = {
+        ...(editForm.startDateTime ? { startDateTime: editForm.startDateTime } : {}),
+        ...(editForm.estimatedCompletion
+          ? { estimatedCompletion: editForm.estimatedCompletion }
+          : {}),
+        ...(editForm.addSites.length ? { addSites: editForm.addSites } : {}),
+        ...(editForm.removeSiteIds.length
+          ? { removeSiteIds: editForm.removeSiteIds }
+          : {}),
+        ...(editForm.addSubSites.length ? { addSubSites: editForm.addSubSites } : {}),
+        ...(editForm.removeSubSiteIds.length
+          ? { removeSubSiteIds: editForm.removeSubSiteIds }
+          : {}),
+        ...(editForm.addCheckpoints.length
+          ? { addCheckpoints: editForm.addCheckpoints }
+          : {}),
+        ...(editForm.removeCheckpointIds.length
+          ? { removeCheckpointIds: editForm.removeCheckpointIds }
+          : {}),
+        ...(updateSitesPayload.length ? { updateSites: updateSitesPayload } : {}),
+        ...(updateSubSitesPayload.length
+          ? { updateSubSites: updateSubSitesPayload }
+          : {}),
+        ...(updateCheckpointsPayload.length
+          ? { updateCheckpoints: updateCheckpointsPayload }
+          : {}),
+        ...(editForm.guardIds.length ? { guardIds: editForm.guardIds } : {}),
+      };
+
       await editPatrolRun({
         patrolRunId: id,
-        body: {
-          addSites: editForm.addSites,
-          removeSiteIds: editForm.removeSiteIds,
-          addSubSites: [],
-          removeSubSiteIds: editForm.removeSubSiteIds,
-          addCheckpoints: [],
-          removeCheckpointIds: editForm.removeCheckpointIds,
-          ...(editForm.newGuardId ? { newGuardId: editForm.newGuardId } : {}),
-        },
+        body: payload,
       }).unwrap();
 
       toast.success("Patrol run updated successfully");
@@ -168,6 +435,32 @@ export default function PatrolDetailsPage() {
     year: "numeric",
   });
 };
+
+const allSubSitesFromMaster = allSites.flatMap((site: any) =>
+  (site.subSites || []).map((sub: any) => ({
+    id: sub.id,
+    name: sub.name,
+    siteName: site.name,
+  }))
+);
+
+const allCheckpointsFromMaster = allSites.flatMap((site: any) => {
+  const siteCheckpoints = (site.checkpoints || []).map((cp: any) => ({
+    id: cp.id,
+    name: cp.name,
+    source: `${site.name}`,
+  }));
+
+  const subSiteCheckpoints = (site.subSites || []).flatMap((sub: any) =>
+    (sub.checkpoints || []).map((cp: any) => ({
+      id: cp.id,
+      name: cp.name,
+      source: `${site.name} / ${sub.name}`,
+    }))
+  );
+
+  return [...siteCheckpoints, ...subSiteCheckpoints];
+});
 
 const formatTimeOnly = (dateString: string) => {
   return new Date(dateString).toLocaleTimeString("en-GB", {
@@ -399,7 +692,7 @@ const exportPDF = async () => {
 
         <div className="flex items-center gap-2">
           <Button
-            onClick={() => setShowEditDialog(true)}
+            onClick={handleOpenEditDialog}
             className="flex items-center gap-2"
             variant="outline"
             disabled={patrol.status === "completed"}
@@ -962,121 +1255,663 @@ const exportPDF = async () => {
           if (!value) resetEditForm();
         }}
       >
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Patrol Run</DialogTitle>
-            <DialogDescription>
-              Update patrol assignments by selecting items to add or remove.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="max-w-6xl w-[96vw] max-h-[92vh] overflow-y-auto p-0">
+          <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 p-6 space-y-6">
+            <DialogHeader className="space-y-2">
+              <DialogTitle className="text-2xl">Edit Patrol Run</DialogTitle>
+              <DialogDescription className="text-base">
+                Manage guards, schedule, and full site structure updates from one workspace.
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-5">
-            <div>
-              <p className="text-sm font-medium mb-2">Reassign Guard (Optional)</p>
-              <select
-                className="w-full border rounded-md px-3 py-2 bg-white"
-                value={editForm.newGuardId}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, newGuardId: e.target.value }))}
-              >
-                <option value="">Keep existing guard assignment</option>
-                {allGuards.map((guard: any) => (
-                  <option key={guard.id} value={guard.id}>
-                    {guard.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="rounded-xl border border-blue-100 bg-white/90 p-4 space-y-3 shadow-sm">
+                <p className="font-semibold text-sm uppercase tracking-wide text-blue-700">Schedule</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Start Date & Time</p>
+                    <input
+                      type="datetime-local"
+                      className="w-full border rounded-md px-3 py-2 bg-white"
+                      value={editForm.startDateTime}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({ ...prev, startDateTime: e.target.value }))
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Estimated Completion</p>
+                    <input
+                      type="datetime-local"
+                      className="w-full border rounded-md px-3 py-2 bg-white"
+                      value={editForm.estimatedCompletion}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({ ...prev, estimatedCompletion: e.target.value }))
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
 
-            <div>
-              <p className="text-sm font-medium mb-2">Add Sites</p>
-              <div className="space-y-2 max-h-36 overflow-y-auto border rounded-md p-3">
-                {allSites
-                  .filter((site: any) => !sites.some((current: any) => current.id === site.id))
-                  .map((site: any) => (
-                    <label key={site.id} className="flex items-center gap-2 text-sm cursor-pointer">
+              <div className="rounded-xl border border-emerald-100 bg-white/90 p-4 space-y-3 shadow-sm">
+                <p className="font-semibold text-sm uppercase tracking-wide text-emerald-700">
+                  Assign Guards
+                </p>
+                <div className="space-y-2 max-h-44 overflow-y-auto border rounded-md p-3 bg-white">
+                  {allGuards.map((guard: any) => (
+                    <label key={guard.id} className="flex items-center gap-2 text-sm cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={editForm.addSites.includes(site.id)}
-                        onChange={() => toggleSelection("addSites", site.id)}
+                        checked={editForm.guardIds.includes(guard.id)}
+                        onChange={() => toggleGuardSelection(guard.id)}
                       />
-                      {site.name}
+                      <span>{guard.name}</span>
                     </label>
                   ))}
+                </div>
               </div>
             </div>
 
-            <div>
-              <p className="text-sm font-medium mb-2">Remove Sites</p>
-              <div className="space-y-2 max-h-36 overflow-y-auto border rounded-md p-3">
-                {sites.map((site: any) => (
-                  <label key={site.id} className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editForm.removeSiteIds.includes(site.id)}
-                      onChange={() => toggleSelection("removeSiteIds", site.id)}
-                    />
-                    {site.name}
-                  </label>
-                ))}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="rounded-xl border border-slate-200 bg-white/90 p-4 space-y-4 shadow-sm">
+                <p className="font-semibold text-sm uppercase tracking-wide text-slate-700">Add Items</p>
+
+                <div>
+                  <p className="text-sm font-medium mb-2">Add Sites</p>
+                  <div className="space-y-2 max-h-36 overflow-y-auto border rounded-md p-3">
+                    {allSites
+                      .filter((site: any) => !sites.some((current: any) => current.id === site.id))
+                      .map((site: any) => (
+                        <label key={site.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={editForm.addSites.includes(site.id)}
+                            onChange={() => toggleSelection("addSites", site.id)}
+                          />
+                          {site.name}
+                        </label>
+                      ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium mb-2">Add Sub-Sites To Existing Sites</p>
+                  <div className="space-y-3 max-h-52 overflow-y-auto border rounded-md p-3">
+                    {sites.map((site: any) => {
+                      const existingSubIds = new Set((site.subSites || []).map((sub: any) => sub.id));
+                      const availableSubSites = allSubSitesFromMaster.filter(
+                        (sub: any) => !existingSubIds.has(sub.id)
+                      );
+
+                      return (
+                        <div key={site.id} className="border rounded-md p-2">
+                          <p className="font-medium text-sm mb-2">{site.name}</p>
+                          <div className="space-y-1">
+                            {availableSubSites.length === 0 && (
+                              <p className="text-xs text-muted-foreground">No available sub-sites.</p>
+                            )}
+                            {availableSubSites.map((sub: any) => (
+                              <label key={`${site.id}-${sub.id}`} className="flex items-center gap-2 text-xs cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={editForm.addSubSites.some(
+                                    (item) => item.parentSiteId === site.id && item.subSiteId === sub.id
+                                  )}
+                                  onChange={() => toggleAddSubSite(site.id, sub.id)}
+                                />
+                                {sub.siteName} / {sub.name}
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium mb-2">Add Checkpoints</p>
+                  <div className="space-y-3 max-h-64 overflow-y-auto border rounded-md p-3">
+                    {sites.map((site: any) => (
+                      <div key={`site-cp-${site.id}`} className="border rounded-md p-2 space-y-2">
+                        <p className="font-medium text-xs">Site: {site.name}</p>
+                        {allCheckpointsFromMaster.map((cp: any) => (
+                          <label key={`site-${site.id}-${cp.id}`} className="flex items-center gap-2 text-xs cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={editForm.addCheckpoints.some(
+                                (item) =>
+                                  item.parentType === "site" &&
+                                  item.parentId === site.id &&
+                                  item.checkpointId === cp.id
+                              )}
+                              onChange={() => toggleAddCheckpoint("site", site.id, cp.id)}
+                            />
+                            {cp.source} / {cp.name}
+                          </label>
+                        ))}
+                      </div>
+                    ))}
+
+                    {sites.flatMap((site: any) =>
+                      (site.subSites || []).map((sub: any) => (
+                        <div key={`sub-cp-${sub.id}`} className="border rounded-md p-2 space-y-2">
+                          <p className="font-medium text-xs">Sub-Site: {site.name} / {sub.name}</p>
+                          {allCheckpointsFromMaster.map((cp: any) => (
+                            <label key={`sub-${sub.id}-${cp.id}`} className="flex items-center gap-2 text-xs cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={editForm.addCheckpoints.some(
+                                  (item) =>
+                                    item.parentType === "subSite" &&
+                                    item.parentId === sub.id &&
+                                    item.checkpointId === cp.id
+                                )}
+                                onChange={() => toggleAddCheckpoint("subSite", sub.id, cp.id)}
+                              />
+                              {cp.source} / {cp.name}
+                            </label>
+                          ))}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-rose-100 bg-white/90 p-4 space-y-4 shadow-sm">
+                <p className="font-semibold text-sm uppercase tracking-wide text-rose-700">Remove Items</p>
+
+                <div>
+                  <p className="text-sm font-medium mb-2">Remove Sites</p>
+                  <div className="space-y-2 max-h-28 overflow-y-auto border rounded-md p-3">
+                    {sites.map((site: any) => (
+                      <label key={site.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={editForm.removeSiteIds.includes(site.id)}
+                          onChange={() => toggleSelection("removeSiteIds", site.id)}
+                        />
+                        {site.name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium mb-2">Remove Sub-Sites</p>
+                  <div className="space-y-2 max-h-32 overflow-y-auto border rounded-md p-3">
+                    {sites.flatMap((site: any) =>
+                      (site.subSites || []).map((sub: any) => (
+                        <label key={sub.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={editForm.removeSubSiteIds.includes(sub.id)}
+                            onChange={() => toggleSelection("removeSubSiteIds", sub.id)}
+                          />
+                          {site.name} / {sub.name}
+                        </label>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium mb-2">Remove Checkpoints</p>
+                  <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                    {sites.flatMap((site: any) => {
+                      const siteCheckpoints = (site.checkpoints || []).map((cp: any) => ({
+                        id: cp.id,
+                        label: `${site.name} / ${cp.name}`,
+                      }));
+
+                      const subSiteCheckpoints = (site.subSites || []).flatMap((sub: any) =>
+                        (sub.checkpoints || []).map((cp: any) => ({
+                          id: cp.id,
+                          label: `${site.name} / ${sub.name} / ${cp.name}`,
+                        }))
+                      );
+
+                      return [...siteCheckpoints, ...subSiteCheckpoints].map((cp) => (
+                        <label key={cp.id} className="flex items-center gap-2 text-xs cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={editForm.removeCheckpointIds.includes(cp.id)}
+                            onChange={() => toggleSelection("removeCheckpointIds", cp.id)}
+                          />
+                          {cp.label}
+                        </label>
+                      ));
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div>
-              <p className="text-sm font-medium mb-2">Remove Sub-Sites</p>
-              <div className="space-y-2 max-h-36 overflow-y-auto border rounded-md p-3">
-                {sites.flatMap((site: any) =>
-                  (site.subSites || []).map((sub: any) => (
-                    <label key={sub.id} className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={editForm.removeSubSiteIds.includes(sub.id)}
-                        onChange={() => toggleSelection("removeSubSiteIds", sub.id)}
-                      />
-                      {site.name} / {sub.name}
-                    </label>
-                  ))
-                )}
+            <div className="rounded-xl border border-violet-100 bg-white/95 p-4 space-y-4 shadow-sm">
+              <p className="font-semibold text-sm uppercase tracking-wide text-violet-700">
+                Update Existing Site Structure
+              </p>
+
+              <div className="space-y-3">
+                <p className="text-sm font-medium">Sites</p>
+                <div className="space-y-4 max-h-72 overflow-y-auto border rounded-md p-3">
+                  {sites.map((site: any) => (
+                    <div key={`update-site-${site.id}`} className="border rounded-md p-3 bg-slate-50/60 space-y-2">
+                      <p className="text-sm font-semibold">{site.name}</p>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        <input
+                          className="border rounded-md px-2 py-1 text-sm"
+                          value={editForm.updateSites[site.id]?.name || ""}
+                          placeholder="Site Name"
+                          onChange={(e) =>
+                            setEditForm((prev) => ({
+                              ...prev,
+                              updateSites: {
+                                ...prev.updateSites,
+                                [site.id]: {
+                                  ...prev.updateSites[site.id],
+                                  name: e.target.value,
+                                },
+                              },
+                            }))
+                          }
+                        />
+                        <input
+                          className="border rounded-md px-2 py-1 text-sm"
+                          value={editForm.updateSites[site.id]?.address || ""}
+                          placeholder="Address"
+                          onChange={(e) =>
+                            setEditForm((prev) => ({
+                              ...prev,
+                              updateSites: {
+                                ...prev.updateSites,
+                                [site.id]: {
+                                  ...prev.updateSites[site.id],
+                                  address: e.target.value,
+                                },
+                              },
+                            }))
+                          }
+                        />
+                        {/* <select
+                          className="border rounded-md px-2 py-1 text-sm bg-white"
+                          value={editForm.updateSites[site.id]?.status || "pending"}
+                          onChange={(e) =>
+                            setEditForm((prev) => ({
+                              ...prev,
+                              updateSites: {
+                                ...prev.updateSites,
+                                [site.id]: {
+                                  ...prev.updateSites[site.id],
+                                  status: e.target.value,
+                                },
+                              },
+                            }))
+                          }
+                        >
+                          <option value="pending">pending</option>
+                          <option value="upcoming">upcoming</option>
+                          <option value="completed">completed</option>
+                          <option value="missed">missed</option>
+                        </select> */}
+                        <input
+                          className="border rounded-md px-2 py-1 text-sm"
+                          value={editForm.updateSites[site.id]?.latitude || ""}
+                          placeholder="Latitude"
+                          onChange={(e) =>
+                            setEditForm((prev) => ({
+                              ...prev,
+                              updateSites: {
+                                ...prev.updateSites,
+                                [site.id]: {
+                                  ...prev.updateSites[site.id],
+                                  latitude: e.target.value,
+                                },
+                              },
+                            }))
+                          }
+                        />
+                        <input
+                          className="border rounded-md px-2 py-1 text-sm"
+                          value={editForm.updateSites[site.id]?.longitude || ""}
+                          placeholder="Longitude"
+                          onChange={(e) =>
+                            setEditForm((prev) => ({
+                              ...prev,
+                              updateSites: {
+                                ...prev.updateSites,
+                                [site.id]: {
+                                  ...prev.updateSites[site.id],
+                                  longitude: e.target.value,
+                                },
+                              },
+                            }))
+                          }
+                        />
+                        <input
+                          className="border rounded-md px-2 py-1 text-sm md:col-span-3"
+                          value={editForm.updateSites[site.id]?.description || ""}
+                          placeholder="Description"
+                          onChange={(e) =>
+                            setEditForm((prev) => ({
+                              ...prev,
+                              updateSites: {
+                                ...prev.updateSites,
+                                [site.id]: {
+                                  ...prev.updateSites[site.id],
+                                  description: e.target.value,
+                                },
+                              },
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-sm font-medium">Sub-Sites</p>
+                <div className="space-y-4 max-h-72 overflow-y-auto border rounded-md p-3">
+                  {sites.flatMap((site: any) =>
+                    (site.subSites || []).map((sub: any) => (
+                      <div key={`update-sub-${sub.id}`} className="border rounded-md p-3 bg-slate-50/60 space-y-2">
+                        <p className="text-sm font-semibold">{site.name} / {sub.name}</p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <input
+                            className="border rounded-md px-2 py-1 text-sm"
+                            value={editForm.updateSubSites[sub.id]?.name || ""}
+                            placeholder="Sub-Site Name"
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateSubSites: {
+                                  ...prev.updateSubSites,
+                                  [sub.id]: {
+                                    ...prev.updateSubSites[sub.id],
+                                    name: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          />
+                          {/* <select
+                            className="border rounded-md px-2 py-1 text-sm bg-white"
+                            value={editForm.updateSubSites[sub.id]?.status || "pending"}
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateSubSites: {
+                                  ...prev.updateSubSites,
+                                  [sub.id]: {
+                                    ...prev.updateSubSites[sub.id],
+                                    status: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          >
+                            <option value="pending">pending</option>
+                            <option value="upcoming">upcoming</option>
+                            <option value="completed">completed</option>
+                            <option value="missed">missed</option>
+                          </select> */}
+                          <input
+                            className="border rounded-md px-2 py-1 text-sm"
+                            value={editForm.updateSubSites[sub.id]?.unitPrice || ""}
+                            placeholder="Unit Price"
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateSubSites: {
+                                  ...prev.updateSubSites,
+                                  [sub.id]: {
+                                    ...prev.updateSubSites[sub.id],
+                                    unitPrice: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          />
+                          <input
+                            className="border rounded-md px-2 py-1 text-sm"
+                            value={editForm.updateSubSites[sub.id]?.estimatedDuration || ""}
+                            placeholder="Estimated Duration"
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateSubSites: {
+                                  ...prev.updateSubSites,
+                                  [sub.id]: {
+                                    ...prev.updateSubSites[sub.id],
+                                    estimatedDuration: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          />
+                          {/* <input
+                            className="border rounded-md px-2 py-1 text-sm"
+                            value={editForm.updateSubSites[sub.id]?.latitude || ""}
+                            placeholder="Latitude"
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateSubSites: {
+                                  ...prev.updateSubSites,
+                                  [sub.id]: {
+                                    ...prev.updateSubSites[sub.id],
+                                    latitude: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          />
+                          <input
+                            className="border rounded-md px-2 py-1 text-sm"
+                            value={editForm.updateSubSites[sub.id]?.longitude || ""}
+                            placeholder="Longitude"
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateSubSites: {
+                                  ...prev.updateSubSites,
+                                  [sub.id]: {
+                                    ...prev.updateSubSites[sub.id],
+                                    longitude: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          /> */}
+                          <input
+                            className="border rounded-md px-2 py-1 text-sm md:col-span-3"
+                            value={editForm.updateSubSites[sub.id]?.description || ""}
+                            placeholder="Description"
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateSubSites: {
+                                  ...prev.updateSubSites,
+                                  [sub.id]: {
+                                    ...prev.updateSubSites[sub.id],
+                                    description: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          />
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-sm font-medium">Checkpoints</p>
+                <div className="space-y-4 max-h-80 overflow-y-auto border rounded-md p-3">
+                  {sites.flatMap((site: any) => {
+                    const siteCheckpoints = (site.checkpoints || []).map((cp: any) => ({
+                      ...cp,
+                      label: `${site.name} / ${cp.name}`,
+                    }));
+
+                    const subSiteCheckpoints = (site.subSites || []).flatMap((sub: any) =>
+                      (sub.checkpoints || []).map((cp: any) => ({
+                        ...cp,
+                        label: `${site.name} / ${sub.name} / ${cp.name}`,
+                      }))
+                    );
+
+                    return [...siteCheckpoints, ...subSiteCheckpoints].map((cp: any) => (
+                      <div key={`update-cp-${cp.id}`} className="border rounded-md p-3 bg-slate-50/60 space-y-2">
+                        <p className="text-sm font-semibold">{cp.label}</p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                          <input
+                            className="border rounded-md px-2 py-1 text-sm"
+                            value={editForm.updateCheckpoints[cp.id]?.name || ""}
+                            placeholder="Checkpoint Name"
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateCheckpoints: {
+                                  ...prev.updateCheckpoints,
+                                  [cp.id]: {
+                                    ...prev.updateCheckpoints[cp.id],
+                                    name: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          />
+                          <select
+                            className="border rounded-md px-2 py-1 text-sm bg-white"
+                            value={editForm.updateCheckpoints[cp.id]?.priorityLevel || "low"}
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateCheckpoints: {
+                                  ...prev.updateCheckpoints,
+                                  [cp.id]: {
+                                    ...prev.updateCheckpoints[cp.id],
+                                    priorityLevel: e.target.value as "low" | "medium" | "high",
+                                  },
+                                },
+                              }))
+                            }
+                          >
+                            <option value="low">low</option>
+                            <option value="medium">medium</option>
+                            <option value="high">high</option>
+                          </select>
+                          {/* <select
+                            className="border rounded-md px-2 py-1 text-sm bg-white"
+                            value={editForm.updateCheckpoints[cp.id]?.status || "pending"}
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateCheckpoints: {
+                                  ...prev.updateCheckpoints,
+                                  [cp.id]: {
+                                    ...prev.updateCheckpoints[cp.id],
+                                    status: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          >
+                            <option value="pending">pending</option>
+                            <option value="upcoming">upcoming</option>
+                            <option value="completed">completed</option>
+                            <option value="missed">missed</option>
+                          </select> */}
+                          <input
+                            className="border rounded-md px-2 py-1 text-sm"
+                            value={editForm.updateCheckpoints[cp.id]?.latitude || ""}
+                            placeholder="Latitude"
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateCheckpoints: {
+                                  ...prev.updateCheckpoints,
+                                  [cp.id]: {
+                                    ...prev.updateCheckpoints[cp.id],
+                                    latitude: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          />
+                          <input
+                            className="border rounded-md px-2 py-1 text-sm"
+                            value={editForm.updateCheckpoints[cp.id]?.longitude || ""}
+                            placeholder="Longitude"
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateCheckpoints: {
+                                  ...prev.updateCheckpoints,
+                                  [cp.id]: {
+                                    ...prev.updateCheckpoints[cp.id],
+                                    longitude: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          />
+                          <input
+                            className="border rounded-md px-2 py-1 text-sm"
+                            value={editForm.updateCheckpoints[cp.id]?.verificationRange || ""}
+                            placeholder="Verification Range"
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateCheckpoints: {
+                                  ...prev.updateCheckpoints,
+                                  [cp.id]: {
+                                    ...prev.updateCheckpoints[cp.id],
+                                    verificationRange: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          />
+                          <input
+                            className="border rounded-md px-2 py-1 text-sm md:col-span-3"
+                            value={editForm.updateCheckpoints[cp.id]?.description || ""}
+                            placeholder="Description"
+                            onChange={(e) =>
+                              setEditForm((prev) => ({
+                                ...prev,
+                                updateCheckpoints: {
+                                  ...prev.updateCheckpoints,
+                                  [cp.id]: {
+                                    ...prev.updateCheckpoints[cp.id],
+                                    description: e.target.value,
+                                  },
+                                },
+                              }))
+                            }
+                          />
+                        </div>
+                      </div>
+                    ));
+                  })}
+                </div>
               </div>
             </div>
 
-            <div>
-              <p className="text-sm font-medium mb-2">Remove Checkpoints</p>
-              <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-3">
-                {sites.flatMap((site: any) => {
-                  const siteCheckpoints = (site.checkpoints || []).map((cp: any) => ({
-                    id: cp.id,
-                    label: `${site.name} / ${cp.name}`,
-                  }));
-
-                  const subSiteCheckpoints = (site.subSites || []).flatMap((sub: any) =>
-                    (sub.checkpoints || []).map((cp: any) => ({
-                      id: cp.id,
-                      label: `${site.name} / ${sub.name} / ${cp.name}`,
-                    }))
-                  );
-
-                  return [...siteCheckpoints, ...subSiteCheckpoints].map((cp) => (
-                    <label key={cp.id} className="flex items-center gap-2 text-sm cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={editForm.removeCheckpointIds.includes(cp.id)}
-                        onChange={() => toggleSelection("removeCheckpointIds", cp.id)}
-                      />
-                      {cp.label}
-                    </label>
-                  ));
-                })}
-              </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmitEdit} disabled={isUpdatingPatrol}>
+                {isUpdatingPatrol ? "Saving..." : "Save Changes"}
+              </Button>
             </div>
-          </div>
-
-          <div className="flex justify-end gap-2 pt-3 border-t">
-            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmitEdit} disabled={isUpdatingPatrol}>
-              {isUpdatingPatrol ? "Saving..." : "Save Changes"}
-            </Button>
           </div>
         </DialogContent>
       </Dialog>
