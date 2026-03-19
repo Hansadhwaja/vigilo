@@ -421,7 +421,13 @@ const [createSubSite, { isLoading: isCreatingSubSite }] =
   page: 1,
 });
 
-const guards = guardsResponse?.data || [];
+const guards =
+  guardsResponse?.data?.filter(
+    (guard: any) =>
+      !["ongoing", "overtime", "overtime_started"].includes(
+        guard.status?.toLowerCase()
+      )
+  ) || [];
 
 const [createPatrolRun, { isLoading: isCreating }] =
   useCreatePatrolRunMutation();
@@ -430,7 +436,11 @@ const [createPatrolRun, { isLoading: isCreating }] =
   
 });
 
-const orders = ordersResponse?.data || [];
+const orders =
+  ordersResponse?.data?.filter(
+    (order: any) =>
+      order.type === "patrol" && order.status === "upcoming"
+  ) || [];
 
 const [deletePatrolRun, { isLoading: isDeleting }] =
   useDeletePatrolRunMutation();
@@ -1998,40 +2008,42 @@ const handleQrIconAction = (checkpoint: any) => {
     </SelectTrigger>
 
     <SelectContent className="max-h-80 overflow-y-auto">
-      {guards.map((guard: any) => {
-        const isSelected = formData.guardIds.includes(guard.id);
+  {guards.length === 0 ? (
+    <div className="px-3 py-2 text-sm text-gray-500 select-none">
+      No available guards
+    </div>
+  ) : (
+    guards.map((guard: any) => {
+      const isSelected = formData.guardIds.includes(guard.id);
 
-        return (
-          <div
-            key={guard.id}
-            className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100"
-            onClick={() => {
-              if (isSelected) {
-                setFormData({
-                  ...formData,
-                  guardIds: formData.guardIds.filter(
-                    (id) => id !== guard.id
-                  ),
-                });
-              } else {
-                setFormData({
-                  ...formData,
-                  guardIds: [...formData.guardIds, guard.id],
-                });
-              }
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={isSelected}
-              readOnly
-            />
-            <User className="h-4 w-4" />
-            {guard.name}
-          </div>
-        );
-      })}
-    </SelectContent>
+      return (
+        <div
+          key={guard.id}
+          className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100"
+          onClick={() => {
+            if (isSelected) {
+              setFormData({
+                ...formData,
+                guardIds: formData.guardIds.filter(
+                  (id) => id !== guard.id
+                ),
+              });
+            } else {
+              setFormData({
+                ...formData,
+                guardIds: [...formData.guardIds, guard.id],
+              });
+            }
+          }}
+        >
+          <input type="checkbox" checked={isSelected} readOnly />
+          <User className="h-4 w-4" />
+          {guard.name}
+        </div>
+      );
+    })
+  )}
+</SelectContent>
   </Select>
 </div>
               
@@ -2073,17 +2085,23 @@ const handleQrIconAction = (checkpoint: any) => {
                   </SelectTrigger>
 
                   <SelectContent className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300">
-                    {orders.map((order: any) => (
-                      <SelectItem key={order.id} value={order.id}>
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          <span className="font-medium max-w-xs flex-1">
-                            {order.locationName || order.locationAddress}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
+  {orders.length === 0 ? (
+    <div className="px-3 py-2 text-sm text-gray-500">
+      No upcoming patrol orders
+    </div>
+  ) : (
+    orders.map((order: any) => (
+      <SelectItem key={order.id} value={order.id}>
+        <div className="flex items-center gap-2">
+          <FileText className="h-4 w-4" />
+          <span className="font-medium max-w-xs flex-1">
+            {order.locationName || order.locationAddress}
+          </span>
+        </div>
+      </SelectItem>
+    ))
+  )}
+</SelectContent>
                 </Select>
               </div>
               

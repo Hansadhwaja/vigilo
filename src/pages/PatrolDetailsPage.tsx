@@ -41,6 +41,7 @@ import {
   EditPatrolRunRequest,
   useGetAllPatrolSitesQuery,
   useGetPatrolRunByIdForAdminQuery,
+  useLazyDownloadSiteQRsPdfQuery,
 } from "../apis/patrollingAPI";
 import { useGetAllGuardsQuery } from "../apis/guardsApi";
 
@@ -111,6 +112,7 @@ export default function PatrolDetailsPage() {
     guardIds: [] as string[],
   });
 
+  const [triggerDownloadSitePdf] = useLazyDownloadSiteQRsPdfQuery();
   const { data: allSitesResponse } = useGetAllPatrolSitesQuery(
     { page: 1, limit: 200 },
     { skip: !showEditDialog }
@@ -134,7 +136,48 @@ export default function PatrolDetailsPage() {
 
   const [viewerOpen, setViewerOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [openSites, setOpenSites] = useState<{ [key: string]: boolean }>({});
+  const toggleOpen = (siteId: string) => {
+  setOpenSites((prev) => ({
+    ...prev,
+    [siteId]: !prev[siteId],
+  }));
+};
+
+  const handleDownloadSiteQR = async (site: any) => {
+  if (!site?.id) {
+    toast.error("Site ID missing");
+    return;
+  }
+
+  try {
+    const blob = await triggerDownloadSitePdf({ siteId: site.id }).unwrap();
+
+    const url = URL.createObjectURL(blob);
+
+    const safeName = (site.name || "site")
+      .replace(/[^a-zA-Z0-9-_ ]/g, "")
+      .trim();
+
+    const fileName = `${safeName || "site"}-qr.pdf`;
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+
+    toast.success("QR PDF downloaded");
+  } catch (err) {
+    console.error(err);
+    toast.error("Download failed");
+  }
+};
 
   const toggleSelection = (key: "addSites" | "removeSiteIds" | "removeSubSiteIds" | "removeCheckpointIds", value: string) => {
     setEditForm((prev) => {
@@ -877,30 +920,40 @@ const exportPDF = async () => {
             </div>
 
             {/* RIGHT SIDE */}
-            <div className="flex items-center gap-4">
-              <Badge className={statusColor(site.status)}>
-                {site.status}
-              </Badge>
+            <div className="flex items-center gap-3">
 
-              <p className="text-sm text-muted-foreground">
-                {completedCheckpoints}/{totalCheckpoints} completed
-              </p>
+  <Button
+    size="sm"
+    variant="outline"
+    onClick={() => handleDownloadSiteQR(site)}
+  >
+    Download QR
+  </Button>
 
-              <button
-                onClick={() => setOpen(!open)}
-                className="p-1 rounded-md hover:bg-muted transition"
-              >
-                {open ? (
-                  <ChevronUp className="w-6 h-6" />
-                ) : (
-                  <ChevronDown className="w-6 h-6" />
-                )}
-              </button>
-            </div>
+  <Badge className={statusColor(site.status)}>
+    {site.status}
+  </Badge>
+
+  <p className="text-sm text-muted-foreground">
+    {completedCheckpoints}/{totalCheckpoints} completed
+  </p>
+
+  <button
+    onClick={() => toggleOpen(site.id)}
+    className="p-1 rounded-md hover:bg-muted transition"
+  >
+    {openSites[site.id] ? (
+      <ChevronUp className="w-6 h-6" />
+    ) : (
+      <ChevronDown className="w-6 h-6" />
+    )}
+  </button>
+
+</div>
           </div>
 
           {/* ================= COLLAPSIBLE CONTENT ================= */}
-          {open && (
+          {openSites[site.id] && (
             <div className="px-5 pb-5 space-y-5 border-t">
               
               {/* SITE DESCRIPTION */}
