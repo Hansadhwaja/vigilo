@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import jsPDF from "jspdf";
 import { 
   Plus, 
@@ -1349,12 +1350,15 @@ const handleQrIconAction = (checkpoint: any) => {
   generateQRCodeForCheckpoint(checkpoint);
 
   const qrUrl = checkpoint.qr?.qrUrl;
-  if (qrUrl) {
-    setQrPreview({ url: qrUrl, name: checkpoint.name || "checkpoint" });
+  if (!qrUrl) {
+    toast.error("QR not available");
     return;
   }
 
-  toast.error("QR image not available for preview");
+  setQrPreview({
+    url: qrUrl,
+    name: checkpoint.name || "checkpoint",
+  });
 };
 
   const getStatusColor = (status: string) => {
@@ -1955,7 +1959,7 @@ const handleQrIconAction = (checkpoint: any) => {
       </Dialog>
 
       {/* Enhanced Create Patrol Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog} >
         <DialogContent className="max-w-6xl w-[95vw] max-h-[95vh] p-8 overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Patrol Run</DialogTitle>
@@ -2565,35 +2569,52 @@ disabled={deletingCheckpoint}
               Create Patrol Run
             </Button>
           </div>
-          {qrPreview && (
-  <div
-    className="fixed inset-0 bg-black/70 flex items-center justify-center z-[100]"
-    onClick={() => setQrPreview(null)}
-  >
-    <div
-      className="bg-white p-6 rounded-xl shadow-xl"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <img
-        src={qrPreview.url}
-        alt="QR Preview"
-        className="w-72 h-72 object-contain"
-      />
-      <div className="mt-4 flex justify-center">
-        <Button
-          size="sm"
-          onClick={() => downloadQR(qrPreview.url, qrPreview.name)}
-          className="flex items-center gap-2"
-        >
-          <Download className="h-4 w-4" />
-          Download QR
-        </Button>
-      </div>
-    </div>
-  </div>
-)}
+          
         </DialogContent>
       </Dialog>
+      <Dialog
+  open={!!qrPreview}
+  onOpenChange={(open) => {
+    if (!open) setQrPreview(null);
+  }}
+>
+  <DialogContent className="max-w-md p-6 rounded-2xl">
+
+    {/* Close Button */}
+    <button
+      onClick={() => setQrPreview(null)}
+      className="absolute top-3 right-3 text-gray-500 hover:text-black"
+    >
+      
+    </button>
+
+    {/* Title */}
+    <div className="text-center font-semibold text-gray-700 mb-4">
+      {qrPreview?.name}
+    </div>
+
+    {/* QR Image */}
+    <img
+      src={qrPreview?.url}
+      alt="QR Preview"
+      className="w-64 h-64 mx-auto object-contain"
+    />
+
+    {/* Download */}
+    <div className="mt-5 flex justify-center">
+      <Button
+        size="sm"
+        onClick={() =>
+          qrPreview &&
+          downloadQR(qrPreview.url, qrPreview.name)
+        }
+      >
+        Download QR
+      </Button>
+    </div>
+
+  </DialogContent>
+</Dialog>
       
 
       {/* Export Dialog */}
