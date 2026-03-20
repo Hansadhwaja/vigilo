@@ -439,7 +439,7 @@ const [createPatrolRun, { isLoading: isCreating }] =
 const orders =
   ordersResponse?.data?.filter(
     (order: any) =>
-      order.type === "patrol" && order.status === "upcoming"
+       order.status === "upcoming"
   ) || [];
 
 const [deletePatrolRun, { isLoading: isDeleting }] =
