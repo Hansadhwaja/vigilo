@@ -110,6 +110,15 @@ export interface CreateAlarmPayload {
   price: number;
 }
 
+export interface DeleteAlarmResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    alarmId: string;
+    title?: string;
+  };
+}
+
 /* ================================
    RTK Query API
 ================================ */
@@ -142,6 +151,14 @@ export const alarmsApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Alarms", id: "LIST" }],
     }),
 
+    deleteAlarm: builder.mutation<DeleteAlarmResponse, string>({
+      query: (alarmId) => ({
+        url: `/alarm/deleteAlarm/${alarmId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "Alarms", id: "LIST" }],
+    }),
+
 
   }),
 });
@@ -153,4 +170,5 @@ export const alarmsApi = baseApi.injectEndpoints({
 export const {
   useCreateAlarmMutation,
   useGetAllAlarmsQuery,
+  useDeleteAlarmMutation,
 } = alarmsApi;

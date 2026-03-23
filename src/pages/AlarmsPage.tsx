@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Search, Filter, Clock, User, MapPin, Bell, CheckCircle, AlertTriangle, Phone, Timer, Route, Download, FileText, Users, Zap, TrendingUp, Siren, Loader2 } from "lucide-react";
+import { Plus, Search, Filter, Clock, User, MapPin, Bell, CheckCircle, AlertTriangle, Phone, Timer, Route, Download, FileText, Users, Zap, TrendingUp, Siren, Loader2, Trash2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -12,9 +12,10 @@ import { Progress } from "../components/ui/progress";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
 import { availableGuards, sampleGuards } from "../data/sampleData";
 import { toast } from "sonner";
-import {useCreateAlarmMutation, useGetAllAlarmsQuery} from "../apis/alarmsAPI";
+import {useCreateAlarmMutation, useDeleteAlarmMutation, useGetAllAlarmsQuery} from "../apis/alarmsAPI";
 import {useGetAllPatrolSitesQuery} from "../apis/patrollingAPI";
 import {useGetAllGuardsQuery} from "../apis/guardsApi";
+import { useDeleteAllNotificationsMutation, useDeleteNotificationByIdMutation, useGetMyNotificationsQuery, useMarkAllNotificationsAsReadMutation } from "../apis/notificationAPI";
 import { getStatusStyle, getStatusColor } from "./../utils/statusColors";
 
 
@@ -101,16 +102,29 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [showExportDialog, setShowExportDialog] = useState(false);
-  const [notifications, setNotifications] = useState<any[]>([]);
   const [escalatedAlarms, setEscalatedAlarms] = useState<Set<string>>(new Set());
   const itemsPerPage = 5;
 
 
   const [createAlarm, { isLoading: isCreating }] = useCreateAlarmMutation();
+  const [deleteAlarm, { isLoading: isDeletingAlarm }] = useDeleteAlarmMutation();
+
+  const { data: notificationsResponse } = useGetMyNotificationsQuery({
+    page: 1,
+    limit: 20,
+    filter: "all",
+  });
+  const [markAllNotificationsAsRead, { isLoading: isMarkingAllRead }] =
+    useMarkAllNotificationsAsReadMutation();
+  const [deleteAllNotifications, { isLoading: isDeletingAllNotifications }] =
+    useDeleteAllNotificationsMutation();
+  const [deleteNotificationById, { isLoading: isDeletingNotification }] =
+    useDeleteNotificationByIdMutation();
 
   const { data } = useGetAllAlarmsQuery();
 
 const alarms = data?.data || [];
+const notifications = notificationsResponse?.data || [];
 
     const { data: guardsResponse, isLoading, isError, error, isFetching } = useGetAllGuardsQuery({
       limit: itemsPerPage,
@@ -178,19 +192,6 @@ const formatTimeOnly = (dateString: string) => {
           
           if (slaStatus && !escalatedAlarms.has(alarm.id)) {
             setEscalatedAlarms(prev => new Set(prev).add(alarm.id));
-            
-            // Create notification
-            const notification = {
-              id: `notif-${alarm.id}-${Date.now()}`,
-              alarmId: alarm.id,
-              type: slaStatus.level,
-              message: slaStatus.message,
-              action: slaStatus.action,
-              timestamp: new Date(),
-              acknowledged: false
-            };
-            
-            setNotifications(prev => [notification, ...prev.slice(0, 9)]);
             
             // Show toast notification
             if (slaStatus.level === "CRITICAL_BREACH") {
@@ -269,6 +270,9 @@ const formatTimeOnly = (dateString: string) => {
     status: alarm.status,
 
     breach: alarm.breach,
+    monitoringCompany: alarm.monitoringCompany,
+    license: alarm.license,
+    unitPrice: alarm.unitPrice,
 
     original: alarm,
   };
@@ -476,6 +480,61 @@ useEffect(() => {
     toast.error(message);
   }
 };
+
+  const handleDeleteAlarm = async (alarmId: string) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this alarm?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteAlarm(alarmId).unwrap();
+      toast.success("Alarm deleted successfully");
+    } catch (err: any) {
+      const message =
+        err?.data?.message ||
+        err?.error ||
+        "Failed to delete alarm";
+      toast.error(message);
+    }
+  };
+
+  const handleDeleteNotification = async (notificationId: string) => {
+    try {
+      await deleteNotificationById(notificationId).unwrap();
+      toast.success("Notification deleted");
+    } catch (err: any) {
+      const message =
+        err?.data?.message ||
+        err?.error ||
+        "Failed to delete notification";
+      toast.error(message);
+    }
+  };
+
+  const handleDeleteAllNotifications = async () => {
+    try {
+      await deleteAllNotifications({ filter: "all" }).unwrap();
+      toast.success("All notifications deleted");
+    } catch (err: any) {
+      const message =
+        err?.data?.message ||
+        err?.error ||
+        "Failed to delete notifications";
+      toast.error(message);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllNotificationsAsRead({ filter: "all" }).unwrap();
+      toast.success("All notifications marked as read");
+    } catch (err: any) {
+      const message =
+        err?.data?.message ||
+        err?.error ||
+        "Failed to mark notifications as read";
+      toast.error(message);
+    }
+  };
 
   // Export functionality
   const handleExportData = (format: 'csv' | 'pdf') => {
@@ -773,6 +832,16 @@ useEffect(() => {
                               Resolve
                             </Button>
                           )}
+
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteAlarm(alarm.id)}
+                            disabled={isDeletingAlarm}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -1388,7 +1457,7 @@ useEffect(() => {
             <CardHeader className="pb-2">
               <CardTitle className="text-xl flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-orange-500" />
-                SLA Alerts ({notifications.filter(n => !n.acknowledged).length})
+                Notifications ({notificationsResponse?.counts?.unread ?? notifications.length} unread)
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
@@ -1397,14 +1466,25 @@ useEffect(() => {
                   <div 
                     key={notif.id} 
                     className={`p-2 rounded border-l-4 text-lg ${
-                      notif.type === 'CRITICAL_BREACH' ? 'border-red-500 bg-red-50' :
-                      notif.type === 'WARNING' ? 'border-orange-500 bg-orange-50' :
-                      'border-yellow-500 bg-yellow-50'
+                      notif.type === 'newRequest' ? 'border-blue-500 bg-blue-50' :
+                      notif.isRead ? 'border-gray-300 bg-gray-50' :
+                      'border-orange-500 bg-orange-50'
                     }`}
                   >
-                    <div className="font-medium">{notif.message}</div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="font-medium">{notif.message}</div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-6 w-6 p-0"
+                        onClick={() => handleDeleteNotification(notif.id)}
+                        disabled={isDeletingNotification}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
                     <div className="text-gray-600 text-lg mt-1">
-                      Alarm {notif.alarmId} • {notif.timestamp.toLocaleTimeString()}
+                      {notif.type} • {new Date(notif.createdAt).toLocaleTimeString()}
                     </div>
                   </div>
                 ))}
@@ -1420,7 +1500,18 @@ useEffect(() => {
                 size="sm" 
                 variant="outline" 
                 className="w-full mt-3 text-lg"
-                onClick={() => setNotifications([])}
+                onClick={handleMarkAllAsRead}
+                disabled={isMarkingAllRead}
+              >
+                Mark All Read
+              </Button>
+
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="w-full mt-2 text-lg"
+                onClick={handleDeleteAllNotifications}
+                disabled={isDeletingAllNotifications}
               >
                 Clear All
               </Button>
