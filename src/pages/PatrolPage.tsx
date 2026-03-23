@@ -523,7 +523,7 @@ const totalCompletion = todayPatrols.reduce(
     vehicleId: "", 
     startDateTime: "",
     estimatedCompletion: "",
-    sites: [] as any[],
+    siteIds: [] as string[],
     notes: "",
     unitPrice: 0
   });
@@ -599,6 +599,25 @@ const availableSites = data?.data?.map((site) => ({
     qr: cp.qr,
   })),
 })) || [];
+
+const selectedSites = useMemo(
+  () =>
+    formData.siteIds
+      .map((siteId) => availableSites.find((site) => site.id === siteId))
+      .filter(Boolean) as any[],
+  [formData.siteIds, availableSites]
+);
+
+const getTotalCheckpointsForSite = (site: any) => {
+  const siteLevelCheckpoints = site.checkpoints?.length || 0;
+  const subSiteCheckpoints = (site.subsites || []).reduce(
+    (total: number, subsite: any) => total + (subsite.checkpoints?.length || 0),
+    0
+  );
+
+  return siteLevelCheckpoints + subSiteCheckpoints;
+};
+
   // Enhanced GPS tracking simulation
   useEffect(() => {
     const interval = setInterval(() => {
@@ -641,6 +660,12 @@ const availableSites = data?.data?.map((site) => ({
   const handleDeleteSite = async (siteId: string) => {
   try {
     await deleteSiteApi(siteId).unwrap();
+
+    setFormData((prev) => ({
+      ...prev,
+      siteIds: prev.siteIds.filter((id) => id !== siteId),
+    }));
+
     toast.success("Site deleted successfully");
   } catch (error: any) {
     toast.error(error?.data?.message || "Failed to delete site");
@@ -718,7 +743,7 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
       vehicleId: "",
       startDateTime: "",
       estimatedCompletion: "",
-      sites: [],
+      siteIds: [],
       notes: "",
       unitPrice: 0
     });
@@ -730,7 +755,7 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
     if (
       !formData.guardIds ||
       !formData.vehicleId ||
-      formData.sites.length === 0
+      formData.siteIds.length === 0
     ) {
       toast.error("Please fill all required fields");
       return;
@@ -745,7 +770,7 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
       startDateTime: new Date(formData.startDateTime).toISOString(),
       estimatedCompletion: new Date(formData.estimatedCompletion).toISOString(),
       description: formData.notes || "",
-      siteIds: formData.sites.map((site: any) => site.id),
+      siteIds: formData.siteIds,
     };
 
     const response = await createPatrolRun(payload).unwrap();
@@ -764,7 +789,7 @@ const handleDeleteCheckpoint = async (checkpointId: string) => {
       estimatedCompletion: "",
       notes: "",
       unitPrice: 0,
-      sites: [],
+      siteIds: [],
     });
 
     setShowCreateDialog(false);
@@ -1292,13 +1317,13 @@ const downloadSiteQRPdf = async (site: any) => {
 
   const handleAddSiteToPatrol = (site: any) => {
     setFormData(prev => {
-      if (prev.sites.some((existingSite: any) => existingSite.id === site.id)) {
+      if (prev.siteIds.includes(site.id)) {
         return prev;
       }
 
       return {
         ...prev,
-        sites: [...prev.sites, site],
+        siteIds: [...prev.siteIds, site.id],
       };
     });
     
@@ -1309,13 +1334,13 @@ const downloadSiteQRPdf = async (site: any) => {
 
   const toggleSiteSelection = (site: any) => {
     setFormData((prev) => {
-      const alreadySelected = prev.sites.some((selectedSite: any) => selectedSite.id === site.id);
+      const alreadySelected = prev.siteIds.includes(site.id);
 
       return {
         ...prev,
-        sites: alreadySelected
-          ? prev.sites.filter((selectedSite: any) => selectedSite.id !== site.id)
-          : [...prev.sites, site],
+        siteIds: alreadySelected
+          ? prev.siteIds.filter((id) => id !== site.id)
+          : [...prev.siteIds, site.id],
       };
     });
   };
@@ -2182,8 +2207,8 @@ const handleQrIconAction = (checkpoint: any) => {
                   <SelectTrigger className="w-full md:w-[420px]">
                     <SelectValue
                       placeholder={
-                        formData.sites.length > 0
-                          ? `${formData.sites.length} site(s) selected`
+                        selectedSites.length > 0
+                          ? `${selectedSites.length} site(s) selected`
                           : "Select sites"
                       }
                     />
@@ -2194,7 +2219,7 @@ const handleQrIconAction = (checkpoint: any) => {
                       <div className="px-3 py-2 text-sm text-gray-500">No sites available</div>
                     ) : (
                       availableSites.map((site) => {
-                        const isSelected = formData.sites.some((selectedSite) => selectedSite.id === site.id);
+                        const isSelected = formData.siteIds.includes(site.id);
 
                         return (
                           <div
@@ -2216,7 +2241,7 @@ const handleQrIconAction = (checkpoint: any) => {
               {/* Selected Sites */}
 <div className="space-y-5 max-h-[500px] overflow-y-auto pr-2">
 
-  {formData.sites.map((site) => (
+  {selectedSites.map((site) => (
     <Card
       key={site.id}
       className="w-full border border-gray-200 shadow-sm hover:shadow-md transition"
@@ -2239,6 +2264,10 @@ const handleQrIconAction = (checkpoint: any) => {
 
               <Badge className="bg-blue-50 text-blue-700 border-blue-200 text-xs">
                 {site.subsites.length} Sub-Sites
+              </Badge>
+
+              <Badge className="bg-indigo-50 text-indigo-700 border-indigo-200 text-xs">
+                {getTotalCheckpointsForSite(site)} Total Checkpoints
               </Badge>
 
               {site.checkpoints.length > 0 && (
@@ -2519,24 +2548,17 @@ disabled={deletingCheckpoint}
 </div>
 
               {/* Selected Sites Summary */}
-              {formData.sites.length > 0 && (
+              {selectedSites.length > 0 && (
                 <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <h4 className="font-medium text-blue-900 mb-2">Selected Sites for Patrol:</h4>
                   <div className="space-y-2">
-                    {formData.sites.map((site) => (
+                    {selectedSites.map((site) => (
                       <div key={site.id} className="flex items-center justify-between text-xl">
                         <div className="flex items-center gap-2">
                           <Building className="h-4 w-4 text-blue-600" />
                           <span>{site.name}</span>
                           <Badge variant="outline" className="text-lg">
-                            {(
-                              (site.checkpoints?.length || 0) +
-                              site.subsites.reduce(
-                                (total: number, subsite: any) =>
-                                  total + (subsite.checkpoints?.length || 0),
-                                0
-                              )
-                            )} checkpoints
+                            {getTotalCheckpointsForSite(site)} checkpoints
                           </Badge>
                         </div>
                         <Button
@@ -2544,7 +2566,7 @@ disabled={deletingCheckpoint}
                           variant="ghost"
                           onClick={() => setFormData(prev => ({
                             ...prev,
-                            sites: prev.sites.filter(s => s.id !== site.id)
+                            siteIds: prev.siteIds.filter((id) => id !== site.id)
                           }))}
                           className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
                         >
@@ -2580,7 +2602,7 @@ disabled={deletingCheckpoint}
                 formData.guardIds.length === 0 ||
                 !formData.vehicleId ||
                 !formData.orderId ||
-                formData.sites.length === 0 ||
+                formData.siteIds.length === 0 ||
                 formData.unitPrice <= 0
               }
             >
