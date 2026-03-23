@@ -287,6 +287,7 @@ export interface AdminPatrolGuard {
 }
 
 export interface AdminPatrolRun {
+  guardIds: any;
   id: string;
   patrolId: string;
   status: string;

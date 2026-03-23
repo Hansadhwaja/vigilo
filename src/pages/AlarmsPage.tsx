@@ -13,10 +13,11 @@ import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, Pagi
 import { availableGuards, sampleGuards } from "../data/sampleData";
 import { toast } from "sonner";
 import {useCreateAlarmMutation, useDeleteAlarmMutation, useGetAllAlarmsQuery} from "../apis/alarmsAPI";
-import {useGetAllPatrolSitesQuery} from "../apis/patrollingAPI";
+import {useGetAllPatrolSitesQuery, useGetAllPatrolRunsForAdminQuery} from "../apis/patrollingAPI";
 import {useGetAllGuardsQuery} from "../apis/guardsApi";
 import { useDeleteAllNotificationsMutation, useDeleteNotificationByIdMutation, useGetMyNotificationsQuery, useMarkAllNotificationsAsReadMutation } from "../apis/notificationAPI";
 import { getStatusStyle, getStatusColor } from "./../utils/statusColors";
+
 
 
 
@@ -138,7 +139,48 @@ const notifications = notificationsResponse?.data || [];
   useGetAllPatrolSitesQuery({});
 
 const sites = sitesResponse?.data || [];
-  
+
+  const {
+  data: patrolData,
+} = useGetAllPatrolRunsForAdminQuery({
+    page: 1,
+    limit: 100,
+});
+
+const activePatrolGuardIds = React.useMemo(() => {
+  if (!patrolData?.data) return [];
+
+    const guardIdSet = new Set<string>();
+
+    patrolData.data.forEach((run) => {
+      const runStatus = String(run.status || "").toLowerCase();
+      if (runStatus !== "upcoming" && runStatus !== "ongoing") return;
+
+      if (Array.isArray(run.guards)) {
+        run.guards.forEach((guard) => {
+          if (guard?.id) {
+            guardIdSet.add(String(guard.id));
+          }
+        });
+      }
+
+      if (Array.isArray(run.guardIds)) {
+        run.guardIds.forEach((guardId: any) => {
+          if (guardId) {
+            guardIdSet.add(String(guardId));
+          }
+        });
+      }
+    });
+
+    return Array.from(guardIdSet);
+}, [patrolData]);
+
+const filteredGuards = React.useMemo(() => {
+  return guards.filter((guard) =>
+    activePatrolGuardIds.includes(guard.id)
+  );
+}, [guards, activePatrolGuardIds]);
   // Create alarm form state
   const [newAlarm, setNewAlarm] = useState({
   title: "",
@@ -1230,47 +1272,53 @@ useEffect(() => {
 
       {/* Assigned Guards */}
       <div>
-        <Label>Assigned Guards</Label>
+  <Label>Assigned Guards (Patrolling Only)</Label>
 
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Select guards" />
-          </SelectTrigger>
+  <Select>
+    <SelectTrigger>
+      <SelectValue placeholder="Select guards" />
+    </SelectTrigger>
 
-          <SelectContent className="max-h-60 overflow-y-auto">
+    <SelectContent className="max-h-60 overflow-y-auto">
 
-            {guards.map((guard: any) => {
-              const isSelected = newAlarm.guardIds.includes(guard.id);
+      {filteredGuards.length === 0 ? (
+        <div className="px-3 py-2 text-sm text-gray-500">
+          No active patrol guards available
+        </div>
+      ) : (
+        filteredGuards.map((guard: any) => {
+          const isSelected = newAlarm.guardIds.includes(guard.id);
 
-              return (
-                <div
-                  key={guard.id}
-                  className="flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-gray-100 rounded"
-                  onClick={() => {
-                    if (isSelected) {
-                      setNewAlarm({
-                        ...newAlarm,
-                        guardIds: newAlarm.guardIds.filter(
-                          (id) => id !== guard.id
-                        ),
-                      });
-                    } else {
-                      setNewAlarm({
-                        ...newAlarm,
-                        guardIds: [...newAlarm.guardIds, guard.id],
-                      });
-                    }
-                  }}
-                >
-                  <input type="checkbox" checked={isSelected} readOnly />
-                  <span>{guard.name}</span>
-                </div>
-              );
-            })}
+          return (
+            <div
+              key={guard.id}
+              className="flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-gray-100 rounded"
+              onClick={() => {
+                if (isSelected) {
+                  setNewAlarm({
+                    ...newAlarm,
+                    guardIds: newAlarm.guardIds.filter(
+                      (id) => id !== guard.id
+                    ),
+                  });
+                } else {
+                  setNewAlarm({
+                    ...newAlarm,
+                    guardIds: [...newAlarm.guardIds, guard.id],
+                  });
+                }
+              }}
+            >
+              <input type="checkbox" checked={isSelected} readOnly />
+              <span>{guard.name}</span>
+            </div>
+          );
+        })
+      )}
 
-          </SelectContent>
-        </Select>
-      </div>
+    </SelectContent>
+  </Select>
+</div>
 
       {/* ETA */}
       <div>
