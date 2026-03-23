@@ -40,6 +40,8 @@ import { demoTrend, revenueStreams, liveMetrics } from "../data/sampleData";
 import { useGetAllGuardsQuery } from "../apis/guardsApi";
 import { useGetAllSchedulesQuery } from "../apis/schedulingAPI";
 import { useGetAllOrdersQuery } from "../apis/ordersApi";
+import { useGetAllPatrolRunsForAdminQuery } from "../apis/patrollingAPI";
+import { useGetAllAlarmsQuery } from "../apis/alarmsAPI";
 
 interface DashboardProps {
   kpi: {
@@ -98,6 +100,23 @@ export default function Dashboard({ kpi }: DashboardProps) {
   const allGuards = guardsResponse?.data ?? [];
   const schedules = schedulesResponse?.data ?? [];
 
+    const {
+    data: patrolResponse,
+    isFetching,
+  } = useGetAllPatrolRunsForAdminQuery({
+    limit: 10,
+  });
+
+  const Patrols = patrolResponse?.data || [];
+    const { data: alarmsResponse } = useGetAllAlarmsQuery();
+    const alarms = alarmsResponse?.data || [];
+
+    const activeAlarmsCount = useMemo(() => {
+      return alarms.filter(
+        (alarm: any) => String(alarm.status || "").toLowerCase() === "ongoing"
+      ).length;
+    }, [alarms]);
+
   const activeShiftsCount = useMemo(() => {
   const now = new Date();
 
@@ -115,25 +134,10 @@ export default function Dashboard({ kpi }: DashboardProps) {
 }, [schedules, currentTime]);
 
 const activePatrolsCount = useMemo(() => {
-  const now = new Date();
-
-  return schedules.filter((schedule: any) => {
-    // Must be patrol
-    if (schedule.type !== "patrol") {
-      return false;
-    }
-
-    // Ignore finished schedules
-    if (["completed", "cancelled"].includes(schedule.status)) {
-      return false;
-    }
-
-    const start = new Date(schedule.startTime);
-    const end = new Date(schedule.endTime);
-
-    return now >= start && now <= end;
-  }).length;
-}, [schedules, currentTime]);
+  return Patrols.filter(
+    (patrol: any) => String(patrol.status || "").toLowerCase() === "ongoing"
+  ).length;
+}, [Patrols]);
 
 
   // Compute On Duty Guards
@@ -216,9 +220,9 @@ const activePatrolsCount = useMemo(() => {
         <KPI 
           icon={<Bell className="h-5 w-5" />} 
           label="Active Alarms" 
-          value={kpi.openAlarms} 
+          value={activeAlarmsCount} 
           sub="requiring response"
-          urgent={kpi.openAlarms > 2}
+          urgent={activeAlarmsCount > 2}
           to="/alarms"
         />
          <KPI 
