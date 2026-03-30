@@ -339,6 +339,7 @@ export interface AdminPatrolRunDetailsResponse {
       patrolId: string;
       vehicleId: string;
       description: string | null;
+      notes: string | null;
       status: string;
       startTime: string;
       estimatedCompletion: string;

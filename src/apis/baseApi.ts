@@ -10,6 +10,20 @@ export const baseApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Auth", "Guards", "Incidents", "Alarms", "Patrol", "Shifts","Orders", "Schedules","Clients","Profile", "Notifications"],
+  tagTypes: [
+    "Auth",
+    "Guards",
+    "Incidents",
+    "Alarms",
+    "Patrol",
+    "Shifts",
+    "Orders",
+    "Schedules",
+    "Clients",
+    "Profile",
+    "Notifications",
+    "Messages",
+    "Presence",
+  ],
   endpoints: () => ({}), // will extend in separate files
 });

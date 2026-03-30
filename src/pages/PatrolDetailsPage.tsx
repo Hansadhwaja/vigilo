@@ -125,6 +125,7 @@ export default function PatrolDetailsPage() {
 
   const patrolData = data?.data;
   const patrol = patrolData?.patrol;
+  console.log("Patrol Data:", patrolData);
   const order = patrolData?.order;
   const client = patrolData?.client;
   const guards = patrolData?.guards || [];
@@ -804,7 +805,7 @@ const exportPDF = async () => {
   <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 text-base">
     
     <Info label="Description" value={patrol.description} />
-
+    
     {/* Start Time */}
     <div>
       <p className="text-muted-foreground text-sm">Start Time</p>
