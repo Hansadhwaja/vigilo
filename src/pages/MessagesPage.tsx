@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { io, type Socket } from "socket.io-client";
 import {
   MessageCircle,
   Search,
@@ -49,6 +50,26 @@ interface PendingAttachment {
   size: number;
   dataUrl: string;
 }
+
+interface SocketMessageEvent {
+  id: string;
+  conversationId: string;
+  senderId: string;
+}
+
+interface PresenceUpdateEvent {
+  userId: string;
+  isOnline: boolean;
+  lastSeenAt: string | null;
+}
+
+interface TypingEvent {
+  userId: string;
+  conversationId: string;
+}
+
+const SOCKET_BASE_URL = "https://vigilo-backend-1.onrender.com";
+const SOCKET_HEARTBEAT_MS = 30000;
 
 const EMOJI_SET = [
   "😀","😁","😂","😅","😊","😍","😘","😎",
@@ -206,12 +227,20 @@ export default function MessagesPage() {
   const [editDraft, setEditDraft] = useState("");
   const [openingUserId, setOpeningUserId] = useState<string>("");
   const [conversationByUserId, setConversationByUserId] = useState<Record<string, string>>({});
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const [livePresenceByUserId, setLivePresenceByUserId] = useState<Record<string, PresenceUpdateEvent>>({});
+  const [socketConnected, setSocketConnected] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const lastMarkedRef = useRef<string>("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const emojiRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const socketRef = useRef<Socket | null>(null);
+  const activeConversationRef = useRef<string>("");
+  const selectedContactRef = useRef<ContactItem | null>(null);
+  const typingTimeoutRef = useRef<number | null>(null);
+  const shouldEmitTypingRef = useRef(true);
 
   const authUser = useMemo(() => {
     try {
@@ -259,13 +288,27 @@ export default function MessagesPage() {
 
   const presenceIds = useMemo(() => filteredContacts.map((c) => c.id), [filteredContacts]);
   const { data: presenceRows = [] } = useGetBulkPresenceQuery(presenceIds, { skip: presenceIds.length === 0, pollingInterval: 15000 });
-  const presenceMap = useMemo(() => new Map(presenceRows.map((row) => [String(row.userId), row])), [presenceRows]);
+  const presenceMap = useMemo(() => {
+    const map = new Map(presenceRows.map((row) => [String(row.userId), row]));
+    Object.values(livePresenceByUserId).forEach((row) => {
+      map.set(String(row.userId), row);
+    });
+    return map;
+  }, [livePresenceByUserId, presenceRows]);
 
   const { data: messagesResponse, refetch: refetchMessages, isFetching: isMessagesFetching } = useGetMessagesQuery(
     { conversationId: activeConversationId, limit: 50 },
     { skip: !activeConversationId, pollingInterval: 2500, refetchOnMountOrArgChange: true }
   );
   const messageList = messagesResponse?.messages || [];
+
+  useEffect(() => {
+    activeConversationRef.current = activeConversationId;
+  }, [activeConversationId]);
+
+  useEffect(() => {
+    selectedContactRef.current = selectedContact;
+  }, [selectedContact]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -289,12 +332,127 @@ export default function MessagesPage() {
   }, [heartbeatPresence]);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token || !authUserId) return;
+
+    const socket = io(SOCKET_BASE_URL, {
+      transports: ["websocket"],
+    });
+
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      setSocketConnected(true);
+      socket.emit("register", { token });
+
+      if (activeConversationRef.current) {
+        socket.emit("joinConversation", activeConversationRef.current);
+      }
+    });
+
+    socket.on("disconnect", () => {
+      setSocketConnected(false);
+    });
+
+    socket.on("newMessage", (payload: SocketMessageEvent) => {
+      if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
+        refetchMessages();
+      }
+    });
+
+    socket.on("receiveMessage", (payload: SocketMessageEvent) => {
+      if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
+        refetchMessages();
+        socket.emit("markSeen", { messageId: payload.id, conversationId: payload.conversationId });
+      }
+    });
+
+    socket.on("messageUpdated", (payload: { conversationId: string }) => {
+      if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
+        refetchMessages();
+      }
+    });
+
+    socket.on("messageDeleted", (payload: { conversationId: string }) => {
+      if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
+        refetchMessages();
+      }
+    });
+
+    socket.on("messageDeletedForMe", (payload: { conversationId: string; userId: string }) => {
+      if (String(payload?.userId) !== authUserId) return;
+      if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
+        refetchMessages();
+      }
+    });
+
+    socket.on("messageSeen", (payload: { conversationId: string }) => {
+      if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
+        refetchMessages();
+      }
+    });
+
+    socket.on("userTyping", (payload: TypingEvent) => {
+      if (!payload?.conversationId || payload.conversationId !== activeConversationRef.current) return;
+      const currentContactId = selectedContactRef.current?.id;
+      if (currentContactId && String(payload.userId) !== currentContactId) return;
+      setIsOtherTyping(true);
+    });
+
+    socket.on("userStoppedTyping", (payload: TypingEvent) => {
+      if (!payload?.conversationId || payload.conversationId !== activeConversationRef.current) return;
+      const currentContactId = selectedContactRef.current?.id;
+      if (currentContactId && String(payload.userId) !== currentContactId) return;
+      setIsOtherTyping(false);
+    });
+
+    socket.on("presence:update", (payload: PresenceUpdateEvent) => {
+      if (!payload?.userId) return;
+      setLivePresenceByUserId((prev) => ({
+        ...prev,
+        [String(payload.userId)]: {
+          userId: String(payload.userId),
+          isOnline: !!payload.isOnline,
+          lastSeenAt: payload.lastSeenAt,
+        },
+      }));
+    });
+
+    const heartbeatTimer = window.setInterval(() => {
+      if (socket.connected) {
+        socket.emit("presence:heartbeat");
+      }
+    }, SOCKET_HEARTBEAT_MS);
+
+    return () => {
+      window.clearInterval(heartbeatTimer);
+      if (typingTimeoutRef.current) {
+        window.clearTimeout(typingTimeoutRef.current);
+      }
+      socket.removeAllListeners();
+      socket.disconnect();
+      socketRef.current = null;
+      setSocketConnected(false);
+    };
+  }, [authUserId, refetchMessages]);
+
+  useEffect(() => {
+    if (!activeConversationId || !socketConnected || !socketRef.current) return;
+    setIsOtherTyping(false);
+    shouldEmitTypingRef.current = true;
+    socketRef.current.emit("joinConversation", activeConversationId);
+  }, [activeConversationId, socketConnected]);
+
+  useEffect(() => {
     if (!activeConversationId || messageList.length === 0) return;
     const lastMessage = messageList[messageList.length - 1];
     if (!lastMessage) return;
     const markKey = `${activeConversationId}:${lastMessage.id}`;
     if (markKey === lastMarkedRef.current) return;
     lastMarkedRef.current = markKey;
+    if (socketRef.current?.connected) {
+      socketRef.current.emit("markSeen", { messageId: lastMessage.id, conversationId: activeConversationId });
+    }
     markMessagesRead({ conversationId: activeConversationId, messageId: lastMessage.id }).catch(() => { lastMarkedRef.current = ""; });
   }, [activeConversationId, markMessagesRead, messageList]);
 
@@ -323,6 +481,21 @@ export default function MessagesPage() {
     if (!trimmed && pendingAttachments.length === 0) return;
     const attachmentsPayload = pendingAttachments.map((f) => ({ name: f.name, type: f.type, size: f.size, content: f.dataUrl }));
     try {
+      if (socketRef.current?.connected) {
+        socketRef.current.emit("sendMessage", {
+          conversationId: activeConversationId,
+          message: trimmed,
+          type: attachmentsPayload.length ? "file" : "text",
+          attachments: attachmentsPayload,
+        });
+        setDraftMessage("");
+        setPendingAttachments([]);
+        setEmojiOpen(false);
+        shouldEmitTypingRef.current = true;
+        socketRef.current.emit("stopTyping", { conversationId: activeConversationId });
+        return;
+      }
+
       await sendMessage({ conversationId: activeConversationId, content: trimmed || undefined, type: attachmentsPayload.length ? "file" : "text", attachments: attachmentsPayload }).unwrap();
       setDraftMessage(""); setPendingAttachments([]); setEmojiOpen(false);
       await refetchMessages();
@@ -355,6 +528,16 @@ export default function MessagesPage() {
   const handleSaveEditedMessage = async () => {
     if (!editingMessageId || !editDraft.trim()) { toast.error("Content required"); return; }
     try {
+      if (socketRef.current?.connected && activeConversationId) {
+        socketRef.current.emit("x", {
+          messageId: editingMessageId,
+          conversationId: activeConversationId,
+          content: editDraft.trim(),
+        });
+        cancelEditMessage();
+        return;
+      }
+
       await editMessage({ messageId: editingMessageId, content: editDraft.trim() }).unwrap();
       cancelEditMessage(); await refetchMessages();
     } catch (error: any) { toast.error(error?.data?.message || "Failed to edit"); }
@@ -363,6 +546,12 @@ export default function MessagesPage() {
   const handleDeleteForEveryone = async (messageId: string) => {
     if (!window.confirm("Delete for everyone?")) return;
     try {
+      if (socketRef.current?.connected && activeConversationId) {
+        socketRef.current.emit("deleteMessage", { messageId, conversationId: activeConversationId });
+        if (editingMessageId === messageId) cancelEditMessage();
+        return;
+      }
+
       await deleteMessageForEveryone({ messageId }).unwrap();
       if (editingMessageId === messageId) cancelEditMessage();
       await refetchMessages();
@@ -372,6 +561,12 @@ export default function MessagesPage() {
   const handleDeleteForMe = async (messageId: string) => {
     if (!window.confirm("Delete for you only?")) return;
     try {
+      if (socketRef.current?.connected && activeConversationId) {
+        socketRef.current.emit("deleteMessageForMe", { messageId, conversationId: activeConversationId });
+        if (editingMessageId === messageId) cancelEditMessage();
+        return;
+      }
+
       await deleteMessageForMe({ messageId }).unwrap();
       if (editingMessageId === messageId) cancelEditMessage();
       await refetchMessages();
@@ -532,7 +727,7 @@ export default function MessagesPage() {
                 <div className="min-w-0">
                   <p className="font-semibold text-[14px] text-gray-900 truncate leading-tight">{selectedContact.name}</p>
                   <p className={`text-[11.5px] truncate leading-tight ${isOnline ? "text-emerald-500 font-medium" : "text-gray-400"}`}>
-                    {selectedPresence ? formatPresence(selectedPresence.isOnline, selectedPresence.lastSeenAt) : "checking…"}
+                    {isOtherTyping ? "typing..." : selectedPresence ? formatPresence(selectedPresence.isOnline, selectedPresence.lastSeenAt) : "checking…"}
                   </p>
                 </div>
               </div>
@@ -703,7 +898,40 @@ export default function MessagesPage() {
                   )}
                   <input
                     value={draftMessage}
-                    onChange={(e) => setDraftMessage(e.target.value)}
+                    onChange={(e) => {
+                      const nextValue = e.target.value;
+                      setDraftMessage(nextValue);
+
+                      if (!activeConversationId || !socketRef.current?.connected) {
+                        return;
+                      }
+
+                      if (nextValue.trim()) {
+                        if (shouldEmitTypingRef.current) {
+                          socketRef.current.emit("typing", { conversationId: activeConversationId });
+                          shouldEmitTypingRef.current = false;
+                        }
+
+                        if (typingTimeoutRef.current) {
+                          window.clearTimeout(typingTimeoutRef.current);
+                        }
+
+                        typingTimeoutRef.current = window.setTimeout(() => {
+                          if (socketRef.current?.connected && activeConversationRef.current) {
+                            socketRef.current.emit("stopTyping", { conversationId: activeConversationRef.current });
+                          }
+                          shouldEmitTypingRef.current = true;
+                          typingTimeoutRef.current = null;
+                        }, 1500);
+                      } else {
+                        if (typingTimeoutRef.current) {
+                          window.clearTimeout(typingTimeoutRef.current);
+                          typingTimeoutRef.current = null;
+                        }
+                        socketRef.current.emit("stopTyping", { conversationId: activeConversationId });
+                        shouldEmitTypingRef.current = true;
+                      }
+                    }}
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendMessage(); } }}
                     placeholder="Type a message…"
                     disabled={!activeConversationId || isOpeningConversation}
