@@ -241,6 +241,7 @@ export default function MessagesPage() {
   const selectedContactRef = useRef<ContactItem | null>(null);
   const typingTimeoutRef = useRef<number | null>(null);
   const shouldEmitTypingRef = useRef(true);
+  const refetchMessagesRef = useRef<() => unknown>(() => undefined);
 
   const authUser = useMemo(() => {
     try {
@@ -303,6 +304,10 @@ export default function MessagesPage() {
   const messageList = messagesResponse?.messages || [];
 
   useEffect(() => {
+    refetchMessagesRef.current = refetchMessages;
+  }, [refetchMessages]);
+
+  useEffect(() => {
     activeConversationRef.current = activeConversationId;
   }, [activeConversationId]);
 
@@ -336,7 +341,11 @@ export default function MessagesPage() {
     if (!token || !authUserId) return;
 
     const socket = io(SOCKET_BASE_URL, {
-      transports: ["websocket"],
+      transports: ["polling", "websocket"],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      timeout: 20000,
     });
 
     socketRef.current = socket;
@@ -354,41 +363,45 @@ export default function MessagesPage() {
       setSocketConnected(false);
     });
 
+    socket.on("connect_error", (error) => {
+      console.warn("Socket connect_error:", error.message);
+    });
+
     socket.on("newMessage", (payload: SocketMessageEvent) => {
       if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
-        refetchMessages();
+        refetchMessagesRef.current();
       }
     });
 
     socket.on("receiveMessage", (payload: SocketMessageEvent) => {
       if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
-        refetchMessages();
+        refetchMessagesRef.current();
         socket.emit("markSeen", { messageId: payload.id, conversationId: payload.conversationId });
       }
     });
 
     socket.on("messageUpdated", (payload: { conversationId: string }) => {
       if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
-        refetchMessages();
+        refetchMessagesRef.current();
       }
     });
 
     socket.on("messageDeleted", (payload: { conversationId: string }) => {
       if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
-        refetchMessages();
+        refetchMessagesRef.current();
       }
     });
 
     socket.on("messageDeletedForMe", (payload: { conversationId: string; userId: string }) => {
       if (String(payload?.userId) !== authUserId) return;
       if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
-        refetchMessages();
+        refetchMessagesRef.current();
       }
     });
 
     socket.on("messageSeen", (payload: { conversationId: string }) => {
       if (payload?.conversationId && payload.conversationId === activeConversationRef.current) {
-        refetchMessages();
+        refetchMessagesRef.current();
       }
     });
 
@@ -434,7 +447,7 @@ export default function MessagesPage() {
       socketRef.current = null;
       setSocketConnected(false);
     };
-  }, [authUserId, refetchMessages]);
+  }, [authUserId]);
 
   useEffect(() => {
     if (!activeConversationId || !socketConnected || !socketRef.current) return;
@@ -496,7 +509,9 @@ export default function MessagesPage() {
         return;
       }
 
+      console.log("Emitting sendMessage via API for conversationId", activeConversationId, "with content:", trimmed, "and attachments:", attachmentsPayload);
       await sendMessage({ conversationId: activeConversationId, content: trimmed || undefined, type: attachmentsPayload.length ? "file" : "text", attachments: attachmentsPayload }).unwrap();
+      console.log("Message sent successfully via API");
       setDraftMessage(""); setPendingAttachments([]); setEmojiOpen(false);
       await refetchMessages();
     } catch (error: any) { toast.error(error?.data?.message || "Failed to send message"); }
