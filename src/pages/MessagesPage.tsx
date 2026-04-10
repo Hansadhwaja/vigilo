@@ -68,7 +68,7 @@ interface TypingEvent {
   conversationId: string;
 }
 
-const SOCKET_BASE_URL = "https://vigilo-backend-1.onrender.com";
+const SOCKET_BASE_URL = "https://v-backend-flae.onrender.com";
 const SOCKET_HEARTBEAT_MS = 30000;
 
 const EMOJI_SET = [
