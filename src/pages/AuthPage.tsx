@@ -1,32 +1,28 @@
-import React, { useState } from "react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { useLoginMutation } from "../apis/authApi";
-import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { Shield, Eye, EyeOff } from "lucide-react";
+import { useLoginMutation } from "@/apis/authApi";
+import { toast } from "sonner";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import { Shield } from "lucide-react";
+import {
+  LoginForm,
+  LoginFormValues,
+} from "@/components/Auth/Form/LoginForm";
+import { Button } from "@/components/ui/button";
 
 export default function AuthPage() {
   const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-
   const [login, { isLoading }] = useLoginMutation();
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const isEmailValid = emailRegex.test(email);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleLogin = async (values: LoginFormValues) => {
     try {
-      const res = await login({
-        email: email.trim(),
-        password: password.trim(),
-      }).unwrap();
+      const res = await login(values).unwrap();
 
       localStorage.setItem("token", res.token);
       localStorage.setItem("user", JSON.stringify(res.user));
@@ -34,171 +30,20 @@ export default function AuthPage() {
       toast.success(res.message || "Login successful!");
       navigate("/dashboard");
     } catch (error: any) {
-      console.log("Login response:", error);
-
-      const errorMessage =
+      const message =
         error?.data?.error?.message ||
         error?.data?.message ||
         "Invalid email or password";
 
-      toast.error(errorMessage);
+      toast.error(message);
     }
   };
 
-  const isButtonDisabled =
-    !email || !password || !isEmailValid || isLoading;
-
   return (
-    <div 
-      className="h-screen w-screen flex items-center justify-center p-4 overflow-hidden relative"
-    >
-      {/* Multi-layer gradient background with new colors */}
-      <div 
-        className="absolute inset-0" 
-        style={{ 
-          background: "linear-gradient(135deg, #011F6B 0%, #2360FF 50%, #011F6B 100%)" 
-        }}
-      ></div>
-      <div 
-        className="absolute inset-0 opacity-30" 
-        style={{ 
-          background: "linear-gradient(225deg, #2360FF 0%, transparent 50%, #011F6B 100%)" 
-        }}
-      ></div>
-      
-      {/* Animated floating shapes with new primary color */}
-      <div 
-        className="absolute top-20 left-10 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"
-        style={{ backgroundColor: "#2360FF" }}
-      ></div>
-      <div 
-        className="absolute top-40 right-10 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"
-        style={{ backgroundColor: "#011F6B" }}
-      ></div>
-      <div 
-        className="absolute -bottom-8 left-1/3 w-72 h-72 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"
-        style={{ backgroundColor: "#2360FF" }}
-      ></div>
-      
-      {/* Geometric patterns */}
-      <div className="absolute top-0 left-0 w-full h-full opacity-10">
-        <div className="absolute top-10 left-10 w-64 h-64 border border-white rounded-full"></div>
-        <div className="absolute bottom-20 right-20 w-48 h-48 border-2 border-white rotate-45"></div>
-        <div className="absolute top-1/2 right-1/4 w-32 h-32 border border-white rounded-lg rotate-12"></div>
-      </div>
-      
-      {/* Solid WHITE card */}
-      <Card className="w-full max-w-md bg-white text-gray-900 shadow-2xl p-8 relative z-10">
-        <CardHeader className="text-center space-y-3">
-          <div className="flex justify-center items-center gap-3">
-            <div 
-              className="h-12 w-12 rounded-xl grid place-items-center shadow-lg"
-              style={{ backgroundColor: "#2360FF" }}
-            >
-              <Shield className="h-6 w-6 text-white" />
-            </div>
-            <CardTitle className="text-2xl font-semibold tracking-wide text-gray-900">
-              VIGILO ADMIN
-            </CardTitle>
-          </div>
-          <p className="text-xl text-gray-600">Admin Login Portal</p>
-        </CardHeader>
-
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="email"
-                className="text-xl font-medium text-gray-700"
-              >
-                Email Address
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                className="mt-1 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 bg-white"
-              />
-              {email && !isEmailValid && (
-                <p 
-                  className="text-sm mt-1"
-                  style={{ color: "#FC0000" }}
-                >
-                  Please enter a valid email address
-                </p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div>
-              <label
-                htmlFor="password"
-                className="text-xl font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <div className="relative mt-1">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  className="pl-4 pr-10 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 bg-white"
-                />
-                <div
-                  className={`absolute inset-y-0 right-3 flex items-center ${
-                    password
-                      ? "cursor-pointer"
-                      : "cursor-not-allowed opacity-50"
-                  }`}
-                  onClick={() =>
-                    password && setShowPassword(!showPassword)
-                  }
-                >
-                  {showPassword ? (
-                    <Eye className="h-5 w-5 text-gray-500" />
-                  ) : (
-                    <EyeOff className="h-5 w-5 text-gray-500" />
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Login Button */}
-            <Button
-              type="submit"
-              disabled={isButtonDisabled}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 rounded-lg transition-all duration-200 mt-4 shadow-lg"
-            >
-              {isLoading ? "Logging in..." : "Login"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* Add animation keyframes */}
-      <style>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
+    <div className="bg-red-400">
+      <Button>
+        HEllo
+      </Button>
     </div>
   );
 }

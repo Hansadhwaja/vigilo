@@ -39,6 +39,7 @@ import { isSameMonthNow } from "./utils/helpers";
 import ProtectedRoute from "./components/ProtectedRoute/ProctedRoute";
 import { Toaster } from "sonner";
 import AssignmentDetailsPage from "./components/ui/AssignmentDetailsPage";
+import { TooltipProvider } from "./components/ui/tooltip";
 
 // -------------------- Types --------------------
 export interface Guard {
@@ -353,26 +354,25 @@ function MainLayout() {
 }
 
 // -------------------- VigiloApp Component --------------------
-export default function VigiloApp() {
+export default function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Auth route - no sidebar or topbar */}
-        <Route path="/auth" element={<AuthPage />} />
+      <TooltipProvider>
+        <Routes>
+          <Route path="/auth" element={<AuthPage />} />
 
-        {/* All other routes - with sidebar and topbar */}
-        <Route path="/*" element={
-          <ProtectedRoute>
-            <MainLayout />
-          </ProtectedRoute>
-        }
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          }
+          />
+        </Routes>
+        <Toaster
+          position="top-right"
+          richColors
         />
-      </Routes>
-      {/* Toaster Notifications */}
-      <Toaster
-        position="top-right"
-        richColors
-      />
+      </TooltipProvider>
     </BrowserRouter>
   );
 }
