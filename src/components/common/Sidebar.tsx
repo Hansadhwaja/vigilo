@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { 
-  Shield, 
-  Menu, 
-  X, 
+import {
+  Shield,
+  Menu,
+  X,
   Activity,
   Map,
   Calendar,
@@ -35,8 +35,10 @@ import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Progress } from "../ui/progress";
 import { classNames } from "../../utils/helpers";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { navLinks } from "../../constants";
+import { cn } from "../ui/utils";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -57,7 +59,7 @@ interface SideItemProps {
 // Simple tooltip for collapsed icons
 function Tooltip({ children, content, show }: { children: React.ReactNode; content: string; show: boolean }) {
   if (!show) return <>{children}</>;
-  
+
   return (
     <div className="group/tooltip relative">
       {children}
@@ -76,7 +78,7 @@ function Tooltip({ children, content, show }: { children: React.ReactNode; conte
 // Image with fallback
 function IconImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
   const [error, setError] = useState(false);
-  
+
   if (error) {
     return (
       <div className={classNames("bg-white/20 rounded flex items-center justify-center", className)}>
@@ -84,10 +86,10 @@ function IconImage({ src, alt, className }: { src: string; alt: string; classNam
       </div>
     );
   }
-  
+
   return (
-    <img 
-      src={src} 
+    <img
+      src={src}
       alt={alt}
       className={className}
       onError={() => setError(true)}
@@ -146,31 +148,29 @@ export default function Sidebar({
   return (
     <aside
       className={classNames(
-        "h-full transition-all duration-300 ease-in-out border-r border-blue-300/30 text-white flex flex-col",
+        "h-full transition-all duration-300 ease-in-out border-r border-blue-300/30 text-white flex flex-col bg-blue-900 ",
         isOpen ? "w-72" : "w-20"
       )}
-      style={{
-        backgroundColor: "#011F6B"
-      }}
+
     >
       {/* Header with Menu Button on Top */}
       <div className="flex items-center gap-3 p-3 border-b border-white/10">
-        <Button 
-          size="icon" 
-          variant="ghost" 
+        <Button
+          size="icon"
+          variant="ghost"
           className="text-white hover:bg-white/10 flex-shrink-0"
           onClick={onToggle}
         >
           <Menu className="h-5 w-5" />
         </Button>
-        
+
         {isOpen && (
           <>
             <div
               onClick={() => navigate("/dashboard", { replace: true })}
               className="h-10 w-10 rounded-xl backdrop-blur-sm
                          grid place-items-center shadow-lg cursor-pointer 
-                         hover:scale-105 transition-transform flex-shrink-0"
+                         hover:scale-105 transition-transform shrink-0"
               style={{ backgroundColor: "#2360FF" }}
             >
               <Shield className="h-6 w-6 text-white" />
@@ -188,7 +188,7 @@ export default function Sidebar({
         <Card className="m-3 bg-white/10 backdrop-blur-sm border-white/20 text-white">
           <CardHeader className="p-4 pb-0">
             <div className="flex items-center gap-2 text-lg">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               <Activity className="h-4 w-4" />
               System Status
             </div>
@@ -205,7 +205,7 @@ export default function Sidebar({
       )}
 
       {/* Navigation */}
-      <nav 
+      {/* <nav
         className="flex-1 overflow-y-auto py-2 px-2"
         style={{
           scrollbarWidth: 'none',
@@ -219,82 +219,102 @@ export default function Sidebar({
         `}</style>
 
         <SideItem
-          icon={<IconImage src={DashboardIcon} alt="Dashboard" className="h-6 w-6"/> }
+          icon={<IconImage src={DashboardIcon} alt="Dashboard" className="h-6 w-6" />}
           label="Dashboard"
           active={activeTab === "dashboard"}
           onClick={() => onTabChange("dashboard")}
           open={isOpen}
         />
         <SideItem
-          icon={<IconImage src={SchedulingIcon} alt="Scheduling" className="h-6 w-6"/>}
+          icon={<IconImage src={SchedulingIcon} alt="Scheduling" className="h-6 w-6" />}
           label="Scheduling"
           active={activeTab === "scheduling"}
           onClick={() => onTabChange("scheduling")}
           open={isOpen}
         />
         <SideItem
-          icon={<IconImage src={ClientIcon} alt="Clients" className="h-6 w-6"/>}
+          icon={<IconImage src={ClientIcon} alt="Clients" className="h-6 w-6" />}
           label="Clients Management"
           active={activeTab === "clients"}
           onClick={() => onTabChange("clients")}
           open={isOpen}
         />
         <SideItem
-          icon={<IconImage src={IncidentIcon} alt="Incidents" className="h-6 w-6"/>}
+          icon={<IconImage src={IncidentIcon} alt="Incidents" className="h-6 w-6" />}
           label="Incidents"
           active={activeTab === "incidents"}
           onClick={() => onTabChange("incidents")}
           open={isOpen}
         />
         <SideItem
-          icon={<IconImage src={AlarmIcon} alt="Alarms" className="h-6 w-6"/>}
+          icon={<IconImage src={AlarmIcon} alt="Alarms" className="h-6 w-6" />}
           label="Alarms"
           active={activeTab === "alarms"}
           onClick={() => onTabChange("alarms")}
           open={isOpen}
         />
         <SideItem
-          icon={<IconImage src={MapIcon} alt="Map" className="h-6 w-6 "/>}
+          icon={<IconImage src={MapIcon} alt="Map" className="h-6 w-6 " />}
           label="Map"
           active={activeTab === "map"}
           onClick={() => onTabChange("map")}
           open={isOpen}
         />
         <SideItem
-          icon={<IconImage src={MessageIcon} alt="Messages" className="h-6 w-6"/>}
+          icon={<IconImage src={MessageIcon} alt="Messages" className="h-6 w-6" />}
           label="Messages"
           active={activeTab === "messages"}
           onClick={() => onTabChange("messages")}
           open={isOpen}
         />
         <SideItem
-          icon={<IconImage src={PatrolingIcon} alt="Patrolling" className="h-6 w-6"/>}
+          icon={<IconImage src={PatrolingIcon} alt="Patrolling" className="h-6 w-6" />}
           label="Patrolling"
           active={activeTab === "patrol"}
           onClick={() => onTabChange("patrol")}
           open={isOpen}
         />
         <SideItem
-          icon={<IconImage src={HRIcon} alt="HR" className="h-6 w-6"/>}
+          icon={<IconImage src={HRIcon} alt="HR" className="h-6 w-6" />}
           label="HR & Compliance"
           active={activeTab === "hr"}
           onClick={() => onTabChange("hr")}
           open={isOpen}
         />
         <SideItem
-          icon={<IconImage src={InvoicingIcon} alt="Invoicing" className="h-6 w-6"/>}
+          icon={<IconImage src={InvoicingIcon} alt="Invoicing" className="h-6 w-6" />}
           label="Invoicing"
           active={activeTab === "invoicing"}
           onClick={() => onTabChange("invoicing")}
           open={isOpen}
         />
         <SideItem
-          icon={<IconImage src={SettingsIcon} alt="Settings" className="h-6 w-6"/>}
+          icon={<IconImage src={SettingsIcon} alt="Settings" className="h-6 w-6" />}
           label="Settings"
           active={activeTab === "settings"}
           onClick={() => onTabChange("settings")}
           open={isOpen}
         />
+      </nav> */}
+
+      <nav className="p-2 space-y-1">
+        {navLinks.map(item => (
+          <NavLink to={item.link} key={item.label} className={({ isActive }) => cn(
+            "flex gap-2 items-center px-3 py-2 hover:bg-white/15 rounded-md cursor-pointer",
+            isActive && "bg-white/15"
+          )}>
+            <Tooltip>
+              <ToolipTrigger>
+   <item.icon size={20} />
+              {isOpen && (<p>{item.label}</p>)}
+              </ToolipTrigger>
+              <TooltipContent>
+                {item.label}
+              </TooltipContent>
+           
+            </Tooltip>
+          </NavLink>
+        ))}
       </nav>
 
       {/* Footer with Logout */}

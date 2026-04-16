@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 // Components
 import Sidebar from "./components/common/Sidebar";
@@ -37,7 +37,7 @@ import {
 } from "./data/sampleData";
 import { isSameMonthNow } from "./utils/helpers";
 import ProtectedRoute from "./components/ProtectedRoute/ProctedRoute";
-import { toast, Toaster } from "sonner";
+import { Toaster } from "sonner";
 import AssignmentDetailsPage from "./components/ui/AssignmentDetailsPage";
 
 // -------------------- Types --------------------
@@ -196,12 +196,12 @@ function MainLayout() {
       prev.map((a) =>
         a.id === alarm.id
           ? {
-              ...a,
-              assigned: alarm.assigned,
-              assignedId: alarm.assignedId,
-              eta: alarm.eta,
-              assignedAt: alarm.assignedAt,
-            }
+            ...a,
+            assigned: alarm.assigned,
+            assignedId: alarm.assignedId,
+            eta: alarm.eta,
+            assignedAt: alarm.assignedAt,
+          }
           : a
       )
     );
@@ -212,16 +212,16 @@ function MainLayout() {
       prev.map((a) =>
         a.id === id
           ? {
-              ...a,
-              completed: true,
-              completedAt: new Date(),
-              responseTime: a.assignedAt
-                ? Math.round(
-                    (new Date().getTime() - new Date(a.assignedAt).getTime()) /
-                      60000
-                  )
-                : a.sinceMins,
-            }
+            ...a,
+            completed: true,
+            completedAt: new Date(),
+            responseTime: a.assignedAt
+              ? Math.round(
+                (new Date().getTime() - new Date(a.assignedAt).getTime()) /
+                60000
+              )
+              : a.sinceMins,
+          }
           : a
       )
     );
@@ -267,8 +267,8 @@ function MainLayout() {
             <Route path="/clients" element={<ClientsPage />} />
             <Route path="/clients/:id" element={<OrderDetailsPage />} />
             <Route path="/scheduling/:id" element={<AssignmentDetailsPage />} />
-            <Route 
-              path="/incidents" 
+            <Route
+              path="/incidents"
               element={
                 <IncidentsPage
                   list={incidentList}
@@ -276,11 +276,11 @@ function MainLayout() {
                   setFilter={setIncidentFilter}
                   onOpen={handleIncidentSelect}
                 />
-              } 
+              }
             />
             <Route path="/incidents/:id" element={<IncidentDetailsPage />} />
-            <Route 
-              path="/alarms" 
+            <Route
+              path="/alarms"
               element={
                 <AlarmsPage
                   alarmList={alarmList}
@@ -288,11 +288,11 @@ function MainLayout() {
                   onResolve={resolveAlarm}
                   onSelectAlarm={setSelectedAlarm}
                 />
-              } 
+              }
             />
-            <Route 
-              path="/map" 
-              element={<MapPage onSelectGuard={setSelectedGuard} />} 
+            <Route
+              path="/map"
+              element={<MapPage onSelectGuard={setSelectedGuard} />}
             />
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/patrol" element={<PatrolPage />} />
@@ -300,30 +300,16 @@ function MainLayout() {
             <Route path="/hr" element={<HRPage />} />
             <Route path="/guard-details/:id" element={<GuardDetailsPage />} />
             <Route path="/invoicing" element={<InvoicingPage />} />
-            <Route 
-              path="/settings" 
-              element={<SettingsPage usageAlarmsMTD={usageAlarmsMTD} />} 
+            <Route
+              path="/settings"
+              element={<SettingsPage usageAlarmsMTD={usageAlarmsMTD} />}
             />
           </Routes>
           {/* Toaster Notifications */}
-      <Toaster 
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          success: {
-            style: {
-              background: '#10b981',
-              color: '#fff',
-            },
-          },
-          error: {
-            style: {
-              background: '#ef4444',
-              color: '#fff',
-            },
-          },
-        }}
-      />
+          <Toaster
+            position="top-right"
+            richColors
+          />
         </div>
       </div>
 
@@ -373,28 +359,19 @@ export default function VigiloApp() {
       <Routes>
         {/* Auth route - no sidebar or topbar */}
         <Route path="/auth" element={<AuthPage />} />
-        
+
         {/* All other routes - with sidebar and topbar */}
-        <Route path="/*" element={<ProtectedRoute><MainLayout /></ProtectedRoute>} />
+        <Route path="/*" element={
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+        />
       </Routes>
       {/* Toaster Notifications */}
-      <Toaster 
+      <Toaster
         position="top-right"
-        toastOptions={{
-          duration: 3000,
-          success: {
-            style: {
-              background: '#10b981',
-              color: '#fff',
-            },
-          },
-          error: {
-            style: {
-              background: '#ef4444',
-              color: '#fff',
-            },
-          },
-        }}
+        richColors
       />
     </BrowserRouter>
   );
