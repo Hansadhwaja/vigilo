@@ -2,8 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@import "@fontsource-variable/inter";
-
 @import "@fontsource-variable/roboto";
 
 @custom-variant dark (&:is(.dark *));
@@ -80,6 +78,9 @@
   --sidebar-border: oklch(0.922 0 0);
 
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* Custom Colors */
+  --primary-100: #011f6b;
 }
 
 .dark {
@@ -143,7 +144,7 @@ html {
 }
 
 @theme inline {
-  --font-sans: 'Inter Variable', sans-serif;
+  --font-sans: "Roboto Variable", sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -166,7 +167,7 @@ html {
 
   --radius: var(--radius);
 
-  --font-heading: 'Roboto Variable', sans-serif;
+  --font-heading: "Roboto Variable", sans-serif;
 
   --color-sidebar-ring: var(--sidebar-ring);
 
@@ -207,4 +208,78 @@ html {
   --radius-3xl: calc(var(--radius) * 2.2);
 
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Custom Colors */
+  --color-primary-100: var(--primary-100);
+}
+
+@layer utilities {
+  .auth-bg-base {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #011f6b 0%, #2360ff 50%, #011f6b 100%);
+  }
+
+  .auth-bg-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      225deg,
+      #2360ff 0%,
+      transparent 50%,
+      #011f6b 100%
+    );
+    opacity: 0.3;
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+@keyframes blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
