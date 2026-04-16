@@ -72,7 +72,7 @@ import { useGetAllOrdersQuery } from "../apis/ordersApi";
 import { toast } from "sonner";
 import { getStatusColor, getStatusStyle } from "../utils/statusColors";
 import { DatePicker } from "@heroui/react";
-import EditAssignmentDialog from "../components/ui/EditAssignmentDialog";
+import EditAssignmentDialog from "../components/AssignmentDetails/EditAssignmentDialog";
 
 // Helper to get current week dates
 const getCurrentWeekDates = () => {

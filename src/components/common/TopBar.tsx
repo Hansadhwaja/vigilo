@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { useGetProfileQuery } from "../../apis/profileApi";
-import ProfileEditDialog from "../ui/ProfileEditDialog";
+import ProfileEditDialog from "@/components/ProfileEditDialog";
 import { toast } from "sonner";
 
 interface TopBarProps {
@@ -24,10 +24,10 @@ interface TopBarProps {
 
 export default function TopBar({ search, onSearchChange, onSidebarToggle }: TopBarProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
-  
+
   // Fetch profile from API
   const { data: profileResponse, isLoading, isError } = useGetProfileQuery();
-  
+
   const profile = profileResponse?.data;
 
   const handleLogout = () => {
@@ -53,11 +53,11 @@ export default function TopBar({ search, onSearchChange, onSidebarToggle }: TopB
         </Button>
         <div className="w-full max-w-xl relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input 
-            value={search} 
-            onChange={e => onSearchChange(e.target.value)} 
-            placeholder="Search sites, guards, incidents…" 
-            className="pl-8" 
+          <Input
+            value={search}
+            onChange={e => onSearchChange(e.target.value)}
+            placeholder="Search sites, guards, incidents…"
+            className="pl-8"
           />
         </div>
         <div className="ml-auto flex items-center gap-2">
@@ -72,10 +72,10 @@ export default function TopBar({ search, onSearchChange, onSidebarToggle }: TopB
             </SelectContent>
           </Select>
           <Button variant="outline" className="gap-2">
-            <Globe className="h-4 w-4"/> 
+            <Globe className="h-4 w-4" />
             Client Portal
           </Button>
-          
+
           {/* Profile Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -137,7 +137,7 @@ export default function TopBar({ search, onSearchChange, onSidebarToggle }: TopB
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     className="cursor-pointer"
                     onClick={() => setShowEditDialog(true)}
                   >
@@ -149,7 +149,7 @@ export default function TopBar({ search, onSearchChange, onSidebarToggle }: TopB
                     <span>Settings</span>
                   </DropdownMenuItem> */}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     variant="destructive"
                     className="cursor-pointer"
                     onClick={handleLogout}

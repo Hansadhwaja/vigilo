@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Download } from "lucide-react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import jsPDF from "jspdf";
 import {
   Card,

@@ -11,25 +11,24 @@ import { Textarea } from "../components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
 import {
-  useGetAllOrdersQuery, 
-  useCancelOrderMutation, 
-  useAcceptOrderMutation, 
-  useDeleteClientMutation,  
-  useEditOrderMutation,  
-  useGetAllClientsQuery      
+  useGetAllOrdersQuery,
+  useCancelOrderMutation,
+  useAcceptOrderMutation,
+  useDeleteClientMutation,
+  useEditOrderMutation,
+  useGetAllClientsQuery
 } from "../apis/ordersApi";
 
 import {
-  useGetClientByIdQuery,     
+  useGetClientByIdQuery,
   useEditClientMutation,
   useUploadImageMutation,
 } from "../apis/usersApi";
 
 import { AlertCircle } from "lucide-react";
-import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { Toast } from "@heroui/react";
 import { getStatusColor, getStatusStyle } from "../utils/statusColors";
+import { toast } from "sonner";
 
 export default function ClientsPage() {
   const [isEditingClient, setIsEditingClient] = useState(false);
@@ -55,7 +54,7 @@ export default function ClientsPage() {
   const [showClientDialog, setShowClientDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-const [orderSearchTerm, setOrderSearchTerm] = useState("");
+  const [orderSearchTerm, setOrderSearchTerm] = useState("");
   const [clientSearchTerm, setClientSearchTerm] = useState("");
   const [debouncedOrderSearch, setDebouncedOrderSearch] = useState("");
   const [debouncedClientSearch, setDebouncedClientSearch] = useState("");
@@ -78,22 +77,22 @@ const [orderSearchTerm, setOrderSearchTerm] = useState("");
     endTime: "",
   });
 
-// Debounce order search
-useEffect(() => {
-  const timer = setTimeout(() => {
-    setDebouncedOrderSearch(orderSearchTerm);
-    if (currentPage !== 1) setCurrentPage(1);
-  }, 500);
-  return () => clearTimeout(timer);
-}, [orderSearchTerm]);
+  // Debounce order search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedOrderSearch(orderSearchTerm);
+      if (currentPage !== 1) setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [orderSearchTerm]);
 
-// Debounce client search
-useEffect(() => {
-  const timer = setTimeout(() => {
-    setDebouncedClientSearch(clientSearchTerm);
-  }, 500);
-  return () => clearTimeout(timer);
-}, [clientSearchTerm]);
+  // Debounce client search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedClientSearch(clientSearchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [clientSearchTerm]);
 
 
   // Fetch orders from API
@@ -119,28 +118,28 @@ useEffect(() => {
   const apiPagination = ordersResponse?.pagination;
 
   const { data, isLoading: isLoadingClients, isError: isErrorClients } = useGetAllClientsQuery({
-  search: debouncedClientSearch || undefined,
-  page: 1,
-  limit: 100,
-});
+    search: debouncedClientSearch || undefined,
+    page: 1,
+    limit: 100,
+  });
 
 
-  const clients = data?.data; 
+  const clients = data?.data;
   const clientsList = clients ? (Array.isArray(clients) ? clients : [clients]) : [];
 
   // Filter clients by search
-const filteredClients = useMemo(() => {
-  if (!clientsList || clientsList.length === 0) return [];
-  if (!debouncedClientSearch) return clientsList;
-  
-  const searchLower = debouncedClientSearch.toLowerCase();
-  return clientsList.filter(client => 
-    client.name?.toLowerCase().includes(searchLower) ||
-    client.email?.toLowerCase().includes(searchLower) ||
-    client.mobile?.toLowerCase().includes(searchLower) ||
-    client.address?.toLowerCase().includes(searchLower)
-  );
-}, [clientsList, debouncedClientSearch]);
+  const filteredClients = useMemo(() => {
+    if (!clientsList || clientsList.length === 0) return [];
+    if (!debouncedClientSearch) return clientsList;
+
+    const searchLower = debouncedClientSearch.toLowerCase();
+    return clientsList.filter(client =>
+      client.name?.toLowerCase().includes(searchLower) ||
+      client.email?.toLowerCase().includes(searchLower) ||
+      client.mobile?.toLowerCase().includes(searchLower) ||
+      client.address?.toLowerCase().includes(searchLower)
+    );
+  }, [clientsList, debouncedClientSearch]);
 
 
   const handleDeleteClient = async (clientId: string) => {
@@ -178,62 +177,62 @@ const filteredClients = useMemo(() => {
   };
 
   const handleAcceptReject = async () => {
-  if (!selectedOrder) return;
+    if (!selectedOrder) return;
 
-  try {
-    if (actionType === "accept") {
+    try {
+      if (actionType === "accept") {
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-      const startDate = new Date(selectedOrder.startDate);
-      startDate.setHours(0, 0, 0, 0);
+        const startDate = new Date(selectedOrder.startDate);
+        startDate.setHours(0, 0, 0, 0);
 
-      if (startDate < today) {
-        const daysLate = Math.floor(
-          (today.getTime() - startDate.getTime()) /
-          (1000 * 60 * 60 * 24)
-        );
+        if (startDate < today) {
+          const daysLate = Math.floor(
+            (today.getTime() - startDate.getTime()) /
+            (1000 * 60 * 60 * 24)
+          );
 
-        const confirmLate = window.confirm(
-          `⚠️ WARNING: This order's start date was ${daysLate} day(s) ago.\n\n` +
-          `Are you sure you want to accept an expired order?`
-        );
+          const confirmLate = window.confirm(
+            `⚠️ WARNING: This order's start date was ${daysLate} day(s) ago.\n\n` +
+            `Are you sure you want to accept an expired order?`
+          );
 
-        if (!confirmLate) return;
+          if (!confirmLate) return;
+        }
+
+        await acceptOrder(selectedOrder.id).unwrap();
+        toast.success("Order accepted successfully");
+
+      } else if (actionType === "reject") {
+        console.log("Sending request:", {
+          id: selectedOrder.id,
+          reason: actionMessage,
+        });
+
+
+        if (!actionMessage.trim()) {
+          toast.error("Please provide a rejection reason");
+          return;
+        }
+
+        await cancelOrder({
+          id: selectedOrder.id,
+          reason: actionMessage,
+        }).unwrap();
+
+        toast.success("Order rejected successfully");
       }
 
-      await acceptOrder(selectedOrder.id).unwrap();
-      toast.success("Order accepted successfully");
+      setShowActionDialog(false);
+      setActionMessage("");
 
-    } else if (actionType === "reject") {
-      console.log("Sending request:", {
-    id: selectedOrder.id,
-    reason: actionMessage,
-  });
-
-
-      if (!actionMessage.trim()) {
-        toast.error("Please provide a rejection reason");
-        return;
-      }
-
-      await cancelOrder({
-        id: selectedOrder.id,
-        reason: actionMessage,
-      }).unwrap();
-
-      toast.success("Order rejected successfully");
+    } catch (err: any) {
+      console.error("Failed to process order:", err);
+      toast.error(err?.data?.message || "Failed to process order");
     }
-
-    setShowActionDialog(false);
-    setActionMessage("");
-
-  } catch (err: any) {
-    console.error("Failed to process order:", err);
-    toast.error(err?.data?.message || "Failed to process order");
-  }
-};
+  };
 
   // ===== EDIT ORDER FUNCTIONS =====
   const handleEditClick = (order: any) => {
@@ -300,14 +299,14 @@ const filteredClients = useMemo(() => {
           lng: parseFloat(editFormData.siteServiceLng)
         };
       }
-    
+
       // Call the edit API
       await editOrder({
         id: selectedOrder.id,
         body: payload
       }).unwrap();
 
-//  console.log("🚀 Editing order with payload:", payload);
+      //  console.log("🚀 Editing order with payload:", payload);
       toast.success("Order updated successfully");
       setShowEditDialog(false);
       setSelectedOrder(null);
@@ -335,26 +334,26 @@ const filteredClients = useMemo(() => {
 
   const getOrderUrgency = (order: any) => {
     if (order.status !== "pending") return null;
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const startDate = new Date(order.startDate);
     startDate.setHours(0, 0, 0, 0);
-    
+
     const daysUntilStart = Math.floor((startDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (daysUntilStart < 0) {
       return { type: "expired", days: Math.abs(daysUntilStart), color: "bg-red-50" };
     } else if (daysUntilStart <= 2) {
       return { type: "urgent", days: daysUntilStart, color: "bg-red-50" };
-    } 
-    
+    }
+
     return null;
   };
 
   // ===== CLIENT EDIT HANDLERS =====
-  
+
   // Handler to start editing client
   const handleEditClientClick = () => {
     if (selectedClient) {
@@ -378,7 +377,7 @@ const filteredClients = useMemo(() => {
         id: selectedClient.id,
         body: editClientData,
       }).unwrap();
-      
+
       toast.success("Client updated successfully");
       setIsEditingClient(false);
       setShowClientDialog(false);
@@ -397,42 +396,42 @@ const filteredClients = useMemo(() => {
   };
 
   // Handler for avatar upload
-const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  if (!file.type.startsWith('image/')) {
-    toast.error("Please upload an image file");
-    return;
-  }
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please upload an image file");
+      return;
+    }
 
-  if (file.size > 5 * 1024 * 1024) {
-    toast.error("Image size should be less than 5MB");
-    return;
-  }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB");
+      return;
+    }
 
-  try {
-    setUploadingAvatar(true);
-    
-    const formData = new FormData();
-    formData.append('image', file);
+    try {
+      setUploadingAvatar(true);
 
-    const response = await uploadImage(formData).unwrap();
-    
-    console.log('🎯 Upload response:', response); 
-    console.log('🎯 New avatar URL:', response.imageUrl); 
-    
-    handleClientFormChange("avatar", response.imageUrl);
-    
-    toast.success("Avatar uploaded successfully");
-    e.target.value = '';
-  } catch (err: any) {
-    console.error("Failed to upload avatar:", err);
-    toast.error(err?.data?.message || "Failed to upload avatar");
-  } finally {
-    setUploadingAvatar(false);
-  }
-};
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await uploadImage(formData).unwrap();
+
+      console.log('🎯 Upload response:', response);
+      console.log('🎯 New avatar URL:', response.imageUrl);
+
+      handleClientFormChange("avatar", response.imageUrl);
+
+      toast.success("Avatar uploaded successfully");
+      e.target.value = '';
+    } catch (err: any) {
+      console.error("Failed to upload avatar:", err);
+      toast.error(err?.data?.message || "Failed to upload avatar");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
 
 
@@ -445,7 +444,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
           <h1 className="mb-1">Order Management</h1>
           <p className="text-gray-600 text-lg">Manage security service orders & contracts</p>
         </div>
-                
+
         {/* Inline Summary Cards */}
         <div className="flex flex-wrap gap-3">
           <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
@@ -455,7 +454,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
               <div className="text-lg text-blue-600">Total</div>
             </div>
           </div>
-                    
+
           <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
             <CheckCircle className="h-4 w-4 text-green-600" />
             <div>
@@ -463,7 +462,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
               <div className="text-lg text-green-600">Active</div>
             </div>
           </div>
-                    
+
           <div className="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200">
             <Building className="h-4 w-4 text-purple-600" />
             <div>
@@ -471,7 +470,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
               <div className="text-lg text-purple-600">Estimated</div>
             </div>
           </div>
-                    
+
           <div className="flex items-center gap-2 bg-orange-50 px-3 py-2 rounded-lg border border-orange-200">
             <Building className="h-4 w-4 text-orange-600" />
             <div>
@@ -498,8 +497,8 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
               <Input
                 placeholder="Search orders..."
-               value={orderSearchTerm}
-  onChange={(e) => setOrderSearchTerm(e.target.value)}
+                value={orderSearchTerm}
+                onChange={(e) => setOrderSearchTerm(e.target.value)}
                 className="pl-9 w-auto h-8"
               />
               {isFetching && (
@@ -537,19 +536,19 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
               </SelectContent>
             </Select>
             <Button
-  variant="outline"
-  size="lg"
-  onClick={() => {
-    setStatusFilter("all");
-    setServiceTypeFilter("all");
-    setOrderSearchTerm("");
-    setDebouncedOrderSearch("");
-    setCurrentPage(1);
-  }}
-  className="h-8"
->
-  Clear
-</Button>
+              variant="outline"
+              size="lg"
+              onClick={() => {
+                setStatusFilter("all");
+                setServiceTypeFilter("all");
+                setOrderSearchTerm("");
+                setDebouncedOrderSearch("");
+                setCurrentPage(1);
+              }}
+              className="h-8"
+            >
+              Clear
+            </Button>
 
           </div>
 
@@ -592,10 +591,10 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
               )}
 
               {/* Order List - Premium Minimal Design */}
-{!isLoading && !isError && orders.length > 0 && (
-  <>
-    {/* Custom Scrollbar Styles - Add to your global CSS or style tag */}
-    <style>{`
+              {!isLoading && !isError && orders.length > 0 && (
+                <>
+                  {/* Custom Scrollbar Styles - Add to your global CSS or style tag */}
+                  <style>{`
       .premium-scroll::-webkit-scrollbar {
         height: 8px;
       }
@@ -616,216 +615,213 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       }
     `}</style>
 
-    <div className="overflow-x-auto premium-scroll rounded-xl border border-gray-200/60 shadow-sm bg-white">
-      <table className="w-full text-lg">
-        <thead className="bg-linear-to-r from-gray-50 to-gray-100/50 border-b border-gray-200/60">
-          <tr>
-            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Service</th>
-            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Location</th>
-            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Schedule</th>
-            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Guards</th>
-            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Status</th>
-            <th className="px-6 py-4 font-semibold text-gray-700 text-left">Created</th>
-            <th className="px-6 py-4 font-semibold text-gray-700 text-right">Actions</th>
-          </tr>
-        </thead>
+                  <div className="overflow-x-auto premium-scroll rounded-xl border border-gray-200/60 shadow-sm bg-white">
+                    <table className="w-full text-lg">
+                      <thead className="bg-linear-to-r from-gray-50 to-gray-100/50 border-b border-gray-200/60">
+                        <tr>
+                          <th className="px-6 py-4 font-semibold text-gray-700 text-left">Service</th>
+                          <th className="px-6 py-4 font-semibold text-gray-700 text-left">Location</th>
+                          <th className="px-6 py-4 font-semibold text-gray-700 text-left">Schedule</th>
+                          <th className="px-6 py-4 font-semibold text-gray-700 text-left">Guards</th>
+                          <th className="px-6 py-4 font-semibold text-gray-700 text-left">Status</th>
+                          <th className="px-6 py-4 font-semibold text-gray-700 text-left">Created</th>
+                          <th className="px-6 py-4 font-semibold text-gray-700 text-right">Actions</th>
+                        </tr>
+                      </thead>
 
-        <tbody className="divide-y divide-gray-100">
-          {orders.map((order) => {
-            const urgency = getOrderUrgency(order);
-            
+                      <tbody className="divide-y divide-gray-100">
+                        {orders.map((order) => {
+                          const urgency = getOrderUrgency(order);
 
-            return (
-              <tr 
-                key={order.id} 
-                className={`hover:bg-gray-50/50 transition-all duration-200 ${urgency ? urgency.color : ''}`}
-              >
-                <td className="px-6 py-4">
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900 text-lg">
-                        {order.serviceType.replace(/([A-Z])/g, " $1").trim()}
-                      </span>
-                      {urgency && urgency.type === "expired" && (
-                        <Badge className="bg-red-50 hover:bg-red-60 text-white text-xs px-2 py-0.5 font-medium">
-                          EXPIRED · {urgency.days}d
-                        </Badge>
-                      )}
-                      {urgency && urgency.type === "urgent" && (
-                        <Badge className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-2 py-0.5 font-medium">
-                          {urgency.days}d left
-                        </Badge>
-                      )}
-                      {urgency && urgency.type === "warning" && (
-                        <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2 py-0.5 font-medium">
-                          {urgency.days}d
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="text-lg text-gray-500 font-mono">
-                      #{order.id.slice(0, 8)}
-                    </div>
-                  </div>
-                </td>
 
-                <td className="px-6 py-4">
-                  <div className="flex items-start gap-2 max-w-50">
-                    <MapPin className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
-                    <span className="text-lg text-gray-700 line-clamp-2">
-                      {order.locationAddress}
-                    </span>
-                  </div>
-                </td>
+                          return (
+                            <tr
+                              key={order.id}
+                              className={`hover:bg-gray-50/50 transition-all duration-200 ${urgency ? urgency.color : ''}`}
+                            >
+                              <td className="px-6 py-4">
+                                <div className="flex flex-col gap-1.5">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-gray-900 text-lg">
+                                      {order.serviceType.replace(/([A-Z])/g, " $1").trim()}
+                                    </span>
+                                    {urgency && urgency.type === "expired" && (
+                                      <Badge className="bg-red-50 hover:bg-red-60 text-white text-xs px-2 py-0.5 font-medium">
+                                        EXPIRED · {urgency.days}d
+                                      </Badge>
+                                    )}
+                                    {urgency && urgency.type === "urgent" && (
+                                      <Badge className="bg-orange-500 hover:bg-orange-600 text-white text-xs px-2 py-0.5 font-medium">
+                                        {urgency.days}d left
+                                      </Badge>
+                                    )}
+                                    {urgency && urgency.type === "warning" && (
+                                      <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-xs px-2 py-0.5 font-medium">
+                                        {urgency.days}d
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <div className="text-lg text-gray-500 font-mono">
+                                    #{order.id.slice(0, 8)}
+                                  </div>
+                                </div>
+                              </td>
 
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-gray-400 shrink-0" />
-                    <div className="text-lg text-gray-700 whitespace-nowrap">
-                      {formatDate(order.startDate)} → {formatDate(order.endDate)}
-                    </div>
-                  </div>
-                </td>
+                              <td className="px-6 py-4">
+                                <div className="flex items-start gap-2 max-w-50">
+                                  <MapPin className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
+                                  <span className="text-lg text-gray-700 line-clamp-2">
+                                    {order.locationAddress}
+                                  </span>
+                                </div>
+                              </td>
 
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-gray-400" />
-                    <span className="text-lg text-gray-700 font-medium">
-                      {order.guardsRequired}
-                    </span>
-                  </div>
-                </td>
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-4 w-4 text-gray-400 shrink-0" />
+                                  <div className="text-lg text-gray-700 whitespace-nowrap">
+                                    {formatDate(order.startDate)} → {formatDate(order.endDate)}
+                                  </div>
+                                </div>
+                              </td>
 
-                <td className="px-6 py-4">
-                  <Badge 
-                      className="font-medium border-2"
-                       style={getStatusStyle(order.status)}
-                                                        >
-                            {getStatusColor(order.status).label}
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-2">
+                                  <User className="h-4 w-4 text-gray-400" />
+                                  <span className="text-lg text-gray-700 font-medium">
+                                    {order.guardsRequired}
+                                  </span>
+                                </div>
+                              </td>
+
+                              <td className="px-6 py-4">
+                                <Badge
+                                  className="font-medium border-2"
+                                  style={getStatusStyle(order.status)}
+                                >
+                                  {getStatusColor(order.status).label}
                                 </Badge>
-                </td>
+                              </td>
 
-                <td className="px-6 py-4">
-                  <span className="text-lg text-gray-600">
-                    {formatDate(order.createdAt)}
-                  </span>
-                </td>
+                              <td className="px-6 py-4">
+                                <span className="text-lg text-gray-600">
+                                  {formatDate(order.createdAt)}
+                                </span>
+                              </td>
 
-                <td className="px-6 py-4">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-9 w-9 p-0 hover:bg-gray-100"
-                      onClick={() => handleViewDetails(order.id)}
-                      title="View Details"
-                    >
-                      <Eye className="h-4 w-4 text-gray-600" />
-                    </Button>
+                              <td className="px-6 py-4">
+                                <div className="flex items-center justify-end gap-2">
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-9 w-9 p-0 hover:bg-gray-100"
+                                    onClick={() => handleViewDetails(order.id)}
+                                    title="View Details"
+                                  >
+                                    <Eye className="h-4 w-4 text-gray-600" />
+                                  </Button>
 
-                    {order.status !== "completed" && order.status !== "cancelled" && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-9 w-9 p-0 hover:bg-blue-50 text-blue-600"
-                        onClick={() => handleEditClick(order)}
-                        title="Edit Order"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    )}
+                                  {order.status !== "completed" && order.status !== "cancelled" && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-9 w-9 p-0 hover:bg-blue-50 text-blue-600"
+                                      onClick={() => handleEditClick(order)}
+                                      title="Edit Order"
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                  )}
 
-                    {order.status === "pending" && (
-                      <div className="flex items-center gap-1.5 ml-2">
-                        <Button
-                          size="sm"
-                          className="h-9 px-3 text-lg bg-emerald-600 hover:bg-emerald-700 shadow-sm"
-                          onClick={() => handleAction(order, "accept")}
-                          disabled={isAccepting}
-                        >
-                          Accept
-                        </Button>
+                                  {order.status === "pending" && (
+                                    <div className="flex items-center gap-1.5 ml-2">
+                                      <Button
+                                        size="sm"
+                                        className="h-9 px-3 text-lg bg-emerald-600 hover:bg-emerald-700 shadow-sm"
+                                        onClick={() => handleAction(order, "accept")}
+                                        disabled={isAccepting}
+                                      >
+                                        Accept
+                                      </Button>
 
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-9 px-3 text-lg text-red-600 hover:bg-red-50"
-                          onClick={() => handleAction(order, "reject")}
-                          disabled={isCancelling}
-                        >
-                          Reject
-                        </Button>
-                      </div>
-                    )}
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-9 px-3 text-lg text-red-600 hover:bg-red-50"
+                                        onClick={() => handleAction(order, "reject")}
+                                        disabled={isCancelling}
+                                      >
+                                        Reject
+                                      </Button>
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
 
-    {/* Premium Pagination */}
-    {totalPages > 1 && (
-      <div className="flex justify-center mt-6">
-        <Pagination>
-          <PaginationContent className="gap-1">
-            <PaginationItem>
-              <PaginationPrevious 
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (currentPage > 1) {
-                    setCurrentPage(prev => prev - 1);
-                  }
-                }}
-                className={`${
-                  currentPage === 1 
-                    ? "pointer-events-none opacity-40 cursor-not-allowed" 
-                    : "cursor-pointer hover:bg-gray-100"
-                } transition-colors`}
-              />
-            </PaginationItem>
-            
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setCurrentPage(page);
-                  }}
-                  isActive={page === currentPage}
-                  className={`cursor-pointer transition-all ${
-                    page === currentPage 
-                      ? "bg-gray-900 text-white hover:bg-gray-800" 
-                      : "hover:bg-gray-100"
-                  }`}
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
-            
-            <PaginationItem>
-              <PaginationNext 
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (currentPage < totalPages) {
-                    setCurrentPage(prev => prev + 1);
-                  }
-                }}
-                className={`${
-                  currentPage === totalPages 
-                    ? "pointer-events-none opacity-40 cursor-not-allowed" 
-                    : "cursor-pointer hover:bg-gray-100"
-                } transition-colors`}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
-    )}
-  </>
-)}
+                  {/* Premium Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex justify-center mt-6">
+                      <Pagination>
+                        <PaginationContent className="gap-1">
+                          <PaginationItem>
+                            <PaginationPrevious
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (currentPage > 1) {
+                                  setCurrentPage(prev => prev - 1);
+                                }
+                              }}
+                              className={`${currentPage === 1
+                                ? "pointer-events-none opacity-40 cursor-not-allowed"
+                                : "cursor-pointer hover:bg-gray-100"
+                                } transition-colors`}
+                            />
+                          </PaginationItem>
+
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                            <PaginationItem key={page}>
+                              <PaginationLink
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setCurrentPage(page);
+                                }}
+                                isActive={page === currentPage}
+                                className={`cursor-pointer transition-all ${page === currentPage
+                                  ? "bg-gray-900 text-white hover:bg-gray-800"
+                                  : "hover:bg-gray-100"
+                                  }`}
+                              >
+                                {page}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ))}
+
+                          <PaginationItem>
+                            <PaginationNext
+                              onClick={(e) => {
+                                e.preventDefault();
+                                if (currentPage < totalPages) {
+                                  setCurrentPage(prev => prev + 1);
+                                }
+                              }}
+                              className={`${currentPage === totalPages
+                                ? "pointer-events-none opacity-40 cursor-not-allowed"
+                                : "cursor-pointer hover:bg-gray-100"
+                                } transition-colors`}
+                            />
+                          </PaginationItem>
+                        </PaginationContent>
+                      </Pagination>
+                    </div>
+                  )}
+                </>
+              )}
 
             </CardContent>
           </Card>
@@ -838,27 +834,27 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
               <Input
-  placeholder="Search clients..."
-  value={clientSearchTerm}  // ✅ CORRECT
-  onChange={(e) => setClientSearchTerm(e.target.value)}  // ✅ CORRECT
-  className="pl-9 w-40 h-8"
-/>
+                placeholder="Search clients..."
+                value={clientSearchTerm}  // ✅ CORRECT
+                onChange={(e) => setClientSearchTerm(e.target.value)}  // ✅ CORRECT
+                className="pl-9 w-40 h-8"
+              />
 
             </div>
             <Button
-  variant="outline"
-  size="lg"
-  onClick={() => {
-    setClientSearchTerm("");
-    setDebouncedClientSearch("");
-  }}
-  className="h-8"
->
-  Clear
-</Button>
+              variant="outline"
+              size="lg"
+              onClick={() => {
+                setClientSearchTerm("");
+                setDebouncedClientSearch("");
+              }}
+              className="h-8"
+            >
+              Clear
+            </Button>
 
           </div>
-          
+
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-lg">Detailed Client Information</CardTitle>
@@ -866,91 +862,91 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
             <CardContent className="pt-0">
               {!isLoading && !isError && clientsList.length > 0 && (
                 <div className="overflow-x-auto rounded-lg border border-gray-200">
-  <table className="w-full text-lg text-left table-fixed">
-    <thead className="bg-gray-50 border-b">
-      <tr>
-        <th className="px-4 py-3 font-medium text-gray-700 w-[20%]">Name</th>
-        <th className="px-4 py-3 font-medium text-gray-700 w-[25%]">Email</th>
-        <th className="px-4 py-3 font-medium text-gray-700 w-[15%]">Phone</th>
-        <th className="px-4 py-3 font-medium text-gray-700 w-[25%]">Address</th>
-        <th className="px-4 py-3 font-medium text-gray-700 text-right w-[15%]">Actions</th>
-      </tr>
-    </thead>
+                  <table className="w-full text-lg text-left table-fixed">
+                    <thead className="bg-gray-50 border-b">
+                      <tr>
+                        <th className="px-4 py-3 font-medium text-gray-700 w-[20%]">Name</th>
+                        <th className="px-4 py-3 font-medium text-gray-700 w-[25%]">Email</th>
+                        <th className="px-4 py-3 font-medium text-gray-700 w-[15%]">Phone</th>
+                        <th className="px-4 py-3 font-medium text-gray-700 w-[25%]">Address</th>
+                        <th className="px-4 py-3 font-medium text-gray-700 text-right w-[15%]">Actions</th>
+                      </tr>
+                    </thead>
 
-    <tbody className="divide-y">
-      {filteredClients.map((client) => (
-        <tr key={client.id} className="hover:bg-gray-50 transition-colors">
-          <td className="px-4 py-3 font-medium text-gray-900">
-            <div className="truncate" title={client.name}>
-              {client.name}
-            </div>
-          </td>
+                    <tbody className="divide-y">
+                      {filteredClients.map((client) => (
+                        <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+                          <td className="px-4 py-3 font-medium text-gray-900">
+                            <div className="truncate" title={client.name}>
+                              {client.name}
+                            </div>
+                          </td>
 
-          <td className="px-4 py-3 text-gray-700">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-gray-400 shrink-0" />
-              <span 
-                className="truncate cursor-help" 
-                title={client.email}
-              >
-                {client.email}
-              </span>
-            </div>
-          </td>
+                          <td className="px-4 py-3 text-gray-700">
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-4 w-4 text-gray-400 shrink-0" />
+                              <span
+                                className="truncate cursor-help"
+                                title={client.email}
+                              >
+                                {client.email}
+                              </span>
+                            </div>
+                          </td>
 
-          <td className="px-4 py-3 text-gray-700">
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-gray-400 shrink-0" />
-              <span className="truncate" title={client.mobile}>
-                {client.mobile}
-              </span>
-            </div>
-          </td>
+                          <td className="px-4 py-3 text-gray-700">
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-4 w-4 text-gray-400 shrink-0" />
+                              <span className="truncate" title={client.mobile}>
+                                {client.mobile}
+                              </span>
+                            </div>
+                          </td>
 
-          <td className="px-4 py-3 text-gray-600">
-            <div className="truncate" title={client.address || "—"}>
-              {client.address || "—"}
-            </div>
-          </td>
+                          <td className="px-4 py-3 text-gray-600">
+                            <div className="truncate" title={client.address || "—"}>
+                              {client.address || "—"}
+                            </div>
+                          </td>
 
-          <td className="px-4 py-3 text-right">
-            <div className="flex justify-end gap-2">
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-8 w-8 p-0"
-                onClick={() => {
-                  setSelectedClient(client);
-                  setShowClientDialog(true);
-                }}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="lg"
+                                variant="outline"
+                                className="h-8 w-8 p-0"
+                                onClick={() => {
+                                  setSelectedClient(client);
+                                  setShowClientDialog(true);
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
 
-              <Button
-                size="lg"
-                variant="outline"
-                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                onClick={() => handleDeleteClient(client.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-  
-  {filteredClients.length === 0 && (
-    <div className="text-center py-8">
-      <p className="text-gray-600">No clients found</p>
-      {clientSearchTerm && (
-        <p className="text-sm text-gray-500 mt-1">Try adjusting your search</p>
-      )}
-    </div>
-  )}
-</div>
+                              <Button
+                                size="lg"
+                                variant="outline"
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                onClick={() => handleDeleteClient(client.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {filteredClients.length === 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-gray-600">No clients found</p>
+                      {clientSearchTerm && (
+                        <p className="text-sm text-gray-500 mt-1">Try adjusting your search</p>
+                      )}
+                    </div>
+                  )}
+                </div>
 
               )}
             </CardContent>
@@ -958,183 +954,183 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         </TabsContent>
       </Tabs>
 
-{/* ===== EDIT ORDER DIALOG ===== */}
-<Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-    <DialogHeader>
-      <DialogTitle>Edit Order</DialogTitle>
-      <DialogDescription>
-        Update order details including location, schedule, and requirements
-      </DialogDescription>
-    </DialogHeader>
+      {/* ===== EDIT ORDER DIALOG ===== */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Order</DialogTitle>
+            <DialogDescription>
+              Update order details including location, schedule, and requirements
+            </DialogDescription>
+          </DialogHeader>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-      <div className="space-y-2">
-        <Label htmlFor="edit-serviceType">Service Type</Label>
-        <Select
-          value={editFormData.serviceType}
-          onValueChange={(value: string) => handleEditFormChange("serviceType", value)}
-        >
-          <SelectTrigger id="edit-serviceType" className="text-lg">
-            <SelectValue placeholder="Select service type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="static" className="text-lg">Static</SelectItem>
-            <SelectItem value="premiumSecurity" className="text-lg">Premium Security</SelectItem>
-            <SelectItem value="standardPatrol" className="text-lg">Standard Patrol</SelectItem>
-            <SelectItem value="24/7Monitoring" className="text-lg">24/7 Monitoring</SelectItem>
-            <SelectItem value="healthcareSecurity" className="text-lg">Healthcare Security</SelectItem>
-            <SelectItem value="industrialSecurity" className="text-lg">Industrial Security</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-serviceType">Service Type</Label>
+              <Select
+                value={editFormData.serviceType}
+                onValueChange={(value: string) => handleEditFormChange("serviceType", value)}
+              >
+                <SelectTrigger id="edit-serviceType" className="text-lg">
+                  <SelectValue placeholder="Select service type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="static" className="text-lg">Static</SelectItem>
+                  <SelectItem value="premiumSecurity" className="text-lg">Premium Security</SelectItem>
+                  <SelectItem value="standardPatrol" className="text-lg">Standard Patrol</SelectItem>
+                  <SelectItem value="24/7Monitoring" className="text-lg">24/7 Monitoring</SelectItem>
+                  <SelectItem value="healthcareSecurity" className="text-lg">Healthcare Security</SelectItem>
+                  <SelectItem value="industrialSecurity" className="text-lg">Industrial Security</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="edit-guardsRequired">Guards Required</Label>
-        <Input
-          id="edit-guardsRequired"
-          type="number"
-          min="1"
-          className="text-lg"
-          value={editFormData.guardsRequired}
-          onChange={(e) => handleEditFormChange("guardsRequired", e.target.value)}
-        />
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-guardsRequired">Guards Required</Label>
+              <Input
+                id="edit-guardsRequired"
+                type="number"
+                min="1"
+                className="text-lg"
+                value={editFormData.guardsRequired}
+                onChange={(e) => handleEditFormChange("guardsRequired", e.target.value)}
+              />
+            </div>
 
-      <div className="space-y-2 md:col-span-2">
-        <Label htmlFor="edit-locationName">Location Name</Label>
-        <Textarea
-          id="edit-locationName"
-          className="text-lg font-semibold text-black leading-relaxed resize-none"
-          value={editFormData.locationName}
-          onChange={(e) => handleEditFormChange("locationName", e.target.value)}
-          placeholder="e.g., Mumbai Central Office"
-          rows={2}
-        />
-      </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="edit-locationName">Location Name</Label>
+              <Textarea
+                id="edit-locationName"
+                className="text-lg font-semibold text-black leading-relaxed resize-none"
+                value={editFormData.locationName}
+                onChange={(e) => handleEditFormChange("locationName", e.target.value)}
+                placeholder="e.g., Mumbai Central Office"
+                rows={2}
+              />
+            </div>
 
-      <div className="space-y-2 md:col-span-2">
-        <Label htmlFor="edit-locationAddress">Location Address</Label>
-        <Textarea
-          id="edit-locationAddress"
-          className="text-lg font-semibold text-black leading-relaxed resize-none"
-          value={editFormData.locationAddress}
-          onChange={(e) => handleEditFormChange("locationAddress", e.target.value)}
-          placeholder="Full address"
-          rows={3}
-        />
-      </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="edit-locationAddress">Location Address</Label>
+              <Textarea
+                id="edit-locationAddress"
+                className="text-lg font-semibold text-black leading-relaxed resize-none"
+                value={editFormData.locationAddress}
+                onChange={(e) => handleEditFormChange("locationAddress", e.target.value)}
+                placeholder="Full address"
+                rows={3}
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="edit-latitude">Latitude</Label>
-        <Input
-          id="edit-latitude"
-          type="number"
-          step="0.000001"
-          className="text-lg"
-          value={editFormData.siteServiceLat}
-          onChange={(e) => handleEditFormChange("siteServiceLat", e.target.value)}
-          placeholder="e.g., 19.0596"
-        />
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-latitude">Latitude</Label>
+              <Input
+                id="edit-latitude"
+                type="number"
+                step="0.000001"
+                className="text-lg"
+                value={editFormData.siteServiceLat}
+                onChange={(e) => handleEditFormChange("siteServiceLat", e.target.value)}
+                placeholder="e.g., 19.0596"
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="edit-longitude">Longitude</Label>
-        <Input
-          id="edit-longitude"
-          type="number"
-          step="0.000001"
-          className="text-lg"
-          value={editFormData.siteServiceLng}
-          onChange={(e) => handleEditFormChange("siteServiceLng", e.target.value)}
-          placeholder="e.g., 72.8295"
-        />
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-longitude">Longitude</Label>
+              <Input
+                id="edit-longitude"
+                type="number"
+                step="0.000001"
+                className="text-lg"
+                value={editFormData.siteServiceLng}
+                onChange={(e) => handleEditFormChange("siteServiceLng", e.target.value)}
+                placeholder="e.g., 72.8295"
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="edit-startDate">Start Date</Label>
-        <Input
-          id="edit-startDate"
-          type="date"
-          className="text-lg"
-          value={editFormData.startDate}
-          onChange={(e) => handleEditFormChange("startDate", e.target.value)}
-        />
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-startDate">Start Date</Label>
+              <Input
+                id="edit-startDate"
+                type="date"
+                className="text-lg"
+                value={editFormData.startDate}
+                onChange={(e) => handleEditFormChange("startDate", e.target.value)}
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="edit-endDate">End Date</Label>
-        <Input
-          id="edit-endDate"
-          type="date"
-          className="text-lg"
-          value={editFormData.endDate}
-          onChange={(e) => handleEditFormChange("endDate", e.target.value)}
-        />
-        {editFormData.endDate && editFormData.startDate && new Date(editFormData.endDate) < new Date(editFormData.startDate) && (
-          <p className="text-red-600 text-sm font-medium">End date must be after start date</p>
-        )}
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-endDate">End Date</Label>
+              <Input
+                id="edit-endDate"
+                type="date"
+                className="text-lg"
+                value={editFormData.endDate}
+                onChange={(e) => handleEditFormChange("endDate", e.target.value)}
+              />
+              {editFormData.endDate && editFormData.startDate && new Date(editFormData.endDate) < new Date(editFormData.startDate) && (
+                <p className="text-red-600 text-sm font-medium">End date must be after start date</p>
+              )}
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="edit-startTime">Start Time</Label>
-        <Input
-          id="edit-startTime"
-          type="time"
-          className="text-lg"
-          value={editFormData.startTime}
-          onChange={(e) => handleEditFormChange("startTime", e.target.value)}
-        />
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-startTime">Start Time</Label>
+              <Input
+                id="edit-startTime"
+                type="time"
+                className="text-lg"
+                value={editFormData.startTime}
+                onChange={(e) => handleEditFormChange("startTime", e.target.value)}
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="edit-endTime">End Time</Label>
-        <Input
-          id="edit-endTime"
-          type="time"
-          className="text-lg"
-          value={editFormData.endTime}
-          onChange={(e) => handleEditFormChange("endTime", e.target.value)}
-        />
-        {editFormData.endTime && editFormData.startTime && editFormData.startDate === editFormData.endDate && editFormData.endTime <= editFormData.startTime && (
-          <p className="text-red-600 text-sm font-medium">End time must be after start time</p>
-        )}
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-endTime">End Time</Label>
+              <Input
+                id="edit-endTime"
+                type="time"
+                className="text-lg"
+                value={editFormData.endTime}
+                onChange={(e) => handleEditFormChange("endTime", e.target.value)}
+              />
+              {editFormData.endTime && editFormData.startTime && editFormData.startDate === editFormData.endDate && editFormData.endTime <= editFormData.startTime && (
+                <p className="text-red-600 text-sm font-medium">End time must be after start time</p>
+              )}
+            </div>
 
-      <div className="space-y-2 md:col-span-2">
-        <Label htmlFor="edit-description">Description</Label>
-        <Textarea
-          id="edit-description"
-          className="text-lg leading-relaxed resize-none"
-          value={editFormData.description}
-          onChange={(e) => handleEditFormChange("description", e.target.value)}
-          placeholder="Order description and requirements..."
-          rows={4}
-        />
-      </div>
-    </div>
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                className="text-lg leading-relaxed resize-none"
+                value={editFormData.description}
+                onChange={(e) => handleEditFormChange("description", e.target.value)}
+                placeholder="Order description and requirements..."
+                rows={4}
+              />
+            </div>
+          </div>
 
-    <DialogFooter>
-      <Button
-        variant="outline"
-        onClick={() => setShowEditDialog(false)}
-        disabled={isEditing}
-      >
-        Cancel
-      </Button>
-      <Button
-        onClick={handleEditSubmit}
-        disabled={isEditing || (editFormData.endDate && editFormData.startDate && new Date(editFormData.endDate) < new Date(editFormData.startDate)) || (editFormData.endTime && editFormData.startTime && editFormData.startDate === editFormData.endDate && editFormData.endTime <= editFormData.startTime)}
-        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isEditing && (
-          <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
-        )}
-        Save Changes
-      </Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowEditDialog(false)}
+              disabled={isEditing}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEditSubmit}
+              disabled={isEditing || (editFormData.endDate && editFormData.startDate && new Date(editFormData.endDate) < new Date(editFormData.startDate)) || (editFormData.endTime && editFormData.startTime && editFormData.startDate === editFormData.endDate && editFormData.endTime <= editFormData.startTime)}
+              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isEditing && (
+                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
+              )}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
 
 
@@ -1172,8 +1168,8 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 {!isEditingClient ? (
                   <>
                     {selectedClient.avatar ? (
-                      <img 
-                        src={selectedClient.avatar} 
+                      <img
+                        src={selectedClient.avatar}
                         alt={selectedClient.name}
                         className="h-24 w-24 rounded-full object-cover border-4 border-blue-100 shadow-lg"
                       />
@@ -1193,8 +1189,8 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                     <div className="flex justify-center">
                       {editClientData.avatar ? (
                         <div className="relative">
-                          <img 
-                            src={editClientData.avatar} 
+                          <img
+                            src={editClientData.avatar}
                             alt="Avatar preview"
                             className="h-24 w-24 rounded-full object-cover border-4 border-blue-100 shadow-lg"
                             onError={(e) => {
@@ -1223,7 +1219,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                       <Label className="text-lg font-semibold text-gray-700 mb-2 block">
                         Profile Picture
                       </Label>
-                      
+
                       {/* Upload Button */}
                       <div className="flex gap-2">
                         <label className="flex-1">
@@ -1352,8 +1348,8 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 {selectedClient.isVerified !== undefined && !isEditingClient && (
                   <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <span className="text-lg font-semibold text-gray-700">Account Status:</span>
-                    <Badge className={selectedClient.isVerified 
-                      ? "bg-green-100 text-green-800 border-green-300" 
+                    <Badge className={selectedClient.isVerified
+                      ? "bg-green-100 text-green-800 border-green-300"
                       : "bg-yellow-100 text-yellow-800 border-yellow-300"
                     }>
                       {selectedClient.isVerified ? "Verified" : "Unverified"}
@@ -1366,7 +1362,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 
           <DialogFooter className="border-t pt-4 flex gap-2">
             {!isEditingClient ? (
-              <Button 
+              <Button
                 onClick={() => setShowClientDialog(false)}
                 className="w-full"
                 variant="outline"
@@ -1375,7 +1371,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
               </Button>
             ) : (
               <>
-                <Button 
+                <Button
                   onClick={() => setIsEditingClient(false)}
                   variant="outline"
                   disabled={isEditingClientMutation}
@@ -1383,7 +1379,7 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={handleSaveClient}
                   disabled={isEditingClientMutation}
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
@@ -1407,55 +1403,55 @@ const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       </Dialog>
 
       <Dialog open={showActionDialog} onOpenChange={setShowActionDialog}>
-  <DialogContent className="sm:max-w-md rounded-xl">
-    <DialogHeader>
-      <DialogTitle>
-        {actionType === "accept" && "Accept Order"}
-        {actionType === "reject" && "Reject Order"}
-      </DialogTitle>
-      <DialogDescription>
-        {actionType === "accept" &&
-          "Confirm accepting this order and starting the service."}
-        {actionType === "reject" &&
-          "Provide a reason for rejecting this order."}
-      </DialogDescription>
-    </DialogHeader>
+        <DialogContent className="sm:max-w-md rounded-xl">
+          <DialogHeader>
+            <DialogTitle>
+              {actionType === "accept" && "Accept Order"}
+              {actionType === "reject" && "Reject Order"}
+            </DialogTitle>
+            <DialogDescription>
+              {actionType === "accept" &&
+                "Confirm accepting this order and starting the service."}
+              {actionType === "reject" &&
+                "Provide a reason for rejecting this order."}
+            </DialogDescription>
+          </DialogHeader>
 
-    {actionType === "reject" && (
-      <div className="space-y-4 pt-2">
-        <Label htmlFor="message">Rejection Reason</Label>
-        <Textarea
-          id="message"
-          placeholder="Please provide a reason for rejection..."
-          value={actionMessage}
-          onChange={(e) => setActionMessage(e.target.value)}
-          rows={3}
-        />
-      </div>
-    )}
+          {actionType === "reject" && (
+            <div className="space-y-4 pt-2">
+              <Label htmlFor="message">Rejection Reason</Label>
+              <Textarea
+                id="message"
+                placeholder="Please provide a reason for rejection..."
+                value={actionMessage}
+                onChange={(e) => setActionMessage(e.target.value)}
+                rows={3}
+              />
+            </div>
+          )}
 
-    <div className="flex justify-end gap-2 pt-6">
-      <Button
-        variant="outline"
-        onClick={() => setShowActionDialog(false)}
-      >
-        Cancel
-      </Button>
+          <div className="flex justify-end gap-2 pt-6">
+            <Button
+              variant="outline"
+              onClick={() => setShowActionDialog(false)}
+            >
+              Cancel
+            </Button>
 
-      <Button
-        onClick={handleAcceptReject}
-        className={actionType === "reject" ? "bg-red-600 hover:bg-red-700" : ""}
-        disabled={isAccepting || isCancelling}
-      >
-        {(isAccepting || isCancelling) && (
-          <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
-        )}
-        {actionType === "accept" && "Accept Order"}
-        {actionType === "reject" && "Reject Order"}
-      </Button>
-    </div>
-  </DialogContent>
-</Dialog>
+            <Button
+              onClick={handleAcceptReject}
+              className={actionType === "reject" ? "bg-red-600 hover:bg-red-700" : ""}
+              disabled={isAccepting || isCancelling}
+            >
+              {(isAccepting || isCancelling) && (
+                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-solid border-current border-r-transparent"></div>
+              )}
+              {actionType === "accept" && "Accept Order"}
+              {actionType === "reject" && "Reject Order"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 

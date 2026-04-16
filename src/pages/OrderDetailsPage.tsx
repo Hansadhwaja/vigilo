@@ -12,7 +12,7 @@ import { Dialog, DialogContent } from "../components/ui/dialog";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetOrderByIdQuery, useEditOrderMutation } from "../apis/ordersApi";
 import { useUploadImageMutation } from "../apis/usersApi";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner";
 import { getStatusColor, getStatusStyle } from "../utils/statusColors";
 
 // Helper functions

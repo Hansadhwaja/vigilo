@@ -2,34 +2,9 @@ import React, { useState } from "react";
 import {
   Shield,
   Menu,
-  X,
   Activity,
-  Map,
-  Calendar,
-  Users,
-  FileWarning,
-  MessageSquare,
-  Settings,
-  Bell,
-  Route,
-  BadgeCheck,
-  Building2,
-  Users2,
-  Receipt,
   LogOut
 } from "lucide-react";
-
-import DashboardIcon from "../../images/material-symbols_dashboard-rounded.svg";
-import SchedulingIcon from "../../public/lets-icons_clock-fill.svg";
-import ClientIcon from "../../public/mingcute_building-1-fill.svg";
-import IncidentIcon from "../../public/fluent-mdl2_incident-triangle.svg";
-import AlarmIcon from "../../public/mingcute_notification-fill.svg";
-import MapIcon from "../../public/solar_map-bold.svg";
-import MessageIcon from "../../public/tabler_message-filled.svg";
-import PatrolingIcon from "../../public/mingcute_bulb-fill.svg";
-import HRIcon from "../../public/duo-icons_user.svg";
-import InvoicingIcon from "../../public/Frame.svg";
-import SettingsIcon from "../../public/material-symbols_settings.svg";
 
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -38,7 +13,8 @@ import { classNames } from "../../utils/helpers";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { navLinks } from "../../constants";
-import { cn } from "../ui/utils";
+import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -57,23 +33,23 @@ interface SideItemProps {
 }
 
 // Simple tooltip for collapsed icons
-function Tooltip({ children, content, show }: { children: React.ReactNode; content: string; show: boolean }) {
-  if (!show) return <>{children}</>;
+// function Tooltip({ children, content, show }: { children: React.ReactNode; content: string; show: boolean }) {
+//   if (!show) return <>{children}</>;
 
-  return (
-    <div className="group/tooltip relative">
-      {children}
-      <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm font-bold rounded-lg 
-                      opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible
-                      transition-all duration-150 whitespace-nowrap z-50 shadow-xl
-                      pointer-events-none">
-        {content}
-        <div className="absolute right-full top-1/2 -translate-y-1/2 
-                        border-6 border-transparent border-r-gray-900" />
-      </div>
-    </div>
-  );
-}
+//   return (
+//     <div className="group/tooltip relative">
+//       {children}
+//       <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm font-bold rounded-lg 
+//                       opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible
+//                       transition-all duration-150 whitespace-nowrap z-50 shadow-xl
+//                       pointer-events-none">
+//         {content}
+//         <div className="absolute right-full top-1/2 -translate-y-1/2 
+//                         border-6 border-transparent border-r-gray-900" />
+//       </div>
+//     </div>
+//   );
+// }
 
 // Image with fallback
 function IconImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
@@ -304,14 +280,14 @@ export default function Sidebar({
             isActive && "bg-white/15"
           )}>
             <Tooltip>
-              <ToolipTrigger>
-   <item.icon size={20} />
-              {isOpen && (<p>{item.label}</p>)}
-              </ToolipTrigger>
+              <TooltipTrigger>
+                <item.icon size={20} />
+                {isOpen && (<p>{item.label}</p>)}
+              </TooltipTrigger>
               <TooltipContent>
                 {item.label}
               </TooltipContent>
-           
+
             </Tooltip>
           </NavLink>
         ))}

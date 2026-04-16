@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./dialog";
-import { Label } from "./label";
-import { Input } from "./input";
-import { Button } from "./button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+
 import { Loader2 } from "lucide-react";
-import { useEditProfileMutation } from "../../apis/profileApi";
 import { toast } from "sonner";
+import { useEditProfileMutation } from "@/apis/profileApi";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
 interface ProfileEditDialogProps {
   open: boolean;
@@ -39,7 +40,7 @@ export default function ProfileEditDialog({ open, onOpenChange, profile }: Profi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     if (!formData.name.trim()) {
       toast.error("Name is required");
@@ -49,7 +50,7 @@ export default function ProfileEditDialog({ open, onOpenChange, profile }: Profi
       toast.error("Mobile is required");
       return;
     }
-    
+
     try {
       const res = await editProfile(formData).unwrap();
       toast.success(res.message || "Profile updated successfully!");
@@ -68,7 +69,7 @@ export default function ProfileEditDialog({ open, onOpenChange, profile }: Profi
             Update your profile information
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name <span className="text-red-500">*</span></Label>

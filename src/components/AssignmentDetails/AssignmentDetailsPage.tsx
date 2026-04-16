@@ -20,11 +20,11 @@ import {
   Users,
   AlertTriangle,
 } from "lucide-react";
-import { 
+import {
   useGetStaticShiftDetailsForAdminQuery,
-  useDeleteScheduleMutation 
+  useDeleteScheduleMutation
 } from "../../apis/schedulingAPI";
-import EditAssignmentDialog from "../ui/EditAssignmentDialog";
+import EditAssignmentDialog from "./EditAssignmentDialog";
 import { toast } from "sonner";
 
 export default function AssignmentDetailsPage() {
@@ -41,7 +41,7 @@ export default function AssignmentDetailsPage() {
   // ✅ DYNAMIC CALCULATIONS
   const calculations = useMemo(() => {
     if (!response?.data) return null;
-    
+
     const { guards, shift } = response.data;
 
     // Calculate status distribution
@@ -101,7 +101,7 @@ export default function AssignmentDetailsPage() {
               try {
                 const result = await deleteSchedule({ id }).unwrap();
                 toast.success(result.message || "Shift deleted successfully!");
-                
+
                 setTimeout(() => {
                   navigate("/scheduling");
                 }, 500);
@@ -178,9 +178,9 @@ export default function AssignmentDetailsPage() {
   if (isError || !response?.data) {
     return (
       <div className="max-w-7xl mx-auto p-6 space-y-6">
-        <Button 
-          variant="outline" 
-          onClick={() => navigate("/scheduling")} 
+        <Button
+          variant="outline"
+          onClick={() => navigate("/scheduling")}
           className="flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -223,9 +223,9 @@ export default function AssignmentDetailsPage() {
         {/* Header Section */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate("/scheduling")} 
+            <Button
+              variant="outline"
+              onClick={() => navigate("/scheduling")}
               className="flex items-center gap-2 hover:bg-gray-100"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -236,11 +236,11 @@ export default function AssignmentDetailsPage() {
               <p className="text-xl text-gray-500 mt-1">{calculations?.shiftCode}</p>
             </div>
           </div>
-          
+
           {/* ✅ ACTION BUTTONS */}
           <div className="flex gap-3">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="flex items-center gap-2 hover:bg-gray-100"
               onClick={() => setIsEditDialogOpen(true)}
               disabled={isDeleting}
@@ -248,8 +248,8 @@ export default function AssignmentDetailsPage() {
               <Edit className="h-4 w-4" />
               Edit Shift
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="flex items-center gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-300"
               onClick={handleDelete}
               disabled={isDeleting}
@@ -274,79 +274,79 @@ export default function AssignmentDetailsPage() {
           {/* Left Column - Main Info */}
           <div className="lg:col-span-2 space-y-6">
             {/* Shift Information Card */}
- <Card className="shadow-sm">
-  <CardHeader className="pb-4">
-    <div className="flex items-start justify-between">
-      <div>
-        <CardTitle className="text-xl font-semibold text-gray-900">Shift Information</CardTitle>
-      </div>
-      <div className="flex gap-2">
-        <Badge className={`${getTypeBadge(shift.type)} text-xl px-3 py-1 capitalize`}>
-          {shift.type}
-        </Badge>
-        <Badge className={`${getStatusColor(shift.status)} text-xl px-3 py-1`}>
-          {shift.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-        </Badge>
-      </div>
-    </div>
-  </CardHeader>
-  <CardContent className="space-y-6">
-    {/* Shift Date & Times */}
-    <div className="grid grid-cols-2 gap-6">
-      <div>
-        <p className="text-lg font-semibold text-gray-900 mb-1">Shift Date</p>
-        <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-gray-400" />
-          <p className="text-lg text-gray-500">{formatDate(shift.date)}</p>
-        </div>
-      </div>
-      <div>
-        <p className="text-lg font-semibold text-gray-900 mb-1">Guards Assigned</p>
-        <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-gray-400" />
-          <p className="text-lg text-gray-500">
-            {guards.length} {guards.length === 1 ? 'Guard' : 'Guards'}
-          </p>
-        </div>
-      </div>
-    </div>
+            <Card className="shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <CardTitle className="text-xl font-semibold text-gray-900">Shift Information</CardTitle>
+                  </div>
+                  <div className="flex gap-2">
+                    <Badge className={`${getTypeBadge(shift.type)} text-xl px-3 py-1 capitalize`}>
+                      {shift.type}
+                    </Badge>
+                    <Badge className={`${getStatusColor(shift.status)} text-xl px-3 py-1`}>
+                      {shift.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Shift Date & Times */}
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-lg font-semibold text-gray-900 mb-1">Shift Date</p>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-gray-400" />
+                      <p className="text-lg text-gray-500">{formatDate(shift.date)}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-lg font-semibold text-gray-900 mb-1">Guards Assigned</p>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-gray-400" />
+                      <p className="text-lg text-gray-500">
+                        {guards.length} {guards.length === 1 ? 'Guard' : 'Guards'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-    {/* Shift Times */}
-    <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-      <h4 className="text-lg font-semibold text-gray-900 mb-3">Shift Times</h4>
-      <div className="grid grid-cols-3 gap-4">
-        <div>
-          <p className="text-lg font-semibold text-gray-900 mb-1">Start</p>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-gray-400" />
-            <p className="text-lg text-gray-500">{formatTime(shift.startTime)}</p>
-          </div>
-        </div>
-        <div>
-          <p className="text-lg font-semibold text-gray-900 mb-1">End</p>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-gray-400" />
-            <p className="text-lg text-gray-500">{formatTime(shift.endTime)}</p>
-          </div>
-        </div>
-        <div>
-          <p className="text-lg font-semibold text-gray-900 mb-1">Duration</p>
-          <p className="text-lg text-gray-500">
-            {calculations?.durationHours.toFixed(1)}h
-          </p>
-        </div>
-      </div>
-    </div>
+                {/* Shift Times */}
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Shift Times</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-lg font-semibold text-gray-900 mb-1">Start</p>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gray-400" />
+                        <p className="text-lg text-gray-500">{formatTime(shift.startTime)}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-lg font-semibold text-gray-900 mb-1">End</p>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-gray-400" />
+                        <p className="text-lg text-gray-500">{formatTime(shift.endTime)}</p>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-lg font-semibold text-gray-900 mb-1">Duration</p>
+                      <p className="text-lg text-gray-500">
+                        {calculations?.durationHours.toFixed(1)}h
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-    {/* Description */}
-    {shift.description && (
-      <div>
-        <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-        <p className="text-lg text-gray-500 leading-relaxed">{shift.description}</p>
-      </div>
-    )}
-  </CardContent>
-</Card>
+                {/* Description */}
+                {shift.description && (
+                  <div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
+                    <p className="text-lg text-gray-500 leading-relaxed">{shift.description}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Client Information Card */}
             <Card className="shadow-sm">
@@ -383,34 +383,34 @@ export default function AssignmentDetailsPage() {
                 <CardTitle className="text-xl font-bold text-gray-900">Location Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div>
-                <p className="text-lg text-gray-900 mb-1">Location Name</p>
-                <div className="flex items-start gap-3">
-                  <MapPin className="h-5 w-5 text-green-600 mt-1 shrink-0" />
-                  <h3 className="font-semibold text-gray-900 text-lg">{order.locationName}</h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-lg text-gray-900 mb-1">Location Name</p>
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-5 w-5 text-green-600 mt-1 shrink-0" />
+                      <h3 className="font-semibold text-gray-900 text-lg">{order.locationName}</h3>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-lg text-gray-900 mb-1">Location Address</p>
+                    <p className="text-gray-700">{order.locationAddress}</p>
+                  </div>
                 </div>
-                </div>
-                <div>
-                <p className="text-lg text-gray-900 mb-1">Location Address</p>
-                <p className="text-gray-700">{order.locationAddress}</p>
-                </div>
-              </div>
 
-              <div className="flex gap-3 flex-wrap">
-                <Badge variant="outline" className="px-3 py-1 capitalize">
-                {order.serviceType}
-                </Badge>
-                <Badge variant="outline" className="px-3 py-1">
-                {order.guardsRequired} Guard{order.guardsRequired > 1 ? 's' : ''} Required
-                </Badge>
-              </div>
-
-              {order.description && (
-                <div className="pt-3 border-t">
-                <p className="text-gray-700">{order.description}</p>
+                <div className="flex gap-3 flex-wrap">
+                  <Badge variant="outline" className="px-3 py-1 capitalize">
+                    {order.serviceType}
+                  </Badge>
+                  <Badge variant="outline" className="px-3 py-1">
+                    {order.guardsRequired} Guard{order.guardsRequired > 1 ? 's' : ''} Required
+                  </Badge>
                 </div>
-              )}
+
+                {order.description && (
+                  <div className="pt-3 border-t">
+                    <p className="text-gray-700">{order.description}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -451,7 +451,7 @@ export default function AssignmentDetailsPage() {
                         <div>
                           <p className="text-lg text-gray-500 mb-1">Clock In</p>
                           <p className="font-medium text-gray-900 text-xl">
-                            {guard.timesheet.clockInTime 
+                            {guard.timesheet.clockInTime
                               ? formatTime(guard.timesheet.clockInTime)
                               : "Not clocked in"}
                           </p>
@@ -459,7 +459,7 @@ export default function AssignmentDetailsPage() {
                         <div>
                           <p className="text-lg text-gray-500 mb-1">Clock Out</p>
                           <p className="font-medium text-gray-900 text-xl">
-                            {guard.timesheet.clockOutTime 
+                            {guard.timesheet.clockOutTime
                               ? formatTime(guard.timesheet.clockOutTime)
                               : "Not clocked out"}
                           </p>
@@ -587,8 +587,8 @@ export default function AssignmentDetailsPage() {
                     {order.images.map((img, idx) => (
                       <div key={idx} className="relative group">
                         <div className="aspect-square rounded-lg bg-gray-200 overflow-hidden">
-                          <img 
-                            src={img} 
+                          <img
+                            src={img}
                             alt={`Location ${idx + 1}`}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             onError={(e) => {

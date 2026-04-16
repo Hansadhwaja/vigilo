@@ -24,7 +24,7 @@ import HRPage from "./pages/HRPage";
 import ClientsPage from "./pages/ClientsPage";
 import MessagesPage from "./pages/MessagesPage";
 import InvoicingPage from "./pages/InvoicingPage";
-import { AuthPage, GuardDetailsPage } from "./pages";
+import { GuardDetailsPage } from "./pages";
 import OrderDetailsPage from "./pages/OrderDetailsPage";
 import PatrolDetailsPage from "./pages/PatrolDetailsPage";
 
@@ -38,8 +38,9 @@ import {
 import { isSameMonthNow } from "./utils/helpers";
 import ProtectedRoute from "./components/ProtectedRoute/ProctedRoute";
 import { Toaster } from "sonner";
-import AssignmentDetailsPage from "./components/ui/AssignmentDetailsPage";
+import AssignmentDetailsPage from "./components/AssignmentDetails/AssignmentDetailsPage";
 import { TooltipProvider } from "./components/ui/tooltip";
+import AuthPage from "./pages/Auth/AuthPage";
 
 // -------------------- Types --------------------
 export interface Guard {

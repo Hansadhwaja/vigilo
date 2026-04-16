@@ -16,7 +16,7 @@ import {
 } from "@/components/Auth/Form/LoginForm";
 import { Button } from "@/components/ui/button";
 
-export default function AuthPage() {
+const AuthPage = () => {
   const navigate = useNavigate();
   const [login, { isLoading }] = useLoginMutation();
 
@@ -40,10 +40,11 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="bg-red-400">
-      <Button>
-        HEllo
-      </Button>
+    <div className="w-full h-600">
+      <div className="w-400 h-400 border bg-red-400">
+        Hello
+      </div>
     </div>
   );
 }
+export default AuthPage;
