@@ -17,5 +17,4 @@ export { default as CompliancePage } from './CompliancePage';
 export { default as HRPage } from './HRPage';
 export { default as AccountPage } from './AccountPage';
 export { default as ContractorsPage } from './ContractorsPage';
-export { default as MessagesPage } from './MessagesPage';
 export { default as GuardDetailsPage } from './GuardDetailsPage';

@@ -109,10 +109,7 @@ export const messagesApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Messages", id: "CHAT_LIST" }],
     }),
 
-    createOrGetDirectConversation: builder.mutation<
-      CreateDirectConversationResponse,
-      CreateDirectConversationPayload
-    >({
+    createOrGetDirectConversation: builder.mutation<CreateDirectConversationResponse, CreateDirectConversationPayload>({
       query: (body) => ({
         url: "/messages/conversations/direct",
         method: "POST",
@@ -121,10 +118,7 @@ export const messagesApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "Messages", id: "CHAT_LIST" }],
     }),
 
-    getMessages: builder.query<
-      GetMessagesResponse,
-      { conversationId: string; cursor?: string; limit?: number }
-    >({
+    getMessages: builder.query<GetMessagesResponse, { conversationId: string; cursor?: string; limit?: number }>({
       query: ({ conversationId, cursor, limit = 30 }) => ({
         url: `/messages/conversations/${conversationId}/messages`,
         method: "GET",
@@ -175,10 +169,7 @@ export const messagesApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "Messages", id: "CHAT_LIST" }],
     }),
 
-    markMessagesRead: builder.mutation<
-      { message: string },
-      { conversationId: string; messageId?: string }
-    >({
+    markMessagesRead: builder.mutation<{ message: string }, { conversationId: string; messageId?: string }>({
       query: ({ conversationId, messageId }) => ({
         url: `/messages/conversations/${conversationId}/read`,
         method: "PATCH",

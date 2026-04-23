@@ -6,15 +6,15 @@ import {
   LogOut
 } from "lucide-react";
 
-import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Progress } from "../ui/progress";
-import { classNames } from "../../utils/helpers";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { NavLink, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { navLinks } from "../../constants";
+import { navLinks } from "@/constants";
 import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -24,13 +24,6 @@ interface SidebarProps {
   liveRevenue: number;
 }
 
-interface SideItemProps {
-  icon: React.ReactNode;
-  label: string;
-  active: boolean;
-  onClick: () => void;
-  open: boolean;
-}
 
 export default function Sidebar({
   isOpen,
@@ -53,35 +46,28 @@ export default function Sidebar({
   return (
     <aside
       className={cn(
-        "h-full transition-all duration-300 ease-in-out border-r border-blue-300/30 text-white bg-primary-100 p-2 space-y-2",
+        "max-md:hidden h-full transition-all duration-300 ease-in-out border-r border-blue-300/30 text-white bg-primary-100 p-2 flex flex-col gap-2",
         isOpen ? "w-72" : "w-20"
       )}
 
     >
       <div className="flex items-center gap-3 p-3 border-b border-white/10">
-        <Button
-          size="icon"
-          variant="ghost"
-          className="text-white hover:bg-white/10 flex-shrink-0"
-          onClick={onToggle}
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
 
-        {isOpen && (
-          <>
-            <div
-              onClick={() => navigate("/dashboard", { replace: true })}
-              className="h-10 w-10 rounded-xl backdrop-blur-sm grid place-items-center shadow-lg cursor-pointer hover:scale-105 transition-transform shrink-0 bg-blue-500"
-            >
-              <Shield className="h-6 w-6 text-white" />
-            </div>
+        <>
+          <div
+            onClick={() => navigate("/dashboard", { replace: true })}
+            className="h-10 w-10 rounded-xl backdrop-blur-sm grid place-items-center shadow-lg cursor-pointer hover:scale-105 transition-transform shrink-0 bg-blue-500"
+          >
+            <Shield className="h-6 w-6 text-white" />
+          </div>
+          {isOpen && (
             <div>
               <div className="text-lg font-semibold tracking-wide">VIGILO</div>
               <div className="text-xs text-white/70">Workforce & Monitoring</div>
             </div>
-          </>
-        )}
+          )}
+        </>
+
       </div>
 
       {isOpen && (
@@ -104,7 +90,7 @@ export default function Sidebar({
         </Card>
       )}
 
-      <nav className="space-y-1 overflow-y-auto no-scrollbar">
+      <nav className="space-y-1 overflow-y-auto no-scrollbar flex-1">
         {navLinks.map(item => (
           <NavLink
             to={item.link}
@@ -130,12 +116,14 @@ export default function Sidebar({
         ))}
       </nav>
 
+      <Separator className="bg-white/15" />
+
       {/* Footer with Logout */}
-      <div className="border-t border-white/10">
+      <div >
         <Button
           onClick={handleLogout}
           className={cn(
-            "w-full flex items-center gap-2 hover:opacity-90 transition-all duration-200 bg-red-500",
+            "w-full flex items-center gap-2 hover:opacity-90 transition-all duration-200 bg-red-500 h-10",
             !isOpen && "justify-center"
           )}
         >

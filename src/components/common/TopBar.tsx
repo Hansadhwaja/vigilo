@@ -15,14 +15,16 @@ import {
 import { useGetProfileQuery } from "../../apis/profileApi";
 import ProfileEditDialog from "@/components/ProfileEditDialog";
 import { toast } from "sonner";
+import MobileSidebar from "./Navbar/MobileSidebar";
 
 interface TopBarProps {
   search: string;
   onSearchChange: (value: string) => void;
   onSidebarToggle: () => void;
+  liveRevenue: number;
 }
 
-export default function TopBar({ search, onSearchChange, onSidebarToggle }: TopBarProps) {
+export default function TopBar({ search, onSearchChange, onSidebarToggle, liveRevenue }: TopBarProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   // Fetch profile from API
@@ -48,7 +50,8 @@ export default function TopBar({ search, onSearchChange, onSidebarToggle }: TopB
   return (
     <>
       <div className="h-14 border-b bg-white flex items-center gap-2 px-3">
-        <Button size="icon" variant="ghost" className="md:hidden" onClick={onSidebarToggle}>
+        <MobileSidebar liveRevenue={liveRevenue} />
+        <Button size="icon" variant="ghost" className="max-md:hidden" onClick={onSidebarToggle}>
           <Menu className="h-5 w-5" />
         </Button>
         <div className="w-full max-w-xl relative">

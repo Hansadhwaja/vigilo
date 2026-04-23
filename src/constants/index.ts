@@ -57,3 +57,19 @@ export const navLinks = [
         link: "/settings"
     },
 ];
+
+//Messages
+export const avatarColors = [
+    "from-violet-500 to-purple-600",
+    "from-emerald-500 to-teal-600",
+    "from-orange-500 to-red-500",
+    "from-blue-500 to-indigo-600",
+    "from-pink-500 to-rose-600",
+    "from-amber-500 to-yellow-600",
+];
+
+export const EMOJI_SET = [
+    "😀", "😁", "😂", "😅", "😊", "😍", "😘", "😎",
+    "🤝", "👏", "👍", "🙏", "🔥", "🎉", "✅", "💬",
+    "📌", "📷", "📎", "🛡️",
+];

@@ -65,9 +65,9 @@ export const usersApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map(({ id }) => ({ type: 'Clients' as const, id })),
-              { type: 'Clients', id: 'LIST' },
-            ]
+            ...result.data.map(({ id }) => ({ type: 'Clients' as const, id })),
+            { type: 'Clients', id: 'LIST' },
+          ]
           : [{ type: 'Clients', id: 'LIST' }],
     }),
 
@@ -81,10 +81,7 @@ export const usersApi = baseApi.injectEndpoints({
     }),
 
     // Edit client
-    editClient: builder.mutation<
-      EditClientResponse,
-      { id: string; body: EditClientPayload }
-    >({
+    editClient: builder.mutation<EditClientResponse, { id: string; body: EditClientPayload }>({
       query: ({ id, body }) => ({
         url: `/users/editClient/${id}`,
         method: "PUT",
