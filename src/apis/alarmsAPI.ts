@@ -1,9 +1,4 @@
 import { baseApi } from "./baseApi";
-
-/* ================================
-   Interfaces
-================================ */
-
 export interface AlarmGuardPivot {
   id: string;
   status: string;
@@ -27,12 +22,12 @@ export interface Alarm {
   description?: string;
 
   alarmType:
-    | "intrusion"
-    | "panic"
-    | "fire"
-    | "medical"
-    | "motion"
-    | "other";
+  | "intrusion"
+  | "panic"
+  | "fire"
+  | "medical"
+  | "motion"
+  | "other";
 
   priority: "low" | "medium" | "high" | "critical";
 
@@ -68,10 +63,6 @@ export interface Alarm {
   updatedAt: string;
   guards: AlarmGuard[];
 }
-
-/* ================================
-   API Responses
-================================ */
 
 export interface GetAllAlarmsResponse {
   success: boolean;
@@ -119,25 +110,13 @@ export interface DeleteAlarmResponse {
   };
 }
 
-/* ================================
-   RTK Query API
-================================ */
-
 export const alarmsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-
-    /* ================================
-       CREATE ALARM
-    ================================ */
-
-    createAlarm: builder.mutation<
-      CreateAlarmResponse,
-      CreateAlarmPayload
-    >({
-      query: (body) => ({
+    createAlarm: builder.mutation({
+      query: (data) => ({
         url: `/alarm/createAlarm`,
         method: "POST",
-        body,
+        body: data,
       }),
 
       invalidatesTags: [{ type: "Alarms", id: "LIST" }],
@@ -150,7 +129,6 @@ export const alarmsApi = baseApi.injectEndpoints({
 
       providesTags: [{ type: "Alarms", id: "LIST" }],
     }),
-
     deleteAlarm: builder.mutation<DeleteAlarmResponse, string>({
       query: (alarmId) => ({
         url: `/alarm/deleteAlarm/${alarmId}`,
@@ -158,14 +136,8 @@ export const alarmsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Alarms", id: "LIST" }],
     }),
-
-
   }),
 });
-
-/* ================================
-   Hooks
-================================ */
 
 export const {
   useCreateAlarmMutation,

@@ -27,7 +27,7 @@ export interface Incident {
   assignedGuardUser: any | null;
   reporter: IncidentReporter;
   shift: IncidentShift;
-  
+
   // For UI convenience (these don't exist in API, added for display)
   site?: string;
   type?: string;
@@ -77,10 +77,7 @@ export const incidentsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
 
     // ---- FETCH ALL INCIDENTS ----
-    getAllIncidents: builder.query<
-      GetAllIncidentsResponse,
-      GetAllIncidentsParams | void
-    >({
+    getAllIncidents: builder.query<GetAllIncidentsResponse, GetAllIncidentsParams | void>({
       query: (params) => {
         const queryParams = new URLSearchParams();
 
@@ -94,9 +91,8 @@ export const incidentsApi = baseApi.injectEndpoints({
         }
 
         return {
-          url: `/incidents/getAllIncidentsForAdmin${
-            queryParams.toString() ? `?${queryParams.toString()}` : ""
-          }`,
+          url: `/incidents/getAllIncidentsForAdmin${queryParams.toString() ? `?${queryParams.toString()}` : ""
+            }`,
           method: "GET",
         };
       },
@@ -117,7 +113,7 @@ export const incidentsApi = baseApi.injectEndpoints({
           assignedGuardUser: i.assignedGuardUser,
           reporter: i.reporter || { id: "", name: "Unknown" },
           shift: i.shift || { id: "", type: "Unknown" },
-          
+
           // ✅ UI convenience fields
           site: i.name || "Unknown Site",
           type: i.name || "Incident",
@@ -141,12 +137,12 @@ export const incidentsApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.data.map((item) => ({
-                type: "Incidents" as const,
-                id: item.id,
-              })),
-              { type: "Incidents", id: "LIST" },
-            ]
+            ...result.data.map((item) => ({
+              type: "Incidents" as const,
+              id: item.id,
+            })),
+            { type: "Incidents", id: "LIST" },
+          ]
           : [{ type: "Incidents", id: "LIST" }],
     }),
 
@@ -175,7 +171,7 @@ export const incidentsApi = baseApi.injectEndpoints({
           assignedGuardUser: i.assignedGuardUser,
           reporter: i.reporter || { id: "", name: "Unknown" },
           shift: i.shift || { id: "", type: "Unknown" },
-          
+
           // ✅ UI convenience fields (for backward compatibility)
           site: i.name || "Unknown Site",
           type: i.name || "Incident",

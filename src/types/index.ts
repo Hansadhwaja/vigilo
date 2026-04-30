@@ -50,7 +50,7 @@ export interface MessageController {
     saveEdit: () => void;
     onDeleteForEveryone: (id: string) => void;
     onDeleteForMe: (id: string) => void;
-    isEditingMessage:boolean;
+    isEditingMessage: boolean;
 }
 
 export interface BaseMessageProps {
@@ -134,4 +134,16 @@ export interface KPI {
     revenueGrowth: number;
     activeContracts: number;
     avgResponseTime: number;
+}
+
+
+//Invoice
+export type InvoiceType = {
+    id: string;
+    client: string;
+    services: string[];
+    period: string;
+    amount: number;
+    status: string;
+    dueDate: string;
 }

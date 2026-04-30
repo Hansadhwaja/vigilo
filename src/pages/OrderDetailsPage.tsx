@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { ArrowLeft, MapPin, Clock, User, Camera, FileText, Badge as BadgeIcon, Edit, Save, X, Mail, Phone, MapPinIcon, Upload, Trash2, ZoomIn, ChevronLeft, ChevronRight } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Label } from "../components/ui/label";
-import { Button } from "../components/ui/button";
-import { Separator } from "../components/ui/separator";
-import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Dialog, DialogContent } from "../components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetOrderByIdQuery, useEditOrderMutation } from "../apis/ordersApi";
 import { useUploadImageMutation } from "../apis/usersApi";
@@ -45,7 +45,7 @@ const formatTime = (isoOrTime?: string) => {
     if (!isNaN(d.getTime())) {
       return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
-  } catch {}
+  } catch { }
   return isoOrTime;
 };
 
@@ -139,17 +139,17 @@ export default function OrderDetailsPage() {
 
     try {
       setUploadingImage(true);
-      
+
       const formData = new FormData();
       formData.append("image", file);
-      
+
       const response = await uploadImage(formData).unwrap();
-      
+
       setEditFormData(prev => ({
         ...prev,
         images: [...prev.images, response.imageUrl]
       }));
-      
+
       toast.success("Image uploaded successfully");
       e.target.value = "";
     } catch (err: any) {
@@ -254,28 +254,27 @@ export default function OrderDetailsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-8xl mx-auto px-0 py-0">
-        
-        {/* Header */}
+      <div className="max-w-8xl mx-auto px-0 py-0 h-screen overflow-y-auto">
+
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <Button 
-                variant="ghost" 
-                onClick={onBack} 
+              <Button
+                variant="ghost"
+                onClick={onBack}
                 className="flex items-center gap-2 hover:bg-white text-lg px-4 py-2"
               >
                 <ArrowLeft className="h-5 w-5" />
                 <span className="font-medium">Back</span>
               </Button>
-              
+
               <div className="h-8 w-px bg-gray-300" />
-              
+
               <div>
                 <div className="flex items-center gap-4">
                   <FileText className="h-7 w-7 text-gray-700" />
                   <h1 className="text-3xl font-bold text-gray-900">Complete Order Details</h1>
-                  <Badge 
+                  <Badge
                     className="border-2 text-lg font-semibold px-4 py-1.5"
                     style={getStatusStyle(order.status)}
                   >
@@ -291,7 +290,7 @@ export default function OrderDetailsPage() {
             {/* Action Buttons */}
             <div className="flex gap-3">
               {!isEditMode ? (
-                <Button 
+                <Button
                   variant="outline"
                   onClick={handleEditClick}
                   disabled={order.status === "completed" || order.status === "cancelled"}
@@ -302,7 +301,7 @@ export default function OrderDetailsPage() {
                 </Button>
               ) : (
                 <>
-                  <Button 
+                  <Button
                     variant="outline"
                     onClick={handleCancelEdit}
                     disabled={isEditing}
@@ -311,7 +310,7 @@ export default function OrderDetailsPage() {
                     <X className="h-5 w-5" />
                     Cancel
                   </Button>
-                  <Button 
+                  <Button
                     onClick={handleSaveEdit}
                     disabled={isEditing}
                     className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-lg font-medium px-6 py-2.5 h-auto"
@@ -329,13 +328,10 @@ export default function OrderDetailsPage() {
           </div>
         </div>
 
-        {/* Main Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* LEFT - Main Content */}
+
           <div className="lg:col-span-2 space-y-6">
-            
-            {/* Service Information Card */}
+
             <Card className="border-2 border-gray-200 shadow-sm bg-white">
               <CardHeader className="border-b-2 border-gray-200 pb-4">
                 <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
@@ -345,8 +341,6 @@ export default function OrderDetailsPage() {
               </CardHeader>
               <CardContent className="p-6">
                 <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                  
-                  {/* Service Type */}
                   <div>
                     <Label className="text-base font-semibold text-gray-900 mb-2 block">Service Type</Label>
                     {!isEditMode ? (
@@ -373,7 +367,6 @@ export default function OrderDetailsPage() {
                     )}
                   </div>
 
-                  {/* Guards Required */}
                   <div>
                     <Label className="text-base font-semibold text-gray-900 mb-2 block">Guards Required</Label>
                     {!isEditMode ? (
@@ -389,7 +382,6 @@ export default function OrderDetailsPage() {
                     )}
                   </div>
 
-                  {/* Location Name */}
                   {(order.locationName || isEditMode) && (
                     <div className="col-span-2">
                       <Label className="text-base font-semibold text-gray-900 mb-2 block">Location Name</Label>
@@ -405,8 +397,6 @@ export default function OrderDetailsPage() {
                       )}
                     </div>
                   )}
-
-                  {/* Location Address */}
                   <div className="col-span-2">
                     <Label className="text-base font-semibold text-gray-900 mb-2 block">Location Address</Label>
                     {!isEditMode ? (
@@ -421,7 +411,6 @@ export default function OrderDetailsPage() {
                     )}
                   </div>
 
-                  {/* Coordinates */}
                   <div className="col-span-2">
                     <Label className="text-base font-semibold text-gray-900 mb-2 block">Coordinates</Label>
                     {!isEditMode ? (
@@ -453,7 +442,6 @@ export default function OrderDetailsPage() {
 
                 <Separator className="my-6" />
 
-                {/* Description */}
                 <div>
                   <Label className="text-base font-semibold text-gray-900 mb-2 block">Description</Label>
                   {!isEditMode ? (
@@ -473,7 +461,6 @@ export default function OrderDetailsPage() {
               </CardContent>
             </Card>
 
-            {/* ✅ IMPROVED Location Images Card */}
             <Card className="border-2 border-gray-200 shadow-sm bg-white">
               <CardHeader className="border-b-2 border-gray-200 pb-4">
                 <div className="flex items-center justify-between">
@@ -481,8 +468,7 @@ export default function OrderDetailsPage() {
                     <Camera className="h-6 w-6" />
                     Location Images
                   </CardTitle>
-                  
-                  {/* Upload button in edit mode */}
+
                   {isEditMode && (
                     <label className="cursor-pointer">
                       <input
@@ -522,25 +508,21 @@ export default function OrderDetailsPage() {
                 {currentImages.length > 0 ? (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {currentImages.map((src: string, idx: number) => (
-                      <div 
-                        key={idx} 
+                      <div
+                        key={idx}
                         className="relative aspect-video rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-400 transition-all group cursor-pointer"
                         onClick={() => !isEditMode && openImageViewer(idx)}
                       >
-                        <img 
-                          src={src} 
-                          alt={`Location ${idx + 1}`} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                        <img
+                          src={src}
+                          alt={`Location ${idx + 1}`}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                        
-                        {/* View icon overlay (non-edit mode) */}
                         {!isEditMode && (
                           <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <ZoomIn className="h-8 w-8 text-white" />
                           </div>
                         )}
-                        
-                        {/* Delete button (edit mode) */}
                         {isEditMode && (
                           <button
                             onClick={(e) => {
@@ -553,8 +535,7 @@ export default function OrderDetailsPage() {
                             <Trash2 className="h-4 w-4" />
                           </button>
                         )}
-                        
-                        {/* Image counter */}
+
                         <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
                           {idx + 1} / {currentImages.length}
                         </div>
@@ -570,13 +551,13 @@ export default function OrderDetailsPage() {
                     )}
                   </div>
                 )}
-                
+
                 {isEditMode && currentImages.length > 0 && (
                   <p className="text-sm text-gray-500 mt-3">
                     Max size: 5MB per image. Hover over an image to delete it.
                   </p>
                 )}
-                
+
                 {!isEditMode && currentImages.length > 0 && (
                   <p className="text-sm text-gray-500 mt-3">
                     Click on any image to view in full screen
@@ -585,7 +566,6 @@ export default function OrderDetailsPage() {
               </CardContent>
             </Card>
 
-            {/* Client Information Card */}
             {order.client && (
               <Card className="border-2 border-gray-200 shadow-sm bg-white">
                 <CardHeader className="border-b-2 border-gray-200 pb-4">
@@ -618,10 +598,7 @@ export default function OrderDetailsPage() {
             )}
           </div>
 
-          {/* RIGHT - Sidebar */}
           <div className="space-y-6">
-            
-            {/* Schedule Card */}
             <Card className="border-2 border-gray-200 shadow-sm bg-white">
               <CardHeader className="border-b-2 border-gray-200 pb-4">
                 <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
@@ -630,8 +607,8 @@ export default function OrderDetailsPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-5">
-                
-                {/* Start Date */}
+
+
                 <div>
                   <Label className="text-base font-semibold text-gray-900 mb-2 block">Start Date</Label>
                   {!isEditMode ? (
@@ -646,7 +623,6 @@ export default function OrderDetailsPage() {
                   )}
                 </div>
 
-                {/* End Date */}
                 <div>
                   <Label className="text-base font-semibold text-gray-900 mb-2 block">End Date</Label>
                   {!isEditMode ? (
@@ -663,7 +639,6 @@ export default function OrderDetailsPage() {
 
                 <Separator />
 
-                {/* Start Time */}
                 <div>
                   <Label className="text-base font-semibold text-gray-900 mb-2 block">Start Time</Label>
                   {!isEditMode ? (
@@ -678,7 +653,6 @@ export default function OrderDetailsPage() {
                   )}
                 </div>
 
-                {/* End Time */}
                 <div>
                   <Label className="text-base font-semibold text-gray-900 mb-2 block">End Time</Label>
                   {!isEditMode ? (
@@ -695,7 +669,6 @@ export default function OrderDetailsPage() {
               </CardContent>
             </Card>
 
-            {/* Order Status Card */}
             <Card className="border-2 border-gray-200 shadow-sm bg-white">
               <CardHeader className="border-b-2 border-gray-200 pb-4">
                 <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
@@ -706,7 +679,7 @@ export default function OrderDetailsPage() {
               <CardContent className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <Label className="text-base font-semibold text-gray-900">Status:</Label>
-                  <Badge 
+                  <Badge
                     className="text-base font-semibold px-4 py-1.5 border-2"
                     style={getStatusStyle(order.status)}
                   >
@@ -731,7 +704,6 @@ export default function OrderDetailsPage() {
         </div>
       </div>
 
-      {/* ✅ FULL SCREEN IMAGE VIEWER MODAL */}
       <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-none">
           <div className="relative w-full h-[95vh] flex items-center justify-center">

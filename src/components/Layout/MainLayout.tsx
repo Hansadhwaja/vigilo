@@ -5,13 +5,16 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import TopBar from '../common/TopBar';
 import { liveMetrics, sampleAlarms, sampleGuards, sampleIncidents } from '@/data/sampleData';
 import { isSameMonthNow } from '@/utils/helpers';
-import { AlarmsPage, ClientsPage, Dashboard, GuardDetailsPage, HRPage, IncidentDetailsPage, IncidentsPage, MapPage, PatrolPage, SchedulingPage, SettingsPage } from '@/pages';
+import { ClientsPage, Dashboard, GuardDetailsPage, HRPage, IncidentDetailsPage, IncidentsPage, MapPage, PatrolPage, SchedulingPage, SettingsPage } from '@/pages';
 import OrderDetailsPage from '@/pages/OrderDetailsPage';
 import AssignmentDetailsPage from '../AssignmentDetails/AssignmentDetailsPage';
 import MessagesPage from '@/pages/Messages/MessagesPage';
 import PatrolDetailsPage from '@/pages/PatrolDetailsPage';
-import InvoicingPage from '@/pages/InvoicingPage';
+import InvoicingPage from '@/pages/Invoicing/InvoicingPage';
 import Sidebar from '../common/Navbar/Sidebar';
+import GenerateInvoicePage from '@/pages/Invoicing/GenerateInvoicePage';
+import InvoiceDetailsPage from '@/pages/Invoicing/InvoiceDetailsPage';
+import AlarmsPage from '@/pages/Alarm/AlarmsPage';
 
 const MainLayout = () => {
     const navigate = useNavigate();
@@ -195,7 +198,13 @@ const MainLayout = () => {
                         <Route path="/patrol/:id" element={<PatrolDetailsPage />} />
                         <Route path="/hr" element={<HRPage />} />
                         <Route path="/guard-details/:id" element={<GuardDetailsPage />} />
-                        <Route path="/invoicing" element={<InvoicingPage />} />
+
+                        <Route path="/invoicing" >
+                            <Route index element={<InvoicingPage />} />
+                            <Route path="new" element={<GenerateInvoicePage />} />
+                            <Route path=":invoiceId" element={<InvoiceDetailsPage />} />
+                        </Route>
+
                         <Route
                             path="/settings"
                             element={<SettingsPage usageAlarmsMTD={usageAlarmsMTD} />}

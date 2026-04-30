@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { ArrowLeft, AlertTriangle, MapPin, Clock, User, Camera, MessageSquare, Shield, FileText, CheckCircle, Clock4, ZoomIn, X, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Label } from "../components/ui/label";
-import { Button } from "../components/ui/button";
-import { Separator } from "../components/ui/separator";
-import { Dialog, DialogContent } from "../components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetIncidentByIdQuery } from "../apis/incidentsApi";
 import { getStatusColor, getStatusStyle } from "../utils/statusColors";

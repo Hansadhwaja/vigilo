@@ -48,3 +48,65 @@ export const formatMessageTime = (dateStr: string) => {
   const date = new Date(dateStr);
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
+
+export const getDateTime = ({
+  date,
+  time,
+}: {
+  date: string;
+  time: string;
+}) => {
+  const d = new Date(date);
+
+  // Extract UTC parts to avoid timezone shift
+  const year = d.getUTCFullYear();
+  const month = d.getUTCMonth();
+  const day = d.getUTCDate();
+
+  const [hours, minutes] = time.split(":").map(Number);
+
+  // Create LOCAL datetime using extracted date
+  return new Date(year, month, day, hours, minutes);
+};
+
+export const calculateWork = (
+  startDate: string,
+  startTime: string,
+  endDate: string,
+  endTime: string
+) => {
+  const start = getDateTime({ date: startDate, time: startTime });
+  const end = getDateTime({ date: endDate, time: endTime });
+
+  let diffMs = end.getTime() - start.getTime();
+
+  // 🔥 Handle overnight shifts (VERY IMPORTANT)
+  if (diffMs < 0) {
+    const nextDay = new Date(end);
+    nextDay.setDate(nextDay.getDate() + 1);
+    diffMs = nextDay.getTime() - start.getTime();
+  }
+
+  const totalHours = diffMs / (1000 * 60 * 60);
+
+  return {
+    hours: Number(totalHours.toFixed(2)),
+    days: Math.floor(totalHours / 24),
+  };
+};
+
+export const formatDate = (
+  date: string | Date,
+  options?: Intl.DateTimeFormatOptions
+) => {
+  if (!date) return "—";
+
+  const d = typeof date === "string" ? new Date(date) : date;
+
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    ...options,
+  }).format(d);
+};

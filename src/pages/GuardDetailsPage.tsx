@@ -1,13 +1,13 @@
 import React from "react";
 import { ArrowLeft, Phone, Mail, MapPin, User, Building, Clock, AlertCircle, Calendar, Activity, ExternalLink, ChevronRight } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Separator } from "../components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetGuardByIdQuery } from "../apis/guardsApi";
 import { getStatusColor, getStatusStyle } from "../utils/statusColors";
-import { Label } from "../components/ui/label";
+import { Label } from "@/components/ui/label";
 
 export default function GuardDetailsPage() {
   const navigate = useNavigate();

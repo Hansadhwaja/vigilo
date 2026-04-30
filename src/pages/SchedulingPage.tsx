@@ -15,38 +15,39 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { Button } from "../components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select";
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "../components/ui/dialog";
-import { Label } from "../components/ui/label";
-import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../components/ui/tabs";
+} from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -54,14 +55,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../components/ui/table";
-import { Checkbox } from "../components/ui/checkbox";
-import { Calendar } from "../components/ui/calendar";
+} from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "../components/ui/popover";
+} from "@/components/ui/popover";
 import { useGetAllGuardsQuery } from "../apis/guardsApi";
 import {
   useCreateScheduleMutation,
@@ -143,10 +144,10 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
     // Parse dates properly
     const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
     const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
-    
+
     const startDateObj = new Date(startYear, startMonth - 1, startDay);
     const endDateObj = new Date(endYear, endMonth - 1, endDay);
-    
+
     const daysDiff = Math.floor((endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24));
 
 
@@ -154,7 +155,7 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
     for (let dayOffset = 0; dayOffset <= daysDiff; dayOffset++) {
       const currentDateObj = new Date(startDateObj);
       currentDateObj.setDate(startDateObj.getDate() + dayOffset);
-      
+
       // Format date manually (avoid timezone issues)
       const year = currentDateObj.getFullYear();
       const month = String(currentDateObj.getMonth() + 1).padStart(2, '0');
@@ -202,7 +203,7 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
           orderId: shift.orderId,
           orderLocationName: shift.locationName || "Unknown Location",
           orderName: shift.orderName || "Unknown Location",
-           orderAddress: shift.orderAddress || "Address not available",
+          orderAddress: shift.orderAddress || "Address not available",
 
           description: shift.description,
           type: shift.type,
@@ -214,7 +215,7 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
           start,
           end,
           duration: getDuration(shift.startTime, shift.endTime),
-          
+
           displayDate: dateKey,
           originalStartDate: shift.startTime,
           originalEndDate: shift.endTime,
@@ -269,6 +270,7 @@ export default function ShiftPage() {
 
   //delete a schedule
   const [deleteSchedule] = useDeleteScheduleMutation();
+
   const handleDelete = async (id: string, e: any) => {
     e.stopPropagation();
 
@@ -316,26 +318,26 @@ export default function ShiftPage() {
   };
   // In your calendar/scheduling component where you call handleOpenEditDialog
 
-const handleOpenEditDialog = (assignment: any) => {
-  const shiftId = assignment.shiftId;
-  
-  // Find all assignments with the same shiftId
-  const allAssignmentsForShift = scheduleData
-    .flatMap(day => day.guards)
-    .filter(a => a.shiftId === shiftId);
-  
-  // ✅ Extract unique guard IDs (remove duplicates)
-  const allGuardIds = [...new Set(allAssignmentsForShift.map(a => a.guardId))];
-  
-  console.log("All guard IDs for shift:", allGuardIds); // ✅ Debug log
-  
-  setSelectedAssignment({
-    ...assignment,
-    allGuardIdsForShift: allGuardIds, // ✅ No duplicates
-  });
-  
-  setShowEditDialog(true);
-};
+  const handleOpenEditDialog = (assignment: any) => {
+    const shiftId = assignment.shiftId;
+
+    // Find all assignments with the same shiftId
+    const allAssignmentsForShift = scheduleData
+      .flatMap(day => day.guards)
+      .filter(a => a.shiftId === shiftId);
+
+    // ✅ Extract unique guard IDs (remove duplicates)
+    const allGuardIds = [...new Set(allAssignmentsForShift.map(a => a.guardId))];
+
+    console.log("All guard IDs for shift:", allGuardIds); // ✅ Debug log
+
+    setSelectedAssignment({
+      ...assignment,
+      allGuardIdsForShift: allGuardIds, // ✅ No duplicates
+    });
+
+    setShowEditDialog(true);
+  };
 
 
   // Helpers: timezone constants & formatters
@@ -765,6 +767,13 @@ const handleOpenEditDialog = (assignment: any) => {
   //   console.log("Selected Guards:", formData.guardIds);
   // }, [formData.guardIds]);
 
+  const allowedOrders = (orders || []).filter(
+    (o: any) =>
+      !["completed", "cancelled", "pending"].includes(
+        (o.status || "").toLowerCase()
+      )
+  );
+
   return (
     <div className="space-y-3">
       {/* Compact Header with Summary Cards Inline */}
@@ -1075,91 +1084,91 @@ const handleOpenEditDialog = (assignment: any) => {
                                     id: string;
                                     role: string;
                                     name:
+                                    | string
+                                    | number
+                                    | bigint
+                                    | boolean
+                                    | React.ReactElement<
+                                      unknown,
+                                      | string
+                                      | React.JSXElementConstructor<any>
+                                    >
+                                    | Iterable<React.ReactNode>
+                                    | React.ReactPortal
+                                    | Promise<
                                       | string
                                       | number
                                       | bigint
                                       | boolean
-                                      | React.ReactElement<
-                                          unknown,
-                                          | string
-                                          | React.JSXElementConstructor<any>
-                                        >
-                                      | Iterable<React.ReactNode>
                                       | React.ReactPortal
-                                      | Promise<
-                                          | string
-                                          | number
-                                          | bigint
-                                          | boolean
-                                          | React.ReactPortal
-                                          | React.ReactElement<
-                                              unknown,
-                                              | string
-                                              | React.JSXElementConstructor<any>
-                                            >
-                                          | Iterable<React.ReactNode>
-                                          | null
-                                          | undefined
-                                        >
+                                      | React.ReactElement<
+                                        unknown,
+                                        | string
+                                        | React.JSXElementConstructor<any>
+                                      >
+                                      | Iterable<React.ReactNode>
                                       | null
-                                      | undefined;
+                                      | undefined
+                                    >
+                                    | null
+                                    | undefined;
                                     time:
+                                    | string
+                                    | number
+                                    | bigint
+                                    | boolean
+                                    | React.ReactElement<
+                                      unknown,
+                                      | string
+                                      | React.JSXElementConstructor<any>
+                                    >
+                                    | Iterable<React.ReactNode>
+                                    | React.ReactPortal
+                                    | Promise<
                                       | string
                                       | number
                                       | bigint
                                       | boolean
-                                      | React.ReactElement<
-                                          unknown,
-                                          | string
-                                          | React.JSXElementConstructor<any>
-                                        >
-                                      | Iterable<React.ReactNode>
                                       | React.ReactPortal
-                                      | Promise<
-                                          | string
-                                          | number
-                                          | bigint
-                                          | boolean
-                                          | React.ReactPortal
-                                          | React.ReactElement<
-                                              unknown,
-                                              | string
-                                              | React.JSXElementConstructor<any>
-                                            >
-                                          | Iterable<React.ReactNode>
-                                          | null
-                                          | undefined
-                                        >
+                                      | React.ReactElement<
+                                        unknown,
+                                        | string
+                                        | React.JSXElementConstructor<any>
+                                      >
+                                      | Iterable<React.ReactNode>
                                       | null
-                                      | undefined;
+                                      | undefined
+                                    >
+                                    | null
+                                    | undefined;
                                     description:
+                                    | string
+                                    | number
+                                    | bigint
+                                    | boolean
+                                    | React.ReactElement<
+                                      unknown,
+                                      | string
+                                      | React.JSXElementConstructor<any>
+                                    >
+                                    | Iterable<React.ReactNode>
+                                    | Promise<
                                       | string
                                       | number
                                       | bigint
                                       | boolean
+                                      | React.ReactPortal
                                       | React.ReactElement<
-                                          unknown,
-                                          | string
-                                          | React.JSXElementConstructor<any>
-                                        >
+                                        unknown,
+                                        | string
+                                        | React.JSXElementConstructor<any>
+                                      >
                                       | Iterable<React.ReactNode>
-                                      | Promise<
-                                          | string
-                                          | number
-                                          | bigint
-                                          | boolean
-                                          | React.ReactPortal
-                                          | React.ReactElement<
-                                              unknown,
-                                              | string
-                                              | React.JSXElementConstructor<any>
-                                            >
-                                          | Iterable<React.ReactNode>
-                                          | null
-                                          | undefined
-                                        >
                                       | null
-                                      | undefined;
+                                      | undefined
+                                    >
+                                    | null
+                                    | undefined;
                                     orderId: string;
                                     StaticGuards: { status: string };
                                     status: any;
@@ -1170,11 +1179,10 @@ const handleOpenEditDialog = (assignment: any) => {
                                     key={assignment.id}
                                     className={`
                                   relative p-4 rounded-lg border-2 shadow-sm hover:shadow-md transition-all cursor-pointer
-                                  ${
-                                    assignment.role === "Patrol"
-                                      ? "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-300 hover:border-orange-400"
-                                      : "bg-gradient-to-br from-green-50 to-green-100 border-green-300 hover:border-green-400"
-                                  }
+                                  ${assignment.role === "Patrol"
+                                        ? "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-300 hover:border-orange-400"
+                                        : "bg-gradient-to-br from-green-50 to-green-100 border-green-300 hover:border-green-400"
+                                      }
                                 `}
                                     onClick={() =>
                                       handleEditAssignment(assignment)
@@ -1185,11 +1193,10 @@ const handleOpenEditDialog = (assignment: any) => {
                                         variant="outline"
                                         className={`
                                       text-lg px-2 py-0.5
-                                      ${
-                                        assignment.role === "patrol"
-                                          ? "bg-orange-200 text-orange-900 border-orange-400"
-                                          : "bg-green-200 text-green-900 border-green-400"
-                                      }
+                                      ${assignment.role === "patrol"
+                                            ? "bg-orange-200 text-orange-900 border-orange-400"
+                                            : "bg-green-200 text-green-900 border-green-400"
+                                          }
                                     `}
                                       >
                                         {assignment.role}
@@ -1225,21 +1232,20 @@ const handleOpenEditDialog = (assignment: any) => {
                                               <div
                                                 className={`
                                             px-2 py-0.5 rounded-full text-lg font-medium
-                                            ${
-                                              assignment.orderId === "o1"
-                                                ? "bg-blue-200 text-blue-900"
-                                                : assignment.orderId === "o2"
-                                                  ? "bg-purple-200 text-purple-900"
-                                                  : assignment.orderId === "o3"
-                                                    ? "bg-cyan-200 text-cyan-900"
-                                                    : assignment.orderId ===
-                                                        "o4"
-                                                      ? "bg-amber-200 text-amber-900"
-                                                      : assignment.orderId ===
-                                                          "o5"
-                                                        ? "bg-pink-200 text-pink-900"
-                                                        : "bg-teal-200 text-teal-900"
-                                            }
+                                            ${assignment.orderId === "o1"
+                                                    ? "bg-blue-200 text-blue-900"
+                                                    : assignment.orderId === "o2"
+                                                      ? "bg-purple-200 text-purple-900"
+                                                      : assignment.orderId === "o3"
+                                                        ? "bg-cyan-200 text-cyan-900"
+                                                        : assignment.orderId ===
+                                                          "o4"
+                                                          ? "bg-amber-200 text-amber-900"
+                                                          : assignment.orderId ===
+                                                            "o5"
+                                                            ? "bg-pink-200 text-pink-900"
+                                                            : "bg-teal-200 text-teal-900"
+                                                  }
                                           `}
                                               >
                                                 {assignment.description}
@@ -1327,18 +1333,17 @@ const handleOpenEditDialog = (assignment: any) => {
                             key={orderId as string}
                             className={`
                               px-3 py-1 rounded-full text-lg font-medium
-                              ${
-                                orderId === "o1"
-                                  ? "bg-blue-200 text-blue-900"
-                                  : orderId === "o2"
-                                    ? "bg-purple-200 text-purple-900"
-                                    : orderId === "o3"
-                                      ? "bg-cyan-200 text-cyan-900"
-                                      : orderId === "o4"
-                                        ? "bg-amber-200 text-amber-900"
-                                        : orderId === "o5"
-                                          ? "bg-pink-200 text-pink-900"
-                                          : "bg-teal-200 text-teal-900"
+                              ${orderId === "o1"
+                                ? "bg-blue-200 text-blue-900"
+                                : orderId === "o2"
+                                  ? "bg-purple-200 text-purple-900"
+                                  : orderId === "o3"
+                                    ? "bg-cyan-200 text-cyan-900"
+                                    : orderId === "o4"
+                                      ? "bg-amber-200 text-amber-900"
+                                      : orderId === "o5"
+                                        ? "bg-pink-200 text-pink-900"
+                                        : "bg-teal-200 text-teal-900"
                               }
                             `}
                           >
@@ -1429,13 +1434,12 @@ const handleOpenEditDialog = (assignment: any) => {
                         key={index}
                         className={`
                   p-3 border-r border-gray-200 text-center cursor-pointer transition-all
-                  ${
-                    isSelected
-                      ? "bg-blue-900 text-white"
-                      : isToday
-                        ? "bg-blue-100 text-blue-900 hover:bg-blue-200"
-                        : "hover:bg-gray-200"
-                  }
+                  ${isSelected
+                            ? "bg-blue-900 text-white"
+                            : isToday
+                              ? "bg-blue-100 text-blue-900 hover:bg-blue-200"
+                              : "hover:bg-gray-200"
+                          }
                 `}
                         onClick={() => setSelectedDate(new Date(day))}
                       >
@@ -1499,7 +1503,7 @@ const handleOpenEditDialog = (assignment: any) => {
                           const matchesRole =
                             filterRole === "all" ||
                             assignment.type?.toLowerCase() ===
-                              filterRole.toLowerCase();
+                            filterRole.toLowerCase();
 
                           const matchesSearch =
                             !searchTerm ||
@@ -1547,11 +1551,10 @@ const handleOpenEditDialog = (assignment: any) => {
                                     key={assignment.id}
                                     className={`
                               p-2 rounded-md text-lg cursor-pointer transition-all border group-hover:shadow-sm
-                              ${
-                                assignment.type === "patrol"
-                                  ? "bg-linear-to-r from-orange-100 to-orange-50 text-orange-900 border-orange-200 hover:from-orange-200 hover:to-orange-100"
-                                  : "bg-linear-to-r from-green-100 to-green-50 text-green-900 border-green-200 hover:from-green-200 hover:to-green-100"
-                              }
+                              ${assignment.type === "patrol"
+                                        ? "bg-linear-to-r from-orange-100 to-orange-50 text-orange-900 border-orange-200 hover:from-orange-200 hover:to-orange-100"
+                                        : "bg-linear-to-r from-green-100 to-green-50 text-green-900 border-green-200 hover:from-green-200 hover:to-green-100"
+                                      }
                             `}
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -1588,15 +1591,15 @@ const handleOpenEditDialog = (assignment: any) => {
                                       className="text-lg px-0 py-0 border-2 overflow-hidden"
                                       style={getStatusStyle(
                                         guard.status ||
-                                          assignment.status ||
-                                          "pending",
+                                        assignment.status ||
+                                        "pending",
                                       )}
                                     >
                                       {
                                         getStatusColor(
                                           guard.status ||
-                                            assignment.status ||
-                                            "pending",
+                                          assignment.status ||
+                                          "pending",
                                         ).label
                                       }
                                     </Badge>
@@ -1706,59 +1709,59 @@ const handleOpenEditDialog = (assignment: any) => {
                         assignment: {
                           role: string;
                           name:
+                          | string
+                          | number
+                          | bigint
+                          | boolean
+                          | React.ReactElement<
+                            unknown,
+                            string | React.JSXElementConstructor<any>
+                          >
+                          | Iterable<React.ReactNode>
+                          | React.ReactPortal
+                          | Promise<
                             | string
                             | number
                             | bigint
                             | boolean
-                            | React.ReactElement<
-                                unknown,
-                                string | React.JSXElementConstructor<any>
-                              >
-                            | Iterable<React.ReactNode>
                             | React.ReactPortal
-                            | Promise<
-                                | string
-                                | number
-                                | bigint
-                                | boolean
-                                | React.ReactPortal
-                                | React.ReactElement<
-                                    unknown,
-                                    string | React.JSXElementConstructor<any>
-                                  >
-                                | Iterable<React.ReactNode>
-                                | null
-                                | undefined
-                              >
+                            | React.ReactElement<
+                              unknown,
+                              string | React.JSXElementConstructor<any>
+                            >
+                            | Iterable<React.ReactNode>
                             | null
-                            | undefined;
+                            | undefined
+                          >
+                          | null
+                          | undefined;
                           time:
+                          | string
+                          | number
+                          | bigint
+                          | boolean
+                          | React.ReactElement<
+                            unknown,
+                            string | React.JSXElementConstructor<any>
+                          >
+                          | Iterable<React.ReactNode>
+                          | React.ReactPortal
+                          | Promise<
                             | string
                             | number
                             | bigint
                             | boolean
-                            | React.ReactElement<
-                                unknown,
-                                string | React.JSXElementConstructor<any>
-                              >
-                            | Iterable<React.ReactNode>
                             | React.ReactPortal
-                            | Promise<
-                                | string
-                                | number
-                                | bigint
-                                | boolean
-                                | React.ReactPortal
-                                | React.ReactElement<
-                                    unknown,
-                                    string | React.JSXElementConstructor<any>
-                                  >
-                                | Iterable<React.ReactNode>
-                                | null
-                                | undefined
-                              >
+                            | React.ReactElement<
+                              unknown,
+                              string | React.JSXElementConstructor<any>
+                            >
+                            | Iterable<React.ReactNode>
                             | null
-                            | undefined;
+                            | undefined
+                          >
+                          | null
+                          | undefined;
                         },
                         idx: React.Key | null | undefined,
                       ) => (
@@ -1766,11 +1769,10 @@ const handleOpenEditDialog = (assignment: any) => {
                           key={idx}
                           className={`
                 inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium cursor-pointer transition-all shadow-sm
-                ${
-                  assignment.role === "Patrol"
-                    ? "bg-orange-100 text-orange-900 hover:bg-orange-200 border border-orange-300"
-                    : "bg-green-100 text-green-900 hover:bg-green-200 border border-green-300"
-                }
+                ${assignment.role === "Patrol"
+                              ? "bg-orange-100 text-orange-900 hover:bg-orange-200 border border-orange-300"
+                              : "bg-green-100 text-green-900 hover:bg-green-200 border border-green-300"
+                            }
               `}
                           onClick={() => handleEditAssignment(assignment)}
                         >
@@ -1917,7 +1919,7 @@ const handleOpenEditDialog = (assignment: any) => {
                           // Clear endDate if it's before the new start date
                           endDate:
                             formData.endDate &&
-                            formData.endDate < localDateString
+                              formData.endDate < localDateString
                               ? ""
                               : formData.endDate,
                         });
@@ -1951,8 +1953,8 @@ const handleOpenEditDialog = (assignment: any) => {
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {formData.endDate
                   ? new Date(
-                      formData.endDate + "T00:00:00",
-                    ).toLocaleDateString()
+                    formData.endDate + "T00:00:00",
+                  ).toLocaleDateString()
                   : "Pick end date"}
               </Button>
 
@@ -2026,33 +2028,26 @@ const handleOpenEditDialog = (assignment: any) => {
                   setFormData({ ...formData, orderId: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Address" />
                 </SelectTrigger>
 
-                <SelectContent
-                  className="max-h-56 overflow-y-auto z-50"
-                  style={{ maxHeight: "14rem", overflowY: "auto" }}
-                >
-                  {(() => {
-                    const allowedOrders = (orders || []).filter(
-                      (o: any) =>
-                        !["completed", "cancelled", "pending"].includes(
-                          (o.status || "").toLowerCase(),
-                        ),
-                    );
-                    return allowedOrders.length > 0 ? (
-                      allowedOrders.map((order: any) => (
-                        <SelectItem key={order.id} value={order.id}>
-                          {order.locationAddress ?? order.id}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <div className="p-3 text-lg text-gray-500">
-                        No active orders available
-                      </div>
-                    );
-                  })()}
+                <SelectContent className="max-h-56 overflow-y-auto z-50">
+                  {allowedOrders.length > 0 ? (
+                    allowedOrders.map((order: any) => (
+                      <SelectItem
+                        key={order.id}
+                        value={order.id}
+                        className="cursor-pointer"
+                      >
+                        {order.locationAddress ?? order.id}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="no-orders">
+                      No active orders available
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -2069,7 +2064,7 @@ const handleOpenEditDialog = (assignment: any) => {
                   setFormData({ ...formData, orderId: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select name" />
                 </SelectTrigger>
 
@@ -2091,9 +2086,9 @@ const handleOpenEditDialog = (assignment: any) => {
                         </SelectItem>
                       ))
                     ) : (
-                      <div className="p-3 text-lg text-gray-500">
+                      <SelectItem value="no-orders" className="p-3 text-lg text-gray-500">
                         No active orders available
-                      </div>
+                      </SelectItem>
                     );
                   })()}
                 </SelectContent>
@@ -2176,9 +2171,9 @@ const handleOpenEditDialog = (assignment: any) => {
                       );
                     })
                   ) : (
-                    <div className="p-3 text-lg text-gray-500">
+                    <SelectItem value="no-guards" className="p-3 text-lg text-gray-500">
                       No Guards available
-                    </div>
+                    </SelectItem>
                   )}
                 </SelectContent>
               </Select>

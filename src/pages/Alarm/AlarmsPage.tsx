@@ -1,25 +1,21 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Search, Filter, Clock, User, MapPin, Bell, CheckCircle, AlertTriangle, Phone, Timer, Route, Download, FileText, Users, Zap, TrendingUp, Siren, Loader2, Trash2 } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
-import { Label } from "../components/ui/label";
-import { Textarea } from "../components/ui/textarea";
-import { Progress } from "../components/ui/progress";
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "../components/ui/pagination";
-import { availableGuards, sampleGuards } from "../data/sampleData";
+import { Plus, Search, Filter, User, MapPin, Bell, CheckCircle, AlertTriangle, Phone, Timer, Route, Download, FileText, Users, Zap, TrendingUp, Siren, Loader2, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { availableGuards, sampleGuards } from "@/data/sampleData";
 import { toast } from "sonner";
-import {useCreateAlarmMutation, useDeleteAlarmMutation, useGetAllAlarmsQuery} from "../apis/alarmsAPI";
-import {useGetAllPatrolSitesQuery, useGetAllPatrolRunsForAdminQuery} from "../apis/patrollingAPI";
-import {useGetAllGuardsQuery} from "../apis/guardsApi";
-import { useDeleteAllNotificationsMutation, useDeleteNotificationByIdMutation, useGetMyNotificationsQuery, useMarkAllNotificationsAsReadMutation } from "../apis/notificationAPI";
-import { getStatusStyle, getStatusColor } from "./../utils/statusColors";
-
-
-
+import { useCreateAlarmMutation, useDeleteAlarmMutation, useGetAllAlarmsQuery } from "@/apis/alarmsAPI";
+import { useGetAllPatrolSitesQuery, useGetAllPatrolRunsForAdminQuery } from "@/apis/patrollingAPI";
+import { useGetAllGuardsQuery } from "@/apis/guardsApi";
+import { useDeleteAllNotificationsMutation, useDeleteNotificationByIdMutation, useGetMyNotificationsQuery, useMarkAllNotificationsAsReadMutation } from "@/apis/notificationAPI";
+import { getStatusStyle, getStatusColor } from "@/utils/statusColors";
+import CreateAlarmModal from "../../components/Alarm/Modal/CreateAlarmModal";
 
 interface AlarmsPageProps {
   alarmList: any[];
@@ -33,16 +29,16 @@ const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: numbe
   const R = 6371; // km
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLng = (lng2 - lng1) * Math.PI / 180;
-  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLng/2) * Math.sin(dLng/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
 
-const findOptimalGuard = (alarmLocation: {lat: number, lng: number}, priority: string) => {
-  const availableNow = sampleGuards.filter(g => 
-    g.status !== "Off Duty" && 
+const findOptimalGuard = (alarmLocation: { lat: number, lng: number }, priority: string) => {
+  const availableNow = sampleGuards.filter(g =>
+    g.status !== "Off Duty" &&
     g.status !== "Assigned" &&
     (priority === "Critical" || g.licences.includes("VIC Sec"))
   );
@@ -68,9 +64,9 @@ const findOptimalGuard = (alarmLocation: {lat: number, lng: number}, priority: s
 // SLA Escalation Logic
 const checkSLABreach = (alarm: any) => {
   if (!alarm.slaTargetMins || alarm.completed) return null;
-  
+
   const breachPercentage = (alarm.sinceMins / alarm.slaTargetMins) * 100;
-  
+
   if (breachPercentage >= 100) {
     return {
       level: "CRITICAL_BREACH",
@@ -90,7 +86,7 @@ const checkSLABreach = (alarm: any) => {
       action: "PRIORITY_ASSIGNMENT"
     };
   }
-  
+
   return null;
 };
 
@@ -106,8 +102,6 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
   const [escalatedAlarms, setEscalatedAlarms] = useState<Set<string>>(new Set());
   const itemsPerPage = 5;
 
-
-  const [createAlarm, { isLoading: isCreating }] = useCreateAlarmMutation();
   const [deleteAlarm, { isLoading: isDeletingAlarm }] = useDeleteAlarmMutation();
 
   const { data: notificationsResponse } = useGetMyNotificationsQuery({
@@ -124,31 +118,28 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
 
   const { data } = useGetAllAlarmsQuery();
 
-const alarms = data?.data || [];
-const notifications = notificationsResponse?.data || [];
+  const alarms = data?.data || [];
+  const notifications = notificationsResponse?.data || [];
 
-    const { data: guardsResponse, isLoading, isError, error, isFetching } = useGetAllGuardsQuery({
-      limit: itemsPerPage,
-      page: currentPage,
-    });
-  
-    const guards = guardsResponse?.data || [];
-    const apiPagination = guardsResponse?.pagination;
+  const { data: guardsResponse, isLoading, isError, error, isFetching } = useGetAllGuardsQuery({
+    limit: itemsPerPage,
+    page: currentPage,
+  });
 
-    const { data: sitesResponse, isLoading: sitesLoading } =
-  useGetAllPatrolSitesQuery({});
+  const guards = guardsResponse?.data || [];
+  const apiPagination = guardsResponse?.pagination;
 
-const sites = sitesResponse?.data || [];
+
 
   const {
-  data: patrolData,
-} = useGetAllPatrolRunsForAdminQuery({
+    data: patrolData,
+  } = useGetAllPatrolRunsForAdminQuery({
     page: 1,
     limit: 100,
-});
+  });
 
-const activePatrolGuardIds = React.useMemo(() => {
-  if (!patrolData?.data) return [];
+  const activePatrolGuardIds = React.useMemo(() => {
+    if (!patrolData?.data) return [];
 
     const guardIdSet = new Set<string>();
 
@@ -174,43 +165,45 @@ const activePatrolGuardIds = React.useMemo(() => {
     });
 
     return Array.from(guardIdSet);
-}, [patrolData]);
+  }, [patrolData]);
 
-const filteredGuards = React.useMemo(() => {
-  return guards.filter((guard) =>
-    activePatrolGuardIds.includes(guard.id)
-  );
-}, [guards, activePatrolGuardIds]);
+  const filteredGuards = React.useMemo(() => {
+    return guards.filter((guard) =>
+      activePatrolGuardIds.includes(guard.id)
+    );
+  }, [guards, activePatrolGuardIds]);
   // Create alarm form state
+
+
   const [newAlarm, setNewAlarm] = useState({
-  title: "",
-  siteId: "",
-  type: "",
-  priority: "",
-  guardIds: [] as string[],
-  eta: "",
-  slaTime: "",
-  description: "",
-  unitPrice: "",
-  location: "",
-  monitoringCompany: "",
-  license: "",
-});
-
-const formatDateOnly = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
+    title: "",
+    siteId: "",
+    type: "",
+    priority: "",
+    guardIds: [] as string[],
+    eta: "",
+    slaTime: "",
+    description: "",
+    unitPrice: "",
+    location: "",
+    monitoringCompany: "",
+    license: "",
   });
-};
 
-const formatTimeOnly = (dateString: string) => {
-  return new Date(dateString).toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-};
+  const formatDateOnly = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const formatTimeOnly = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  };
 
   // Filter alarms based on search and filters
   // const filteredAlarms = alarmList.filter(alarm => {
@@ -221,7 +214,7 @@ const formatTimeOnly = (dateString: string) => {
   //                        (statusFilter === "active" && !alarm.completed) ||
   //                        (statusFilter === "resolved" && alarm.completed);
   //   const matchesPriority = priorityFilter === "all" || alarm.priority === priorityFilter;
-    
+
   //   return matchesSearch && matchesStatus && matchesPriority;
   // });
 
@@ -231,10 +224,10 @@ const formatTimeOnly = (dateString: string) => {
       alarmList.forEach(alarm => {
         if (!alarm.completed) {
           const slaStatus = checkSLABreach(alarm);
-          
+
           if (slaStatus && !escalatedAlarms.has(alarm.id)) {
             setEscalatedAlarms(prev => new Set(prev).add(alarm.id));
-            
+
             // Show toast notification
             if (slaStatus.level === "CRITICAL_BREACH") {
               toast.error(slaStatus.message, {
@@ -265,12 +258,12 @@ const formatTimeOnly = (dateString: string) => {
     if (alarm.responseTime) return sum + alarm.responseTime;
     return sum;
   }, 0) / Math.max(alarmList.filter(a => a.responseTime).length, 1);
-  const resolvedToday = alarmList.filter(a => a.completed && a.completedAt && 
+  const resolvedToday = alarmList.filter(a => a.completed && a.completedAt &&
     new Date(a.completedAt).toDateString() === new Date().toDateString()).length;
-  
+
   // Monthly billing metrics
   const monthlyBillingValue = alarmList
-    .filter(a => a.completed && a.completedAt && 
+    .filter(a => a.completed && a.completedAt &&
       new Date(a.completedAt).getMonth() === new Date().getMonth())
     .reduce((sum, a) => sum + (a.unitPrice || 0), 0);
 
@@ -280,148 +273,128 @@ const formatTimeOnly = (dateString: string) => {
   const endIndex = startIndex + itemsPerPage;
 
   const formattedAlarms = alarms.map((alarm) => {
-  const createdTime = new Date(alarm.createdAt).getTime();
-  const now = Date.now();
+    const createdTime = new Date(alarm.createdAt).getTime();
+    const now = Date.now();
 
-  const sinceMins = Math.floor((now - createdTime) / 60000);
+    const sinceMins = Math.floor((now - createdTime) / 60000);
 
-  const assignedGuard = alarm.guards?.length
-    ? alarm.guards.map((g) => g.name).join(", ")
-    : null;
+    const assignedGuard = alarm.guards?.length
+      ? alarm.guards.map((g) => g.name).join(", ")
+      : null;
 
-  return {
-    id: alarm.id,
+    return {
+      id: alarm.id,
 
-    site: alarm.siteName || "Unknown Site",
+      site: alarm.siteName || "Unknown Site",
 
-    type: alarm.title || alarm.alarmType,
+      type: alarm.title || alarm.alarmType,
 
-    location: alarm.specificLocation,
+      location: alarm.specificLocation,
 
-    priority: alarm.priority,
+      priority: alarm.priority,
 
-    sinceMins,
-    createdAt: alarm.createdAt,
+      sinceMins,
+      createdAt: alarm.createdAt,
 
-    slaTargetMins: alarm.slaTimeMinutes,
+      slaTargetMins: alarm.slaTimeMinutes,
 
-    assigned: assignedGuard,
+      assigned: assignedGuard,
 
-    eta: alarm.etaMinutes ? `${alarm.etaMinutes} min` : null,
+      eta: alarm.etaMinutes ? `${alarm.etaMinutes} min` : null,
 
-    status: alarm.status,
+      status: alarm.status,
 
-    breach: alarm.breach,
-    monitoringCompany: alarm.monitoringCompany,
-    license: alarm.license,
-    unitPrice: alarm.unitPrice,
+      breach: alarm.breach,
+      monitoringCompany: alarm.monitoringCompany,
+      license: alarm.license,
+      unitPrice: alarm.unitPrice,
 
-    original: alarm,
-  };
-});
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+      original: alarm,
+    };
+  });
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-const todaysAlarms = formattedAlarms.filter((alarm) => {
-  const created = new Date(alarm.createdAt);
-  created.setHours(0, 0, 0, 0);
+  const todaysAlarms = formattedAlarms.filter((alarm) => {
+    const created = new Date(alarm.createdAt);
+    created.setHours(0, 0, 0, 0);
 
-  return created.getTime() === today.getTime();
-});
-
-const activeAlarms = todaysAlarms.filter(
-  (alarm) => alarm.status === "ongoing"
-).length;
-
-const criticalAlarms = todaysAlarms.filter(
-  (alarm) => alarm.priority?.toLowerCase() === "high"
-).length;
-
-const slaBreachAlarms = todaysAlarms.filter(
-  (alarm) => alarm.breach === true
-).length;
-
-
-const filteredAlarms = formattedAlarms.filter((alarm) => {
-  const search = searchTerm.toLowerCase();
-
-  // SEARCH
-  const matchesSearch =
-    alarm.site?.toLowerCase().includes(search) ||
-    alarm.type?.toLowerCase().includes(search) ||
-    alarm.location?.toLowerCase().includes(search) ||
-    alarm.assigned?.toLowerCase().includes(search);
-
-  // STATUS FILTER
-  let matchesStatus = true;
-  if (statusFilter === "ongoing") {
-    matchesStatus = alarm.status === "ongoing";
-  }
-  if (statusFilter === "completed") {
-    matchesStatus = alarm.status === "completed" ;
-  }
-  if (statusFilter === "cancelled") {
-    matchesStatus = alarm.status === "cancelled";
-  }
-  if (statusFilter === "pending") {
-    matchesStatus = alarm.status === "pending";
-  }
-  if (statusFilter === "delayed") {
-    matchesStatus = alarm.status === "delayed" ;
-  }
-
-  // PRIORITY FILTER
-  let matchesPriority = true;
-  if (priorityFilter !== "all") {
-    matchesPriority =
-      alarm.priority?.toLowerCase() === priorityFilter.toLowerCase();
-  }
-
-  return matchesSearch && matchesStatus && matchesPriority;
-});
-
-const alarmsPerPage = 5;
-
-const totalPages = Math.ceil(filteredAlarms.length / alarmsPerPage);
-
-const indexOfLastAlarm = currentPage * alarmsPerPage;
-const indexOfFirstAlarm = indexOfLastAlarm - alarmsPerPage;
-
-const currentAlarms = filteredAlarms.slice(
-  indexOfFirstAlarm,
-  indexOfLastAlarm
-);
-
-useEffect(() => {
-  setCurrentPage(1);
-}, [searchTerm, statusFilter, priorityFilter]);
-
-
-
-  const handleCreateAlarm = () => {
-  setNewAlarm({
-    title: "",
-    siteId: "",
-    type: "",
-    priority: "",
-    guardIds: [],
-    eta: "",
-    slaTime: "",
-    description: "",
-    unitPrice: "",
-    location: "",
-    monitoringCompany: "",
-    license: "",
+    return created.getTime() === today.getTime();
   });
 
-  setShowCreateDialog(true);
-};
+  const activeAlarms = todaysAlarms.filter(
+    (alarm) => alarm.status === "ongoing"
+  ).length;
+
+  const criticalAlarms = todaysAlarms.filter(
+    (alarm) => alarm.priority?.toLowerCase() === "high"
+  ).length;
+
+  const slaBreachAlarms = todaysAlarms.filter(
+    (alarm) => alarm.breach === true
+  ).length;
+
+
+  const filteredAlarms = formattedAlarms.filter((alarm) => {
+    const search = searchTerm.toLowerCase();
+
+    // SEARCH
+    const matchesSearch =
+      alarm.site?.toLowerCase().includes(search) ||
+      alarm.type?.toLowerCase().includes(search) ||
+      alarm.location?.toLowerCase().includes(search) ||
+      alarm.assigned?.toLowerCase().includes(search);
+
+    // STATUS FILTER
+    let matchesStatus = true;
+    if (statusFilter === "ongoing") {
+      matchesStatus = alarm.status === "ongoing";
+    }
+    if (statusFilter === "completed") {
+      matchesStatus = alarm.status === "completed";
+    }
+    if (statusFilter === "cancelled") {
+      matchesStatus = alarm.status === "cancelled";
+    }
+    if (statusFilter === "pending") {
+      matchesStatus = alarm.status === "pending";
+    }
+    if (statusFilter === "delayed") {
+      matchesStatus = alarm.status === "delayed";
+    }
+
+    // PRIORITY FILTER
+    let matchesPriority = true;
+    if (priorityFilter !== "all") {
+      matchesPriority =
+        alarm.priority?.toLowerCase() === priorityFilter.toLowerCase();
+    }
+
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
+
+  const alarmsPerPage = 5;
+
+  const totalPages = Math.ceil(filteredAlarms.length / alarmsPerPage);
+
+  const indexOfLastAlarm = currentPage * alarmsPerPage;
+  const indexOfFirstAlarm = indexOfLastAlarm - alarmsPerPage;
+
+  const currentAlarms = filteredAlarms.slice(
+    indexOfFirstAlarm,
+    indexOfLastAlarm
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, priorityFilter]);
+
 
   // Enhanced GPS-based guard assignment
   const handleSmartAssign = useCallback((alarm: any) => {
     const alarmLocation = { lat: -37.815, lng: 144.965 }; // Mock location - in real app, get from alarm data
     const optimalGuard = findOptimalGuard(alarmLocation, alarm.priority);
-    
+
     if (optimalGuard) {
       onAssign({
         ...alarm,
@@ -430,11 +403,11 @@ useEffect(() => {
         eta: `${optimalGuard.eta} min`,
         assignedAt: new Date()
       });
-      
+
       toast.success(`Guard ${optimalGuard.name} assigned to ${alarm.site}`, {
         description: `ETA: ${optimalGuard.eta} minutes (${optimalGuard.distance.toFixed(1)}km away)`
       });
-      
+
       // Auto-notify client
       handleNotifyClient(alarm, `Guard ${optimalGuard.name} assigned - ETA ${optimalGuard.eta} minutes`);
     } else {
@@ -446,10 +419,10 @@ useEffect(() => {
 
   const handleResolveWithBilling = useCallback((alarm: any) => {
     // Calculate actual response time
-    const responseTime = alarm.assignedAt ? 
-      Math.round((new Date().getTime() - new Date(alarm.assignedAt).getTime()) / 60000) : 
+    const responseTime = alarm.assignedAt ?
+      Math.round((new Date().getTime() - new Date(alarm.assignedAt).getTime()) / 60000) :
       alarm.sinceMins;
-    
+
     // Create billing record
     const billingRecord = {
       alarmId: alarm.id,
@@ -462,16 +435,16 @@ useEffect(() => {
       withinSLA: responseTime <= alarm.slaTargetMins,
       billingMonth: new Date().toISOString().slice(0, 7) // YYYY-MM format
     };
-    
+
     // In real app, this would be sent to billing API
     console.log("Creating billing record:", billingRecord);
-    
+
     onResolve(alarm.id);
-    
+
     toast.success(`Alarm ${alarm.id} resolved`, {
       description: `Response time: ${responseTime}min | Billing: ${alarm.unitPrice}`
     });
-    
+
     // Auto-notify client of resolution
     handleNotifyClient(alarm, `Alarm resolved in ${responseTime} minutes`);
   }, [onResolve]);
@@ -479,49 +452,13 @@ useEffect(() => {
   const handleNotifyClient = (alarm: any, message: string) => {
     // In real app, this would send notifications via email/SMS
     console.log(`CLIENT NOTIFICATION for ${alarm.site}: ${message}`);
-    
+
     toast.info("Client notified", {
       description: `Notification sent to ${alarm.monitoringCompany}`
     });
   };
 
-  const handleSaveAlarm = async () => {
-  try {
 
-    const payload = {
-      title: newAlarm.title,
-      alarmType: newAlarm.type,
-      priority: newAlarm.priority,
-      siteId: newAlarm.siteId,
-      specificLocation: newAlarm.location,
-      guardIds: newAlarm.guardIds,
-      etaMinutes: Number(newAlarm.eta),
-      slaTimeMinutes: Number(newAlarm.slaTime),
-      unitPrice: Number(newAlarm.unitPrice),
-      price: Number(newAlarm.unitPrice),
-      description: newAlarm.description,
-      monitoringCompany: newAlarm.monitoringCompany,
-      license: newAlarm.license,
-
-    };
-
-    await createAlarm(payload).unwrap();
-
-    toast.success("Alarm created successfully");
-
-    setShowCreateDialog(false);
-
-  } catch (err: any) {
-    console.error(err);
-
-    const message =
-      err?.data?.message ||
-      err?.error ||
-      "Failed to create alarm";
-
-    toast.error(message);
-  }
-};
 
   const handleDeleteAlarm = async (alarmId: string) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this alarm?");
@@ -601,7 +538,7 @@ useEffect(() => {
         Object.keys(exportData[0]).join(','),
         ...exportData.map(row => Object.values(row).join(','))
       ].join('\n');
-      
+
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -615,7 +552,7 @@ useEffect(() => {
         description: "In production, this would create a detailed PDF report"
       });
     }
-    
+
     setShowExportDialog(false);
     toast.success(`${format.toUpperCase()} export completed`, {
       description: `${exportData.length} alarm records exported`
@@ -653,70 +590,67 @@ useEffect(() => {
   return (
     <div className="space-y-3">
       {/* Compact Header with Summary Cards Inline */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div className="flex-1">
-          <h1 className="mb-1">Alarm Management</h1>
-          <p className="text-gray-600 text-xl">Real-time Response & Guard Assignment</p>
+      <div className="flex justify-between">
+        <div className="">
+          <h1 className="text-lg">Alarm Management</h1>
+          <p className="text-gray-600 text-xs">Real-time Response & Guard Assignment</p>
         </div>
-        
-        {/* Enhanced Inline Summary Cards */}
-        <div className="flex flex-wrap gap-3">
-          <div className="flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
-            <Bell className="h-4 w-4 text-red-600" />
-            <div>
-              <div className="font-bold text-red-700">{activeAlarms}</div>
-              <div className="text-lg text-red-600">Active</div>
-            </div>
+        <div className="flex gap-2 items-center">
+          <Button
+            variant="outline"
+            onClick={() => setShowExportDialog(true)}
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export
+          </Button>
+
+          <CreateAlarmModal />
+        </div>
+      </div>
+      {/* Enhanced Inline Summary Cards */}
+      <div className="flex flex-wrap gap-3">
+        <div className="flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
+          <Bell className="h-4 w-4 text-red-600" />
+          <div>
+            <div className="font-bold text-red-700">{activeAlarms}</div>
+            <div className="text-lg text-red-600">Active</div>
           </div>
-          
-          <div className="flex items-center gap-2 bg-orange-50 px-3 py-2 rounded-lg border border-orange-200">
-            <Siren className="h-4 w-4 text-orange-600" />
-            <div>
-              <div className="font-bold text-orange-700">{criticalAlarms}</div>
-              <div className="text-lg text-orange-600">Critical</div>
-            </div>
+        </div>
+
+        <div className="flex items-center gap-2 bg-orange-50 px-3 py-2 rounded-lg border border-orange-200">
+          <Siren className="h-4 w-4 text-orange-600" />
+          <div>
+            <div className="font-bold text-orange-700">{criticalAlarms}</div>
+            <div className="text-lg text-orange-600">Critical</div>
           </div>
-          
-          <div className="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200">
-            <Zap className="h-4 w-4 text-purple-600" />
-            <div>
-              <div className="font-bold text-purple-700">{slaBreachAlarms}</div>
-              <div className="text-lg text-purple-600">SLA Breach</div>
-            </div>
+        </div>
+
+        <div className="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200">
+          <Zap className="h-4 w-4 text-purple-600" />
+          <div>
+            <div className="font-bold text-purple-700">{slaBreachAlarms}</div>
+            <div className="text-lg text-purple-600">SLA Breach</div>
           </div>
-          
-          {/* <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
+        </div>
+
+        {/* <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
             <Timer className="h-4 w-4 text-blue-600" />
             <div>
               <div className="font-bold text-blue-700">{Math.round(averageResponseTime)}m</div>
               <div className="text-lg text-blue-600">Avg Response</div>
             </div>
           </div> */}
-          
-          <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
-            <TrendingUp className="h-4 w-4 text-green-600" />
-            <div>
-              <div className="font-bold text-green-700">${monthlyBillingValue.toFixed(0)}</div>
-              <div className="text-lg text-green-600">Monthly Billing</div>
-            </div>
+
+        <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
+          <TrendingUp className="h-4 w-4 text-green-600" />
+          <div>
+            <div className="font-bold text-green-700">${monthlyBillingValue.toFixed(0)}</div>
+            <div className="text-lg text-green-600">Monthly Billing</div>
           </div>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setShowExportDialog(true)} 
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
-          
-          <Button onClick={handleCreateAlarm} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Create Alarm
-          </Button>
         </div>
       </div>
+
 
       {/* Compact Filters Row */}
       <div className="flex flex-wrap gap-2 items-center bg-white p-3 rounded-lg border">
@@ -755,8 +689,8 @@ useEffect(() => {
             <SelectItem value="critical">Critical</SelectItem>
           </SelectContent>
         </Select>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           size="sm"
           onClick={() => {
             setStatusFilter("all");
@@ -768,20 +702,20 @@ useEffect(() => {
           Clear
         </Button>
       </div>
-      
+
 
       {/* Main Alarm List - Compact Layout */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">Patrol Alarms</CardTitle>
         </CardHeader>
-        
+
         <CardContent className="pt-0">
-          
+
           {/* Alarm List */}
           <div className="space-y-3">
             {currentAlarms.map((alarm) => (
-              
+
               <Card key={alarm.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
@@ -795,26 +729,26 @@ useEffect(() => {
                           <span className="text-lg text-gray-600">{alarm.location || 'Location TBD'}</span>
                         </div>
                       </div>
-                      
+
                       {/* Priority & Timing */}
                       <div className="mt-2">
                         <Badge className={getPriorityColor(alarm.priority)}>
                           {alarm.priority} Priority
                         </Badge>
                         <div>
-      <p className="text-muted-foreground text-sm"></p>
-      <p className="font-semibold text-base">
-        Created At: {formatDateOnly(alarm.createdAt)}
-      </p>
-      <p className="font-semibold text-base">
-        {formatTimeOnly(alarm.createdAt)}
-      </p>
-    </div>
+                          <p className="text-muted-foreground text-sm"></p>
+                          <p className="font-semibold text-base">
+                            Created At: {formatDateOnly(alarm.createdAt)}
+                          </p>
+                          <p className="font-semibold text-base">
+                            {formatTimeOnly(alarm.createdAt)}
+                          </p>
+                        </div>
                         <div className={`text-lg font-medium ${getSLAColor(alarm.sinceMins, alarm.slaTargetMins)}`}>
                           SLA: {alarm.slaTargetMins}min
                         </div>
                       </div>
-                      
+
                       {/* Assignment */}
                       <div className="mt-4 flex flex-col justify-between">
                         {alarm.assigned ? (
@@ -830,29 +764,29 @@ useEffect(() => {
                           <div className="text-xl text-gray-500">Unassigned</div>
                         )}
                       </div>
-                      
+
                       {/* Status & Actions */}
                       <div className="flex items-center justify-between">
                         <div>
                           {alarm.status ? (
-  <Badge
-    style={getStatusStyle(alarm.status)}
-    className="border capitalize"
-  >
-    {getStatusColor(alarm.status).label}
-  </Badge>
-) : (
-  <Badge className="bg-gray-100 text-gray-600 border-gray-300">
-    Undefined
-  </Badge>
-)}
+                            <Badge
+                              style={getStatusStyle(alarm.status)}
+                              className="border capitalize"
+                            >
+                              {getStatusColor(alarm.status).label}
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-gray-100 text-gray-600 border-gray-300">
+                              Undefined
+                            </Badge>
+                          )}
                           {alarm.breach && (
-  <div className="text-lg font-semibold text-red-600 mt-1">
-    🚨 SLA Breach
-  </div>
-)}
+                            <div className="text-lg font-semibold text-red-600 mt-1">
+                              🚨 SLA Breach
+                            </div>
+                          )}
                         </div>
-                        
+
                         {/* Action Buttons */}
                         <div className="flex gap-1">
                           <Button
@@ -863,7 +797,7 @@ useEffect(() => {
                           >
                             <Bell className="h-3 w-3" />
                           </Button>
-                          
+
                           {!alarm.status && (
                             <Button
                               size="sm"
@@ -896,8 +830,8 @@ useEffect(() => {
                         <span>SLA Progress</span>
                         <span>{Math.round((alarm.sinceMins / alarm.slaTargetMins) * 100)}%</span>
                       </div>
-                      <Progress 
-                        value={Math.min((alarm.sinceMins / alarm.slaTargetMins) * 100, 100)} 
+                      <Progress
+                        value={Math.min((alarm.sinceMins / alarm.slaTargetMins) * 100, 100)}
                         className="h-2"
                       />
                     </div>
@@ -913,8 +847,8 @@ useEffect(() => {
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious 
-                      href="#" 
+                    <PaginationPrevious
+                      href="#"
                       onClick={(e) => {
                         e.preventDefault();
                         if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -922,7 +856,7 @@ useEffect(() => {
                       className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
                     />
                   </PaginationItem>
-                  
+
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <PaginationItem key={page}>
                       <PaginationLink
@@ -937,10 +871,10 @@ useEffect(() => {
                       </PaginationLink>
                     </PaginationItem>
                   ))}
-                  
+
                   <PaginationItem>
-                    <PaginationNext 
-                      href="#" 
+                    <PaginationNext
+                      href="#"
                       onClick={(e) => {
                         e.preventDefault();
                         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
@@ -956,504 +890,223 @@ useEffect(() => {
       </Card>
 
       {/* Alarm Details Dialog */}
-<Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-  <DialogContent className="max-w-4xl p-6">
-    <DialogHeader>
-      <DialogTitle className="text-2xl font-bold">
-        Alarm Details
-      </DialogTitle>
-      <DialogDescription className="text-gray-500">
-        Comprehensive alarm information and response tracking
-      </DialogDescription>
-    </DialogHeader>
+      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
+        <DialogContent className="max-w-4xl p-6">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              Alarm Details
+            </DialogTitle>
+            <DialogDescription className="text-gray-500">
+              Comprehensive alarm information and response tracking
+            </DialogDescription>
+          </DialogHeader>
 
-    {selectedAlarm && (
-      <div className="space-y-6">
+          {selectedAlarm && (
+            <div className="space-y-6">
 
-        {/* TOP GRID */}
-        <div className="grid grid-cols-2 gap-6">
+              {/* TOP GRID */}
+              <div className="grid grid-cols-2 gap-6">
 
-          {/* Alarm Information */}
-          <div className="bg-gray-50 p-4 rounded-lg border">
-            <h3 className="font-semibold text-lg mb-3 text-gray-800">
-              Alarm Information
-            </h3>
+                {/* Alarm Information */}
+                <div className="bg-gray-50 p-4 rounded-lg border">
+                  <h3 className="font-semibold text-lg mb-3 text-gray-800">
+                    Alarm Information
+                  </h3>
 
-            <div className="space-y-2 text-sm">
+                  <div className="space-y-2 text-sm">
 
-              <div className="flex justify-between">
-                <span className="text-gray-500">Site</span>
-                <span className="font-medium">{selectedAlarm.site}</span>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Site</span>
+                      <span className="font-medium">{selectedAlarm.site}</span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Type</span>
+                      <span className="font-medium">{selectedAlarm.type}</span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Location</span>
+                      <span className="font-medium">
+                        {selectedAlarm.location || "Not specified"}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Priority</span>
+
+                      <Badge className={`${getPriorityColor(selectedAlarm.priority)}`}>
+                        {selectedAlarm.priority}
+                      </Badge>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Time Since</span>
+                      <span>{selectedAlarm.sinceMins} minutes</span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">SLA Time</span>
+                      <span>{selectedAlarm.slaTargetMins} minutes</span>
+                    </div>
+
+                  </div>
+                </div>
+
+
+                {/* Monitoring Details (NEW SECTION) */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h3 className="font-semibold text-lg mb-3 text-blue-800">
+                    Monitoring Details
+                  </h3>
+
+                  <div className="space-y-2 text-sm">
+
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Monitoring Company</span>
+                      <span className="font-medium">
+                        {selectedAlarm.monitoringCompany || "Not Provided"}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">License</span>
+                      <span className="font-medium">
+                        {selectedAlarm.license || "Not Provided"}
+                      </span>
+                    </div>
+
+                  </div>
+                </div>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-gray-500">Type</span>
-                <span className="font-medium">{selectedAlarm.type}</span>
+
+              {/* RESPONSE STATUS */}
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                <h3 className="font-semibold text-lg mb-3 text-green-800">
+                  Response Status
+                </h3>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Status -</span>
+                    <span className="font-medium capitalize mr-60">
+                      {selectedAlarm.status}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Assigned Guard -</span>
+                    <span className="mr-45">
+                      {selectedAlarm.assigned || "Unassigned"}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">ETA -</span>
+                    <span className="mr-65">
+                      {selectedAlarm.eta || "Not calculated"}
+                    </span>
+                  </div>
+
+                  {selectedAlarm.responseTime && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Response Time</span>
+                      <span>{selectedAlarm.responseTime} minutes</span>
+                    </div>
+                  )}
+
+                  {selectedAlarm.completedAt && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Resolved At</span>
+                      <span>
+                        {new Date(selectedAlarm.completedAt).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
+
+                </div>
               </div>
 
-              <div className="flex justify-between">
-                <span className="text-gray-500">Location</span>
-                <span className="font-medium">
-                  {selectedAlarm.location || "Not specified"}
-                </span>
-              </div>
 
-              <div className="flex justify-between items-center">
-                <span className="text-gray-500">Priority</span>
+              {/* DESCRIPTION */}
+              {selectedAlarm.description && (
+                <div className="bg-gray-50 p-4 rounded-lg border">
+                  <h3 className="font-semibold text-lg mb-2">
+                    Description
+                  </h3>
 
-                <Badge className={`${getPriorityColor(selectedAlarm.priority)}`}>
-                  {selectedAlarm.priority}
-                </Badge>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-gray-500">Time Since</span>
-                <span>{selectedAlarm.sinceMins} minutes</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-gray-500">SLA Time</span>
-                <span>{selectedAlarm.slaTargetMins} minutes</span>
-              </div>
-
-            </div>
-          </div>
-
-
-          {/* Monitoring Details (NEW SECTION) */}
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <h3 className="font-semibold text-lg mb-3 text-blue-800">
-              Monitoring Details
-            </h3>
-
-            <div className="space-y-2 text-sm">
-
-              <div className="flex justify-between">
-                <span className="text-gray-500">Monitoring Company</span>
-                <span className="font-medium">
-                  {selectedAlarm.monitoringCompany || "Not Provided"}
-                </span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-gray-500">License</span>
-                <span className="font-medium">
-                  {selectedAlarm.license || "Not Provided"}
-                </span>
-              </div>
-
-            </div>
-          </div>
-        </div>
-
-
-        {/* RESPONSE STATUS */}
-        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-          <h3 className="font-semibold text-lg mb-3 text-green-800">
-            Response Status
-          </h3>
-
-          <div className="grid grid-cols-2 gap-4 text-sm">
-
-            <div className="flex justify-between">
-              <span className="text-gray-500">Status -</span>
-              <span className="font-medium capitalize mr-60">
-                {selectedAlarm.status}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-gray-500">Assigned Guard -</span>
-              <span className="mr-45">
-                {selectedAlarm.assigned || "Unassigned"}
-              </span>
-            </div>
-
-            <div className="flex justify-between">
-              <span className="text-gray-500">ETA -</span>
-              <span className="mr-65">
-                {selectedAlarm.eta || "Not calculated"}
-              </span>
-            </div>
-
-            {selectedAlarm.responseTime && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">Response Time</span>
-                <span>{selectedAlarm.responseTime} minutes</span>
-              </div>
-            )}
-
-            {selectedAlarm.completedAt && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">Resolved At</span>
-                <span>
-                  {new Date(selectedAlarm.completedAt).toLocaleString()}
-                </span>
-              </div>
-            )}
-
-          </div>
-        </div>
-
-
-        {/* DESCRIPTION */}
-        {selectedAlarm.description && (
-          <div className="bg-gray-50 p-4 rounded-lg border">
-            <h3 className="font-semibold text-lg mb-2">
-              Description
-            </h3>
-
-            <p className="text-sm text-gray-700">
-              {selectedAlarm.description}
-            </p>
-          </div>
-        )}
-
-
-        {/* SLA STATUS */}
-        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-          <h3 className="font-semibold text-lg mb-3 text-red-700">
-            SLA Status
-          </h3>
-
-          <div className="space-y-3">
-
-            <div className="flex justify-between text-sm">
-              <span>Time Elapsed</span>
-
-              <span
-                className={getSLAColor(
-                  selectedAlarm.sinceMins,
-                  selectedAlarm.slaTargetMins
-                )}
-              >
-                {selectedAlarm.sinceMins}m / {selectedAlarm.slaTargetMins}m
-              </span>
-            </div>
-
-            {selectedAlarm.slaTargetMins > 0 && (
-              <Progress
-                value={Math.min(
-                  (selectedAlarm.sinceMins /
-                    selectedAlarm.slaTargetMins) *
-                    100,
-                  100
-                )}
-                className="h-3"
-              />
-            )}
-
-            {selectedAlarm.slaTargetMins > 0 &&
-              selectedAlarm.sinceMins >
-                selectedAlarm.slaTargetMins && (
-                <div className="text-red-600 font-medium text-sm">
-                  ⚠️ SLA Breach:{" "}
-                  {selectedAlarm.sinceMins -
-                    selectedAlarm.slaTargetMins}{" "}
-                  minutes overdue
+                  <p className="text-sm text-gray-700">
+                    {selectedAlarm.description}
+                  </p>
                 </div>
               )}
 
+
+              {/* SLA STATUS */}
+              <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                <h3 className="font-semibold text-lg mb-3 text-red-700">
+                  SLA Status
+                </h3>
+
+                <div className="space-y-3">
+
+                  <div className="flex justify-between text-sm">
+                    <span>Time Elapsed</span>
+
+                    <span
+                      className={getSLAColor(
+                        selectedAlarm.sinceMins,
+                        selectedAlarm.slaTargetMins
+                      )}
+                    >
+                      {selectedAlarm.sinceMins}m / {selectedAlarm.slaTargetMins}m
+                    </span>
+                  </div>
+
+                  {selectedAlarm.slaTargetMins > 0 && (
+                    <Progress
+                      value={Math.min(
+                        (selectedAlarm.sinceMins /
+                          selectedAlarm.slaTargetMins) *
+                        100,
+                        100
+                      )}
+                      className="h-3"
+                    />
+                  )}
+
+                  {selectedAlarm.slaTargetMins > 0 &&
+                    selectedAlarm.sinceMins >
+                    selectedAlarm.slaTargetMins && (
+                      <div className="text-red-600 font-medium text-sm">
+                        ⚠️ SLA Breach:{" "}
+                        {selectedAlarm.sinceMins -
+                          selectedAlarm.slaTargetMins}{" "}
+                        minutes overdue
+                      </div>
+                    )}
+
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          <div className="flex justify-end pt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowDetailsDialog(false)}
+            >
+              Close
+            </Button>
           </div>
-        </div>
-
-      </div>
-    )}
-
-    <div className="flex justify-end pt-4">
-      <Button
-        variant="outline"
-        onClick={() => setShowDetailsDialog(false)}
-      >
-        Close
-      </Button>
-    </div>
-  </DialogContent>
-</Dialog>
+        </DialogContent>
+      </Dialog>
 
       {/* Create Alarm Dialog */}
-<Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-  <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-    
-    <DialogHeader>
-      <DialogTitle className="text-xl font-semibold">
-        Create New Alarm
-      </DialogTitle>
-      <DialogDescription>
-        Register a new security alarm and assign response parameters
-      </DialogDescription>
-    </DialogHeader>
 
-    {/* FORM GRID */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4">
-
-      {/* Alarm Title */}
-      <div>
-        <Label htmlFor="title">Alarm Title</Label>
-        <Input
-          id="title"
-          value={newAlarm.title}
-          onChange={(e) =>
-            setNewAlarm({ ...newAlarm, title: e.target.value })
-          }
-          placeholder="Brief alarm description"
-        />
-      </div>
-
-      {/* Site */}
-      <div>
-        <Label htmlFor="site">Site</Label>
-
-        <Select
-          value={newAlarm.siteId}
-          onValueChange={(value: string) =>
-            setNewAlarm({ ...newAlarm, siteId: value })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select site" />
-          </SelectTrigger>
-
-          <SelectContent>
-            {sites.map((site: any) => (
-              <SelectItem key={site.id} value={site.id}>
-                {site.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Alarm Type */}
-      <div>
-        <Label>Alarm Type</Label>
-        <Select
-          value={newAlarm.type}
-          onValueChange={(value: string) =>
-            setNewAlarm({ ...newAlarm, type: value })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select type" />
-          </SelectTrigger>
-
-          <SelectContent>
-            <SelectItem value="intrusion">Intrusion</SelectItem>
-            <SelectItem value="fire">Fire Alarm</SelectItem>
-            <SelectItem value="medical">Medical Emergency</SelectItem>
-            <SelectItem value="security">Security Breach</SelectItem>
-            <SelectItem value="technical">Technical Fault</SelectItem>
-            <SelectItem value="environmental">Environmental</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Priority */}
-      <div>
-        <Label>Priority</Label>
-
-        <Select
-          value={newAlarm.priority}
-          onValueChange={(value: string) =>
-            setNewAlarm({ ...newAlarm, priority: value })
-          }
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select priority" />
-          </SelectTrigger>
-
-          <SelectContent>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Assigned Guards */}
-      <div>
-  <Label>Assigned Guards (Patrolling Only)</Label>
-
-  <Select>
-    <SelectTrigger>
-      <SelectValue placeholder="Select guards" />
-    </SelectTrigger>
-
-    <SelectContent className="max-h-60 overflow-y-auto">
-
-      {filteredGuards.length === 0 ? (
-        <div className="px-3 py-2 text-sm text-gray-500">
-          No active patrol guards available
-        </div>
-      ) : (
-        filteredGuards.map((guard: any) => {
-          const isSelected = newAlarm.guardIds.includes(guard.id);
-
-          return (
-            <div
-              key={guard.id}
-              className="flex items-center gap-2 px-2 py-1 cursor-pointer hover:bg-gray-100 rounded"
-              onClick={() => {
-                if (isSelected) {
-                  setNewAlarm({
-                    ...newAlarm,
-                    guardIds: newAlarm.guardIds.filter(
-                      (id) => id !== guard.id
-                    ),
-                  });
-                } else {
-                  setNewAlarm({
-                    ...newAlarm,
-                    guardIds: [...newAlarm.guardIds, guard.id],
-                  });
-                }
-              }}
-            >
-              <input type="checkbox" checked={isSelected} readOnly />
-              <span>{guard.name}</span>
-            </div>
-          );
-        })
-      )}
-
-    </SelectContent>
-  </Select>
-</div>
-
-      {/* ETA */}
-      <div>
-        <Label htmlFor="eta">ETA (minutes)</Label>
-        <Input
-          id="eta"
-          type="number"
-          value={newAlarm.eta}
-          onChange={(e) =>
-            setNewAlarm({ ...newAlarm, eta: e.target.value })
-          }
-          placeholder="Expected arrival time"
-        />
-      </div>
-
-      {/* SLA */}
-      <div>
-        <Label htmlFor="slaTime">SLA Time (minutes)</Label>
-        <Input
-          id="slaTime"
-          type="number"
-          value={newAlarm.slaTime}
-          onChange={(e) =>
-            setNewAlarm({ ...newAlarm, slaTime: e.target.value })
-          }
-          placeholder="SLA response time"
-        />
-      </div>
-
-      {/* Unit Price */}
-      <div>
-        <Label htmlFor="unitPrice">Unit Price ($)</Label>
-        <Input
-          id="unitPrice"
-          type="number"
-          value={newAlarm.unitPrice}
-          onChange={(e) =>
-            setNewAlarm({ ...newAlarm, unitPrice: e.target.value })
-          }
-          placeholder="Billing rate"
-        />
-      </div>
-      {/* Location */}
-      <div className="col-span-2">
-        <Label htmlFor="location">Specific Location</Label>
-        <Input
-          id="location"
-          value={newAlarm.location}
-          onChange={(e) =>
-            setNewAlarm({ ...newAlarm, location: e.target.value })
-          }
-          placeholder="Exact location within site"
-        />
-      </div>
-
-      {/* SECTION DIVIDER */}
-      <div className="col-span-2 border-t pt-4 mt-2">
-        <p className="text-sm font-semibold text-gray-600 mb-2">
-          Monitoring Details
-        </p>
-      </div>
-
-      {/* Monitoring Company */}
-      <div>
-        <Label htmlFor="monitoringCompany">Monitoring Company</Label>
-        <Input
-          id="monitoringCompany"
-          value={newAlarm.monitoringCompany}
-          onChange={(e) =>
-            setNewAlarm({
-              ...newAlarm,
-              monitoringCompany: e.target.value,
-            })
-          }
-          placeholder="Monitoring service provider"
-        />
-      </div>
-
-      {/* License */}
-      <div>
-        <Label htmlFor="license">License</Label>
-        <Input
-          id="license"
-          value={newAlarm.license}
-          onChange={(e) =>
-            setNewAlarm({
-              ...newAlarm,
-              license: e.target.value,
-            })
-          }
-          placeholder="Security license number"
-        />
-      </div>
-
-      
-
-      {/* Description */}
-      <div className="col-span-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={newAlarm.description}
-          onChange={(e) =>
-            setNewAlarm({ ...newAlarm, description: e.target.value })
-          }
-          placeholder="Detailed alarm description and context..."
-          rows={3}
-        />
-      </div>
-
-    </div>
-
-    {/* BUTTONS */}
-    <div className="flex justify-end gap-3 pt-6 border-t mt-4">
-      <Button
-        variant="outline"
-        onClick={() => setShowCreateDialog(false)}
-      >
-        Cancel
-      </Button>
-
-      <Button
-        onClick={handleSaveAlarm}
-        disabled={isCreating}
-        className="flex items-center gap-2 px-5"
-      >
-        {isCreating && (
-          <Loader2 className="animate-spin h-4 w-4" />
-        )}
-        Create Alarm
-      </Button>
-    </div>
-
-  </DialogContent>
-</Dialog>
 
       {/* Export Dialog */}
       <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
@@ -1464,7 +1117,7 @@ useEffect(() => {
               Choose format for exporting alarm records and reports
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid grid-cols-2 gap-4 py-4">
             <Button
               onClick={() => handleExportData('csv')}
@@ -1474,7 +1127,7 @@ useEffect(() => {
               <FileText className="h-8 w-8" />
               <span>Export CSV</span>
             </Button>
-            
+
             <Button
               onClick={() => handleExportData('pdf')}
               className="flex flex-col items-center gap-2 h-20"
@@ -1484,12 +1137,12 @@ useEffect(() => {
               <span>Export PDF Report</span>
             </Button>
           </div>
-          
+
           <div className="text-xl text-gray-600">
             <p>CSV: Raw data suitable for spreadsheet analysis</p>
             <p>PDF: Formatted report with charts and summaries</p>
           </div>
-          
+
           <div className="flex justify-end pt-4">
             <Button variant="outline" onClick={() => setShowExportDialog(false)}>
               Cancel
@@ -1511,13 +1164,12 @@ useEffect(() => {
             <CardContent className="pt-0">
               <div className="space-y-2">
                 {notifications.slice(0, 3).map((notif) => (
-                  <div 
-                    key={notif.id} 
-                    className={`p-2 rounded border-l-4 text-lg ${
-                      notif.type === 'newRequest' ? 'border-blue-500 bg-blue-50' :
+                  <div
+                    key={notif.id}
+                    className={`p-2 rounded border-l-4 text-lg ${notif.type === 'newRequest' ? 'border-blue-500 bg-blue-50' :
                       notif.isRead ? 'border-gray-300 bg-gray-50' :
-                      'border-orange-500 bg-orange-50'
-                    }`}
+                        'border-orange-500 bg-orange-50'
+                      }`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="font-medium">{notif.message}</div>
@@ -1537,16 +1189,16 @@ useEffect(() => {
                   </div>
                 ))}
               </div>
-              
+
               {notifications.length > 3 && (
                 <div className="text-lg text-gray-500 mt-2 text-center">
                   +{notifications.length - 3} more alerts
                 </div>
               )}
-              
-              <Button 
-                size="sm" 
-                variant="outline" 
+
+              <Button
+                size="sm"
+                variant="outline"
                 className="w-full mt-3 text-lg"
                 onClick={handleMarkAllAsRead}
                 disabled={isMarkingAllRead}
@@ -1554,9 +1206,9 @@ useEffect(() => {
                 Mark All Read
               </Button>
 
-              <Button 
-                size="sm" 
-                variant="outline" 
+              <Button
+                size="sm"
+                variant="outline"
                 className="w-full mt-2 text-lg"
                 onClick={handleDeleteAllNotifications}
                 disabled={isDeletingAllNotifications}

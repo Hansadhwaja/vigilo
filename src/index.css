@@ -4,6 +4,8 @@
 
 @import "@fontsource-variable/roboto";
 
+@import "@fontsource-variable/inter";
+
 @custom-variant dark (&:is(.dark *));
 
 @layer base {
@@ -144,7 +146,7 @@ html {
 }
 
 @theme inline {
-  --font-sans: "Roboto Variable", sans-serif;
+  --font-sans: "Inter Variable", sans-serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -167,7 +169,7 @@ html {
 
   --radius: var(--radius);
 
-  --font-heading: "Roboto Variable", sans-serif;
+  --font-heading: var(--font-sans);
 
   --color-sidebar-ring: var(--sidebar-ring);
 
@@ -239,6 +241,16 @@ html {
 
   .no-scrollbar::-webkit-scrollbar {
     display: none; /* Chrome/Safari */
+  }
+
+  .heading {
+    @apply text-sm sm:text-lg md:text-xl lg:text-2xl font-semibold;
+  }
+  .sub-heading {
+    @apply text-xs sm:text-base md:text-lg lg:text-xl font-semibold;
+  }
+  .description {
+    @apply text-xs md:text-sm;
   }
 }
 

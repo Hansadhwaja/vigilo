@@ -54,7 +54,7 @@ export default function TopBar({ search, onSearchChange, onSidebarToggle, liveRe
         <Button size="icon" variant="ghost" className="max-md:hidden" onClick={onSidebarToggle}>
           <Menu className="h-5 w-5" />
         </Button>
-        <div className="w-full max-w-xl relative">
+        <div className="w-full max-w-xl relative max-md:hidden">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             value={search}
@@ -64,22 +64,22 @@ export default function TopBar({ search, onSearchChange, onSidebarToggle, liveRe
           />
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <Select defaultValue="melbourne">
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Region" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="melbourne">Melbourne</SelectItem>
-              <SelectItem value="sydney">Sydney</SelectItem>
-              <SelectItem value="perth">Perth</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" className="gap-2">
-            <Globe className="h-4 w-4" />
-            Client Portal
-          </Button>
-
-          {/* Profile Dropdown */}
+          <div className="flex gap-1 max-md:hidden">
+            <Select defaultValue="melbourne">
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Region" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="melbourne">Melbourne</SelectItem>
+                <SelectItem value="sydney">Sydney</SelectItem>
+                <SelectItem value="perth">Perth</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="gap-2">
+              <Globe className="h-4 w-4" />
+              Client Portal
+            </Button>
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="relative h-8 w-8 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
