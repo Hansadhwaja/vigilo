@@ -1,10 +1,7 @@
 "use client";
 
-import { Alarm } from "@/apis/alarmsAPI";
-import { Order } from "@/apis/ordersApi";
 import { RootState } from "@/apis/store";
 import { Client } from "@/apis/usersApi";
-
 import {
   Card,
   CardContent,
@@ -12,6 +9,8 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { InvoiceAlarmsFormValues, InvoiceOrdersFormValues } from "@/schemas";
 
 import { useFormContext, useWatch } from "react-hook-form";
 import { useSelector } from "react-redux";
@@ -19,21 +18,6 @@ import { useSelector } from "react-redux";
 interface InvoicePreviewProps {
   clients: Client[];
 }
-
-const formatCurrency = (val: number) =>
-  new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-  }).format(val);
-
-const formatDate = (date?: string) => {
-  if (!date) return "-";
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(date));
-};
 
 const InvoicePreview = ({
   clients
@@ -47,6 +31,7 @@ const InvoicePreview = ({
     clientId,
     billingFrom,
     billingTo,
+    dueDate,
     orders,
     alarms,
     services,
@@ -57,6 +42,7 @@ const InvoicePreview = ({
       "clientId",
       "billingFrom",
       "billingTo",
+      "dueDate",
       "orders",
       "alarms",
       "services",
@@ -79,9 +65,15 @@ const InvoicePreview = ({
         </div>
 
         <div className="p-4 space-y-4">
-          <div>
-            <h3 className="text-sm text-gray-500">Invoice Date</h3>
-            <p className="font-medium">{formatDate(invoiceDate)}</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-sm text-gray-500">Invoice Date</h3>
+              <p className="font-medium">{formatDate(invoiceDate)}</p>
+            </div>
+            <div>
+              <h3 className="text-sm text-gray-500">Due Date</h3>
+              <p className="font-medium">{formatDate(dueDate)}</p>
+            </div>
           </div>
 
           <Separator />
@@ -108,7 +100,7 @@ const InvoicePreview = ({
                   Orders
                 </h4>
 
-                {orders.map((o) => {
+                {orders.map((o: InvoiceOrdersFormValues) => {
 
                   const service = serviceData[o.title];
                   const price = service.priceType == "daily" ? service.dailyPrice : service.hourlyPrice;
@@ -142,9 +134,7 @@ const InvoicePreview = ({
                   Alarms
                 </h4>
 
-                {alarms.map((a) => {
-                  const total = (a.hours || 0) * (a.price || 0);
-
+                {alarms.map((a: InvoiceAlarmsFormValues) => {
                   return (
                     <div
                       key={a.id}
@@ -153,11 +143,11 @@ const InvoicePreview = ({
                       <div>
                         <p>{a.alarmType}</p>
                         <p className="text-sm text-gray-500">
-                          {a.hours} hrs × ₹{a.price}
+                          ₹{a.price}
                         </p>
                       </div>
                       <p className="font-semibold">
-                        {formatCurrency(total)}
+                        {formatCurrency(a.price)}
                       </p>
                     </div>
                   );
@@ -197,7 +187,6 @@ const InvoicePreview = ({
 
           <Separator />
 
-          {/* Total */}
           <div className="flex justify-between text-lg font-bold">
             <p>Total</p>
             <p>{formatCurrency(grandTotal)}</p>

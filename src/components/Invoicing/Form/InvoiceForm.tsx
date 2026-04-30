@@ -65,7 +65,6 @@ const InvoiceForm = ({
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <div className="space-y-4 col-span-2">
                             <InvoiceDetailsForm clients={clients} />
-                            <ServicePricingSection />
                             <SyncedOrdersForm orders={orders} />
                             <ResolvedAlarmsForm alarms={alarms} />
                         </div>

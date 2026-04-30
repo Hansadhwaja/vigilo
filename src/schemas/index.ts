@@ -56,50 +56,48 @@ export const customServiceSchema = z.object({
         .number()
         .min(0, "Price cannot be negative"),
 });
+export type CustomServiceFormValues = z.infer<typeof customServiceSchema>;
+
+export const invoiceOrdersSchema = z.object({
+    id: z.string(),
+    title: z.string(),
+    startDate: z.string(),
+    startTime: z.string(),
+    endDate: z.string(),
+    endTime: z.string(),
+    hours: z.number(),
+    days: z.number(),
+    dailyPrice: z.string(),
+    hourlyPrice: z.string(),
+    priceType: z.string(),
+    renewalDate: z.string(),
+});
+export type InvoiceOrdersFormValues = z.infer<typeof invoiceOrdersSchema>;
+
+export const invoiceAlarmsSchema = z.object({
+    id: z.string(),
+    siteName: z.string(),
+    alarmType: z.string(),
+    price: z.number(),
+});
+export type InvoiceAlarmsFormValues = z.infer<typeof invoiceAlarmsSchema>;
 
 export const invoiceSchema = z
     .object({
         clientId: z.string().min(1, "Client is required"),
-
         billingFrom: dateString,
         billingTo: dateString,
         invoiceDate: dateString,
         dueDate: dateString,
-
         notes: z.string().optional(),
-
-        orders: z.array(
-            z.object({
-                id: z.string(),
-                title: z.string(),
-                startDate: z.string(),
-                startTime: z.string(),
-                endDate: z.string(),
-                endTime: z.string(),
-                hours: z.number(),
-                days: z.number(),
-                dailyPrice: z.string(),
-                hourlyPrice: z.string(),
-                priceType: z.string(),
-                renewalDate: z.string(),
-            })
-        ).default([]),
-
-        alarms: z.array(
-            z.object({
-                id: z.string(),
-                siteName: z.string(),
-                alarmType: z.string(),
-                price: z.number(),
-            })
-        ).default([]),
-        services: z.array(customServiceSchema),
+        orders: z.array(invoiceOrdersSchema).default([]),
+        alarms: z.array(invoiceAlarmsSchema).default([]),
+        services: z.array(customServiceSchema).default([]),
     })
     .refine((data) => data.billingTo >= data.billingFrom, {
         message: "Billing To must be after Billing From",
         path: ["billingTo"],
     });
-
 
 export type InvoiceFormValues = z.infer<typeof invoiceSchema>;
 
@@ -122,6 +120,5 @@ export const servicePricingSchema = z.object({
 
     renewalDate: dateString,
 });
-
 
 export type ServicePricingFormValues = z.infer<typeof servicePricingSchema>;

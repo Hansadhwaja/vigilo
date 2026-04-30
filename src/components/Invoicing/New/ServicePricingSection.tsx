@@ -1,6 +1,5 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import React from 'react'
 import AlarmPricingModal from './Modal/AlarmPricingModal'
 import EditServicePricingModal from './Modal/EditServicePricingModal'
 

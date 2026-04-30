@@ -1,6 +1,9 @@
 import { useGetAllClientsQuery } from '@/apis/usersApi'
 import CustomHeader from '@/components/common/Header/CustomHeader'
 import InvoiceForm from '@/components/Invoicing/Form/InvoiceForm'
+import AlarmPricingModal from '@/components/Invoicing/New/Modal/AlarmPricingModal'
+import EditServicePricingModal from '@/components/Invoicing/New/Modal/EditServicePricingModal'
+import ServicePricingSection from '@/components/Invoicing/New/ServicePricingSection'
 import { InvoiceFormValues } from '@/schemas'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -27,6 +30,12 @@ const GenerateInvoicePage = () => {
         title="Generate Client Invoice"
         description="Create new invoice with flexible service pricing"
         previousLink='/invoicing'
+        others={
+          <div className='flex gap-2 items-center'>
+            <AlarmPricingModal />
+            <EditServicePricingModal />
+          </div>
+        }
       />
       <InvoiceForm
         isLoading={false}

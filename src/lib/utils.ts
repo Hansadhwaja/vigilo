@@ -95,6 +95,13 @@ export const calculateWork = (
   };
 };
 
+export const formatCurrency = (val: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+  }).format(val);
+
+
 export const formatDate = (
   date: string | Date,
   options?: Intl.DateTimeFormatOptions
