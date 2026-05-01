@@ -1,5 +1,5 @@
 // Export all pages for easier imports
-export { default as Dashboard } from './Dashboard';
+export { default as Dashboard } from './DashBoard/Dashboard';
 export { default as MapPage } from './MapPage';
 export { default as DispatchPage } from './DispatchPage';
 export { default as IncidentsPage } from './IncidentsPage';

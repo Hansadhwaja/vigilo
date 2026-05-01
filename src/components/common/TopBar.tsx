@@ -138,7 +138,7 @@ export default function TopBar({ isOpen, search, onSearchChange, onSidebarToggle
                           <span>{profile.mobile}</span>
                         </p>
                         <p className="text-xs text-gray-600 flex items-start gap-2">
-                          <span className="font-medium flex-shrink-0">Address:</span>
+                          <span className="font-medium shrink-0">Address:</span>
                           <span className="line-clamp-2">{profile.address}</span>
                         </p>
                       </div>

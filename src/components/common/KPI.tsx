@@ -1,8 +1,8 @@
 import React from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { classNames } from "../../utils/helpers";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { cn } from "@/lib/utils";
 
 interface KPIProps {
   icon: React.ReactNode;
@@ -14,55 +14,63 @@ interface KPIProps {
   to?: string;
 }
 
-export default function KPI({ icon, label, value, sub, trend, urgent, to }: KPIProps) {
+export default function KPI({
+  icon,
+  label,
+  value,
+  sub,
+  trend,
+  urgent,
+  to,
+}: KPIProps) {
   const card = (
-    <Card className={classNames(
-      "relative overflow-hidden transition-all duration-200 hover:shadow-md cursor-pointer",
-      urgent && "border-red-200 bg-red-50"
-    )}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className={classNames(
-          "text-xl font-medium",
-          urgent && "text-red-700"
-        )}>
-          {label}
-        </CardTitle>
-        <div className={classNames(
-          "p-2 rounded-lg",
-          urgent ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-600"
-        )}>
-          {icon}
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className={classNames(
-          "text-3xl font-bold",
+    <Card
+      className={cn(
+        "relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5",
+        "border bg-background p-0",
+        urgent && "border-red-200 bg-red-50/40"
+      )}
+    >
+      <CardContent className="p-2 md:p-4 space-y-2">
+
+        <CardHeader className="flex items-center justify-between px-0">
+          <CardTitle className={cn(
+            "text-sm font-medium text-muted-foreground",
+            urgent && "text-red-600"
+          )}>
+            {label}
+          </CardTitle>
+
+          <div className={cn(
+            "p-2 rounded-md",
+            urgent ? "bg-red-100 text-red-600" : "bg-muted text-muted-foreground"
+          )}>
+            {icon}
+          </div>
+        </CardHeader>
+
+        <div className={cn(
+          "text-lg md:text-2xl font-semibold tracking-tight",
           urgent && "text-red-700"
         )}>
           {value}
         </div>
+
         {sub && (
-          <div className="flex items-center gap-1 mt-1">
+          <CardFooter className="flex items-center gap-1 text-xs text-muted-foreground px-0">
             {trend === "up" && <TrendingUp className="h-3 w-3 text-green-600" />}
             {trend === "down" && <TrendingDown className="h-3 w-3 text-red-600" />}
-            <p className={classNames(
-              "text-xl",
-              urgent ? "text-red-600" : "text-gray-500"
-            )}>
-              {sub}
-            </p>
-          </div>
+            <span>{sub}</span>
+          </CardFooter>
         )}
+
         {urgent && (
-          <div className="absolute top-0 right-0 w-0 h-0 border-l-[20px] border-l-transparent border-t-[20px] border-t-red-500"></div>
+          <div className="absolute top-0 right-0 w-0 h-0 border-l-18 border-l-transparent border-t-18 border-t-red-500" />
         )}
+
       </CardContent>
     </Card>
   );
 
-  if (to) {
-    return <Link to={to}>{card}</Link>;
-  }
-
-  return card;
+  return to ? <Link to={to}>{card}</Link> : card;
 }
