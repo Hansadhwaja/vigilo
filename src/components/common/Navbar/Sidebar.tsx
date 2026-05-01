@@ -18,16 +18,12 @@ import { Separator } from "@/components/ui/separator";
 
 interface SidebarProps {
   isOpen: boolean;
-  onToggle: () => void;
-  activeTab: string;
-  onTabChange: (tab: string) => void;
   liveRevenue: number;
 }
 
 
 export default function Sidebar({
   isOpen,
-  onToggle,
   liveRevenue,
 }: SidebarProps) {
   const navigate = useNavigate();
@@ -46,7 +42,7 @@ export default function Sidebar({
   return (
     <aside
       className={cn(
-        "max-md:hidden h-full transition-all duration-300 ease-in-out border-r border-blue-300/30 text-white bg-primary-100 p-2 flex flex-col gap-2 shrink-0",
+        "max-lg:hidden h-full transition-all duration-300 ease-in-out border-r border-blue-300/30 text-white bg-primary-100 p-2 flex flex-col gap-2 shrink-0",
         isOpen ? "w-72" : "w-20"
       )}
 

@@ -36,8 +36,8 @@ export function DataTable<T extends RowWithId>({
 }: DataTableProps<T>) {
     return (
         <div className="border rounded-md">
-            <div className="w-full overflow-x-auto">
-                <Table className="">
+            <div className="overflow-x-auto w-full">
+                <Table className="min-w-200">
                     <TableHeader>
                         <TableRow>
                             {columns.map((col) => (

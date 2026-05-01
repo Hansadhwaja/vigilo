@@ -9,13 +9,12 @@ interface SummaryCardProps {
 
 const SummaryCard = ({ title, value, className }: SummaryCardProps) => {
     return (
-
-        <Card className='p-2 flex flex-col gap-1 rounded-sm'>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-xs font-medium">{title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className={cn("text-xl font-bold",
+        <Card className='p-0 rounded-sm'>
+            <CardContent className='p-2'>
+                <CardHeader className='px-0'>
+                    <CardTitle className="description font-medium text-left">{title}</CardTitle>
+                </CardHeader>
+                <div className={cn("text-base md:text-lg font-bold",
                     className
                 )}>{value}</div>
             </CardContent>

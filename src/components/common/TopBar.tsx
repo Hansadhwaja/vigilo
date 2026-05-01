@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Search, Menu, Globe, User, LogOut, Settings, Edit, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Search, Globe, LogOut, Edit, Loader2, ChevronRight, ChevronLeft } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
@@ -19,12 +19,13 @@ import MobileSidebar from "./Navbar/MobileSidebar";
 
 interface TopBarProps {
   search: string;
+  isOpen: boolean;
   onSearchChange: (value: string) => void;
   onSidebarToggle: () => void;
   liveRevenue: number;
 }
 
-export default function TopBar({ search, onSearchChange, onSidebarToggle, liveRevenue }: TopBarProps) {
+export default function TopBar({ isOpen, search, onSearchChange, onSidebarToggle, liveRevenue }: TopBarProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   // Fetch profile from API
@@ -51,8 +52,12 @@ export default function TopBar({ search, onSearchChange, onSidebarToggle, liveRe
     <>
       <div className="h-14 border-b bg-white flex items-center gap-2 px-3">
         <MobileSidebar liveRevenue={liveRevenue} />
-        <Button size="icon" variant="ghost" className="max-md:hidden" onClick={onSidebarToggle}>
-          <Menu className="h-5 w-5" />
+        <Button size="icon" variant="ghost" className="max-lg:hidden" onClick={onSidebarToggle}>
+          {isOpen ? (
+            <ChevronLeft />
+          ) : (
+            <ChevronRight />
+          )}
         </Button>
         <div className="w-full max-w-xl relative max-md:hidden">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />

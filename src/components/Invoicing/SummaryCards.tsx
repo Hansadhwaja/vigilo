@@ -3,34 +3,32 @@ import SummaryCard from './SummaryCard';
 const SummaryCards = () => {
     const invoiceSummary = [
         {
-            title: "Total Invoiced this month",
+            title: "Invoiced",
             value: `$${Number(1034023).toLocaleString()}`,
-
         },
         {
-            title: "Collected from Clients",
+            title: "Collected",
             value: `$${Number(36523).toLocaleString()}`,
-            className: "text-green-500"
+            className: "text-green-500",
         },
         {
-            title: "Pending / Overdue",
+            title: "Pending",
             value: `$${Number(74023).toLocaleString()}`,
-            className: "text-yellow-500"
+            className: "text-yellow-500",
         },
         {
-            title: "Total Records",
+            title: "Records",
             value: "7",
-            className: "text-emerald-500"
+            className: "text-emerald-500",
         },
         {
             title: "Overdue",
             value: "1",
-            className: "text-orange-500"
+            className: "text-orange-500",
         },
-
     ];
     return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {invoiceSummary.map(i => (
                 <SummaryCard key={i.title} {...i} />
             ))}

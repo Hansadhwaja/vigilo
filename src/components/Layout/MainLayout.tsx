@@ -143,22 +143,20 @@ const MainLayout = () => {
         <div className="h-screen w-screen bg-gray-50 flex overflow-hidden">
             <Sidebar
                 isOpen={sidebarOpen}
-                onToggle={toggleSidebar}
-                activeTab={activeTab}
-                onTabChange={handleTabChange}
                 liveRevenue={liveRevenue}
             />
 
-            <div className="flex-1 flex flex-col min-h-0 bg-gray-50">
+            <div className="flex-1 flex flex-col min-h-0 bg-gray-50 min-w-0">
 
                 <TopBar
+                    isOpen={sidebarOpen}
                     search={search}
                     onSearchChange={setSearch}
                     onSidebarToggle={toggleSidebar}
                     liveRevenue={liveRevenue}
                 />
 
-                <div className="flex-1 p-4 space-y-4 bg-gray-50 min-h-0">
+                <div className="flex-1 p-4 space-y-4 bg-gray-50 min-h-0 min-w-0">
                     <Routes>
                         <Route path="/" element={<Dashboard kpi={kpi} />} />
                         <Route path="/dashboard" element={<Dashboard kpi={kpi} />} />

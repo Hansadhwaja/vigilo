@@ -42,12 +42,12 @@ const MobileSidebar = ({
     return (
         <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger className="cursor-pointer" onClick={() => setOpen(true)}>
-                <Menu size={16} className="md:hidden" />
+                <Menu size={16} className="lg:hidden" />
             </SheetTrigger>
             <SheetContent
                 side="left"
                 className={cn(
-                    "md:hidden text-white bg-primary-100 p-2"
+                    "lg:hidden text-white bg-primary-100 p-2"
                 )}>
 
                 <SheetHeader>

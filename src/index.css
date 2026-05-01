@@ -244,10 +244,10 @@ html {
   }
 
   .heading {
-    @apply text-sm sm:text-lg md:text-xl lg:text-2xl font-semibold;
+    @apply text-base sm:text-lg md:text-xl lg:text-2xl font-semibold;
   }
   .sub-heading {
-    @apply text-xs sm:text-base md:text-lg lg:text-xl font-semibold;
+    @apply text-sm sm:text-base md:text-lg lg:text-xl font-semibold;
   }
   .description {
     @apply text-xs md:text-sm;

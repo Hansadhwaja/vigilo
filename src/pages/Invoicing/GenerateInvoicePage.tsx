@@ -31,7 +31,7 @@ const GenerateInvoicePage = () => {
         description="Create new invoice with flexible service pricing"
         previousLink='/invoicing'
         others={
-          <div className='flex gap-2 items-center'>
+          <div className='flex gap-2 items-center justify-end'>
             <AlarmPricingModal />
             <EditServicePricingModal />
           </div>

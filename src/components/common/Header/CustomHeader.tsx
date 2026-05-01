@@ -12,22 +12,24 @@ interface CustomHeaderProps {
 
 const CustomHeader = ({ title, description, previousLink, others }: CustomHeaderProps) => {
     return (
-        <div className='flex justify-between items-center'>
-            <div className='flex gap-2 items-center'>
-                {previousLink && (
-                    <Button variant="ghost" asChild>
-                        <Link to={previousLink}>
-                            <ArrowLeft />
-                            Back
-                        </Link>
-                    </Button>
-                )}
-                <div>
-                    <h2 className='heading'>{title}</h2>
-                    <p className='description text-gray-600'>{description}</p>
+        <div>
+            {previousLink && (
+                <Button variant="ghost" asChild>
+                    <Link to={previousLink}>
+                        <ArrowLeft />
+                        Back
+                    </Link>
+                </Button>
+            )}
+            <div className='flex justify-between sm:items-center max-sm:flex-col gap-2'>
+                <div className='flex gap-2 sm:items-center max-sm:flex-col'>
+                    <div>
+                        <h2 className='heading'>{title}</h2>
+                        <p className='description text-gray-600'>{description}</p>
+                    </div>
                 </div>
+                {others}
             </div>
-            {others}
         </div>
     )
 }
