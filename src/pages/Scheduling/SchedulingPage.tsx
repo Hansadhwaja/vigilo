@@ -41,200 +41,24 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useNavigate } from "react-router-dom";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { useGetAllGuardsQuery } from "../apis/guardsApi";
+import { useGetAllGuardsQuery } from "@/apis/guardsApi";
 import {
   useCreateScheduleMutation,
   useDeleteScheduleMutation,
   useGetAllSchedulesQuery,
-} from "../apis/schedulingAPI";
-import { useGetAllOrdersQuery } from "../apis/ordersApi";
+} from "@/apis/schedulingAPI";
+import { useGetAllOrdersQuery } from "@/apis/ordersApi";
 import { toast } from "sonner";
-import { getStatusColor, getStatusStyle } from "../utils/statusColors";
-import { DatePicker } from "@heroui/react";
-import EditAssignmentDialog from "../components/AssignmentDetails/EditAssignmentDialog";
+import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
+import EditAssignmentDialog from "@/components/AssignmentDetails/EditAssignmentDialog";
+import { formatDateStr, formatTimeStr, getCurrentWeekDates, organizeShifts } from "@/lib/utils";
+import { upcomingReminders } from "@/constants";
+import CustomHeader from "@/components/common/Header/CustomHeader";
 
-// Helper to get current week dates
-const getCurrentWeekDates = () => {
-  const today = new Date();
-  const startOfWeek = new Date(today);
-  const day = startOfWeek.getDay();
-  startOfWeek.setDate(startOfWeek.getDate() - day); // Start from Sunday
-
-  const dates = [];
-  for (let i = 0; i < 7; i++) {
-    const currentDay = new Date(startOfWeek);
-    currentDay.setDate(startOfWeek.getDate() + i);
-    dates.push(currentDay);
-  }
-
-  return dates;
-};
 const currentWeek = getCurrentWeekDates();
-
-const upcomingReminders = [
-  {
-    id: "REM-001",
-    type: "Shift Start",
-    message: "Night shift starting in 30 minutes",
-    time: new Date().toISOString(),
-    assignee: "Lisa Rodriguez",
-  },
-  {
-    id: "REM-002",
-    type: "Patrol Assignment",
-    message: "Vehicle patrol assignment due",
-    time: new Date(Date.now() + 3600000).toISOString(),
-    assignee: "Mike Chen",
-  },
-];
-// Convert to Local Date object
-const toLocalTime = (isoString: string | number | Date) => new Date(isoString);
-
-// HH:MM formatter
-const getTimeHHMM = (dateObj: Date) => dateObj.toTimeString().slice(0, 5);
-
-// Duration
-const getDuration = (
-  start: string | number | Date,
-  end: string | number | Date,
-) => {
-  const diff =
-    (new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60);
-  return `${diff} hours`;
-};
-
-export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
-  const organized: { [key: string]: any } = {};
-
-  const toMinutes = (hhmm: string) => {
-    const [h, m] = hhmm.split(":").map(Number);
-    return h * 60 + m;
-  };
-
-  scheduleList.forEach((shift) => {
-    // ✅ FIX: Extract dates from startTime and endTime ISO strings
-    const startDateStr = shift.startTime.split('T')[0];  // "2026-01-29"
-    const endDateStr = shift.endTime.split('T')[0];      // "2026-01-31"
-    // For time display, use toLocalTime
-    const start = toLocalTime(shift.startTime);
-    const end = toLocalTime(shift.endTime);
-
-    // Parse dates properly
-    const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
-    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
-
-    const startDateObj = new Date(startYear, startMonth - 1, startDay);
-    const endDateObj = new Date(endYear, endMonth - 1, endDay);
-
-    const daysDiff = Math.floor((endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24));
-
-
-    // ✅ Loop through each day (inclusive)
-    for (let dayOffset = 0; dayOffset <= daysDiff; dayOffset++) {
-      const currentDateObj = new Date(startDateObj);
-      currentDateObj.setDate(startDateObj.getDate() + dayOffset);
-
-      // Format date manually (avoid timezone issues)
-      const year = currentDateObj.getFullYear();
-      const month = String(currentDateObj.getMonth() + 1).padStart(2, '0');
-      const day = String(currentDateObj.getDate()).padStart(2, '0');
-      const dateKey = `${year}-${month}-${day}`;
-
-
-      // Use LOCAL TIME for comparison
-      const shiftStartHHMM = getTimeHHMM(start);
-      const shiftStartMin = toMinutes(shiftStartHHMM);
-
-      // Find matching slot
-      let matchedSlot: string | null = null;
-
-      for (let i = 0; i < timeSlots.length; i++) {
-        const curr = toMinutes(timeSlots[i].time);
-        const next =
-          i < timeSlots.length - 1 ? toMinutes(timeSlots[i + 1].time) : 9999;
-
-        if (shiftStartMin >= curr && shiftStartMin < next) {
-          matchedSlot = timeSlots[i].time;
-          break;
-        }
-      }
-
-      if (!matchedSlot) {
-        console.log(`    ❌ No matching slot for ${shiftStartHHMM}`);
-        continue;
-      }
-
-      if (!organized[dateKey]) organized[dateKey] = {};
-      if (!organized[dateKey][matchedSlot]) organized[dateKey][matchedSlot] = [];
-
-      // Add guard-based assignments for this day
-      shift.guards.forEach((guard: any) => {
-        organized[dateKey][matchedSlot].push({
-          shiftId: shift.id,
-          guardId: guard.id,
-          id: `${shift.id}-${guard.id}-${dateKey}`,
-
-          guardName: guard.name,
-          guardEmail: guard.email,
-          guardStatus: guard.StaticGuards?.status || shift.status,
-
-          orderId: shift.orderId,
-          orderLocationName: shift.locationName || "Unknown Location",
-          orderName: shift.orderName || "Unknown Location",
-          orderAddress: shift.orderAddress || "Address not available",
-
-          description: shift.description,
-          type: shift.type,
-          status: shift.status,
-
-          statusColors: getStatusColor(shift.status),
-
-          timeSlot: matchedSlot,
-          start,
-          end,
-          duration: getDuration(shift.startTime, shift.endTime),
-
-          displayDate: dateKey,
-          originalStartDate: shift.startTime,
-          originalEndDate: shift.endTime,
-          allGuardIdsForShift: shift.guards.map((g: any) => g.id),
-        });
-      });
-    }
-
-  });
-
-  return organized;
-};
-
-
-
-
-
-
-
 
 export default function ShiftPage() {
   const today = new Date();
@@ -339,47 +163,7 @@ export default function ShiftPage() {
     setShowEditDialog(true);
   };
 
-
-  // Helpers: timezone constants & formatters
-  const TIMEZONE = "Asia/Kolkata";
-
-  const formatDateStr = (iso: string | Date) => {
-    if (!iso) return null;
-    const d = new Date(iso);
-    return d.toLocaleDateString("en-US", {
-      timeZone: TIMEZONE,
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const formatTimeStr = (iso: string | Date) => {
-    if (!iso) return null;
-    const d = new Date(iso);
-    return d.toLocaleTimeString("en-US", {
-      timeZone: TIMEZONE,
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
-  const formatHourShort = (iso: string | Date) => {
-    // e.g. "02:30 PM" — used where only start time required
-    return formatTimeStr(iso);
-  };
-
-  const [createSchedule, { isLoading: isCreating }] =
-    useCreateScheduleMutation();
-
-  // Convert JS Date + Time to ISO or backend-friendly "YYYY-MM-DD HH:mm"
-  const combineDateAndTime = (date: Date, time: string) => {
-    const [hours, minutes] = time.split(":");
-    const newDate = new Date(date);
-    newDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-    return newDate.toISOString();
-  };
+  const [createSchedule, { isLoading: isCreating }] = useCreateScheduleMutation();
 
   const handleCreateSchedule = async () => {
     try {
@@ -414,7 +198,6 @@ export default function ShiftPage() {
     }
   };
 
-  // Form states
   const [formData, setFormData] = useState({
     description: "",
     date: "",
@@ -491,7 +274,6 @@ export default function ShiftPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]); // Removed currentPage from dependencies
 
-  // Fetch guards from API with pagination and search
   const {
     data: guardsResponse,
     isLoading,
@@ -774,16 +556,49 @@ export default function ShiftPage() {
       )
   );
 
+  const invoiceSummary = [
+    {
+      title: "Invoiced",
+      value: `$${Number(1034023).toLocaleString()}`,
+    },
+    {
+      title: "Collected",
+      value: `$${Number(36523).toLocaleString()}`,
+      className: "text-green-500",
+    },
+    {
+      title: "Pending",
+      value: `$${Number(74023).toLocaleString()}`,
+      className: "text-yellow-500",
+    },
+    {
+      title: "Records",
+      value: "7",
+      className: "text-emerald-500",
+    },
+    {
+      title: "Overdue",
+      value: "1",
+      className: "text-orange-500",
+    },
+  ];
+
   return (
-    <div className="space-y-3">
-      {/* Compact Header with Summary Cards Inline */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div className="flex-1">
-          <h1 className="mb-1">Scheduling Calendar</h1>
-          <p className="text-gray-600 text-lg">
-            Managed Assignment & Calendar View
-          </p>
-        </div>
+    <div>
+      <div className="space-y-3">
+        <CustomHeader
+          title="Scheduling Calendar"
+          description="Managed Assignment & Calendar View"
+          others={
+            <Button
+              onClick={handleCreateAssignment}
+              className="flex items-center gap-2 justify-end"
+            >
+              <Plus className="h-4 w-4" />
+              Assign Guard
+            </Button>
+          }
+        />
 
         {/* Inline Summary Cards */}
         <div className="flex flex-wrap gap-3">
@@ -827,17 +642,10 @@ export default function ShiftPage() {
             </div>
           </div>
 
-          <Button
-            onClick={handleCreateAssignment}
-            className="flex items-center gap-2 ml-2"
-          >
-            <Plus className="h-4 w-4" />
-            Assign Guard
-          </Button>
+
         </div>
       </div>
 
-      {/* Compact Filters and Controls Row */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
         {/* Compact Filters */}
         <div className="flex flex-wrap gap-2 items-center w-full p-3 rounded-lg border">
@@ -926,11 +734,10 @@ export default function ShiftPage() {
         </div>
       </div>
 
-      {/* Main Calendar */}
       <div className="space-y-3">
         {/* DAILY TIMELINE VIEW */}
         {viewMode === "daily" && (
-          <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
+          <Card className="shadow-lg border-0 bg-linear-to-br from-white to-gray-50">
             <CardHeader className="pb-3 px-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -988,7 +795,7 @@ export default function ShiftPage() {
             <CardContent className="px-4 pb-4">
               <div className="space-y-4">
                 {/* Summary Stats */}
-                <div className="flex flex-wrap gap-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                <div className="flex flex-wrap gap-3 p-4 bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4 text-blue-600" />
                     <span className="text-lg">
@@ -1180,8 +987,8 @@ export default function ShiftPage() {
                                     className={`
                                   relative p-4 rounded-lg border-2 shadow-sm hover:shadow-md transition-all cursor-pointer
                                   ${assignment.role === "Patrol"
-                                        ? "bg-gradient-to-br from-orange-50 to-orange-100 border-orange-300 hover:border-orange-400"
-                                        : "bg-gradient-to-br from-green-50 to-green-100 border-green-300 hover:border-green-400"
+                                        ? "bg-linear-to-br from-orange-50 to-orange-100 border-orange-300 hover:border-orange-400"
+                                        : "bg-linear-to-br from-green-50 to-green-100 border-green-300 hover:border-green-400"
                                       }
                                 `}
                                     onClick={() =>
@@ -1361,7 +1168,7 @@ export default function ShiftPage() {
 
         {/* WEEKLY CALENDAR VIEW */}
         {viewMode === "weekly" && (
-          <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
+          <Card className="shadow-lg border-0 bg-linear-to-br from-white to-gray-50">
             <CardHeader className="pb-3 px-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -1414,7 +1221,7 @@ export default function ShiftPage() {
             </CardHeader>
             <CardContent className="px-4 pb-4">
               <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                <div className="grid grid-cols-8 bg-gradient-to-r from-gray-50 to-gray-100">
+                <div className="grid grid-cols-8 bg-linear-to-r from-gray-50 to-gray-100">
                   <div className="p-3 border-r border-gray-200 font-semibold text-gray-700 text-lg">
                     TIME
                   </div>
@@ -1527,7 +1334,7 @@ export default function ShiftPage() {
                         <div
                           key={dayIndex}
                           className={`
-                    p-2 border-r border-gray-200 min-h-[70px] relative group cursor-pointer transition-all
+                    p-2 border-r border-gray-200 min-h-17.5 relative group cursor-pointer transition-all
                     ${day.toDateString() === selectedDate.toDateString() ? "bg-blue-50" : "hover:bg-gray-50"}
                   `}
                           onClick={() => {
@@ -1648,7 +1455,7 @@ export default function ShiftPage() {
 
         {/* Selected Date Summary Bar */}
         {viewMode === "weekly" && (
-          <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
+          <Card className="bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-200">
             <CardContent className="p-4">
               {/* Row 1: Date and Quick Stats */}
               <div className="flex items-center justify-between mb-3 pb-3 border-b border-blue-200">
@@ -1894,7 +1701,7 @@ export default function ShiftPage() {
                 onOpenChange={setOpenStartCalendar}
               >
                 <DialogContent className="w-auto max-w-fit p-4 overflow-hidden">
-                  <div className="bg-gradient-to-br from-background to-muted/20 rounded-lg">
+                  <div className="bg-linear-to-br from-background to-muted/20 rounded-lg">
                     <Calendar
                       mode="single"
                       selected={
@@ -1960,7 +1767,7 @@ export default function ShiftPage() {
 
               <Dialog open={openEndCalendar} onOpenChange={setOpenEndCalendar}>
                 <DialogContent className="w-auto max-w-fit p-4 overflow-hidden">
-                  <div className="bg-gradient-to-br from-background to-muted/20 rounded-lg">
+                  <div className="bg-linear-to-br from-background to-muted/20 rounded-lg">
                     <Calendar
                       mode="single"
                       selected={
@@ -2308,6 +2115,6 @@ export default function ShiftPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }

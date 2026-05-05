@@ -9,8 +9,9 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { calculateGrandTotal, formatCurrency, formatDate } from "@/lib/utils";
 import { InvoiceAlarmsFormValues, InvoiceOrdersFormValues } from "@/schemas";
+import { useMemo } from "react";
 
 import { useFormContext, useWatch } from "react-hook-form";
 import { useSelector } from "react-redux";
@@ -50,7 +51,10 @@ const InvoicePreview = ({
   }) as any;
 
   const client = clients.find((c) => c.id === clientId);
-  let grandTotal = 0;
+const grandTotal = useMemo(() => 
+  calculateGrandTotal({ orders, alarms, services, serviceData }),
+  [orders, alarms, services, serviceData]
+);
 
   return (
     <Card className="p-0 shadow-md">
@@ -102,12 +106,12 @@ const InvoicePreview = ({
 
                 {orders.map((o: InvoiceOrdersFormValues) => {
 
-                  const service = serviceData[o.title];
+                  const service = serviceData?.[o.title];
+                  if (!service) return null;
                   const price = service.priceType == "daily" ? service.dailyPrice : service.hourlyPrice;
                   const duration = service.priceType == "daily" ? `${o.days} days` : `${o.hours} hrs`;
                   const durationValue = service.priceType == "daily" ? o.days : o.hours;
                   const total = (durationValue || 0) * Number(price);
-                  grandTotal += total
                   return (
                     <div
                       key={o.id}
@@ -163,7 +167,6 @@ const InvoicePreview = ({
 
                 {services.map((s: any, i: number) => {
                   const total = (s.days || 0) * (s.price || 0);
-                  grandTotal += total;
                   return (
                     <div
                       key={i}

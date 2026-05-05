@@ -11,7 +11,7 @@ const services = [
     "industrialSecurity",
 ];
 
-type ServicePricingState = {
+export type ServicePricingState = {
     data: Record<string, ServicePricingFormValues>;
 };
 

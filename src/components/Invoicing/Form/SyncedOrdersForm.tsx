@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { calculateWork, formatDate } from "@/lib/utils";
+import { calculateWork, formatCurrency, formatDate, getOrderPricing } from "@/lib/utils";
 import { Info, Trash2 } from "lucide-react";
 import {
     Controller,
@@ -57,20 +57,13 @@ const SyncedOrdersForm = ({ orders }: { orders: Order[] }) => {
                         render={({ field }) => (
                             <Field className="py-4 space-y-3">
                                 {orders.map((o) => {
-                                    const { hours, days } = calculateWork(
-                                        o.startDate,
-                                        o.startTime,
-                                        o.endDate,
-                                        o.endTime
-                                    );
+                                    const pricing = getOrderPricing(o, serviceData);
+                                    if (!pricing) return null;
 
-                                    const isChecked = field.value?.some(
-                                        (item: any) => item.id === o.id
-                                    );
-                                    const service = serviceData[o.serviceType];
-                                    const price = service.priceType == "daily" ? service.dailyPrice : service.hourlyPrice;
-                                    const duration = service.priceType == "daily" ? `${days} days` : `${hours} hrs`;
-                                    const durationValue = service.priceType == "daily" ? days : hours;
+                                    const { hours, days, price, duration, total } = pricing;
+
+                                    const selectedOrders = field.value || [];
+                                    const isChecked = selectedOrders.some((item: any) => item.id === o.id);
                                     return (
                                         <Card key={o.id} className="p-0">
                                             <CardContent className="flex justify-between items-center border bg-blue-50 p-4 rounded-md">
@@ -130,10 +123,10 @@ const SyncedOrdersForm = ({ orders }: { orders: Order[] }) => {
                                                 <div className="text-right">
                                                     <Badge className="capitalize">{o.status}</Badge>
                                                     <p className="text-sm">
-                                                        {duration} × ₹{price || 0}
+                                                        {duration} × {formatCurrency(Number(price))}
                                                     </p>
                                                     <p className="font-semibold">
-                                                        ₹{(durationValue * Number(price)).toFixed(2)}
+                                                        {formatCurrency(total)}
                                                     </p>
                                                 </div>
                                             </CardContent>

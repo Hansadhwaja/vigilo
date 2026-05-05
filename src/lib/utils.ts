@@ -1,4 +1,8 @@
-import { avatarColors } from "@/constants";
+import { Order } from "@/apis/ordersApi";
+import { avatarColors, TIMEZONE } from "@/constants";
+import { ServicePricingFormValues } from "@/schemas";
+import { CalculateGrandTotalProps } from "@/types";
+import { getStatusColor } from "@/utils/statusColors";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -116,4 +120,238 @@ export const formatDate = (
     year: "numeric",
     ...options,
   }).format(d);
+};
+
+export const getCurrentWeekDates = () => {
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  const day = startOfWeek.getDay();
+  startOfWeek.setDate(startOfWeek.getDate() - day); // Start from Sunday
+
+  const dates = [];
+  for (let i = 0; i < 7; i++) {
+    const currentDay = new Date(startOfWeek);
+    currentDay.setDate(startOfWeek.getDate() + i);
+    dates.push(currentDay);
+  }
+
+  return dates;
+};
+
+export const toLocalTime = (isoString: string | number | Date) => new Date(isoString);
+
+export const getTimeHHMM = (dateObj: Date) => dateObj.toTimeString().slice(0, 5);
+
+export const getDuration = (
+  start: string | number | Date,
+  end: string | number | Date,
+) => {
+  const diff =
+    (new Date(end).getTime() - new Date(start).getTime()) / (1000 * 60 * 60);
+  return `${diff} hours`;
+};
+
+export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
+  const organized: { [key: string]: any } = {};
+
+  const toMinutes = (hhmm: string) => {
+    const [h, m] = hhmm.split(":").map(Number);
+    return h * 60 + m;
+  };
+
+  scheduleList.forEach((shift) => {
+    // ✅ FIX: Extract dates from startTime and endTime ISO strings
+    const startDateStr = shift.startTime.split('T')[0];  // "2026-01-29"
+    const endDateStr = shift.endTime.split('T')[0];      // "2026-01-31"
+    // For time display, use toLocalTime
+    const start = toLocalTime(shift.startTime);
+    const end = toLocalTime(shift.endTime);
+
+    // Parse dates properly
+    const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+
+    const startDateObj = new Date(startYear, startMonth - 1, startDay);
+    const endDateObj = new Date(endYear, endMonth - 1, endDay);
+
+    const daysDiff = Math.floor((endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24));
+
+
+    // ✅ Loop through each day (inclusive)
+    for (let dayOffset = 0; dayOffset <= daysDiff; dayOffset++) {
+      const currentDateObj = new Date(startDateObj);
+      currentDateObj.setDate(startDateObj.getDate() + dayOffset);
+
+      // Format date manually (avoid timezone issues)
+      const year = currentDateObj.getFullYear();
+      const month = String(currentDateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(currentDateObj.getDate()).padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`;
+
+
+      // Use LOCAL TIME for comparison
+      const shiftStartHHMM = getTimeHHMM(start);
+      const shiftStartMin = toMinutes(shiftStartHHMM);
+
+      // Find matching slot
+      let matchedSlot: string | null = null;
+
+      for (let i = 0; i < timeSlots.length; i++) {
+        const curr = toMinutes(timeSlots[i].time);
+        const next =
+          i < timeSlots.length - 1 ? toMinutes(timeSlots[i + 1].time) : 9999;
+
+        if (shiftStartMin >= curr && shiftStartMin < next) {
+          matchedSlot = timeSlots[i].time;
+          break;
+        }
+      }
+
+      if (!matchedSlot) {
+        console.log(`    ❌ No matching slot for ${shiftStartHHMM}`);
+        continue;
+      }
+
+      if (!organized[dateKey]) organized[dateKey] = {};
+      if (!organized[dateKey][matchedSlot]) organized[dateKey][matchedSlot] = [];
+
+      // Add guard-based assignments for this day
+      shift.guards.forEach((guard: any) => {
+        organized[dateKey][matchedSlot].push({
+          shiftId: shift.id,
+          guardId: guard.id,
+          id: `${shift.id}-${guard.id}-${dateKey}`,
+
+          guardName: guard.name,
+          guardEmail: guard.email,
+          guardStatus: guard.StaticGuards?.status || shift.status,
+
+          orderId: shift.orderId,
+          orderLocationName: shift.locationName || "Unknown Location",
+          orderName: shift.orderName || "Unknown Location",
+          orderAddress: shift.orderAddress || "Address not available",
+
+          description: shift.description,
+          type: shift.type,
+          status: shift.status,
+
+          statusColors: getStatusColor(shift.status),
+
+          timeSlot: matchedSlot,
+          start,
+          end,
+          duration: getDuration(shift.startTime, shift.endTime),
+
+          displayDate: dateKey,
+          originalStartDate: shift.startTime,
+          originalEndDate: shift.endTime,
+          allGuardIdsForShift: shift.guards.map((g: any) => g.id),
+        });
+      });
+    }
+
+  });
+
+  return organized;
+};
+
+export const formatDateStr = (iso: string | Date) => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-US", {
+    timeZone: TIMEZONE,
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+export const formatTimeStr = (iso: string | Date) => {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return d.toLocaleTimeString("en-US", {
+    timeZone: TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+export const formatHourShort = (iso: string | Date) => {
+  // e.g. "02:30 PM" — used where only start time required
+  return formatTimeStr(iso);
+};
+
+export const combineDateAndTime = (date: Date, time: string) => {
+  const [hours, minutes] = time.split(":");
+  const newDate = new Date(date);
+  newDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+  return newDate.toISOString();
+};
+
+export const calculateGrandTotal = ({
+  orders = [],
+  alarms = [],
+  services = [],
+  serviceData,
+}: CalculateGrandTotalProps): number => {
+  let total = 0;
+
+  // Orders
+  for (const o of orders) {
+    const service = serviceData?.[o.title];
+    if (!service) continue;
+
+    const price =
+      service.priceType === "daily"
+        ? service.dailyPrice
+        : service.hourlyPrice;
+
+    const duration =
+      service.priceType === "daily" ? o.days : o.hours;
+
+    total += (duration || 0) * Number(price || 0);
+  }
+
+  // Alarms
+  for (const a of alarms) {
+    total += Number(a.price || 0);
+  }
+
+  // Services
+  for (const s of services) {
+    total += (s.days || 0) * (s.price || 0);
+  }
+
+  return total;
+};
+
+export const getOrderPricing = (o: Order, serviceData: Record<string, ServicePricingFormValues>) => {
+  const service = serviceData?.[o.serviceType];
+  if (!service) return null;
+
+  const { hours, days } = calculateWork(
+    o.startDate,
+    o.startTime,
+    o.endDate,
+    o.endTime
+  );
+
+  const price =
+    service.priceType === "daily"
+      ? service.dailyPrice
+      : service.hourlyPrice;
+
+  const durationValue =
+    service.priceType === "daily" ? days : hours;
+
+  return {
+    price,
+    duration: service.priceType === "daily"
+      ? `${days} days`
+      : `${hours} hrs`,
+    total: (durationValue || 0) * Number(price || 0),
+    hours,
+    days
+  };
 };

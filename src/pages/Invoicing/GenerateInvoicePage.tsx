@@ -1,22 +1,50 @@
+import { useGenerateInvoiceMutation } from '@/apis/invoiceApis'
+import { RootState } from '@/apis/store'
 import { useGetAllClientsQuery } from '@/apis/usersApi'
 import CustomHeader from '@/components/common/Header/CustomHeader'
 import InvoiceForm from '@/components/Invoicing/Form/InvoiceForm'
 import AlarmPricingModal from '@/components/Invoicing/New/Modal/AlarmPricingModal'
 import EditServicePricingModal from '@/components/Invoicing/New/Modal/EditServicePricingModal'
-import ServicePricingSection from '@/components/Invoicing/New/ServicePricingSection'
+import { calculateGrandTotal } from '@/lib/utils'
 import { InvoiceFormValues } from '@/schemas'
+import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
 
 const GenerateInvoicePage = () => {
+  const [generateInvoice, { isLoading: isGeneratingInvoice }] = useGenerateInvoiceMutation();
+
   const { data, isLoading } = useGetAllClientsQuery();
   const clients = data?.data ?? [];
   const navigate = useNavigate();
 
-  const handleSubmit = (data: InvoiceFormValues) => {
+
+  const serviceData = useSelector((state: RootState) => state.servicePricing.data);
+
+  const handleSubmit = async (data: InvoiceFormValues) => {
     console.log("Invoice Data", data);
+
+    const grandTotal = calculateGrandTotal({
+      orders: data.orders,
+      alarms: data.alarms,
+      services: data.services,
+      serviceData
+    })
+
     try {
+      await generateInvoice({
+        ...data,
+        orders: data.orders.map(o => ({
+          ...o,
+          dailyPrice: Number(serviceData[o.title].dailyPrice),
+          hourlyPrice: Number(serviceData[o.title].hourlyPrice),
+          renewalDate: serviceData[o.title].renewalDate
+        })),
+        subTotal: grandTotal,
+        tax: 0,
+        totalAmount: grandTotal
+      }).unwrap();
       navigate("/invoicing")
       toast.success("Invoice Created Successfully");
     } catch (error) {
@@ -38,7 +66,7 @@ const GenerateInvoicePage = () => {
         }
       />
       <InvoiceForm
-        isLoading={false}
+        isLoading={isGeneratingInvoice}
         onSubmit={handleSubmit}
         clients={clients}
       />

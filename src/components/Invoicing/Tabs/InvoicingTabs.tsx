@@ -1,9 +1,14 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import React from 'react'
+
 import InvoicingTable from '../Table/InvoicingTable'
 import { dummyInvoices } from '@/constants'
+import { InvoiceType } from '@/types'
 
-const InvoicingTabs = () => {
+interface InvoicingTabsProps {
+    invoices: InvoiceType[];
+}
+
+const InvoicingTabs = ({ invoices }: InvoicingTabsProps) => {
 
     const paidInvoices = dummyInvoices.filter(inv => inv.status.toLowerCase() === "paid")
     const overdueInvoices = dummyInvoices.filter(inv => inv.status.toLowerCase() === "overdue")
@@ -17,7 +22,7 @@ const InvoicingTabs = () => {
             </TabsList>
 
             <TabsContent value='all'>
-                <InvoicingTable invoices={dummyInvoices} />
+                <InvoicingTable invoices={invoices} />
             </TabsContent>
 
             <TabsContent value='paid'>

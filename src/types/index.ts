@@ -1,4 +1,5 @@
 import { MessageItem } from "@/apis/messagesAPI";
+import { InvoiceAlarmsFormValues, InvoiceOrdersFormValues } from "@/schemas";
 
 //Messages
 export type ContactRole = "guard" | "client";
@@ -139,11 +140,36 @@ export interface KPI {
 
 //Invoice
 export type InvoiceType = {
-    id: string;
-    client: string;
-    services: string[];
-    period: string;
     amount: number;
-    status: string;
+    billingPeriod: string;
+    clientCode: string;
+    clientName: string;
     dueDate: string;
+    id: string;
+    invoiceNumber: string;
+    issueDate: string;
+    paidDate: string;
+    services: {
+        alarms: number;
+        custom: number;
+        orders: number;
+    }
+    status: string;
+
 }
+
+
+//SummaryCard
+export type SummaryCardType = {
+    title: string;
+    value: string;
+    className?: string;
+};
+
+export interface CalculateGrandTotalProps {
+  orders?: InvoiceOrdersFormValues[];
+  alarms?: InvoiceAlarmsFormValues[];
+  services?: any[];
+  serviceData: any;
+}
+

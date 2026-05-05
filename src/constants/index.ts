@@ -123,3 +123,23 @@ export const dummyInvoices: InvoiceType[] = [
         dueDate: "2026-01-31",
     },
 ];
+
+//Scheduling
+export const upcomingReminders = [
+    {
+        id: "REM-001",
+        type: "Shift Start",
+        message: "Night shift starting in 30 minutes",
+        time: new Date().toISOString(),
+        assignee: "Lisa Rodriguez",
+    },
+    {
+        id: "REM-002",
+        type: "Patrol Assignment",
+        message: "Vehicle patrol assignment due",
+        time: new Date(Date.now() + 3600000).toISOString(),
+        assignee: "Mike Chen",
+    },
+];
+
+export const TIMEZONE = "Asia/Kolkata";

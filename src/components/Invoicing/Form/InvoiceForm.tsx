@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { InvoiceFormValues, invoiceSchema } from "@/schemas";
 import InvoiceDetailsForm from "./InvoiceDetailsForm";
 import { Client } from "@/apis/usersApi";
-import ServicePricingSection from "../New/ServicePricingSection";
 import SyncedOrdersForm from "./SyncedOrdersForm";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,12 +27,6 @@ const InvoiceForm = ({
     onSubmit,
     clients,
 }: InvoiceFormProps) => {
-    const { data } = useGetAllOrdersQuery();
-    const orders = data?.data ?? [];
-
-    const { data: alarmsResponse } = useGetAllAlarmsQuery();
-    const alarms = alarmsResponse?.data ?? [];
-
 
     const form = useForm({
         resolver: zodResolver(invoiceSchema),
@@ -51,7 +44,24 @@ const InvoiceForm = ({
         },
     });
 
-    const { handleSubmit, formState: { isValid } } = form;
+    const { handleSubmit, watch, formState: { isValid } } = form;
+
+    const clientId = watch("clientId");
+
+    const { data } = useGetAllOrdersQuery(
+        {
+            userId: clientId,
+            nonInvoiced: true
+        },
+        {
+            skip: !clientId
+        }
+    );
+    
+    const orders = data?.data ?? [];
+
+    const { data: alarmsResponse } = useGetAllAlarmsQuery();
+    const alarms = alarmsResponse?.data ?? [];
 
     const onFormSubmit = async (data: InvoiceFormValues) => {
         await onSubmit(data);

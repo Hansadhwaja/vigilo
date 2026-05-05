@@ -6,7 +6,7 @@ export { default as IncidentsPage } from './IncidentsPage';
 export { default as SettingsPage } from './SettingsPage';
 
 // Export all the other pages
-export { default as SchedulingPage } from './SchedulingPage';
+export { default as SchedulingPage } from './Scheduling/SchedulingPage';
 export { default as ClientsPage } from './ClientsPage';
 export { default as IncidentDetailsPage } from './IncidentDetailsPage';
 // export{ default as ShiftPage} from './ShiftPage'

@@ -1,40 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
-import {
-  DollarSign,
-  Users,
-  Bell,
-  Target,
-  TrendingUp,
-  TrendingDown,
-  Star,
-  Clock,
-  Zap,
-  CreditCard,
-  Check
-} from "lucide-react";
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  CartesianGrid,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-
+import { useState, useEffect, useMemo } from "react";
 import { demoTrend, revenueStreams, liveMetrics } from "@/data/sampleData";
-// APIs
 import { useGetAllGuardsQuery } from "@/apis/guardsApi";
 import { useGetAllSchedulesQuery } from "@/apis/schedulingAPI";
 import { useGetAllOrdersQuery } from "@/apis/ordersApi";
@@ -144,9 +109,6 @@ export default function Dashboard({ kpi }: DashboardProps) {
     ).length;
   }, [Patrols]);
 
-
-  // Compute On Duty Guards
-
   const onDutyGuardIds = useMemo(() => {
     const ids = new Set<string>();
 
@@ -163,8 +125,6 @@ export default function Dashboard({ kpi }: DashboardProps) {
 
   const onDutyGuardsCount = onDutyGuardIds.size;
 
-  //Compute Available Guards
-
   const availableGuardsCount = useMemo(() => {
     return allGuards.filter(
       (guard) => !onDutyGuardIds.has(guard.id)
@@ -172,13 +132,7 @@ export default function Dashboard({ kpi }: DashboardProps) {
   }, [allGuards, onDutyGuardIds]);
 
   const line = demoTrend;
-  const pieData = [
-    { name: "On-time", value: 92 },
-    { name: "Late", value: 8 },
-  ];
-  const colors = ["#22c55e", "#ef4444"];
 
-  // Update time every second for live clock
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
@@ -207,8 +161,6 @@ export default function Dashboard({ kpi }: DashboardProps) {
 
       <RevenueMetrics />
 
-
-      {/* Charts Section */}
       <DashboardChart
         line={line}
         revenueStreams={revenueStreams}

@@ -22,16 +22,16 @@ export const sampleSites = [
 ];
 
 export const sampleIncidents = [
-  { 
-    id: "I-1001", 
-    site: "Docklands Precinct", 
+  {
+    id: "I-1001",
+    site: "Docklands Precinct",
     location: {
       name: "Main Entrance - Level 1",
       coordinates: { lat: -37.8136, lng: 144.9631 }
     },
-    type: "Trespass", 
-    severity: "Medium", 
-    status: "Pending", 
+    type: "Trespass",
+    severity: "Medium",
+    status: "Pending",
     time: "2024-09-22 10:24:00",
     dateTime: new Date("2024-09-22T10:24:00"),
     assigned: "A. Khan",
@@ -45,16 +45,16 @@ export const sampleIncidents = [
     clientNotified: true,
     priorityLevel: 2
   },
-  { 
-    id: "I-1002", 
-    site: "CBD Mall", 
+  {
+    id: "I-1002",
+    site: "CBD Mall",
     location: {
       name: "Food Court Area - Level 2",
       coordinates: { lat: -37.8150, lng: 144.9700 }
     },
-    type: "Medical Emergency", 
-    severity: "High", 
-    status: "Resolved", 
+    type: "Medical Emergency",
+    severity: "High",
+    status: "Resolved",
     time: "2024-09-22 09:10:00",
     dateTime: new Date("2024-09-22T09:10:00"),
     assigned: "S. Singh",
@@ -68,16 +68,16 @@ export const sampleIncidents = [
     clientNotified: true,
     priorityLevel: 1
   },
-  { 
-    id: "I-1003", 
-    site: "Docklands Precinct", 
+  {
+    id: "I-1003",
+    site: "Docklands Precinct",
     location: {
       name: "Parking Garage B - Level -2",
       coordinates: { lat: -37.8140, lng: 144.9625 }
     },
-    type: "Theft", 
-    severity: "Low", 
-    status: "Resolved", 
+    type: "Theft",
+    severity: "Low",
+    status: "Resolved",
     time: "2024-09-21 16:45:00",
     dateTime: new Date("2024-09-21T16:45:00"),
     assigned: "M. Chen",
@@ -91,16 +91,16 @@ export const sampleIncidents = [
     clientNotified: true,
     priorityLevel: 3
   },
-  { 
-    id: "I-1004", 
-    site: "CBD Mall", 
+  {
+    id: "I-1004",
+    site: "CBD Mall",
     location: {
       name: "Retail Store 47 - Level 1",
       coordinates: { lat: -37.8148, lng: 144.9695 }
     },
-    type: "Alarm Activation", 
-    severity: "Medium", 
-    status: "Pending", 
+    type: "Alarm Activation",
+    severity: "Medium",
+    status: "Pending",
     time: "2024-09-22 14:30:00",
     dateTime: new Date("2024-09-22T14:30:00"),
     assigned: "S. Singh",
@@ -114,16 +114,16 @@ export const sampleIncidents = [
     clientNotified: true,
     priorityLevel: 2
   },
-  { 
-    id: "I-1005", 
-    site: "Tech Park Campus", 
+  {
+    id: "I-1005",
+    site: "Tech Park Campus",
     location: {
       name: "Building A - Server Room",
       coordinates: { lat: -37.8200, lng: 144.9800 }
     },
-    type: "Security Breach", 
-    severity: "High", 
-    status: "Pending", 
+    type: "Security Breach",
+    severity: "High",
+    status: "Pending",
     time: "2024-09-22 13:15:00",
     dateTime: new Date("2024-09-22T13:15:00"),
     assigned: "A. Khan",
@@ -137,16 +137,16 @@ export const sampleIncidents = [
     clientNotified: true,
     priorityLevel: 1
   },
-  { 
-    id: "I-1006", 
-    site: "Hospital Campus", 
+  {
+    id: "I-1006",
+    site: "Hospital Campus",
     location: {
       name: "Emergency Department - Main Floor",
       coordinates: { lat: -37.8220, lng: 144.9620 }
     },
-    type: "Disturbance", 
-    severity: "Medium", 
-    status: "Resolved", 
+    type: "Disturbance",
+    severity: "Medium",
+    status: "Resolved",
     time: "2024-09-21 22:30:00",
     dateTime: new Date("2024-09-21T22:30:00"),
     assigned: "Lisa Rodriguez",
@@ -160,16 +160,16 @@ export const sampleIncidents = [
     clientNotified: true,
     priorityLevel: 2
   },
-  { 
-    id: "I-1007", 
-    site: "Industrial Park West", 
+  {
+    id: "I-1007",
+    site: "Industrial Park West",
     location: {
       name: "Gate 3 - Vehicle Checkpoint",
       coordinates: { lat: -37.8100, lng: 144.9400 }
     },
-    type: "Unauthorized Vehicle", 
-    severity: "High", 
-    status: "Pending", 
+    type: "Unauthorized Vehicle",
+    severity: "High",
+    status: "Pending",
     time: "2024-09-22 06:15:00",
     dateTime: new Date("2024-09-22T06:15:00"),
     assigned: "David Wilson",
@@ -183,16 +183,16 @@ export const sampleIncidents = [
     clientNotified: true,
     priorityLevel: 1
   },
-  { 
-    id: "I-1008", 
-    site: "University Campus", 
+  {
+    id: "I-1008",
+    site: "University Campus",
     location: {
       name: "Student Library - Level 3",
       coordinates: { lat: -37.8250, lng: 144.9750 }
     },
-    type: "Theft", 
-    severity: "Low", 
-    status: "Closed", 
+    type: "Theft",
+    severity: "Low",
+    status: "Closed",
     time: "2024-09-21 14:20:00",
     dateTime: new Date("2024-09-21T14:20:00"),
     assigned: "M. Chen",
@@ -206,16 +206,16 @@ export const sampleIncidents = [
     clientNotified: false,
     priorityLevel: 3
   },
-  { 
-    id: "I-1009", 
-    site: "Marina District", 
+  {
+    id: "I-1009",
+    site: "Marina District",
     location: {
       name: "Dock C - Berth 15",
       coordinates: { lat: -37.8080, lng: 144.9580 }
     },
-    type: "Safety Hazard", 
-    severity: "Medium", 
-    status: "Resolved", 
+    type: "Safety Hazard",
+    severity: "Medium",
+    status: "Resolved",
     time: "2024-09-22 11:45:00",
     dateTime: new Date("2024-09-22T11:45:00"),
     assigned: "J. Ali",
@@ -229,16 +229,16 @@ export const sampleIncidents = [
     clientNotified: true,
     priorityLevel: 2
   },
-  { 
-    id: "I-1010", 
-    site: "Hotel Downtown", 
+  {
+    id: "I-1010",
+    site: "Hotel Downtown",
     location: {
       name: "Hotel Lobby - Ground Floor",
       coordinates: { lat: -37.8160, lng: 144.9650 }
     },
-    type: "Suspicious Activity", 
-    severity: "Medium", 
-    status: "Pending", 
+    type: "Suspicious Activity",
+    severity: "Medium",
+    status: "Pending",
     time: "2024-09-22 20:15:00",
     dateTime: new Date("2024-09-22T20:15:00"),
     assigned: "Lisa Rodriguez",
@@ -252,16 +252,16 @@ export const sampleIncidents = [
     clientNotified: true,
     priorityLevel: 2
   },
-  { 
-    id: "I-1011", 
-    site: "Airport Terminal", 
+  {
+    id: "I-1011",
+    site: "Airport Terminal",
     location: {
       name: "Terminal A - Security Checkpoint",
       coordinates: { lat: -37.8300, lng: 144.9400 }
     },
-    type: "Security Alert", 
-    severity: "High", 
-    status: "Resolved", 
+    type: "Security Alert",
+    severity: "High",
+    status: "Resolved",
     time: "2024-09-21 08:30:00",
     dateTime: new Date("2024-09-21T08:30:00"),
     assigned: "A. Khan",
@@ -275,16 +275,16 @@ export const sampleIncidents = [
     clientNotified: true,
     priorityLevel: 1
   },
-  { 
-    id: "I-1012", 
-    site: "Sports Complex", 
+  {
+    id: "I-1012",
+    site: "Sports Complex",
     location: {
       name: "Main Arena - Section B",
       coordinates: { lat: -37.8120, lng: 144.9680 }
     },
-    type: "Medical Emergency", 
-    severity: "High", 
-    status: "Resolved", 
+    type: "Medical Emergency",
+    severity: "High",
+    status: "Resolved",
     time: "2024-09-22 19:45:00",
     dateTime: new Date("2024-09-22T19:45:00"),
     assigned: "S. Singh",
@@ -302,149 +302,149 @@ export const sampleIncidents = [
 
 
 export const sampleAlarms = [
-  { 
-    id: "A-2001", 
-    site: "CBD Mall", 
-    type: "Door Forced", 
+  {
+    id: "A-2001",
+    site: "CBD Mall",
+    type: "Door Forced",
     priority: "Critical",
-    priorityLevel: 1, 
+    priorityLevel: 1,
     assigned: "A. Khan",
     assignedId: "g1",
-    eta: "5 min", 
-    slaTargetMins: 15, 
-    sinceMins: 4, 
-    monitoringCompany: "City Retail Monitoring Pty Ltd", 
-    license: "MON-CITY-002", 
+    eta: "5 min",
+    slaTargetMins: 15,
+    sinceMins: 4,
+    monitoringCompany: "City Retail Monitoring Pty Ltd",
+    license: "MON-CITY-002",
     licenseDetails: "License: MON-CITY-002",
-    unitPrice: 55, 
-    completed: false, 
+    unitPrice: 55,
+    completed: false,
     completedAt: undefined,
     createdAt: new Date(),
     description: "Emergency door forced open in main entrance. Immediate response required.",
     location: "Main Entrance - Ground Floor"
   },
-  { 
-    id: "A-2002", 
-    site: "Docklands Precinct", 
-    type: "Panic Button", 
+  {
+    id: "A-2002",
+    site: "Docklands Precinct",
+    type: "Panic Button",
     priority: "Critical",
-    priorityLevel: 1, 
+    priorityLevel: 1,
     assigned: "S. Singh",
     assignedId: "g2",
-    eta: "3 min", 
-    slaTargetMins: 10, 
-    sinceMins: 7, 
-    monitoringCompany: "Alpha Monitoring Pty Ltd", 
-    license: "MON-ALPHA-001", 
+    eta: "3 min",
+    slaTargetMins: 10,
+    sinceMins: 7,
+    monitoringCompany: "Alpha Monitoring Pty Ltd",
+    license: "MON-ALPHA-001",
     licenseDetails: "License: MON-ALPHA-001",
-    unitPrice: 55, 
-    completed: false, 
+    unitPrice: 55,
+    completed: false,
     completedAt: undefined,
     createdAt: new Date(),
     description: "Panic button activated in Level 3 office area. Security guard requested immediately.",
     location: "Level 3 - Office Suite 301"
   },
-  { 
-    id: "A-2003", 
-    site: "CBD Mall", 
-    type: "Motion After Hours", 
+  {
+    id: "A-2003",
+    site: "CBD Mall",
+    type: "Motion After Hours",
     priority: "Medium",
-    priorityLevel: 2, 
+    priorityLevel: 2,
     assigned: undefined,
     assignedId: undefined,
-    eta: undefined, 
-    slaTargetMins: 20, 
-    sinceMins: 12, 
-    monitoringCompany: "City Retail Monitoring Pty Ltd", 
-    license: "MON-CITY-002", 
+    eta: undefined,
+    slaTargetMins: 20,
+    sinceMins: 12,
+    monitoringCompany: "City Retail Monitoring Pty Ltd",
+    license: "MON-CITY-002",
     licenseDetails: "License: MON-CITY-002",
-    unitPrice: 55, 
-    completed: false, 
+    unitPrice: 55,
+    completed: false,
     completedAt: undefined,
     createdAt: new Date(),
     description: "Motion detection triggered in retail area after hours. Investigation required.",
     location: "Retail Level - Store Section B"
   },
-  { 
-    id: "A-2004", 
-    site: "Tech Park Campus", 
-    type: "Fire Alarm", 
+  {
+    id: "A-2004",
+    site: "Tech Park Campus",
+    type: "Fire Alarm",
     priority: "High",
-    priorityLevel: 1, 
+    priorityLevel: 1,
     assigned: "M. Chen",
     assignedId: "g3",
-    eta: "7 min", 
-    slaTargetMins: 12, 
-    sinceMins: 3, 
-    monitoringCompany: "TechPark Security Pty Ltd", 
-    license: "MON-TECH-003", 
+    eta: "7 min",
+    slaTargetMins: 12,
+    sinceMins: 3,
+    monitoringCompany: "TechPark Security Pty Ltd",
+    license: "MON-TECH-003",
     licenseDetails: "License: MON-TECH-003",
-    unitPrice: 75, 
-    completed: false, 
+    unitPrice: 75,
+    completed: false,
     completedAt: undefined,
     createdAt: new Date(),
     description: "Fire alarm system activated in server room. Immediate evacuation and investigation protocol required.",
     location: "Building A - Server Room Level B1"
   },
-  { 
-    id: "A-2005", 
-    site: "Harbour View Plaza", 
-    type: "Medical Emergency", 
+  {
+    id: "A-2005",
+    site: "Harbour View Plaza",
+    type: "Medical Emergency",
     priority: "Critical",
-    priorityLevel: 1, 
+    priorityLevel: 1,
     assigned: "J. Ali",
     assignedId: "g4",
-    eta: "4 min", 
-    slaTargetMins: 8, 
-    sinceMins: 2, 
-    monitoringCompany: "Harbour Security Services", 
-    license: "MON-HARB-004", 
+    eta: "4 min",
+    slaTargetMins: 8,
+    sinceMins: 2,
+    monitoringCompany: "Harbour Security Services",
+    license: "MON-HARB-004",
     licenseDetails: "License: MON-HARB-004",
-    unitPrice: 65, 
-    completed: false, 
+    unitPrice: 65,
+    completed: false,
     completedAt: undefined,
     createdAt: new Date(),
     description: "Medical emergency reported in parking garage. First aid certified guard required immediately.",
     location: "Parking Garage Level P2"
   },
-  { 
-    id: "A-2006", 
-    site: "Corporate Tower", 
-    type: "Intrusion", 
+  {
+    id: "A-2006",
+    site: "Corporate Tower",
+    type: "Intrusion",
     priority: "High",
-    priorityLevel: 1, 
+    priorityLevel: 1,
     assigned: "Lisa Rodriguez",
     assignedId: "g5",
-    eta: "6 min", 
-    slaTargetMins: 15, 
-    sinceMins: 18, 
-    monitoringCompany: "Metro Security Group", 
-    license: "MON-METRO-005", 
+    eta: "6 min",
+    slaTargetMins: 15,
+    sinceMins: 18,
+    monitoringCompany: "Metro Security Group",
+    license: "MON-METRO-005",
     licenseDetails: "License: MON-METRO-005",
-    unitPrice: 80, 
-    completed: true, 
+    unitPrice: 80,
+    completed: true,
     completedAt: new Date(Date.now() - 30 * 60 * 1000), // 30 min ago
     resolvedAt: new Date(Date.now() - 30 * 60 * 1000),
     createdAt: new Date(Date.now() - 60 * 60 * 1000), // 1 hour ago
     description: "Unauthorized entry detected at rear service entrance. Perimeter breach confirmed.",
     location: "Service Entrance - Rear Loading Dock"
   },
-  { 
-    id: "A-2007", 
-    site: "Hospital Campus", 
-    type: "Security Alert", 
+  {
+    id: "A-2007",
+    site: "Hospital Campus",
+    type: "Security Alert",
     priority: "High",
-    priorityLevel: 1, 
+    priorityLevel: 1,
     assigned: "David Wilson",
     assignedId: "g6",
-    eta: "8 min", 
-    slaTargetMins: 12, 
-    sinceMins: 5, 
-    monitoringCompany: "Healthcare Security Services", 
-    license: "MON-HEALTH-006", 
+    eta: "8 min",
+    slaTargetMins: 12,
+    sinceMins: 5,
+    monitoringCompany: "Healthcare Security Services",
+    license: "MON-HEALTH-006",
     licenseDetails: "License: MON-HEALTH-006",
-    unitPrice: 70, 
-    completed: false, 
+    unitPrice: 70,
+    completed: false,
     completedAt: undefined,
     createdAt: new Date(),
     description: "Security alert triggered in restricted medical area. Unauthorized access attempt detected.",
@@ -455,12 +455,12 @@ export const sampleAlarms = [
 
 
 export const sampleVehicles = [
-  { 
-    id: "V-11", 
-    callsign: "Alpha-1", 
-    status: "Active", 
-    odo: 45200, 
-    fuel: 78, 
+  {
+    id: "V-11",
+    callsign: "Alpha-1",
+    status: "Active",
+    odo: 45200,
+    fuel: 78,
     lastServiceKm: 42000,
     lat: -37.8136,
     lng: 144.9631,
@@ -478,12 +478,12 @@ export const sampleVehicles = [
     engineTemp: 92,
     batteryLevel: 88
   },
-  { 
-    id: "V-17", 
-    callsign: "Bravo-2", 
-    status: "Active", 
-    odo: 67800, 
-    fuel: 45, 
+  {
+    id: "V-17",
+    callsign: "Bravo-2",
+    status: "Active",
+    odo: 67800,
+    fuel: 45,
     lastServiceKm: 65000,
     lat: -37.8200,
     lng: 144.9500,
@@ -500,12 +500,12 @@ export const sampleVehicles = [
     engineTemp: 85,
     batteryLevel: 94
   },
-  { 
-    id: "V-22", 
-    callsign: "Charlie-3", 
-    status: "Maintenance", 
-    odo: 23400, 
-    fuel: 92, 
+  {
+    id: "V-22",
+    callsign: "Charlie-3",
+    status: "Maintenance",
+    odo: 23400,
+    fuel: 92,
     lastServiceKm: 20000,
     lat: -37.8180,
     lng: 144.9480,
@@ -590,3 +590,4 @@ export const mapConfig = {
     return { x, y };
   },
 };
+

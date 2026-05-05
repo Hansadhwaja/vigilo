@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Edit } from "lucide-react";
-import { AlarmFormValues, ServicePricingFormValues } from "@/schemas";
-import { useCreateAlarmMutation } from "@/apis/alarmsAPI";
+import { ServicePricingFormValues } from "@/schemas";
 import { toast } from "sonner";
 import ServicePricingForm from "../../Form/ServicePricingForm";
 import { useDispatch } from "react-redux";
