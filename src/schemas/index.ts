@@ -122,3 +122,45 @@ export const servicePricingSchema = z.object({
 });
 
 export type ServicePricingFormValues = z.infer<typeof servicePricingSchema>;
+
+//Scheduling
+export const assignmentSchema = z
+    .object({
+        description: z.string().min(1, "Description is required"),
+
+        startDate: z.string().min(1, "Start date is required"),
+        endDate: z.string().min(1, "End date is required"),
+
+        orderId: z.string().min(1, "Order is required"),
+
+        guardIds: z
+            .array(z.string())
+            .min(1, "Select at least one guard"),
+
+        startTime: z.string().min(1, "Start time is required"),
+        endTime: z.string().min(1, "End time is required"),
+    })
+    .refine(
+        (data) => {
+            if (!data.startDate || !data.endDate) return true;
+
+            return data.endDate >= data.startDate;
+        },
+        {
+            message: "End date must be after or equal to start date",
+            path: ["endDate"],
+        }
+    )
+    .refine(
+        (data) => {
+            if (!data.startTime || !data.endTime) return true;
+
+            return data.endTime > data.startTime;
+        },
+        {
+            message: "End time must be after start time",
+            path: ["endTime"],
+        }
+    );
+
+export type AssignmentFormValues = z.infer<typeof assignmentSchema>;

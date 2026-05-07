@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import ActivityTable from './Table/ActivityTable'
 
 const DashboardActivity = ({ currentTime }: { currentTime: Date }) => {

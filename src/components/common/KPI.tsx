@@ -1,7 +1,7 @@
 import React from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface KPIProps {

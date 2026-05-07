@@ -5,7 +5,7 @@ export const navLinks = [
     {
         icon: LayoutDashboard,
         label: "Dashboard",
-        link: "/dashboard"
+        link: "/"
     },
     {
         icon: Timer,
@@ -75,55 +75,6 @@ export const EMOJI_SET = [
     "📌", "📷", "📎", "🛡️",
 ];
 
-//Invoice
-export const dummyInvoices: InvoiceType[] = [
-    {
-        id: "INV-001",
-        client: "Acme Corp",
-        services: ["Web Development", "UI Design"],
-        period: "Mar 2026",
-        amount: 25000,
-        status: "Paid",
-        dueDate: "2026-03-31",
-    },
-    {
-        id: "INV-002",
-        client: "TechNova Solutions",
-        services: ["Mobile App Development"],
-        period: "Apr 2026",
-        amount: 40000,
-        status: "Pending",
-        dueDate: "2026-04-30",
-    },
-    {
-        id: "INV-003",
-        client: "GreenLeaf Pvt Ltd",
-        services: ["SEO Optimization", "Content Writing"],
-        period: "Feb 2026",
-        amount: 15000,
-        status: "Overdue",
-        dueDate: "2026-02-28",
-    },
-    {
-        id: "INV-004",
-        client: "ByteBridge",
-        services: ["Backend Development"],
-        period: "Apr 2026",
-        amount: 32000,
-        status: "Pending",
-        dueDate: "2026-05-05",
-    },
-    {
-        id: "INV-005",
-        client: "PixelCraft Studio",
-        services: ["Branding", "Graphic Design"],
-        period: "Jan 2026",
-        amount: 18000,
-        status: "Paid",
-        dueDate: "2026-01-31",
-    },
-];
-
 //Scheduling
 export const upcomingReminders = [
     {
@@ -143,3 +94,18 @@ export const upcomingReminders = [
 ];
 
 export const TIMEZONE = "Asia/Kolkata";
+
+export const timeSlots = [
+    { time: "06:00", label: "6 am" },
+    { time: "08:00", label: "8 am" },
+    { time: "10:00", label: "10 am" },
+    { time: "12:00", label: "12 pm" },
+    { time: "14:00", label: "2 pm" },
+    { time: "16:00", label: "4 pm" },
+    { time: "18:00", label: "6 pm" },
+    { time: "20:00", label: "8 pm" },
+    { time: "22:00", label: "10 pm" },
+    { time: "00:00", label: "12 am" },
+    { time: "02:00", label: "2 am" },
+    { time: "04:00", label: "4 am" },
+];

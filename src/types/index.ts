@@ -167,9 +167,58 @@ export type SummaryCardType = {
 };
 
 export interface CalculateGrandTotalProps {
-  orders?: InvoiceOrdersFormValues[];
-  alarms?: InvoiceAlarmsFormValues[];
-  services?: any[];
-  serviceData: any;
+    orders?: InvoiceOrdersFormValues[];
+    alarms?: InvoiceAlarmsFormValues[];
+    services?: any[];
+    serviceData: any;
 }
 
+//Scheduling
+export interface OrganizedAssignment {
+    id: string;
+
+    shiftId: string;
+    guardId: string;
+
+    guardName: string;
+    guardEmail: string;
+    guardStatus: string;
+
+    orderId: string;
+    orderLocationName: string;
+    orderName: string;
+    orderAddress: string;
+
+    description?: string;
+    type?: string;
+    status: string;
+
+    statusColors: {
+        bg: string;
+        text: string;
+    };
+
+    timeSlot: string;
+
+    start: string;
+    end: string;
+    duration: string;
+
+    displayDate: string;
+
+    originalStartDate: string;
+    originalEndDate: string;
+
+    allGuardIdsForShift: string[];
+}
+
+export type OrganizedShifts = {
+    [date: string]: {
+        [time: string]: OrganizedAssignment[];
+    };
+};
+
+export interface TimeSlot {
+  time: string;   // "08:00"
+  label: string;  // "8 AM"
+}

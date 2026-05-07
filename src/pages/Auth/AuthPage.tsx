@@ -24,7 +24,7 @@ const AuthPage = () => {
       localStorage.setItem("user", JSON.stringify(res.user));
 
       toast.success(res.message || "Login successful!");
-      navigate("/dashboard");
+      navigate("/");
     } catch (error: any) {
       const message =
         error?.data?.error?.message ||

@@ -1,7 +1,5 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-
 import InvoicingTable from '../Table/InvoicingTable'
-import { dummyInvoices } from '@/constants'
 import { InvoiceType } from '@/types'
 
 interface InvoicingTabsProps {
@@ -9,9 +7,6 @@ interface InvoicingTabsProps {
 }
 
 const InvoicingTabs = ({ invoices }: InvoicingTabsProps) => {
-
-    const paidInvoices = dummyInvoices.filter(inv => inv.status.toLowerCase() === "paid")
-    const overdueInvoices = dummyInvoices.filter(inv => inv.status.toLowerCase() === "overdue")
 
     return (
         <Tabs defaultValue="all">
@@ -26,11 +21,11 @@ const InvoicingTabs = ({ invoices }: InvoicingTabsProps) => {
             </TabsContent>
 
             <TabsContent value='paid'>
-                <InvoicingTable invoices={paidInvoices} />
+                <InvoicingTable invoices={invoices} />
             </TabsContent>
 
             <TabsContent value='overdue'>
-                <InvoicingTable invoices={overdueInvoices} />
+                <InvoicingTable invoices={invoices} />
             </TabsContent>
         </Tabs>
     )

@@ -103,7 +103,7 @@ export default function IncidentsPage({ list, filter, setFilter, onOpen }: Incid
   
   
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full">
       {/* Header Section */}
       <div className="flex items-center justify-between">
         <div>

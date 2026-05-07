@@ -1,7 +1,8 @@
 import { Order } from "@/apis/ordersApi";
+import { Schedule } from "@/apis/schedulingAPI";
 import { avatarColors, TIMEZONE } from "@/constants";
 import { ServicePricingFormValues } from "@/schemas";
-import { CalculateGrandTotalProps } from "@/types";
+import { CalculateGrandTotalProps, OrganizedAssignment, OrganizedShifts, TimeSlot } from "@/types";
 import { getStatusColor } from "@/utils/statusColors";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -138,6 +139,21 @@ export const getCurrentWeekDates = () => {
   return dates;
 };
 
+export const generateWeekDays = (selectedDate: Date) => {
+  const startOfWeek = new Date(selectedDate);
+  const day = startOfWeek.getDay();
+  startOfWeek.setDate(startOfWeek.getDate() - day); // Start from Sunday
+
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const currentDay = new Date(startOfWeek);
+    currentDay.setDate(startOfWeek.getDate() + i);
+    days.push(currentDay);
+  }
+
+  return days;
+};
+
 export const toLocalTime = (isoString: string | number | Date) => new Date(isoString);
 
 export const getTimeHHMM = (dateObj: Date) => dateObj.toTimeString().slice(0, 5);
@@ -151,55 +167,57 @@ export const getDuration = (
   return `${diff} hours`;
 };
 
-export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
-  const organized: { [key: string]: any } = {};
+export const organizeShifts = (
+  scheduleList: Schedule[],
+  timeSlots: TimeSlot[]
+): OrganizedShifts => {
+  const organized: OrganizedShifts = {};
 
-  const toMinutes = (hhmm: string) => {
+  const toMinutes = (hhmm: string): number => {
     const [h, m] = hhmm.split(":").map(Number);
     return h * 60 + m;
   };
 
   scheduleList.forEach((shift) => {
-    // ✅ FIX: Extract dates from startTime and endTime ISO strings
-    const startDateStr = shift.startTime.split('T')[0];  // "2026-01-29"
-    const endDateStr = shift.endTime.split('T')[0];      // "2026-01-31"
-    // For time display, use toLocalTime
+
+    const startDateStr = shift.startTime.split("T")[0];
+    const endDateStr = shift.endTime.split("T")[0];
+
     const start = toLocalTime(shift.startTime);
     const end = toLocalTime(shift.endTime);
 
-    // Parse dates properly
-    const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
-    const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+    const [sy, sm, sd] = startDateStr.split("-").map(Number);
+    const [ey, em, ed] = endDateStr.split("-").map(Number);
 
-    const startDateObj = new Date(startYear, startMonth - 1, startDay);
-    const endDateObj = new Date(endYear, endMonth - 1, endDay);
+    const startDateObj = new Date(sy, sm - 1, sd);
+    const endDateObj = new Date(ey, em - 1, ed);
 
-    const daysDiff = Math.floor((endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24));
+    const daysDiff = Math.floor(
+      (endDateObj.getTime() - startDateObj.getTime()) /
+      (1000 * 60 * 60 * 24)
+    );
 
-
-    // ✅ Loop through each day (inclusive)
     for (let dayOffset = 0; dayOffset <= daysDiff; dayOffset++) {
       const currentDateObj = new Date(startDateObj);
       currentDateObj.setDate(startDateObj.getDate() + dayOffset);
 
-      // Format date manually (avoid timezone issues)
       const year = currentDateObj.getFullYear();
-      const month = String(currentDateObj.getMonth() + 1).padStart(2, '0');
-      const day = String(currentDateObj.getDate()).padStart(2, '0');
+      const month = String(currentDateObj.getMonth() + 1).padStart(2, "0");
+      const day = String(currentDateObj.getDate()).padStart(2, "0");
+
       const dateKey = `${year}-${month}-${day}`;
 
-
-      // Use LOCAL TIME for comparison
       const shiftStartHHMM = getTimeHHMM(start);
       const shiftStartMin = toMinutes(shiftStartHHMM);
 
-      // Find matching slot
       let matchedSlot: string | null = null;
 
       for (let i = 0; i < timeSlots.length; i++) {
         const curr = toMinutes(timeSlots[i].time);
         const next =
-          i < timeSlots.length - 1 ? toMinutes(timeSlots[i + 1].time) : 9999;
+          i < timeSlots.length - 1
+            ? toMinutes(timeSlots[i + 1].time)
+            : 9999;
 
         if (shiftStartMin >= curr && shiftStartMin < next) {
           matchedSlot = timeSlots[i].time;
@@ -207,29 +225,31 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
         }
       }
 
-      if (!matchedSlot) {
-        console.log(`    ❌ No matching slot for ${shiftStartHHMM}`);
-        continue;
-      }
+      if (!matchedSlot) continue;
 
       if (!organized[dateKey]) organized[dateKey] = {};
-      if (!organized[dateKey][matchedSlot]) organized[dateKey][matchedSlot] = [];
+      if (!organized[dateKey][matchedSlot])
+        organized[dateKey][matchedSlot] = [];
 
-      // Add guard-based assignments for this day
-      shift.guards.forEach((guard: any) => {
-        organized[dateKey][matchedSlot].push({
+      shift.guards.forEach((guard) => {
+        const assignment: OrganizedAssignment = {
           shiftId: shift.id,
           guardId: guard.id,
           id: `${shift.id}-${guard.id}-${dateKey}`,
 
           guardName: guard.name,
           guardEmail: guard.email,
-          guardStatus: guard.StaticGuards?.status || shift.status,
+          guardStatus:
+            guard.StaticGuards?.status || shift.status,
 
           orderId: shift.orderId,
-          orderLocationName: shift.locationName || "Unknown Location",
-          orderName: shift.orderName || "Unknown Location",
-          orderAddress: shift.orderAddress || "Address not available",
+          orderLocationName:
+            shift.orderLocationName || "Unknown Location",
+          orderName:
+            shift.orderLocationName || "Unknown Location",
+          orderAddress:
+            shift.orderLocationAddress ||
+            "Address not available",
 
           description: shift.description,
           type: shift.type,
@@ -238,18 +258,31 @@ export const organizeShifts = (scheduleList: any[], timeSlots: any[]) => {
           statusColors: getStatusColor(shift.status),
 
           timeSlot: matchedSlot,
-          start,
-          end,
-          duration: getDuration(shift.startTime, shift.endTime),
+          start: start.toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          end: end.toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          duration: getDuration(
+            shift.startTime,
+            shift.endTime
+          ),
 
           displayDate: dateKey,
           originalStartDate: shift.startTime,
           originalEndDate: shift.endTime,
-          allGuardIdsForShift: shift.guards.map((g: any) => g.id),
-        });
+
+          allGuardIdsForShift: shift.guards.map(
+            (g) => g.id
+          ),
+        };
+
+        organized[dateKey][matchedSlot].push(assignment);
       });
     }
-
   });
 
   return organized;
@@ -353,5 +386,44 @@ export const getOrderPricing = (o: Order, serviceData: Record<string, ServicePri
     total: (durationValue || 0) * Number(price || 0),
     hours,
     days
+  };
+};
+
+export const formatDateTime = (dateTime: string) => {
+  const date = new Date(dateTime);
+  return {
+    date: date.toLocaleDateString(),
+    time: date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  };
+};
+
+export const mapAssignmentToForm = (a: any) => {
+  if (!a) return undefined;
+
+  return {
+    description: a.description || "",
+
+    // ✅ Date (YYYY-MM-DD)
+    startDate: a.originalStartDate
+      ? new Date(a.originalStartDate).toISOString().split("T")[0]
+      : "",
+
+    endDate: a.originalEndDate
+      ? new Date(a.originalEndDate).toISOString().split("T")[0]
+      : "",
+
+    orderId: a.orderId || "",
+
+    // ✅ Multi guards
+    guardIds: a.allGuardIdsForShift || [],
+
+    // ✅ Time (HH:mm)
+    startTime: a.originalStartDate
+      ? new Date(a.originalStartDate).toISOString().slice(11, 16)
+      : "",
+
+    endTime: a.originalEndDate
+      ? new Date(a.originalEndDate).toISOString().slice(11, 16)
+      : "",
   };
 };

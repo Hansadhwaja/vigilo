@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Search, Globe, LogOut, Edit, Loader2, ChevronRight, ChevronLeft } from "lucide-react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Search, Globe, LogOut, Edit, Loader2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +11,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { useGetProfileQuery } from "../../apis/profileApi";
+} from "@/components/ui/dropdown-menu";
+import { useGetProfileQuery } from "@/apis/profileApi";
 import ProfileEditDialog from "@/components/ProfileEditDialog";
 import { toast } from "sonner";
 import MobileSidebar from "./Navbar/MobileSidebar";
@@ -22,10 +22,9 @@ interface TopBarProps {
   isOpen: boolean;
   onSearchChange: (value: string) => void;
   onSidebarToggle: () => void;
-  liveRevenue: number;
 }
 
-export default function TopBar({ isOpen, search, onSearchChange, onSidebarToggle, liveRevenue }: TopBarProps) {
+export default function TopBar({ isOpen, search, onSearchChange, onSidebarToggle }: TopBarProps) {
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   // Fetch profile from API
@@ -51,12 +50,12 @@ export default function TopBar({ isOpen, search, onSearchChange, onSidebarToggle
   return (
     <>
       <div className="h-14 border-b bg-white flex items-center gap-2 px-3">
-        <MobileSidebar liveRevenue={liveRevenue} />
-        <Button size="icon" variant="ghost" className="max-lg:hidden" onClick={onSidebarToggle}>
+        <MobileSidebar />
+        <Button size="icon" variant="outline" className="max-lg:hidden" onClick={onSidebarToggle}>
           {isOpen ? (
-            <ChevronLeft />
+            <PanelLeftClose />
           ) : (
-            <ChevronRight />
+            <PanelLeftOpen />
           )}
         </Button>
         <div className="w-full max-w-xl relative max-md:hidden">

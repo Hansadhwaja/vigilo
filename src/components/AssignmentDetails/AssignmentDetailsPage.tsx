@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Button } from "../ui/button";
-import { Badge } from "../ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   User,
@@ -23,9 +23,9 @@ import {
 import {
   useGetStaticShiftDetailsForAdminQuery,
   useDeleteScheduleMutation
-} from "../../apis/schedulingAPI";
-import EditAssignmentDialog from "./EditAssignmentDialog";
+} from "@/apis/schedulingAPI";
 import { toast } from "sonner";
+import EditAssignmentModal from "../Scheduling/Modal/EditAssignmentModal";
 
 export default function AssignmentDetailsPage() {
   const { id } = useParams();
@@ -627,7 +627,7 @@ export default function AssignmentDetailsPage() {
       </div>
 
       {/* ✅ EDIT DIALOG */}
-      <EditAssignmentDialog
+      <EditAssignmentModal
         assignment={assignmentForEdit}
         open={isEditDialogOpen}
         onClose={() => setIsEditDialogOpen(false)}

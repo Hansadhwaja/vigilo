@@ -13,20 +13,7 @@ import DashboardChart from "@/components/Dashboard/Chart/DashboardChart";
 import DashboardActivity from "@/components/Dashboard/DashboardActivity";
 import FinancialHealthCard from "@/components/Dashboard/FinancialHealthCard";
 
-interface DashboardProps {
-  kpi: {
-    onDuty: number;
-    openIncidents: number;
-    openAlarms: number;
-    patrolsDue: number;
-    dailyRevenue: number;
-    revenueGrowth: number;
-    activeContracts: number;
-    avgResponseTime: number;
-  };
-}
-
-export default function Dashboard({ kpi }: DashboardProps) {
+export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const { data: ordersResponse } = useGetAllOrdersQuery({
@@ -143,7 +130,7 @@ export default function Dashboard({ kpi }: DashboardProps) {
 
       <LiveStatusHeader
         currentTime={currentTime}
-        avgResponseTime={kpi.avgResponseTime}
+        avgResponseTime={2}
         hourlyRevenue={liveMetrics.hourlyRevenue}
       />
 
@@ -154,10 +141,10 @@ export default function Dashboard({ kpi }: DashboardProps) {
         activeShiftsCount={activeShiftsCount}
         activeOrdersCount={activeOrdersCount}
         activePatrolsCount={activePatrolsCount}
-        dailyRevenue={kpi.dailyRevenue}
+        dailyRevenue={1000}
       />
 
-      <KPIMetrics openIncidents={kpi.openIncidents} />
+      <KPIMetrics openIncidents={4} />
 
       <RevenueMetrics />
 

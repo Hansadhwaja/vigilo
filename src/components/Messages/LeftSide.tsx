@@ -10,7 +10,7 @@ import { ContactItem, ContactRole } from '@/types';
 import { getAvatarColor, getInitials } from '@/lib/utils';
 import { PresenceItem } from '@/apis/messagesAPI';
 import MessageTabs from './Tabs';
-import { Separator } from '../ui/separator';
+import { Separator } from '@/components/ui/separator';
 
 
 interface LeftSideProps {

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Bell, Check, Clock } from "lucide-react";
-import { Progress } from "../ui/progress";
+import { Progress } from "@/components/ui/progress";
 
 const KPIMetrics = ({ openIncidents }: { openIncidents: number }) => {
     const metrics = [

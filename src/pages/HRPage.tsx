@@ -297,7 +297,7 @@ export default function HRPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full">
       {/* FIXED HEADER */}
       <div className="flex-shrink-0 space-y-3 pb-3">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">

@@ -64,7 +64,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full">
       {/* API Status Bar */}
       <Card className={`${apiConnected ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
         <CardContent className="p-4">

@@ -1425,7 +1425,7 @@ const handleQrIconAction = (checkpoint: any) => {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full">
       {/* Compact Header with Summary Cards Inline */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div className="flex-1">
