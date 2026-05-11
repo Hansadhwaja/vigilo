@@ -5,6 +5,7 @@ import { ServicePricingFormValues } from "@/schemas";
 import { CalculateGrandTotalProps, OrganizedAssignment, OrganizedShifts, TimeSlot } from "@/types";
 import { getStatusColor } from "@/utils/statusColors";
 import { clsx, type ClassValue } from "clsx"
+import { format, parse } from "date-fns";
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -426,4 +427,63 @@ export const mapAssignmentToForm = (a: any) => {
       ? new Date(a.originalEndDate).toISOString().slice(11, 16)
       : "",
   };
+};
+
+export const formatTime = (date: string) => {
+  return new Date(date).toLocaleTimeString(
+    "en-US",
+    {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    }
+  );
+};
+
+export const convertTo24Hour = (time: string) => {
+  const [timePart, modifier] = time.split(" ");
+
+  let [hours, minutes] = timePart.split(":");
+
+  if (hours === "12") {
+    hours = "00";
+  }
+
+  if (modifier === "PM") {
+    hours = String(Number(hours) + 12);
+  }
+
+  return `${hours.padStart(2, "0")}:${minutes}`;
+};
+
+export const combineDateAnd12HourTime = (
+  date: string,
+  time: string
+) => {
+
+  // "09 May 2026"
+  const parsedDate = parse(
+    date,
+    "dd MMM yyyy",
+    new Date()
+  );
+
+  // "13:16"
+  const parsedTime = parse(
+    time,
+    "HH:mm",
+    new Date()
+  );
+
+  parsedDate.setHours(
+    parsedTime.getHours(),
+    parsedTime.getMinutes(),
+    0,
+    0
+  );
+
+  return format(
+    parsedDate,
+    "yyyy-MM-dd'T'HH:mm:ssxxx"
+  );
 };

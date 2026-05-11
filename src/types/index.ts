@@ -219,8 +219,79 @@ export type OrganizedShifts = {
 };
 
 export interface TimeSlot {
-  time: string;   // "08:00"
-  label: string;  // "8 AM"
+    time: string;   // "08:00"
+    label: string;  // "8 AM"
 }
 
-//Client Management
+//HR&Compliance
+//TimeSheets
+export interface TimeSheet {
+    changeShiftStatus: string | null;
+    approvedStatus:
+    | "pending"
+    | "approved"
+    | "rejected";
+
+    clockInTime: string | null;
+
+    clockOutTime: string | null;
+
+    date: string;
+
+    description: string;
+
+    guard: {
+        id: string;
+        name: string;
+        email: string;
+    };
+
+    guardShiftStatus:
+    | "pending"
+    | "accepted"
+    | "rejected"
+    | "completed"
+    | string;
+
+    images: string[];
+
+    locationAddress: string;
+
+    locationName: string;
+
+    orderId: string;
+
+    overtimeEndTime: string | null;
+
+    overtimeHours: number;
+
+    overtimeStartTime: string | null;
+
+    requestOffStatus:
+    | "none"
+    | "pending"
+    | "approved"
+    | "rejected"
+    | string;
+
+    serviceType: string;
+
+    shiftEndTime: string;
+
+    shiftId: string;
+
+    shiftStartTime: string;
+
+    shiftStatus:
+    | "pending"
+    | "ongoing"
+    | "completed"
+    | "cancelled"
+    | string;
+
+    shiftTotalHours: number;
+
+    shiftType: string;
+
+    totalHours: number;
+}

@@ -182,7 +182,6 @@ export default function ClientsPage() {
         activeOrders={3}
         totalRevenue={4}
         avgOrderValue={1}
-
       />
 
       <ClientOperationsTabs />

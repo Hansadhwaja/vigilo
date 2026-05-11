@@ -234,3 +234,20 @@ export const clientSchema = z.object({
 });
 
 export type ClientFormValues = z.infer<typeof clientSchema>;
+
+
+//HR & Compliance
+export const guardSchema = z.object({
+    name: z.string().min(1, "Please Enter Name"),
+    email: z.string().min(1, "Please Enter Email"),
+    mobile: z.string().min(1, "Please Enter Mobile"),
+});
+
+export type GuardFormValues = z.infer<typeof guardSchema>;
+
+export const timeSheetSchema = z.object({
+    shiftStartTime: z.string().min(1, "Please Enter Start Time"),
+    shiftEndTime: z.string().min(1, "Please Enter End Time"),
+});
+
+export type TimeSheetFormValues = z.infer<typeof timeSheetSchema>;

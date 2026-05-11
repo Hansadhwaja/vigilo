@@ -199,6 +199,32 @@ export const schedulingApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Schedules"],
     }),
+
+    getAllTimeSheets: builder.query({
+      query: (params = {}) => {
+        const { guardId, fromDate, toDate, page, limit, search } = params;
+        const qs = new URLSearchParams();
+        if (guardId) qs.set("guardId", guardId);
+        if (fromDate) qs.set("fromDate", fromDate);
+        if (toDate) qs.set("toDate", toDate);
+        if (search) qs.set("search", search);
+        if (page) qs.set("page", page);
+        if (limit) qs.set("limit", limit);
+        return `/scheduling/getTimeSheets?${qs.toString()}`
+      },
+
+      providesTags: ["Schedules"],
+    }),
+
+    editTimeSheet: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/scheduling/timesheet/${id}`,
+        method: "PUT",
+        body: data
+      }),
+      invalidatesTags: ["Schedules"],
+
+    })
   }),
 });
 
@@ -207,5 +233,7 @@ export const {
   useCreateScheduleMutation,
   useDeleteScheduleMutation,
   useGetStaticShiftDetailsForAdminQuery,
-  useEditScheduleMutation
+  useEditScheduleMutation,
+  useGetAllTimeSheetsQuery,
+  useEditTimeSheetMutation
 } = schedulingApi;
