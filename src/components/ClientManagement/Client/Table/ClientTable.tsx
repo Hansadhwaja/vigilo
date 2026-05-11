@@ -1,32 +1,26 @@
-import React from "react";
-
 import {
     Column,
     DataTable,
     RowWithId,
 } from "@/components/common/Table/DataTable";
-
 import TablePagination from "@/components/common/Table/TablePagination";
-
 import { Button } from "@/components/ui/button";
-
 import {
     AlertCircle,
     Building,
+    Ellipsis,
+    EllipsisVertical,
     Eye,
     Mail,
     Phone,
     Trash2,
 } from "lucide-react";
-
-export interface Client {
-    id: string;
-    name: string;
-    email: string;
-    mobile: string;
-    address?: string;
-}
-
+import EditClientModal from "../Modal/EditClientModal";
+import { Client } from "@/apis/usersApi";
+import ViewClientModal from "../Modal/ViewClientModal";
+import DeleteClientModal from "../Modal/DeleteClientModal";
+import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
+import { DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 interface ClientTableProps {
     page: number;
     totalPages: number;
@@ -131,22 +125,26 @@ const ClientTable = ({
 
                 render: (row) => (
                     <div className="flex items-center justify-center gap-2">
-                        <Button
-                            size="icon"
-                            variant="ghost"
+                        <ViewClientModal client={row} />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger className="cursor-pointer">
+                                <EllipsisVertical size={16} />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuItem>
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                        <EditClientModal client={row} />
+                                    </div>
 
-                        >
-                            <Eye className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="text-red-600 hover:bg-red-50"
-
-                        >
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem>
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                        <DeleteClientModal client={row} />
+                                    </div>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                 ),
             },

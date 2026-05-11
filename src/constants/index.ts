@@ -1,4 +1,3 @@
-import { InvoiceType } from "@/types";
 import { Bell, Building2, Euro, LayoutDashboard, Map, MessageSquareText, Radar, Settings, Timer, TriangleAlert, User } from "lucide-react";
 
 export const navLinks = [
@@ -108,4 +107,15 @@ export const timeSlots = [
     { time: "00:00", label: "12 am" },
     { time: "02:00", label: "2 am" },
     { time: "04:00", label: "4 am" },
+];
+
+//Invoicing
+export const services = [
+    { label: "Static", value: "static" },
+    { label: "Patrol", value: "patrol" },
+    { label: "Premium Security", value: "premiumSecurity" },
+    { label: "Standard Patrol", value: "standardPatrol" },
+    { label: "24/7 Monitoring", value: "24/7Monitoring" },
+    { label: "Healthcare Security", value: "healthcareSecurity" },
+    { label: "Industrial Security", value: "industrialSecurity" },
 ];

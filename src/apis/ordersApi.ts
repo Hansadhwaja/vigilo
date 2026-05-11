@@ -1,4 +1,5 @@
 // ordersApi.ts
+import { RejectOrderFormValues } from "@/schemas";
 import { baseApi } from "./baseApi";
 
 // Interfaces for Order data structures
@@ -142,11 +143,11 @@ export const ordersApi = baseApi.injectEndpoints({
     }),
 
     // Cancel order (Admin reject order)
-    cancelOrder: builder.mutation<CancelOrderResponse, { id: string; reason: string }>({
-      query: ({ id, reason }) => ({
+    cancelOrder: builder.mutation<CancelOrderResponse, { id: string; data: RejectOrderFormValues }>({
+      query: ({ id, data }) => ({
         url: `/orders/adminCancelOrder/${id}`,
         method: "POST",
-        body: { reason },
+        body: data,
       }),
     }),
 
@@ -163,11 +164,11 @@ export const ordersApi = baseApi.injectEndpoints({
     }),
 
     // Edit order
-    editOrder: builder.mutation<EditOrderResponse, { id: string; body: EditOrderPayload }>({
-      query: ({ id, body }) => ({
+    editOrder: builder.mutation<EditOrderResponse, { id: string; data: EditOrderPayload }>({
+      query: ({ id, data }) => ({
         url: `/orders/editOrder/${id}`,
         method: "PUT",
-        body,
+        body: data,
       }),
       invalidatesTags: (_result, _error, { id }) => [
         { type: "Orders", id },

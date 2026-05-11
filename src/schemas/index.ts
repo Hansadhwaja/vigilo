@@ -164,3 +164,73 @@ export const assignmentSchema = z
     );
 
 export type AssignmentFormValues = z.infer<typeof assignmentSchema>;
+
+//Client Management
+export const orderSchema = z.object({
+    serviceType: z
+        .string()
+        .min(1, "Please select a service type"),
+
+    locationName: z
+        .string()
+        .optional(),
+
+    locationAddress: z
+        .string()
+        .min(1, "Location address is required"),
+
+    siteServiceLat: z
+        .number()
+        .min(1, "Latitude is required"),
+
+    siteServiceLng: z
+        .number()
+        .min(1, "Longitude is required"),
+
+    guardsRequired: z
+        .number()
+        .min(1, "At least 1 guard is required"),
+
+    description: z
+        .string()
+        .min(10, "Description must be at least 10 characters")
+        .optional(),
+
+    startDate: z
+        .string()
+        .min(1, "Start date is required"),
+
+    endDate: z
+        .string()
+        .min(1, "End date is required"),
+
+    startTime: z
+        .string()
+        .min(1, "Start time is required"),
+
+    endTime: z
+        .string()
+        .min(1, "End time is required"),
+
+    images: z.array(z.string()).optional(),
+});
+
+export type OrderFormValues = z.infer<typeof orderSchema>;
+
+export const rejectOrderSchema = z.object({
+    reason: z
+        .string()
+        .optional(),
+});
+
+export type RejectOrderFormValues = z.infer<typeof rejectOrderSchema>;
+
+export const clientSchema = z.object({
+    name: z.string().min(1, "Please Enter Name"),
+    email: z.string().min(1, "Please Enter Email"),
+    mobile: z.string().min(1, "Please Enter Mobile"),
+    address: z.string().min(1, "Please Enter Address"),
+    avatar: z.string().optional(),
+});
+
+export type ClientFormValues = z.infer<typeof clientSchema>;

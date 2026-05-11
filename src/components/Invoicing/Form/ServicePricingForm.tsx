@@ -30,16 +30,7 @@ import {
 } from "@/components/ui/select";
 import { RootState } from "@/apis/store";
 import { setServicePricing } from "@/apis/slices/servicePricingSlice";
-
-const services = [
-    "static",
-    "patrol",
-    "premiumSecurity",
-    "standardPatrol",
-    "24/7Monitoring",
-    "healthcareSecurity",
-    "industrialSecurity",
-];
+import { services } from "@/constants";
 
 const ServicePricingForm = ({
     isLoading,
@@ -105,8 +96,8 @@ const ServicePricingForm = ({
 
                                 <SelectContent>
                                     {services.map((service) => (
-                                        <SelectItem key={service} value={service}>
-                                            {service}
+                                        <SelectItem key={service.value} value={service.value}>
+                                            {service.label}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>

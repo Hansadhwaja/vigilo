@@ -13,6 +13,7 @@ import {
     Building,
     Calendar,
     Edit,
+    EllipsisVertical,
     Eye,
     MapPin,
     User,
@@ -20,6 +21,11 @@ import {
 import TablePagination from "@/components/common/Table/TablePagination";
 import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
 import { Order } from "@/apis/ordersApi";
+import { Link } from "react-router-dom";
+import EditOrderModal from "../Modal/EditOrderModal";
+import AcceptOrderModal from "../Modal/AcceptOrderModal";
+import RejectOrderModal from "../Modal/RejectOrderModal";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface OrderTableProps {
     page: number;
@@ -73,7 +79,7 @@ const OrderTable = ({
         });
     };
 
-    const columns: Column<any & RowWithId>[] = [
+    const columns: Column<Order & RowWithId>[] = [
         {
             key: "serviceType",
             header: "Service",
@@ -187,46 +193,44 @@ const OrderTable = ({
 
             render: (row) => (
                 <div className="flex items-center justify-center gap-2">
-                    <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => { }}
+                    <Link
+                        to={`/clients/${row.id}`}
                     >
                         <Eye className="h-4 w-4" />
-                    </Button>
-
-                    {row.status !== "completed" &&
-                        row.status !== "cancelled" && (
-                            <Button
-                                size="icon"
-                                variant="ghost"
-                                className="text-blue-600 hover:bg-blue-50"
-                                onClick={() => { }}
-                            >
-                                <Edit className="h-4 w-4" />
-                            </Button>
-                        )}
-
-                    {row.status === "pending" && (
-                        <>
-                            <Button
-                                size="sm"
-                                className="bg-emerald-600 hover:bg-emerald-700"
-
-                            >
-                                Accept
-                            </Button>
-
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-red-600 hover:bg-red-50"
-
-                            >
-                                Reject
-                            </Button>
-                        </>
-                    )}
+                    </Link>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger className="cursor-pointer">
+                            <EllipsisVertical size={16} />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            {row.status !== "completed" && row.status !== "cancelled" && (<>
+                                <DropdownMenuItem>
+                                    <div onClick={(e) => e.stopPropagation()}>
+                                        <EditOrderModal order={row} />
+                                    </div>
+                                </DropdownMenuItem>
+                                {row.status === "pending" && (
+                                    <DropdownMenuSeparator />
+                                )}
+                            </>
+                            )}
+                            {row.status === "pending" && (
+                                <>
+                                    <DropdownMenuItem>
+                                        <div onClick={(e) => e.stopPropagation()}>
+                                            <AcceptOrderModal id={row.id} />
+                                        </div>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem>
+                                        <div onClick={(e) => e.stopPropagation()}>
+                                            <RejectOrderModal id={row.id} />
+                                        </div>
+                                    </DropdownMenuItem>
+                                </>
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             ),
         },

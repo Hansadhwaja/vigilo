@@ -222,3 +222,5 @@ export interface TimeSlot {
   time: string;   // "08:00"
   label: string;  // "8 AM"
 }
+
+//Client Management
