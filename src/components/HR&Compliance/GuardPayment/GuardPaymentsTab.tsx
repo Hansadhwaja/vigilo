@@ -7,6 +7,7 @@ import GuardPaymentSearchFilters from './GuardPaymentSearchFilters';
 import GuardPaymentStats from './GuardPaymentStatCards';
 import GeneratePaymentModal from './Modal/GeneratePaymentModal';
 import PaymentList from './PaymentList';
+import { useGetAllGuardPaymentsQuery } from '@/apis/invoiceApis';
 
 const GuardPaymentsTab = () => {
     const {
@@ -25,16 +26,17 @@ const GuardPaymentsTab = () => {
     const { data: guardsRes, isLoading: isGuardsLoading } = useGetAllGuardsQuery();
     const guards = guardsRes?.data ?? [];
 
-    const { data, isLoading, isError, isFetching, error } = useGetAllTimeSheetsQuery({
+    const { data: timeSheetRes, isLoading, isError, isFetching, error } = useGetAllTimeSheetsQuery({
         search: debouncedSearch,
         guardId,
         fromDate,
         toDate
     });
 
-    const timeSheets = data?.data ?? [];
+    const timeSheets = timeSheetRes?.data ?? [];
 
-    console.log(timeSheets);
+    const { data } = useGetAllGuardPaymentsQuery(undefined);
+    const guardPayments = data?.data?.payments ?? [];
 
 
     return (
@@ -52,7 +54,7 @@ const GuardPaymentsTab = () => {
                     guards={guards}
                     isGuardsLoading={isGuardsLoading}
                 />
-                <PaymentList />
+                <PaymentList guardPayments={guardPayments} />
             </CardContent>
         </Card>
     )

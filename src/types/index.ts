@@ -295,3 +295,78 @@ export interface TimeSheet {
 
     totalHours: number;
 }
+
+//Guard Payment
+export interface GuardPaymentResponse {
+    success: boolean;
+    data: {
+        pagination: Pagination;
+        payments: GuardPayment[];
+    };
+}
+
+export interface Pagination {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+}
+
+export interface GuardPayment {
+    id: string;
+
+    guardId: string;
+
+    hourlyRate: string;
+    overtimeHourlyRate: string;
+
+    regularHours: string;
+    overtimeHours: string;
+    totalHours: string;
+
+    taxDeduction: string;
+    otherDeductions: string;
+
+    basePay: string;
+    overtimePay: string;
+    totalPay: string;
+
+    paymentDate: string | null;
+
+    status:
+    | "pending"
+    | "approved"
+    | "paid"
+    | "processing";
+
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+
+    guard: Guard;
+
+    statics: GuardStatic[];
+}
+
+export interface Guard {
+    id: string;
+    name: string;
+    email: string;
+}
+
+export interface GuardStatic {
+    id: string;
+
+    date: string;
+
+    startTime: string;
+    endTime: string;
+
+    shiftTotalHours: number;
+
+    status:
+    | "completed"
+    | "cancelled"
+    | "ended_early"
+    | "overtime_ended";
+}

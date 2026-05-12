@@ -1,23 +1,26 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Clock, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useState } from 'react'
 import { toast } from 'sonner';
-import { TimeSheetFormValues } from '@/schemas';
+import { GuardPaymentFormValues } from '@/schemas';
 import { Button } from '@/components/ui/button';
-import { TimeSheet } from '@/types';
-import TimeSheetForm from '../Form/TimeSheetForm';
+import GuardPaymentForm from '../Form/GuardPaymentForm';
+import { useGenerateGuardPaymentMutation } from '@/apis/invoiceApis';
 
 const GeneratePaymentModal = () => {
     const [open, setOpen] = useState(false);
 
-    const handleSubmit = async (data: TimeSheetFormValues) => {
-        console.log("Edit Time Sheet Data", data);
+    const [generateGuardPayment, { isLoading }] = useGenerateGuardPaymentMutation();
+
+    const handleSubmit = async (data: GuardPaymentFormValues) => {
+        console.log("Guard Payment Data", data);
         try {
-            toast.success("Time Sheet Edited Successfully");
+            await generateGuardPayment(data).unwrap();
+            toast.success(" Guard Payment Added Successfully");
             setOpen(false);
         } catch (error) {
             console.log(error);
-            toast.error("Error while Editing Time Sheet");
+            toast.error("Error while Adding Guard Payment");
         }
     };
 
@@ -29,20 +32,18 @@ const GeneratePaymentModal = () => {
                     Generate Payment
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-lg">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Clock className="h-5 w-5" />
-                        Edit Time Sheet
+                        Generate Payment
                     </DialogTitle>
                     <DialogDescription>
-                        Modify shift times if corrections are needed
+                        Create a new payment record for a guard based on their work hours and rates
                     </DialogDescription>
                 </DialogHeader>
-                <TimeSheetForm
-                    
+                <GuardPaymentForm
                     onSubmit={handleSubmit}
-                    isLoading={false}
+                    isLoading={isLoading}
                     onCancel={() => setOpen(false)}
                 />
             </DialogContent>

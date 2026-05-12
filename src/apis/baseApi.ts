@@ -26,7 +26,8 @@ export const baseApi = createApi({
     "Notifications",
     "Messages",
     "Presence",
-    "Invoice"
+    "Invoice",
+    "GuardPayment"
   ],
   endpoints: () => ({}), // will extend in separate files
 });

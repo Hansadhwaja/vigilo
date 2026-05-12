@@ -101,10 +101,12 @@ export const calculateWork = (
   };
 };
 
-export const formatCurrency = (val: number) =>
-  new Intl.NumberFormat("en-IN", {
+export const formatCurrency = (
+  val: number
+) =>
+  new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "INR",
+    currency: "USD",
   }).format(val);
 
 

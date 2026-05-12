@@ -224,6 +224,19 @@ export const schedulingApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Schedules"],
 
+    }),
+
+    getGuardTimeSheetSummary: builder.query({
+      query: (params = {}) => {
+        const qs = new URLSearchParams();
+        if (params.guardId) qs.set("guardId", params.guardId);
+        if (params.fromDate) qs.set("fromDate", params.fromDate);
+        if (params.toDate) qs.set("toDate", params.toDate);
+        if (params.details) qs.set("details", params.details);
+
+        return `/scheduling/getGuardTimeSheetSummary?${qs.toString()}`
+      },
+      providesTags: ["Schedules"],
     })
   }),
 });
@@ -235,5 +248,6 @@ export const {
   useGetStaticShiftDetailsForAdminQuery,
   useEditScheduleMutation,
   useGetAllTimeSheetsQuery,
-  useEditTimeSheetMutation
+  useEditTimeSheetMutation,
+  useGetGuardTimeSheetSummaryQuery
 } = schedulingApi;

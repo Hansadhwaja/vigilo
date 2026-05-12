@@ -251,3 +251,51 @@ export const timeSheetSchema = z.object({
 });
 
 export type TimeSheetFormValues = z.infer<typeof timeSheetSchema>;
+
+//Guard Payment
+export const guardPaymentSchema = z.object({
+    guardId: z
+        .string()
+        .min(1, "Guard is required"),
+
+    staticIds: z
+        .array(z.string()),
+
+    hourlyRate: z
+        .number()
+        .min(0, "Hourly rate cannot be negative"),
+
+    overtimeHourlyRate: z
+        .number()
+        .min(
+            0,
+            "Overtime hourly rate cannot be negative"
+        ),
+
+    regularHours: z
+        .number()
+        .min(0, "Regular hours cannot be negative"),
+
+    overtimeHours: z
+        .number()
+        .min(0, "Overtime hours cannot be negative"),
+
+    totalHours: z
+        .number()
+        .min(0),
+
+    taxDeduction: z
+        .number()
+        .min(0, "Tax deduction cannot be negative"),
+
+    otherDeductions: z.number().min(0, "Other deductions cannot be negative"),
+    basePay: z.number().min(0),
+    overtimePay: z.number().min(0),
+    totalPay: z.number().min(0),
+    fromDate: z.string().min(1, "Select Start Date"),
+    toDate: z.string().min(1, "Select End Date"),
+});
+
+export type GuardPaymentFormValues = z.infer<
+    typeof guardPaymentSchema
+>;
