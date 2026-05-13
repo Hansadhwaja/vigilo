@@ -124,7 +124,7 @@ const BroadCastMessageForm = ({
             )} */}
 
             {/* Project */}
-            <Controller
+            {/* <Controller
                 control={form.control}
                 name="projectId"
                 render={({ field, fieldState }) => (
@@ -149,7 +149,7 @@ const BroadCastMessageForm = ({
                         )}
                     </Field>
                 )}
-            />
+            /> */}
 
             {/* Message */}
             <Controller
@@ -169,7 +169,7 @@ const BroadCastMessageForm = ({
             />
 
             {/* Attachment */}
-            <Controller
+            {/* <Controller
                 control={form.control}
                 name="attachment"
                 render={({ field, fieldState }) => (
@@ -188,7 +188,7 @@ const BroadCastMessageForm = ({
                         )}
                     </Field>
                 )}
-            />
+            /> */}
 
             <Button type="submit" className="w-full bg-green-500 hover:bg-green-600">Send Broadcast</Button>
         </form>

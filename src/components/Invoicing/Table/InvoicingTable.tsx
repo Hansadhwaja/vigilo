@@ -1,17 +1,38 @@
 
+import { useGenerateInvoicePDFMutation } from '@/apis/invoiceApis';
+import Loader from '@/components/common/Loader';
 import { Column, DataTable, RowWithId } from '@/components/common/Table/DataTable'
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 import { InvoiceType } from '@/types';
 import { Download, Eye } from 'lucide-react'
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface InvoicingTableProps {
     invoices: InvoiceType[];
 }
 
 export const InvoicingTable = ({ invoices }: InvoicingTableProps) => {
+
+    const [loadingInvoiceId, setLoadingInvoiceId] = useState<string | null>(null);
+    const [generateInvoicePDF, { isLoading }] = useGenerateInvoicePDFMutation();
+
+    const handleGeneratePdf = async (id: string) => {
+        setLoadingInvoiceId(id);
+        try {
+            const res = await generateInvoicePDF(id).unwrap();
+            window.open(res?.data?.invoiceUrl, "_blank");
+            toast.success("Invoice Fetched Successfully");
+
+        } catch (error) {
+            toast.error("Error while fetching invoice pdf");
+        } finally {
+
+            setLoadingInvoiceId(null);
+        }
+    }
 
     const columns: Column<InvoiceType & RowWithId>[] = [
         {
@@ -63,12 +84,17 @@ export const InvoicingTable = ({ invoices }: InvoicingTableProps) => {
             align: 'center',
             render: (row) => (
                 <div className="flex gap-2 justify-center items-center">
-                    <Link to={`/invoicing/details/${row.id}`}>
-                        <Eye size={14} />
-                    </Link>
-
-                    <Button variant="outline" size="sm">
-                        <Download size={14} />
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className='cursor-pointer'
+                        onClick={() => handleGeneratePdf(row.id)}
+                        disabled={loadingInvoiceId === row.id}
+                    >
+                        {loadingInvoiceId === row.id
+                            ? <Loader />
+                            : <Download size={14} />
+                        }
                     </Button>
                 </div>
             ),

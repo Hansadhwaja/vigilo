@@ -53,7 +53,7 @@ const ChatsTab = ({
     return (
         <div className='flex flex-col gap-2 h-full overflow-hidden'>
             <div className='space-y-2'>
-                <div ref={dropdownRef} className="relative">
+                {/* <div ref={dropdownRef} className="relative">
                     <button
                         type="button"
                         onClick={() => setDropdownOpen((v) => !v)}
@@ -81,7 +81,7 @@ const ChatsTab = ({
                             ))}
                         </div>
                     )}
-                </div>
+                </div> */}
 
                 <div className="relative">
                     <Search className="h-3.5 w-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
