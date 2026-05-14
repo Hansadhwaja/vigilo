@@ -16,12 +16,8 @@ import InvoiceDetailsPage from '@/pages/Invoicing/InvoiceDetailsPage';
 import AlarmsPage from '@/pages/Alarm/AlarmsPage';
 
 const MainLayout = () => {
-    const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [search, setSearch] = useState("");
-
-    const [incidentList] = useState<Incident[]>(sampleIncidents);
-    const [incidentFilter, setIncidentFilter] = useState("all");
 
     const toggleSidebar = useCallback(() => setSidebarOpen((prev) => !prev), []);
 
@@ -61,22 +57,12 @@ const MainLayout = () => {
     //     );
     // }, []);
 
-    // const handleIncidentSelect = useCallback((incident: Incident) => {
-    //     setSelectedIncident(incident);
-    //     navigate(`/incidents/${incident.id}`);
-    // }, [navigate]);
-
-    // const handleIncidentBack = useCallback(() => {
-    //     setSelectedIncident(null);
-    //     navigate('/incidents');
-    // }, [navigate]);
 
 
     return (
         <div className="h-screen w-screen bg-gray-50 flex overflow-hidden">
             <Sidebar
                 isOpen={sidebarOpen}
-
             />
 
             <div className="flex-1 flex flex-col min-h-0 bg-gray-50 min-w-0">
@@ -104,12 +90,7 @@ const MainLayout = () => {
                         <Route
                             path="/incidents"
                             element={
-                                <IncidentsPage
-                                    list={incidentList}
-                                    filter={incidentFilter}
-                                    setFilter={setIncidentFilter}
-                                    onOpen={() => { }}
-                                />
+                                <IncidentsPage />
                             }
                         />
                         <Route path="/incidents/:id" element={<IncidentDetailsPage />} />

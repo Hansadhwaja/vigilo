@@ -90,7 +90,7 @@ const TimeSheetSearchFilters = ({
                 </SelectTrigger>
                 <SelectContent>
                     {guards.map(g => (
-                        <SelectItem value={g.id}>{g.name}</SelectItem>
+                        <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
                     ))}
                 </SelectContent>
             </Select>

@@ -30,7 +30,7 @@ import {
     orderSchema,
 } from "@/schemas";
 import { services } from "@/constants";
-import ImageUpload from "@/components/common/ImageUpload/ImageUpload";
+import ImageUpload from "@/components/common/Image/ImageUpload";
 
 interface OrderFormProps {
     onSubmit: (d: OrderFormValues) => Promise<void> | void;

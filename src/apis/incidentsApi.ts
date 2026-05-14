@@ -12,37 +12,35 @@ export interface IncidentShift {
   type: string;
 }
 
-export interface Incident {
+export interface IncidentType {
   id: string;
   name: string;
-  location: string; // ← STRING, not object
+  location: string;
   description: string;
   images: string[];
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+
   shiftId: string;
   reportedBy: string;
   assignedGuard: string | null;
-  assignedGuardUser: any | null;
-  reporter: IncidentReporter;
-  shift: IncidentShift;
 
-  // For UI convenience (these don't exist in API, added for display)
-  site?: string;
-  type?: string;
-  severity?: string;
-  status?: string;
-  assigned?: string;
-  time?: string;
-  priorityLevel?: string;
-  guardMessage?: string;
-  actionsTaken?: string;
-  reporterName?: string;
-  photo?: string;
-  clientNotified?: boolean;
+  assignedGuardUser: {
+    id: string;
+    name: string;
+  } | null;
+
+  reporter: {
+    id: string;
+    name: string;
+  };
+
+  shift: {
+    id: string;
+    type: string;
+  };
 }
-
 export interface Pagination {
   total: number;
   page: number;
@@ -53,48 +51,33 @@ export interface Pagination {
 export interface GetAllIncidentsResponse {
   success: boolean;
   message: string;
-  data: Incident[];
+  data: IncidentType[];
   pagination: Pagination;
 }
 
 export interface GetIncidentByIdResponse {
   success: boolean;
   message: string;
-  data: Incident;
+  data: IncidentType;
 }
 
-// ---- Query Params for filtering pagination ----
-export interface GetAllIncidentsParams {
-  limit?: number;
-  page?: number;
-  status?: string;
-  type?: string;
-  severity?: string;
-  search?: string;
-}
 
 export const incidentsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
 
-    // ---- FETCH ALL INCIDENTS ----
-    getAllIncidents: builder.query<GetAllIncidentsResponse, GetAllIncidentsParams | void>({
+    getAllIncidents: builder.query({
       query: (params) => {
-        const queryParams = new URLSearchParams();
+        const qs = new URLSearchParams();
 
         if (params) {
-          if (params.limit) queryParams.append("limit", params.limit.toString());
-          if (params.page) queryParams.append("page", params.page.toString());
-          if (params.status) queryParams.append("status", params.status);
-          if (params.type) queryParams.append("type", params.type);
-          if (params.severity) queryParams.append("severity", params.severity);
-          if (params.search) queryParams.append("search", params.search);
+          if (params.limit) qs.append("limit", params.limit.toString());
+          if (params.page) qs.append("page", params.page.toString());
+          if (params.status) qs.append("status", params.status);
+          if (params.search) qs.append("search", params.search);
         }
 
-        return {
-          url: `/incidents/getAllIncidentsForAdmin${queryParams.toString() ? `?${queryParams.toString()}` : ""
-            }`,
-          method: "GET",
-        };
+        return `/incidents/getAllIncidentsForAdmin${qs.toString() ? `?${qs.toString()}` : ""}`
+
       },
       transformResponse: (response: any): GetAllIncidentsResponse => {
         const mappedData = response.data.map((i: any) => ({
@@ -146,49 +129,11 @@ export const incidentsApi = baseApi.injectEndpoints({
           : [{ type: "Incidents", id: "LIST" }],
     }),
 
-    // ---- GET ONE INCIDENT BY ID ----
-    getIncidentById: builder.query<GetIncidentByIdResponse, string>({
+    getIncidentById: builder.query({
       query: (id) => ({
         url: `/incidents/getIncidentByIdForAdmin/${id}`,
         method: "GET",
       }),
-      transformResponse: (res: any): GetIncidentByIdResponse => {
-        const i = res.data;
-
-        const mapped: Incident = {
-          // ✅ Real API fields (exactly as they come from API)
-          id: i.id,
-          name: i.name,
-          location: i.location,
-          description: i.description,
-          images: i.images || [],
-          createdAt: i.createdAt,
-          updatedAt: i.updatedAt,
-          deletedAt: i.deletedAt,
-          shiftId: i.shiftId,
-          reportedBy: i.reportedBy,
-          assignedGuard: i.assignedGuard,
-          assignedGuardUser: i.assignedGuardUser,
-          reporter: i.reporter || { id: "", name: "Unknown" },
-          shift: i.shift || { id: "", type: "Unknown" },
-
-          // ✅ UI convenience fields (for backward compatibility)
-          site: i.name || "Unknown Site",
-          type: i.name || "Incident",
-          severity: i.severity || "Medium",
-          status: i.status || "Pending",
-          assigned: i.reporter ? i.reporter.name : "Not Assigned",
-          time: i.createdAt,
-          priorityLevel: i.priorityLevel || "Normal",
-          guardMessage: i.guardMessage || i.description || "",
-          actionsTaken: i.actionsTaken || "",
-          reporterName: i.reporter?.name || "Unknown Reporter",
-          photo: i.images?.[0] || "",
-          clientNotified: i.clientNotified !== undefined ? i.clientNotified : true,
-        };
-
-        return { ...res, data: mapped };
-      },
       providesTags: (_result, _error, id) => [
         { type: "Incidents", id },
       ],
@@ -196,7 +141,6 @@ export const incidentsApi = baseApi.injectEndpoints({
   }),
 });
 
-// ---- Export Hooks ----
 export const {
   useGetAllIncidentsQuery,
   useGetIncidentByIdQuery,

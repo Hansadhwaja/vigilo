@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import ImageViewerModal from "./Modal/ImageViewerModal";
+import ImageViewerModal from "@/components/common/Image/Modal/ImageViewerModal";
 import { useState } from "react";
 
 interface Props {

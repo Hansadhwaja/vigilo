@@ -5,39 +5,87 @@ interface StatCardProps {
   label: string;
   value: number | string;
   Icon?: LucideIcon;
-  color?: string; // only for icon accent now
+  color?: string;
 }
 
 const StatCard = ({
   label,
   value,
   Icon,
-  color = "text-gray-600 bg-gray-100",
+  color = "bg-slate-100 text-slate-700",
 }: StatCardProps) => {
   return (
     <div
       className={cn(
-        "flex items-center gap-4 px-4 py-3 rounded-xl border bg-white",
-        "shadow-sm hover:shadow-md transition-all duration-200",
-        "min-w-[140px]"
+        "group relative overflow-hidden",
+        "flex items-center gap-4",
+        "rounded-2xl border border-slate-200",
+        "bg-white/90 backdrop-blur",
+        "px-5 py-4",
+        "shadow-sm",
+        "transition-all duration-300",
+        "hover:-translate-y-0.5 hover:shadow-md",
+        "min-w-[180px]"
       )}
     >
+      {/* subtle glow */}
+      <div
+        className="
+          absolute
+          inset-0
+          bg-gradient-to-br
+          from-slate-50/40
+          via-transparent
+          to-blue-50/30
+          opacity-0
+          transition-opacity
+          duration-300
+          group-hover:opacity-100
+        "
+      />
+
+      {/* icon */}
       {Icon && (
         <div
           className={cn(
-            "p-2 rounded-lg flex items-center justify-center",
+            "relative z-10",
+            "flex h-12 w-12 items-center justify-center",
+            "rounded-2xl",
+            "shadow-sm",
+            "transition-transform duration-300 group-hover:scale-105",
             color
           )}
         >
-          <Icon className="h-4 w-4" />
+          <Icon className="h-5 w-5" />
         </div>
       )}
 
-      <div className="flex flex-col">
-        <span className="text-lg font-semibold text-gray-900 leading-none">
+      {/* content */}
+      <div className="relative z-10 flex flex-col">
+        <span
+          className="
+            text-2xl
+            font-bold
+            tracking-tight
+            text-slate-900
+            leading-none
+          "
+        >
           {value}
         </span>
-        <span className="text-xs text-gray-500">{label}</span>
+
+        <span
+          className="
+            mt-1
+            text-xs
+            font-semibold
+            uppercase
+            tracking-[0.18em]
+            text-slate-500
+          "
+        >
+          {label}
+        </span>
       </div>
     </div>
   );

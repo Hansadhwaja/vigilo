@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-import ImageUpload from "@/components/common/ImageUpload/ImageUpload";
+import ImageUpload from "@/components/common/Image/ImageUpload";
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ClientFormValues, clientSchema } from "@/schemas";

@@ -489,3 +489,25 @@ export const combineDateAnd12HourTime = (
     "yyyy-MM-dd'T'HH:mm:ssxxx"
   );
 };
+
+export const customFormatDateTime = (iso?: string) => {
+  if (!iso) return { date: "—", time: "—" };
+  try {
+    const date = new Date(iso);
+    return {
+      date: date.toLocaleDateString("en-AU", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+      time: date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }),
+    };
+  } catch {
+    return { date: iso, time: "—" };
+  }
+};

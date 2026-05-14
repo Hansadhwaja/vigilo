@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Search, Globe, LogOut, Edit, Loader2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { Search, LogOut, Edit, Loader2, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +15,7 @@ import { useGetProfileQuery } from "@/apis/profileApi";
 import ProfileEditDialog from "@/components/ProfileEditDialog";
 import { toast } from "sonner";
 import MobileSidebar from "./Navbar/MobileSidebar";
+import UserAvatar from "./Avatar/UserAvatar";
 
 interface TopBarProps {
   search: string;
@@ -38,15 +38,6 @@ export default function TopBar({ isOpen, search, onSearchChange, onSidebarToggle
     window.location.href = "/login";
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
   return (
     <>
       <div className="h-14 border-b bg-white flex items-center gap-2 px-3">
@@ -67,6 +58,7 @@ export default function TopBar({ isOpen, search, onSearchChange, onSidebarToggle
             className="pl-8"
           />
         </div>
+
         <div className="ml-auto flex items-center gap-2">
           <div className="flex gap-1 max-md:hidden">
             <Select defaultValue="melbourne">
@@ -79,26 +71,20 @@ export default function TopBar({ isOpen, search, onSearchChange, onSidebarToggle
                 <SelectItem value="perth">Perth</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" className="gap-2">
-              <Globe className="h-4 w-4" />
-              Client Portal
-            </Button>
           </div>
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="relative h-8 w-8 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                {isLoading ? (
-                  <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                    <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
-                  </div>
-                ) : (
-                  <Avatar className="h-8 w-8 cursor-pointer hover:ring-2 hover:ring-blue-400 transition">
-                    <AvatarFallback className="bg-blue-100 text-blue-700 font-semibold">
-                      {profile ? getInitials(profile.name) : "AD"}
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-              </button>
+            <DropdownMenuTrigger className="cursor-pointer">
+              {isLoading ? (
+                <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+                  <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+                </div>
+              ) : (
+                <UserAvatar
+                  src={""}
+                  name={profile?.name ?? "User"}
+                />
+              )}
+
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-64" align="end">
               {isLoading ? (
@@ -115,11 +101,10 @@ export default function TopBar({ isOpen, search, onSearchChange, onSidebarToggle
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-2">
                       <div className="flex items-center gap-2">
-                        <Avatar className="h-12 w-12">
-                          <AvatarFallback className="bg-blue-100 text-blue-700 text-lg font-semibold">
-                            {getInitials(profile.name)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <UserAvatar
+                          src={""}
+                          name={profile?.name ?? "User"}
+                        />
                         <div className="flex flex-col">
                           <p className="text-sm font-semibold leading-none">{profile.name}</p>
                           <p className="text-xs text-muted-foreground mt-1">
