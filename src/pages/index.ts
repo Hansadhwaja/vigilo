@@ -10,7 +10,7 @@ export { default as SchedulingPage } from './Scheduling/SchedulingPage';
 export { default as ClientsPage } from './ClientManagement/ClientsPage';
 export { default as IncidentDetailsPage } from './Incidents/IncidentDetailsPage';
 // export{ default as ShiftPage} from './ShiftPage'
-export { default as PatrolPage } from './PatrolPage';
+export { default as PatrolPage } from './Patrolling/PatrolPage';
 export { default as VehiclesPage } from './VehiclesPage';
 export { default as HRPage } from './HR&Compliance/HRPage';
 export { default as AccountPage } from './AccountPage';

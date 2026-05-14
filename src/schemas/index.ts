@@ -299,3 +299,98 @@ export const guardPaymentSchema = z.object({
 export type GuardPaymentFormValues = z.infer<
     typeof guardPaymentSchema
 >;
+
+//Patrolling
+
+export const checkpointSchema = z.object({
+    checkpointName: z
+        .string()
+        .min(3, "Checkpoint name must be at least 3 characters"),
+
+    checkpointLat: z
+        .number()
+        .min(-90, "Latitude must be greater than -90")
+        .max(90, "Latitude must be less than 90"),
+
+    checkpointLng: z
+        .number()
+        .min(-180, "Longitude must be greater than -180")
+        .max(180, "Longitude must be less than 180"),
+
+    range: z
+        .number()
+        .min(1, "Range must be at least 1 meter")
+        .max(1000, "Range cannot exceed 1000 meters"),
+
+    priority: z.enum(["high", "medium", "low"]),
+
+    checkpointDescription: z
+        .string()
+        .min(5, "Description must be at least 5 characters")
+        .max(500, "Description cannot exceed 500 characters"),
+});
+
+export type CheckpointFormValues = z.infer<typeof checkpointSchema>;
+
+
+export const subSiteSchema = z.object({
+    name: z
+        .string()
+        .min(3, "Sub-site name must be at least 3 characters"),
+
+    unitPrice: z
+        .number()
+        .min(1, "Unit price must be greater than 0"),
+
+    estimatedDuration: z
+        .number()
+        .min(1, "Duration must be at least 1 minute"),
+
+    description: z
+        .string()
+        .min(10, "Description must be at least 10 characters")
+        .max(500, "Description is too long"),
+});
+
+export type SubSiteFormValues = z.infer<typeof subSiteSchema>;
+
+
+export const patrolSchema = z.object({
+    patrolName: z
+        .string()
+        .min(1, "Patrol Name is required"),
+
+    guardIds: z
+        .array(z.string())
+        .min(1, "Select at least one guard"),
+
+    vehicleIds: z
+        .array(z.string())
+        .min(1, "Select at least one vehicle"),
+
+    orderId: z
+        .string()
+        .min(1, "Order is required"),
+
+    siteIds: z
+        .array(z.string())
+        .min(1, "Select at least one site"),
+
+    startDateTime: z
+        .string()
+        .min(1, "Start date & time is required"),
+
+    estimatedCompletion: z
+        .string()
+        .min(1, "Estimated completion is required"),
+
+    unitPrice: z
+        .number()
+        .min(1, "Unit price must be greater than 0"),
+
+    notes: z
+        .string()
+        .optional(),
+});
+
+export type PatrolFormValues = z.infer<typeof patrolSchema>;

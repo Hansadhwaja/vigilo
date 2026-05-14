@@ -1,14 +1,12 @@
 
-import { Incident } from '@/types';
 import { useCallback, useState } from 'react'
-import { Route, Routes, useNavigate } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import TopBar from '../common/TopBar';
-import { sampleIncidents } from '@/data/sampleData';
 import { ClientsPage, Dashboard, GuardDetailsPage, HRPage, IncidentDetailsPage, IncidentsPage, MapPage, PatrolPage, SchedulingPage, SettingsPage } from '@/pages';
 import OrderDetailsPage from '@/pages/ClientManagement/OrderDetailsPage';
 import AssignmentDetailsPage from '../AssignmentDetails/AssignmentDetailsPage';
 import MessagesPage from '@/pages/Messages/MessagesPage';
-import PatrolDetailsPage from '@/pages/PatrolDetailsPage';
+import PatrolDetailsPage from '@/pages/Patrolling/PatrolDetailsPage';
 import InvoicingPage from '@/pages/Invoicing/InvoicingPage';
 import Sidebar from '../common/Navbar/Sidebar';
 import GenerateInvoicePage from '@/pages/Invoicing/GenerateInvoicePage';

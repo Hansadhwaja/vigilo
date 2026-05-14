@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 
-const IncidentsSearchFilters = () => {
+const AlarmSearchFilters = () => {
     const {
         getParam,
         setMultipleParams,
@@ -18,8 +18,8 @@ const IncidentsSearchFilters = () => {
 
     const status = getParam("status");
     const search = getParam("search");
+    const priority = getParam("priority");
 
-    // Search
     const handleSearch = (
         value: string
     ) => {
@@ -29,7 +29,6 @@ const IncidentsSearchFilters = () => {
         });
     };
 
-    // Status
     const handleStatusChange = (
         value: string
     ) => {
@@ -39,10 +38,17 @@ const IncidentsSearchFilters = () => {
         });
     };
 
-    // Clear
+    const handlePriorityChange = (value: string) => {
+        setMultipleParams({
+            priority: value,
+            page: "1",
+        });
+    }
+
     const clearParams = () => {
         setMultipleParams({
             status: "",
+            priority: "",
             search: "",
             page: "1",
         });
@@ -50,8 +56,17 @@ const IncidentsSearchFilters = () => {
 
     const statuses = [
         { label: "Pending", value: "pending" },
-        { label: "Resolved", value: "resolved" },
-        { label: "In Progress", value: "progress" },
+        { label: "Ongoing", value: "ongoing" },
+        { label: "Completed", value: "completed" },
+        { label: "Cancelled", value: "cancelled" },
+        { label: "Delayed", value: "delayed" },
+    ];
+
+    const priorities = [
+        { label: "High", value: "high" },
+        { label: "Medium", value: "medium" },
+        { label: "Low", value: "low" },
+        { label: "Critical", value: "critical" },
     ];
 
     return (
@@ -68,7 +83,7 @@ const IncidentsSearchFilters = () => {
                 sm:items-center
             "
         >
-            {/* FILTER LABEL */}
+
             <div className="flex items-center gap-2 shrink-0">
                 <div
                     className="
@@ -87,12 +102,11 @@ const IncidentsSearchFilters = () => {
                     </p>
 
                     <p className="text-xs text-slate-500">
-                        Search and refine incidents
+                        Search and refine alarms
                     </p>
                 </div>
             </div>
 
-            {/* SEARCH */}
             <div className="relative flex-1 min-w-60">
                 <Search
                     className="
@@ -104,7 +118,7 @@ const IncidentsSearchFilters = () => {
                 />
 
                 <Input
-                    placeholder="Search incidents..."
+                    placeholder="Search alarms..."
                     className="
                         h-11
                         rounded-xl
@@ -120,7 +134,6 @@ const IncidentsSearchFilters = () => {
                 />
             </div>
 
-            {/* STATUS */}
             <Select
                 value={status}
                 onValueChange={(val) => handleStatusChange(val)}
@@ -151,7 +164,36 @@ const IncidentsSearchFilters = () => {
                 </SelectContent>
             </Select>
 
-            {/* CLEAR BUTTON */}
+            <Select
+                value={priority}
+                onValueChange={(val) => handlePriorityChange(val)}
+            >
+                <SelectTrigger
+                    className="
+                        w-full
+                        rounded-xl
+                        border-slate-200
+                        bg-slate-50/70
+                        shadow-none
+                        sm:w-45
+                    "
+                >
+                    <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+
+                <SelectContent className="rounded-xl border-slate-200">
+                    {priorities.map((s) => (
+                        <SelectItem
+                            key={s.value}
+                            value={s.value}
+                            className="rounded-lg"
+                        >
+                            {s.label}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+
             <Button
                 variant="outline"
                 onClick={clearParams}
@@ -171,4 +213,4 @@ const IncidentsSearchFilters = () => {
     );
 };
 
-export default IncidentsSearchFilters;
+export default AlarmSearchFilters;

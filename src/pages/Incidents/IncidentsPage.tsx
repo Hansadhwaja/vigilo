@@ -92,8 +92,6 @@ export default function IncidentsPage() {
   "
     >
       <div className="space-y-6 py-6">
-
-        {/* LIGHT HERO HEADER */}
         <div
           className="
         relative
@@ -109,7 +107,6 @@ export default function IncidentsPage() {
         shadow-sm
       "
         >
-          {/* Decorative Blur */}
           <div className="absolute -top-10 right-0 h-56 w-56 rounded-full bg-blue-200/40 blur-3xl" />
 
           <div className="relative z-10 space-y-4">
@@ -122,10 +119,6 @@ export default function IncidentsPage() {
           </div>
         </div>
 
-        {/* STATS */}
-
-
-        {/* TABLE SECTION */}
         <Card
           className="
         overflow-hidden
@@ -142,7 +135,7 @@ export default function IncidentsPage() {
             className="
           border-b
           border-slate-200
-          bg-gradient-to-r
+          bg-linear-to-r
           from-slate-50
           via-white
           to-blue-50/40
@@ -163,7 +156,7 @@ export default function IncidentsPage() {
               <div>
                 <h2
                   className="
-                text-2xl
+                heading
                 font-bold
                 tracking-tight
                 text-slate-900
@@ -172,7 +165,7 @@ export default function IncidentsPage() {
                   Incident Reports
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 description text-slate-500">
                   Review, track, and manage all reported incidents
                 </p>
               </div>

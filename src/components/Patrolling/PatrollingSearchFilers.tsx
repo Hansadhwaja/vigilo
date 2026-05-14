@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 
-const IncidentsSearchFilters = () => {
+const PatrollingSearchFilters = () => {
     const {
         getParam,
         setMultipleParams,
@@ -19,7 +19,6 @@ const IncidentsSearchFilters = () => {
     const status = getParam("status");
     const search = getParam("search");
 
-    // Search
     const handleSearch = (
         value: string
     ) => {
@@ -29,7 +28,6 @@ const IncidentsSearchFilters = () => {
         });
     };
 
-    // Status
     const handleStatusChange = (
         value: string
     ) => {
@@ -39,7 +37,6 @@ const IncidentsSearchFilters = () => {
         });
     };
 
-    // Clear
     const clearParams = () => {
         setMultipleParams({
             status: "",
@@ -49,9 +46,16 @@ const IncidentsSearchFilters = () => {
     };
 
     const statuses = [
+        { label: "Accepted", value: "accepted" },
+        { label: "Rejected", value: "rejected" },
         { label: "Pending", value: "pending" },
-        { label: "Resolved", value: "resolved" },
-        { label: "In Progress", value: "progress" },
+        { label: "Upcoming", value: "upcoming" },
+        { label: "Ongoing", value: "ongoing" },
+        { label: "Delayed", value: "delayed" },
+        { label: "Absent", value: "absent" },
+        { label: "Scheduled", value: "scheduled" },
+        { label: "Active", value: "active" },
+        { label: "Completed", value: "completed" },
     ];
 
     return (
@@ -68,7 +72,7 @@ const IncidentsSearchFilters = () => {
                 sm:items-center
             "
         >
-            {/* FILTER LABEL */}
+
             <div className="flex items-center gap-2 shrink-0">
                 <div
                     className="
@@ -87,12 +91,11 @@ const IncidentsSearchFilters = () => {
                     </p>
 
                     <p className="text-xs text-slate-500">
-                        Search and refine incidents
+                        Search and refine Patrolling
                     </p>
                 </div>
             </div>
 
-            {/* SEARCH */}
             <div className="relative flex-1 min-w-60">
                 <Search
                     className="
@@ -104,7 +107,7 @@ const IncidentsSearchFilters = () => {
                 />
 
                 <Input
-                    placeholder="Search incidents..."
+                    placeholder="Search Patrolling..."
                     className="
                         h-11
                         rounded-xl
@@ -120,7 +123,6 @@ const IncidentsSearchFilters = () => {
                 />
             </div>
 
-            {/* STATUS */}
             <Select
                 value={status}
                 onValueChange={(val) => handleStatusChange(val)}
@@ -151,7 +153,6 @@ const IncidentsSearchFilters = () => {
                 </SelectContent>
             </Select>
 
-            {/* CLEAR BUTTON */}
             <Button
                 variant="outline"
                 onClick={clearParams}
@@ -171,4 +172,4 @@ const IncidentsSearchFilters = () => {
     );
 };
 
-export default IncidentsSearchFilters;
+export default PatrollingSearchFilters;

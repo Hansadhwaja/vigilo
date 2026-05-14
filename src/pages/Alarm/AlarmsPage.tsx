@@ -16,6 +16,9 @@ import { useGetAllGuardsQuery } from "@/apis/guardsApi";
 import { useDeleteAllNotificationsMutation, useDeleteNotificationByIdMutation, useGetMyNotificationsQuery, useMarkAllNotificationsAsReadMutation } from "@/apis/notificationAPI";
 import { getStatusStyle, getStatusColor } from "@/utils/statusColors";
 import CreateAlarmModal from "../../components/Alarm/Modal/CreateAlarmModal";
+import CustomHeader from "@/components/common/Header/CustomHeader";
+import AlarmStats from "@/components/Alarm/AlarmStats";
+import AlarmSearchFilters from "@/components/Alarm/AlarmSearchFilters";
 
 interface AlarmsPageProps {
   alarmList: any[];
@@ -94,7 +97,6 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [selectedAlarm, setSelectedAlarm] = useState<any>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -167,29 +169,6 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
     return Array.from(guardIdSet);
   }, [patrolData]);
 
-  const filteredGuards = React.useMemo(() => {
-    return guards.filter((guard) =>
-      activePatrolGuardIds.includes(guard.id)
-    );
-  }, [guards, activePatrolGuardIds]);
-  // Create alarm form state
-
-
-  const [newAlarm, setNewAlarm] = useState({
-    title: "",
-    siteId: "",
-    type: "",
-    priority: "",
-    guardIds: [] as string[],
-    eta: "",
-    slaTime: "",
-    description: "",
-    unitPrice: "",
-    location: "",
-    monitoringCompany: "",
-    license: "",
-  });
-
   const formatDateOnly = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-GB", {
       day: "2-digit",
@@ -205,20 +184,6 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
     });
   };
 
-  // Filter alarms based on search and filters
-  // const filteredAlarms = alarmList.filter(alarm => {
-  //   const matchesSearch = alarm.site.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //                        alarm.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //                        (alarm.assigned && alarm.assigned.toLowerCase().includes(searchTerm.toLowerCase()));
-  //   const matchesStatus = statusFilter === "all" || 
-  //                        (statusFilter === "active" && !alarm.completed) ||
-  //                        (statusFilter === "resolved" && alarm.completed);
-  //   const matchesPriority = priorityFilter === "all" || alarm.priority === priorityFilter;
-
-  //   return matchesSearch && matchesStatus && matchesPriority;
-  // });
-
-  // Enhanced SLA monitoring and escalation
   useEffect(() => {
     const interval = setInterval(() => {
       alarmList.forEach(alarm => {
@@ -312,6 +277,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
       original: alarm,
     };
   });
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -589,122 +555,28 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
 
   return (
     <div className="space-y-3">
-      {/* Compact Header with Summary Cards Inline */}
-      <div className="flex justify-between">
-        <div className="">
-          <h1 className="text-lg">Alarm Management</h1>
-          <p className="text-gray-600 text-xs">Real-time Response & Guard Assignment</p>
-        </div>
-        <div className="flex gap-2 items-center">
-          <Button
-            variant="outline"
-            onClick={() => setShowExportDialog(true)}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
+      <CustomHeader
+        title="Alarm Management"
+        description="Real-time Response & Guard Assignment"
+        others={
+          <div className="flex gap-2 items-center">
+            <Button
+              variant="outline"
+              onClick={() => setShowExportDialog(true)}
+              className="flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Export
+            </Button>
 
-          <CreateAlarmModal />
-        </div>
-      </div>
-      {/* Enhanced Inline Summary Cards */}
-      <div className="flex flex-wrap gap-3">
-        <div className="flex items-center gap-2 bg-red-50 px-3 py-2 rounded-lg border border-red-200">
-          <Bell className="h-4 w-4 text-red-600" />
-          <div>
-            <div className="font-bold text-red-700">{activeAlarms}</div>
-            <div className="text-lg text-red-600">Active</div>
+            <CreateAlarmModal />
           </div>
-        </div>
+        }
+      />
 
-        <div className="flex items-center gap-2 bg-orange-50 px-3 py-2 rounded-lg border border-orange-200">
-          <Siren className="h-4 w-4 text-orange-600" />
-          <div>
-            <div className="font-bold text-orange-700">{criticalAlarms}</div>
-            <div className="text-lg text-orange-600">Critical</div>
-          </div>
-        </div>
+      <AlarmStats />
+      <AlarmSearchFilters />
 
-        <div className="flex items-center gap-2 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200">
-          <Zap className="h-4 w-4 text-purple-600" />
-          <div>
-            <div className="font-bold text-purple-700">{slaBreachAlarms}</div>
-            <div className="text-lg text-purple-600">SLA Breach</div>
-          </div>
-        </div>
-
-        {/* <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
-            <Timer className="h-4 w-4 text-blue-600" />
-            <div>
-              <div className="font-bold text-blue-700">{Math.round(averageResponseTime)}m</div>
-              <div className="text-lg text-blue-600">Avg Response</div>
-            </div>
-          </div> */}
-
-        <div className="flex items-center gap-2 bg-green-50 px-3 py-2 rounded-lg border border-green-200">
-          <TrendingUp className="h-4 w-4 text-green-600" />
-          <div>
-            <div className="font-bold text-green-700">${monthlyBillingValue.toFixed(0)}</div>
-            <div className="text-lg text-green-600">Monthly Billing</div>
-          </div>
-        </div>
-      </div>
-
-
-      {/* Compact Filters Row */}
-      <div className="flex flex-wrap gap-2 items-center bg-white p-3 rounded-lg border">
-        <Filter className="h-4 w-4 text-gray-500" />
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
-          <Input
-            placeholder="Search alarms..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9 w-40 h-8"
-          />
-        </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-32 h-8">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="ongoing">Ongoing</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-            <SelectItem value="delayed">Delayed</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-          <SelectTrigger className="w-32 h-8">
-            <SelectValue placeholder="Priority" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Priority</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
-            <SelectItem value="critical">Critical</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            setStatusFilter("all");
-            setPriorityFilter("all");
-            setSearchTerm("");
-          }}
-          className="h-8"
-        >
-          Clear
-        </Button>
-      </div>
-
-
-      {/* Main Alarm List - Compact Layout */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">Patrol Alarms</CardTitle>
