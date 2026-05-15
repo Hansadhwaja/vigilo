@@ -49,7 +49,7 @@ const CheckpointForm = ({
         resolver: zodResolver(checkpointSchema),
         mode: "onChange",
         defaultValues: initialData || {
-            checkpointName: "",
+            name: "",
             checkpointLat: 0,
             checkpointLng: 0,
             range: 20,
@@ -85,7 +85,7 @@ const CheckpointForm = ({
 
                     {/* Checkpoint Name */}
                     <Controller
-                        name="checkpointName"
+                        name="name"
                         control={control}
                         render={({ field, fieldState }) => (
                             <Field>

@@ -1,68 +1,21 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
-import { createPortal } from "react-dom";
-import jsPDF from "jspdf";
 import {
-  Plus,
   Clock,
   MapPin,
   Car,
-  User,
   Eye,
-  Edit,
   Trash2,
-  CheckCircle,
-  AlertTriangle,
   QrCode,
-  Route,
-  Timer,
-  Flag,
-  Navigation,
-  Play,
-  Pause,
-  Square,
-  Activity,
-  Camera,
   FileText,
-  Calendar,
-  Search,
-  Filter,
   Download,
-  MapIcon,
-  Zap,
-  TrendingUp,
-  Users,
-  Shield,
   Building,
   Target,
-  Crosshair,
-  Wifi,
-  DollarSign,
-  Copy,
-  Settings,
-  Loader2
+
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import { toast } from "sonner";
-import { useGetAllClientsQuery } from "@/apis/usersApi";
-import { useCreatePatrolSiteMutation, useGetAllPatrolSitesQuery, useCreateSubSiteMutation, useCreateCheckpointMutation, useCreatePatrolRunMutation } from "@/apis/patrollingAPI";
-import { useGetAllGuardsQuery } from "@/apis/guardsApi";
-import { useGetAllOrdersQuery } from "@/apis/ordersApi";
 import {
   useDeletePatrolSiteMutation,
   useDeletePatrolSubSiteMutation,
@@ -102,42 +55,12 @@ const generateProofOfService = (patrol: any) => {
   };
 };
 
-
-
 export default function PatrolPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   const [triggerDownloadQR] = useLazyDownloadQRQuery();
   const [triggerDownloadSitePdf] = useLazyDownloadSiteQRsPdfQuery();
-
-
-
-  const {
-    data: clientsResponse,
-    isLoading: clientsLoading,
-    isError: clientsError,
-  } = useGetAllClientsQuery();
-
-  const clientList = clientsResponse?.data || [];
-
-  const [
-    createPatrolSite,
-    { isLoading: isCreatingSite }
-  ] = useCreatePatrolSiteMutation();
-
-
-
-  const [createSubSite, { isLoading: isCreatingSubSite }] =
-    useCreateSubSiteMutation();
-
-  const [createCheckpoint, { isLoading: isCreatingCheckpoint }] =
-    useCreateCheckpointMutation();
-
-  const [createPatrolRun, { isLoading: isCreating }] =
-    useCreatePatrolRunMutation();
-
-
 
   const [deletePatrolRun, { isLoading: isDeleting }] =
     useDeletePatrolRunMutation();
@@ -165,7 +88,7 @@ export default function PatrolPage() {
     search: "",
   });
 
-  const patrols = patrolResponse?.data || []
+  const patrols = patrolResponse?.data ?? []
 
   // const [subSiteFormData, setSubSiteFormData] = useState({
   //   name: "",
@@ -1166,8 +1089,6 @@ export default function PatrolPage() {
                 </CardContent>
               </Card>
             ))}
-
-
           </div>
         </CardContent>
       </Card>

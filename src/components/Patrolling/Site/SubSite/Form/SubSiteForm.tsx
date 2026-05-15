@@ -78,7 +78,6 @@ const SubSiteForm = ({
             >
                 <FieldGroup className="space-y-5">
 
-                    {/* Subsite Name */}
                     <Controller
                         name="name"
                         control={control}
@@ -102,7 +101,6 @@ const SubSiteForm = ({
                         )}
                     />
 
-                    {/* Price + Duration */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                         <Controller
@@ -175,7 +173,6 @@ const SubSiteForm = ({
 
                     </div>
 
-                    {/* Description */}
                     <Controller
                         name="description"
                         control={control}
@@ -187,7 +184,6 @@ const SubSiteForm = ({
 
                                 <Textarea
                                     {...field}
-                                    rows={4}
                                     placeholder="Description of this sub-site area and specific requirements..."
                                 />
 
@@ -202,7 +198,6 @@ const SubSiteForm = ({
 
                 </FieldGroup>
 
-                {/* Actions */}
                 <div className="flex justify-end gap-3 pt-2">
                     <Button
                         type="button"

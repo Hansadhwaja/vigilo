@@ -303,7 +303,7 @@ export type GuardPaymentFormValues = z.infer<
 //Patrolling
 
 export const checkpointSchema = z.object({
-    checkpointName: z
+    name: z
         .string()
         .min(3, "Checkpoint name must be at least 3 characters"),
 
@@ -394,3 +394,34 @@ export const patrolSchema = z.object({
 });
 
 export type PatrolFormValues = z.infer<typeof patrolSchema>;
+
+
+export const siteSchema = z.object({
+    name: z
+        .string()
+        .min(1, "Site name is required"),
+
+    address: z
+        .string()
+        .min(1, "Address is required"),
+
+    description: z
+        .string()
+        .optional(),
+
+    clientId: z
+        .string()
+        .min(1, "Client is required"),
+
+    coordinates: z.object({
+        lat: z
+            .string()
+            .min(1, "Latitude is required"),
+
+        lng: z
+            .string()
+            .min(1, "Longitude is required"),
+    }),
+});
+
+export type SiteFormValues = z.infer<typeof siteSchema>;

@@ -3,12 +3,25 @@ import { useState } from 'react'
 import PatrolForm from '../Form/PatrolForm';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { useCreatePatrolRunMutation } from '@/apis/patrollingAPI';
+import { PatrolFormValues } from '@/schemas';
+import { toast } from 'sonner';
 
 const CreatePatrolModal = () => {
     const [open, setOpen] = useState(false);
+    const [createPatrolRun, { isLoading }] = useCreatePatrolRunMutation();
 
-    const handleSubmit = () => {
-
+    const handleSubmit = async (data: PatrolFormValues) => {
+        try {
+            await createPatrolRun({
+                ...data,
+                patrolId: "patrol-123"
+            }).unwrap();
+            toast.success("Patrol Created Successfully");
+            setOpen(false);
+        } catch (error) {
+            toast.error("Error while creating patrol")
+        }
     };
 
     return (
@@ -29,9 +42,8 @@ const CreatePatrolModal = () => {
 
                 <PatrolForm
                     onSubmit={handleSubmit}
-                    isLoading={false}
+                    isLoading={isLoading}
                     onCancel={() => setOpen(false)}
-
                 />
 
             </DialogContent>

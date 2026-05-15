@@ -16,49 +16,6 @@ interface PatrolFormProps {
     ) => Promise<void> | void;
     onCancel: () => void;
     initialData?: PatrolFormValues;
-
-    // selectedSites: any[];
-
-    // toggleSiteSelection: (site: any) => void;
-
-    // getTotalCheckpointsForSite: (
-    //     site: any
-    // ) => number;
-
-    // handleCreateSite: () => void;
-
-    // handleDeleteSite: (
-    //     siteId: string
-    // ) => void;
-
-    // handleDeleteSubSite: (
-    //     subSiteId: string
-    // ) => void;
-
-    // handleDeleteCheckpoint: (
-    //     checkpointId: string
-    // ) => void;
-
-    // handleAddSubSite: (
-    //     siteId: string
-    // ) => void;
-
-    // handleAddCheckpoint: (
-    //     siteId: string,
-    //     subSiteId?: string
-    // ) => void;
-
-    // handleQrIconAction: (
-    //     checkpoint: any
-    // ) => void;
-
-    // downloadSiteQRPdf: (
-    //     site: any
-    // ) => void;
-
-    // deletingSite?: boolean;
-    // deletingSubSite?: boolean;
-    // deletingCheckpoint?: boolean;
 }
 
 const PatrolForm = ({
@@ -66,23 +23,6 @@ const PatrolForm = ({
     onCancel,
     onSubmit,
     initialData,
-
-    // selectedSites,
-
-    // toggleSiteSelection,
-    // getTotalCheckpointsForSite,
-
-    // handleDeleteSite,
-    // handleDeleteSubSite,
-    // handleDeleteCheckpoint,
-    // handleAddSubSite,
-    // handleAddCheckpoint,
-    // handleQrIconAction,
-    // downloadSiteQRPdf,
-
-    // deletingCheckpoint,
-    // deletingSite,
-    // deletingSubSite,
 }: PatrolFormProps) => {
 
     const form = useForm<PatrolFormValues>({
@@ -103,14 +43,9 @@ const PatrolForm = ({
 
     const {
         handleSubmit,
-        control,
         reset,
-        watch,
-        setValue,
         formState: { isValid },
     } = form;
-
-    const values = watch();
 
     const onFormSubmit = async (
         data: PatrolFormValues
@@ -130,6 +65,7 @@ const PatrolForm = ({
             >
                 <PatrolBasicInfoSection />
                 <PatrolSiteSelectionSection />
+
                 <div className="flex justify-end gap-3 pt-2">
 
                     <Button
