@@ -15,7 +15,7 @@ const CreatePatrolModal = () => {
         try {
             await createPatrolRun({
                 ...data,
-                patrolId: "patrol-123"
+                patrolId: crypto.randomUUID()
             }).unwrap();
             toast.success("Patrol Created Successfully");
             setOpen(false);

@@ -511,3 +511,31 @@ export const customFormatDateTime = (iso?: string) => {
     return { date: iso, time: "—" };
   }
 };
+
+export const checkSLABreach = (alarm: any) => {
+  if (!alarm.slaTargetMins || alarm.completed) return null;
+
+  const breachPercentage = (alarm.sinceMins / alarm.slaTargetMins) * 100;
+
+  if (breachPercentage >= 100) {
+    return {
+      level: "CRITICAL_BREACH",
+      message: `SLA CRITICAL BREACH: ${alarm.sinceMins - alarm.slaTargetMins} minutes overdue`,
+      action: "ESCALATE_TO_MANAGEMENT"
+    };
+  } else if (breachPercentage >= 90) {
+    return {
+      level: "WARNING",
+      message: `SLA WARNING: ${Math.round(breachPercentage)}% of SLA time elapsed`,
+      action: "NOTIFY_SUPERVISOR"
+    };
+  } else if (breachPercentage >= 75) {
+    return {
+      level: "CAUTION",
+      message: `SLA CAUTION: ${Math.round(breachPercentage)}% of SLA time elapsed`,
+      action: "PRIORITY_ASSIGNMENT"
+    };
+  }
+
+  return null;
+};

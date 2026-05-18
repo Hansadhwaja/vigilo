@@ -1,24 +1,20 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Search, Filter, User, MapPin, Bell, CheckCircle, AlertTriangle, Phone, Timer, Route, Download, FileText, Users, Zap, TrendingUp, Siren, Loader2, Trash2 } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { User, MapPin, Bell, CheckCircle, Download, FileText, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { availableGuards, sampleGuards } from "@/data/sampleData";
+import { sampleGuards } from "@/data/sampleData";
 import { toast } from "sonner";
-import { useCreateAlarmMutation, useDeleteAlarmMutation, useGetAllAlarmsQuery } from "@/apis/alarmsAPI";
-import { useGetAllPatrolSitesQuery, useGetAllPatrolRunsForAdminQuery } from "@/apis/patrollingAPI";
-import { useGetAllGuardsQuery } from "@/apis/guardsApi";
-import { useDeleteAllNotificationsMutation, useDeleteNotificationByIdMutation, useGetMyNotificationsQuery, useMarkAllNotificationsAsReadMutation } from "@/apis/notificationAPI";
+import { useDeleteAlarmMutation, useGetAllAlarmsQuery } from "@/apis/alarmsAPI";
+import { useGetAllPatrolRunsForAdminQuery } from "@/apis/patrollingAPI";
 import { getStatusStyle, getStatusColor } from "@/utils/statusColors";
 import CreateAlarmModal from "../../components/Alarm/Modal/CreateAlarmModal";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import AlarmStats from "@/components/Alarm/AlarmStats";
 import AlarmSearchFilters from "@/components/Alarm/AlarmSearchFilters";
+import { checkSLABreach, formatDate, formatTime } from "@/lib/utils";
 
 interface AlarmsPageProps {
   alarmList: any[];
@@ -65,124 +61,17 @@ const findOptimalGuard = (alarmLocation: { lat: number, lng: number }, priority:
 };
 
 // SLA Escalation Logic
-const checkSLABreach = (alarm: any) => {
-  if (!alarm.slaTargetMins || alarm.completed) return null;
 
-  const breachPercentage = (alarm.sinceMins / alarm.slaTargetMins) * 100;
-
-  if (breachPercentage >= 100) {
-    return {
-      level: "CRITICAL_BREACH",
-      message: `SLA CRITICAL BREACH: ${alarm.sinceMins - alarm.slaTargetMins} minutes overdue`,
-      action: "ESCALATE_TO_MANAGEMENT"
-    };
-  } else if (breachPercentage >= 90) {
-    return {
-      level: "WARNING",
-      message: `SLA WARNING: ${Math.round(breachPercentage)}% of SLA time elapsed`,
-      action: "NOTIFY_SUPERVISOR"
-    };
-  } else if (breachPercentage >= 75) {
-    return {
-      level: "CAUTION",
-      message: `SLA CAUTION: ${Math.round(breachPercentage)}% of SLA time elapsed`,
-      action: "PRIORITY_ASSIGNMENT"
-    };
-  }
-
-  return null;
-};
 
 export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAlarm }: AlarmsPageProps) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [priorityFilter, setPriorityFilter] = useState("all");
-  const [selectedAlarm, setSelectedAlarm] = useState<any>(null);
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showExportDialog, setShowExportDialog] = useState(false);
   const [escalatedAlarms, setEscalatedAlarms] = useState<Set<string>>(new Set());
-  const itemsPerPage = 5;
 
   const [deleteAlarm, { isLoading: isDeletingAlarm }] = useDeleteAlarmMutation();
 
-  const { data: notificationsResponse } = useGetMyNotificationsQuery({
-    page: 1,
-    limit: 20,
-    filter: "all",
-  });
-  const [markAllNotificationsAsRead, { isLoading: isMarkingAllRead }] =
-    useMarkAllNotificationsAsReadMutation();
-  const [deleteAllNotifications, { isLoading: isDeletingAllNotifications }] =
-    useDeleteAllNotificationsMutation();
-  const [deleteNotificationById, { isLoading: isDeletingNotification }] =
-    useDeleteNotificationByIdMutation();
-
   const { data } = useGetAllAlarmsQuery();
 
-  const alarms = data?.data || [];
-  const notifications = notificationsResponse?.data || [];
+  const alarms = data?.data ?? [];
 
-  const { data: guardsResponse, isLoading, isError, error, isFetching } = useGetAllGuardsQuery({
-    limit: itemsPerPage,
-    page: currentPage,
-  });
-
-  const guards = guardsResponse?.data || [];
-  const apiPagination = guardsResponse?.pagination;
-
-
-
-  const {
-    data: patrolData,
-  } = useGetAllPatrolRunsForAdminQuery({
-    page: 1,
-    limit: 100,
-  });
-
-  const activePatrolGuardIds = React.useMemo(() => {
-    if (!patrolData?.data) return [];
-
-    const guardIdSet = new Set<string>();
-
-    patrolData.data.forEach((run) => {
-      const runStatus = String(run.status || "").toLowerCase();
-      if (runStatus !== "upcoming" && runStatus !== "ongoing") return;
-
-      if (Array.isArray(run.guards)) {
-        run.guards.forEach((guard) => {
-          if (guard?.id) {
-            guardIdSet.add(String(guard.id));
-          }
-        });
-      }
-
-      if (Array.isArray(run.guardIds)) {
-        run.guardIds.forEach((guardId: any) => {
-          if (guardId) {
-            guardIdSet.add(String(guardId));
-          }
-        });
-      }
-    });
-
-    return Array.from(guardIdSet);
-  }, [patrolData]);
-
-  const formatDateOnly = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  const formatTimeOnly = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -199,7 +88,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                 description: `Alarm ${alarm.id} at ${alarm.site}`,
                 action: {
                   label: "View",
-                  onClick: () => handleViewDetails(alarm)
+                  onClick: () => { }
                 }
               });
             } else if (slaStatus.level === "WARNING") {
@@ -214,147 +103,6 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
 
     return () => clearInterval(interval);
   }, [alarmList, escalatedAlarms]);
-
-  // Calculate enhanced metrics
-  // const activeAlarms = alarmList.filter(a => !a.completed).length;
-  // const criticalAlarms = alarmList.filter(a => !a.completed && (a.priority === "Critical" || a.priority === "High")).length;
-  // const slaBreachAlarms = alarmList.filter(a => !a.completed && a.slaTargetMins && a.sinceMins > a.slaTargetMins).length;
-  const averageResponseTime = alarmList.reduce((sum, alarm) => {
-    if (alarm.responseTime) return sum + alarm.responseTime;
-    return sum;
-  }, 0) / Math.max(alarmList.filter(a => a.responseTime).length, 1);
-  const resolvedToday = alarmList.filter(a => a.completed && a.completedAt &&
-    new Date(a.completedAt).toDateString() === new Date().toDateString()).length;
-
-  // Monthly billing metrics
-  const monthlyBillingValue = alarmList
-    .filter(a => a.completed && a.completedAt &&
-      new Date(a.completedAt).getMonth() === new Date().getMonth())
-    .reduce((sum, a) => sum + (a.unitPrice || 0), 0);
-
-  // Pagination
-  // const totalPages = Math.ceil(filteredAlarms.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-
-  const formattedAlarms = alarms.map((alarm) => {
-    const createdTime = new Date(alarm.createdAt).getTime();
-    const now = Date.now();
-
-    const sinceMins = Math.floor((now - createdTime) / 60000);
-
-    const assignedGuard = alarm.guards?.length
-      ? alarm.guards.map((g) => g.name).join(", ")
-      : null;
-
-    return {
-      id: alarm.id,
-
-      site: alarm.siteName || "Unknown Site",
-
-      type: alarm.title || alarm.alarmType,
-
-      location: alarm.specificLocation,
-
-      priority: alarm.priority,
-
-      sinceMins,
-      createdAt: alarm.createdAt,
-
-      slaTargetMins: alarm.slaTimeMinutes,
-
-      assigned: assignedGuard,
-
-      eta: alarm.etaMinutes ? `${alarm.etaMinutes} min` : null,
-
-      status: alarm.status,
-
-      breach: alarm.breach,
-      monitoringCompany: alarm.monitoringCompany,
-      license: alarm.license,
-      unitPrice: alarm.unitPrice,
-
-      original: alarm,
-    };
-  });
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const todaysAlarms = formattedAlarms.filter((alarm) => {
-    const created = new Date(alarm.createdAt);
-    created.setHours(0, 0, 0, 0);
-
-    return created.getTime() === today.getTime();
-  });
-
-  const activeAlarms = todaysAlarms.filter(
-    (alarm) => alarm.status === "ongoing"
-  ).length;
-
-  const criticalAlarms = todaysAlarms.filter(
-    (alarm) => alarm.priority?.toLowerCase() === "high"
-  ).length;
-
-  const slaBreachAlarms = todaysAlarms.filter(
-    (alarm) => alarm.breach === true
-  ).length;
-
-
-  const filteredAlarms = formattedAlarms.filter((alarm) => {
-    const search = searchTerm.toLowerCase();
-
-    // SEARCH
-    const matchesSearch =
-      alarm.site?.toLowerCase().includes(search) ||
-      alarm.type?.toLowerCase().includes(search) ||
-      alarm.location?.toLowerCase().includes(search) ||
-      alarm.assigned?.toLowerCase().includes(search);
-
-    // STATUS FILTER
-    let matchesStatus = true;
-    if (statusFilter === "ongoing") {
-      matchesStatus = alarm.status === "ongoing";
-    }
-    if (statusFilter === "completed") {
-      matchesStatus = alarm.status === "completed";
-    }
-    if (statusFilter === "cancelled") {
-      matchesStatus = alarm.status === "cancelled";
-    }
-    if (statusFilter === "pending") {
-      matchesStatus = alarm.status === "pending";
-    }
-    if (statusFilter === "delayed") {
-      matchesStatus = alarm.status === "delayed";
-    }
-
-    // PRIORITY FILTER
-    let matchesPriority = true;
-    if (priorityFilter !== "all") {
-      matchesPriority =
-        alarm.priority?.toLowerCase() === priorityFilter.toLowerCase();
-    }
-
-    return matchesSearch && matchesStatus && matchesPriority;
-  });
-
-  const alarmsPerPage = 5;
-
-  const totalPages = Math.ceil(filteredAlarms.length / alarmsPerPage);
-
-  const indexOfLastAlarm = currentPage * alarmsPerPage;
-  const indexOfFirstAlarm = indexOfLastAlarm - alarmsPerPage;
-
-  const currentAlarms = filteredAlarms.slice(
-    indexOfFirstAlarm,
-    indexOfLastAlarm
-  );
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter, priorityFilter]);
-
 
   // Enhanced GPS-based guard assignment
   const handleSmartAssign = useCallback((alarm: any) => {
@@ -424,8 +172,6 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
     });
   };
 
-
-
   const handleDeleteAlarm = async (alarmId: string) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this alarm?");
     if (!confirmDelete) return;
@@ -440,94 +186,6 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
         "Failed to delete alarm";
       toast.error(message);
     }
-  };
-
-  const handleDeleteNotification = async (notificationId: string) => {
-    try {
-      await deleteNotificationById(notificationId).unwrap();
-      toast.success("Notification deleted");
-    } catch (err: any) {
-      const message =
-        err?.data?.message ||
-        err?.error ||
-        "Failed to delete notification";
-      toast.error(message);
-    }
-  };
-
-  const handleDeleteAllNotifications = async () => {
-    try {
-      await deleteAllNotifications({ filter: "all" }).unwrap();
-      toast.success("All notifications deleted");
-    } catch (err: any) {
-      const message =
-        err?.data?.message ||
-        err?.error ||
-        "Failed to delete notifications";
-      toast.error(message);
-    }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    try {
-      await markAllNotificationsAsRead({ filter: "all" }).unwrap();
-      toast.success("All notifications marked as read");
-    } catch (err: any) {
-      const message =
-        err?.data?.message ||
-        err?.error ||
-        "Failed to mark notifications as read";
-      toast.error(message);
-    }
-  };
-
-  // Export functionality
-  const handleExportData = (format: 'csv' | 'pdf') => {
-    const exportData = filteredAlarms.map(alarm => ({
-      'Alarm ID': alarm.id,
-      'Site': alarm.site,
-      'Type': alarm.type,
-      'Priority': alarm.priority,
-      'Status': alarm.status ? 'Resolved' : 'Active',
-      'Assigned Guard': alarm.assigned || 'Unassigned',
-      'SLA Target (min)': alarm.slaTargetMins,
-      'Time Since (min)': alarm.sinceMins,
-      'ETA': alarm.eta || 'N/A',
-      'Monitoring Company': alarm.monitoringCompany,
-      'License': alarm.license,
-      'Unit Price': alarm.unitPrice,
-      'SLA Breach': alarm.slaTargetMins && alarm.sinceMins > alarm.slaTargetMins ? 'Yes' : 'No'
-    }));
-
-    if (format === 'csv') {
-      const csv = [
-        Object.keys(exportData[0]).join(','),
-        ...exportData.map(row => Object.values(row).join(','))
-      ].join('\n');
-
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `alarms-export-${new Date().toISOString().slice(0, 10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } else {
-      // PDF export would use a library like jsPDF in real implementation
-      toast.info("PDF export would be generated here", {
-        description: "In production, this would create a detailed PDF report"
-      });
-    }
-
-    setShowExportDialog(false);
-    toast.success(`${format.toUpperCase()} export completed`, {
-      description: `${exportData.length} alarm records exported`
-    });
-  };
-
-  const handleViewDetails = (alarm: any) => {
-    setSelectedAlarm(alarm);
-    setShowDetailsDialog(true);
   };
 
   const getPriorityColor = (priority: string) => {
@@ -562,7 +220,6 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
           <div className="flex gap-2 items-center">
             <Button
               variant="outline"
-              onClick={() => setShowExportDialog(true)}
               className="flex items-center gap-2"
             >
               <Download className="h-4 w-4" />
@@ -577,17 +234,14 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
       <AlarmStats />
       <AlarmSearchFilters />
 
-      <Card>
-        <CardHeader className="pb-3">
+      <Card className="p-0">
+        <CardHeader className="p-4">
           <CardTitle className="text-lg">Patrol Alarms</CardTitle>
         </CardHeader>
 
-        <CardContent className="pt-0">
-
-          {/* Alarm List */}
+        <CardContent className="p-4">
           <div className="space-y-3">
-            {currentAlarms.map((alarm) => (
-
+            {alarms.map((alarm) => (
               <Card key={alarm.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
@@ -610,10 +264,10 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                         <div>
                           <p className="text-muted-foreground text-sm"></p>
                           <p className="font-semibold text-base">
-                            Created At: {formatDateOnly(alarm.createdAt)}
+                            Created At: {formatDate(alarm.createdAt)}
                           </p>
                           <p className="font-semibold text-base">
-                            {formatTimeOnly(alarm.createdAt)}
+                            {formatTime(alarm.createdAt)}
                           </p>
                         </div>
                         <div className={`text-lg font-medium ${getSLAColor(alarm.sinceMins, alarm.slaTargetMins)}`}>
@@ -664,7 +318,6 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleViewDetails(alarm)}
                             className="h-8 w-8 p-0"
                           >
                             <Bell className="h-3 w-3" />
@@ -712,385 +365,8 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
               </Card>
             ))}
           </div>
-
-          {/* Compact Pagination */}
-          {totalPages > 1 && (
-            <div className="flex justify-center mt-4">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage > 1) setCurrentPage(currentPage - 1);
-                      }}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
-                    />
-                  </PaginationItem>
-
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCurrentPage(page);
-                        }}
-                        isActive={page === currentPage}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ))}
-
-                  <PaginationItem>
-                    <PaginationNext
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-                      }}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
         </CardContent>
       </Card>
-
-      {/* Alarm Details Dialog */}
-      <Dialog open={showDetailsDialog} onOpenChange={setShowDetailsDialog}>
-        <DialogContent className="max-w-4xl p-6">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">
-              Alarm Details
-            </DialogTitle>
-            <DialogDescription className="text-gray-500">
-              Comprehensive alarm information and response tracking
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedAlarm && (
-            <div className="space-y-6">
-
-              {/* TOP GRID */}
-              <div className="grid grid-cols-2 gap-6">
-
-                {/* Alarm Information */}
-                <div className="bg-gray-50 p-4 rounded-lg border">
-                  <h3 className="font-semibold text-lg mb-3 text-gray-800">
-                    Alarm Information
-                  </h3>
-
-                  <div className="space-y-2 text-sm">
-
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Site</span>
-                      <span className="font-medium">{selectedAlarm.site}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Type</span>
-                      <span className="font-medium">{selectedAlarm.type}</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Location</span>
-                      <span className="font-medium">
-                        {selectedAlarm.location || "Not specified"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-500">Priority</span>
-
-                      <Badge className={`${getPriorityColor(selectedAlarm.priority)}`}>
-                        {selectedAlarm.priority}
-                      </Badge>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Time Since</span>
-                      <span>{selectedAlarm.sinceMins} minutes</span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">SLA Time</span>
-                      <span>{selectedAlarm.slaTargetMins} minutes</span>
-                    </div>
-
-                  </div>
-                </div>
-
-
-                {/* Monitoring Details (NEW SECTION) */}
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h3 className="font-semibold text-lg mb-3 text-blue-800">
-                    Monitoring Details
-                  </h3>
-
-                  <div className="space-y-2 text-sm">
-
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Monitoring Company</span>
-                      <span className="font-medium">
-                        {selectedAlarm.monitoringCompany || "Not Provided"}
-                      </span>
-                    </div>
-
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">License</span>
-                      <span className="font-medium">
-                        {selectedAlarm.license || "Not Provided"}
-                      </span>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-
-
-              {/* RESPONSE STATUS */}
-              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                <h3 className="font-semibold text-lg mb-3 text-green-800">
-                  Response Status
-                </h3>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Status -</span>
-                    <span className="font-medium capitalize mr-60">
-                      {selectedAlarm.status}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Assigned Guard -</span>
-                    <span className="mr-45">
-                      {selectedAlarm.assigned || "Unassigned"}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">ETA -</span>
-                    <span className="mr-65">
-                      {selectedAlarm.eta || "Not calculated"}
-                    </span>
-                  </div>
-
-                  {selectedAlarm.responseTime && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Response Time</span>
-                      <span>{selectedAlarm.responseTime} minutes</span>
-                    </div>
-                  )}
-
-                  {selectedAlarm.completedAt && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Resolved At</span>
-                      <span>
-                        {new Date(selectedAlarm.completedAt).toLocaleString()}
-                      </span>
-                    </div>
-                  )}
-
-                </div>
-              </div>
-
-
-              {/* DESCRIPTION */}
-              {selectedAlarm.description && (
-                <div className="bg-gray-50 p-4 rounded-lg border">
-                  <h3 className="font-semibold text-lg mb-2">
-                    Description
-                  </h3>
-
-                  <p className="text-sm text-gray-700">
-                    {selectedAlarm.description}
-                  </p>
-                </div>
-              )}
-
-
-              {/* SLA STATUS */}
-              <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                <h3 className="font-semibold text-lg mb-3 text-red-700">
-                  SLA Status
-                </h3>
-
-                <div className="space-y-3">
-
-                  <div className="flex justify-between text-sm">
-                    <span>Time Elapsed</span>
-
-                    <span
-                      className={getSLAColor(
-                        selectedAlarm.sinceMins,
-                        selectedAlarm.slaTargetMins
-                      )}
-                    >
-                      {selectedAlarm.sinceMins}m / {selectedAlarm.slaTargetMins}m
-                    </span>
-                  </div>
-
-                  {selectedAlarm.slaTargetMins > 0 && (
-                    <Progress
-                      value={Math.min(
-                        (selectedAlarm.sinceMins /
-                          selectedAlarm.slaTargetMins) *
-                        100,
-                        100
-                      )}
-                      className="h-3"
-                    />
-                  )}
-
-                  {selectedAlarm.slaTargetMins > 0 &&
-                    selectedAlarm.sinceMins >
-                    selectedAlarm.slaTargetMins && (
-                      <div className="text-red-600 font-medium text-sm">
-                        ⚠️ SLA Breach:{" "}
-                        {selectedAlarm.sinceMins -
-                          selectedAlarm.slaTargetMins}{" "}
-                        minutes overdue
-                      </div>
-                    )}
-
-                </div>
-              </div>
-
-            </div>
-          )}
-
-          <div className="flex justify-end pt-4">
-            <Button
-              variant="outline"
-              onClick={() => setShowDetailsDialog(false)}
-            >
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Create Alarm Dialog */}
-
-
-      {/* Export Dialog */}
-      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Export Alarm Data</DialogTitle>
-            <DialogDescription>
-              Choose format for exporting alarm records and reports
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <Button
-              onClick={() => handleExportData('csv')}
-              className="flex flex-col items-center gap-2 h-20"
-              variant="outline"
-            >
-              <FileText className="h-8 w-8" />
-              <span>Export CSV</span>
-            </Button>
-
-            <Button
-              onClick={() => handleExportData('pdf')}
-              className="flex flex-col items-center gap-2 h-20"
-              variant="outline"
-            >
-              <Download className="h-8 w-8" />
-              <span>Export PDF Report</span>
-            </Button>
-          </div>
-
-          <div className="text-xl text-gray-600">
-            <p>CSV: Raw data suitable for spreadsheet analysis</p>
-            <p>PDF: Formatted report with charts and summaries</p>
-          </div>
-
-          <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
-              Cancel
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Notifications Panel (if notifications exist) */}
-      {notifications.length > 0 && (
-        <div className="fixed top-4 right-4 w-80 max-h-96 overflow-y-auto z-50">
-          <Card className="shadow-lg border-orange-200">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xl flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-orange-500" />
-                Notifications ({notificationsResponse?.counts?.unread ?? notifications.length} unread)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                {notifications.slice(0, 3).map((notif) => (
-                  <div
-                    key={notif.id}
-                    className={`p-2 rounded border-l-4 text-lg ${notif.type === 'newRequest' ? 'border-blue-500 bg-blue-50' :
-                      notif.isRead ? 'border-gray-300 bg-gray-50' :
-                        'border-orange-500 bg-orange-50'
-                      }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="font-medium">{notif.message}</div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-6 w-6 p-0"
-                        onClick={() => handleDeleteNotification(notif.id)}
-                        disabled={isDeletingNotification}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                    <div className="text-gray-600 text-lg mt-1">
-                      {notif.type} • {new Date(notif.createdAt).toLocaleTimeString()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {notifications.length > 3 && (
-                <div className="text-lg text-gray-500 mt-2 text-center">
-                  +{notifications.length - 3} more alerts
-                </div>
-              )}
-
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full mt-3 text-lg"
-                onClick={handleMarkAllAsRead}
-                disabled={isMarkingAllRead}
-              >
-                Mark All Read
-              </Button>
-
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full mt-2 text-lg"
-                onClick={handleDeleteAllNotifications}
-                disabled={isDeletingAllNotifications}
-              >
-                Clear All
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }

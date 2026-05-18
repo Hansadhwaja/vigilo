@@ -44,6 +44,8 @@ import {
   useLazyDownloadSiteQRsPdfQuery,
 } from "@/apis/patrollingAPI";
 import { useGetAllGuardsQuery } from "@/apis/guardsApi";
+import CustomHeader from "@/components/common/Header/CustomHeader";
+import { cn } from "@/lib/utils";
 
 export default function PatrolDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -706,59 +708,43 @@ export default function PatrolDetailsPage() {
 
     toast.success("PDF exported successfully");
   };
+
   return (
-    <div className="p-6 space-y-6 bg-gray-50 min-h-screen text-[15px]">
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full">
+      <CustomHeader
+        previousLink="/patrol"
+        title="Patrol Run Details"
+        description="Comprehensive patrol run monitoring and progress tracking"
+        others={
+          <div className="flex items-center gap-2 justify-end">
+            <Badge className={cn("capitalize", statusColor(patrol.status))}>
+              {patrol.status}
+            </Badge>
+            <Button
+              onClick={handleOpenEditDialog}
+              className="flex items-center gap-2"
+              variant="outline"
+              disabled={patrol.status === "completed"}
+            >
+              <Edit className="w-4 h-4" />
+              Edit
+            </Button>
 
-      {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-
-          <div>
-            <h1 className="text-3xl font-semibold flex items-center gap-3">
-              <Shield className="w-7 h-7 text-purple-600" />
-              Patrol Run Details
-              <span className="text-gray-500 font-medium">
-                {patrol.patrolId}
-              </span>
-            </h1>
-            <p className="text-base text-muted-foreground">
-              Comprehensive patrol run monitoring and progress tracking
-            </p>
+            <Button
+              onClick={() => setShowExportDialog(true)}
+              className="flex items-center gap-2"
+              variant="outline"
+            >
+              <Download className="w-4 h-4" />
+              Export
+            </Button>
           </div>
-        </div>
-
-        <Badge className={statusColor(patrol.status)}>
-          {patrol.status}
-        </Badge>
-
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={handleOpenEditDialog}
-            className="flex items-center gap-2"
-            variant="outline"
-            disabled={patrol.status === "completed"}
-          >
-            <Edit className="w-4 h-4" />
-            Edit
-          </Button>
-
-          <Button
-            onClick={() => setShowExportDialog(true)}
-            className="flex items-center gap-2"
-            variant="outline"
-          >
-            <Download className="w-4 h-4" />
-            Export
-          </Button>
-        </div>
-      </div>
+        }
+      />
 
       {/* PROGRESS SECTION */}
-      <Card>
-        <CardContent className="space-y-6 pt-6">
+      <Card className="p-0">
+        <CardContent className="space-y-4 p-4">
 
           <div>
             <p className="text-base text-muted-foreground">Overall Progress</p>

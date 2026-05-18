@@ -16,6 +16,7 @@ import ProfileEditDialog from "@/components/ProfileEditDialog";
 import { toast } from "sonner";
 import MobileSidebar from "./Navbar/MobileSidebar";
 import UserAvatar from "./Avatar/UserAvatar";
+import NotificationModal from "../Notification/Modal/NotificationModal";
 
 interface TopBarProps {
   search: string;
@@ -72,6 +73,10 @@ export default function TopBar({ isOpen, search, onSearchChange, onSidebarToggle
               </SelectContent>
             </Select>
           </div>
+
+          <NotificationModal />
+          
+
           <DropdownMenu>
             <DropdownMenuTrigger className="cursor-pointer">
               {isLoading ? (
@@ -156,7 +161,7 @@ export default function TopBar({ isOpen, search, onSearchChange, onSidebarToggle
         </div>
       </div>
 
-      {/* Profile Edit Dialog */}
+
       {profile && (
         <ProfileEditDialog
           open={showEditDialog}

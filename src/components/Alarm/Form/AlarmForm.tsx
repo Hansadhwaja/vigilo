@@ -30,24 +30,13 @@ const AlarmForm = ({
 
     const { data: sitesResponse, isLoading: sitesLoading } = useGetAllPatrolSitesQuery({});
 
-    const sites = sitesResponse?.data || [];
+    const sites = sitesResponse?.data ?? [];
 
-    const { data: guardsResponse, isLoading: isGuardLoading, isError, error, isFetching } = useGetAllGuardsQuery({
-        limit: 10,
-        page: 1,
-    });
+    const { data: guardsResponse, isLoading: isGuardLoading } = useGetAllGuardsQuery();
 
-    const guards = guardsResponse?.data || [];
-    const apiPagination = guardsResponse?.pagination;
+    const guards = guardsResponse?.data ?? [];
 
-
-
-    const {
-        data: patrolData,
-    } = useGetAllPatrolRunsForAdminQuery({
-        page: 1,
-        limit: 100,
-    });
+    const { data: patrolData, } = useGetAllPatrolRunsForAdminQuery({});
 
     const activePatrolGuardIds = useMemo(() => {
         if (!patrolData?.data) return [];
@@ -217,12 +206,12 @@ const AlarmForm = ({
                             <FieldLabel>Assigned Guards</FieldLabel>
 
                             <div className="border rounded p-2 max-h-60 overflow-y-auto">
-                                {filteredGuards.length === 0 ? (
+                                {guards.length === 0 ? (
                                     <p className="text-sm text-gray-500">
                                         No guards available
                                     </p>
                                 ) : (
-                                    filteredGuards.map((guard: any) => {
+                                    guards.map((guard: any) => {
                                         const isSelected = field.value?.includes(guard.id);
 
                                         return (
@@ -262,7 +251,11 @@ const AlarmForm = ({
                     render={({ field, fieldState }) => (
                         <Field>
                             <FieldLabel>ETA (minutes)</FieldLabel>
-                            <Input type="number" {...field} />
+                            <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
                             {fieldState.error && (
                                 <FieldError errors={[fieldState.error]} />
                             )}
@@ -277,7 +270,11 @@ const AlarmForm = ({
                     render={({ field, fieldState }) => (
                         <Field>
                             <FieldLabel>SLA Time</FieldLabel>
-                            <Input type="number" {...field} />
+                            <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
                             {fieldState.error && (
                                 <FieldError errors={[fieldState.error]} />
                             )}
@@ -292,7 +289,11 @@ const AlarmForm = ({
                     render={({ field, fieldState }) => (
                         <Field>
                             <FieldLabel>Unit Price</FieldLabel>
-                            <Input type="number" {...field} />
+                            <Input
+                                type="number"
+                                {...field}
+                                onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
                             {fieldState.error && (
                                 <FieldError errors={[fieldState.error]} />
                             )}
