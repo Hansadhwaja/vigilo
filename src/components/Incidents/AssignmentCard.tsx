@@ -45,14 +45,14 @@ const IncidentAssignmentCard = ({
             ${isAssigned
                             ? `
                   border-emerald-800
-                  bg-gradient-to-br
+                  bg-linear-to-br
                   from-emerald-900
                   via-emerald-800
                   to-emerald-900
                 `
                             : `
                   border-orange-800
-                  bg-gradient-to-br
+                  bg-linear-to-br
                   from-orange-900
                   via-amber-800
                   to-orange-900
@@ -126,13 +126,13 @@ const IncidentAssignmentCard = ({
             ${isAssigned
                             ? `
                   border-emerald-200
-                  bg-gradient-to-br
+                  bg-linear-to-br
                   from-emerald-50
                   to-white
                 `
                             : `
                   border-orange-200
-                  bg-gradient-to-br
+                  bg-linear-to-br
                   from-orange-50
                   to-white
                 `
@@ -230,7 +230,7 @@ const IncidentAssignmentCard = ({
               rounded-2xl
               border
               border-slate-200
-              bg-gradient-to-br
+              bg-linear-to-br
               from-slate-50
               to-white
               p-5

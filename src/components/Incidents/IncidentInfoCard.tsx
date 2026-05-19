@@ -41,7 +41,7 @@ const IncidentInfoCard = ({
               rounded-2xl
               border
               border-slate-200
-              bg-gradient-to-br
+              bg-linear-to-br
               from-slate-50
               to-white
               p-5
@@ -107,7 +107,7 @@ const IncidentInfoCard = ({
               rounded-2xl
               border
               border-slate-200
-              bg-gradient-to-br
+              bg-linear-to-br
               from-slate-50
               to-white
               p-5
@@ -182,7 +182,7 @@ const IncidentInfoCard = ({
               rounded-2xl
               border
               border-slate-200
-              bg-gradient-to-br
+              bg-linear-to-br
               from-slate-50
               to-white
               p-6

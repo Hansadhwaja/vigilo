@@ -70,7 +70,7 @@ const ViewPatrolModal = ({
                 </Button>
             </DialogTrigger>
 
-            <DialogContent className="max-w-6xl max-h-[92vh] overflow-y-auto rounded-2xl border bg-gradient-to-br from-slate-50 via-white to-slate-100 p-0">
+            <DialogContent className="max-w-6xl max-h-[92vh] overflow-y-auto rounded-2xl border bg-linear-to-br from-slate-50 via-white to-slate-100 p-0">
 
                 {/* Header */}
                 <DialogHeader className="border-b bg-white/80 backdrop-blur px-6 py-5 sticky top-0 z-20">
@@ -355,7 +355,7 @@ const ViewPatrolModal = ({
                     {/* Proof of Service */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-                        <div className="rounded-2xl border bg-gradient-to-br from-blue-50 to-indigo-100 p-6 text-center shadow-sm">
+                        <div className="rounded-2xl border bg-linear-to-br from-blue-50 to-indigo-100 p-6 text-center shadow-sm">
                             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm">
                                 <QrCode className="h-7 w-7 text-blue-600" />
                             </div>
@@ -369,7 +369,7 @@ const ViewPatrolModal = ({
                             </div>
                         </div>
 
-                        <div className="rounded-2xl border bg-gradient-to-br from-emerald-50 to-green-100 p-6 text-center shadow-sm">
+                        <div className="rounded-2xl border bg-linear-to-br from-emerald-50 to-green-100 p-6 text-center shadow-sm">
                             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm">
                                 <Camera className="h-7 w-7 text-emerald-600" />
                             </div>
@@ -383,7 +383,7 @@ const ViewPatrolModal = ({
                             </div>
                         </div>
 
-                        <div className="rounded-2xl border bg-gradient-to-br from-purple-50 to-fuchsia-100 p-6 text-center shadow-sm">
+                        <div className="rounded-2xl border bg-linear-to-br from-purple-50 to-fuchsia-100 p-6 text-center shadow-sm">
                             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-sm">
                                 <FileText className="h-7 w-7 text-purple-600" />
                             </div>

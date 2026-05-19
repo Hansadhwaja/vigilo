@@ -1296,7 +1296,7 @@ export default function PatrolDetailsPage() {
         }}
       >
         <DialogContent className="max-w-6xl w-[96vw] max-h-[92vh] overflow-y-auto p-0">
-          <div className="bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 p-6 space-y-6">
+          <div className="bg-linear-to-br from-slate-50 via-blue-50 to-cyan-50 p-6 space-y-6">
             <DialogHeader className="space-y-2">
               <DialogTitle className="text-2xl">Edit Patrol Run</DialogTitle>
               <DialogDescription className="text-base">

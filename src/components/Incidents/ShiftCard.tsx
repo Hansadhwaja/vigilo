@@ -37,7 +37,7 @@ const ShiftCard = ({
             rounded-2xl
             border
             border-slate-200
-            bg-gradient-to-br
+            bg-linear-to-br
             from-emerald-900
             via-emerald-800
             to-emerald-900
@@ -83,7 +83,7 @@ const ShiftCard = ({
             rounded-2xl
             border
             border-slate-200
-            bg-gradient-to-br
+            bg-linear-to-br
             from-slate-50
             to-white
             p-5
@@ -145,7 +145,7 @@ const ShiftCard = ({
             rounded-2xl
             border
             border-slate-200
-            bg-gradient-to-br
+            bg-linear-to-br
             from-slate-50
             to-white
             p-5

@@ -32,7 +32,7 @@ const DateTimeCard = ({
             rounded-2xl
             border
             border-slate-200
-            bg-gradient-to-br
+            bg-linear-to-br
             from-slate-900
             via-slate-800
             to-slate-900
@@ -78,7 +78,7 @@ const DateTimeCard = ({
             rounded-2xl
             border
             border-slate-200
-            bg-gradient-to-br
+            bg-linear-to-br
             from-slate-50
             to-white
             p-5
@@ -137,7 +137,7 @@ const DateTimeCard = ({
             rounded-2xl
             border
             border-slate-200
-            bg-gradient-to-br
+            bg-linear-to-br
             from-slate-50
             to-white
             p-5

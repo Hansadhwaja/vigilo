@@ -126,7 +126,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
           </CardHeader>
           <CardContent>
             <div className="relative w-full" style={{ height: 480 }}>
-              <svg viewBox={`0 0 ${mapConfig.width} ${mapConfig.height}`} className="w-full h-full rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 border">
+              <svg viewBox={`0 0 ${mapConfig.width} ${mapConfig.height}`} className="w-full h-full rounded-lg bg-linear-to-br from-slate-100 to-slate-200 border">
                 {/* Background grid */}
                 <defs>
                   <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">

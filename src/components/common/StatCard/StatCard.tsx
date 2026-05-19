@@ -33,7 +33,7 @@ const StatCard = ({
         className="
           absolute
           inset-0
-          bg-gradient-to-br
+          bg-linear-to-br
           from-slate-50/40
           via-transparent
           to-blue-50/30

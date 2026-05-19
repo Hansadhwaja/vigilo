@@ -237,7 +237,7 @@ const PaymentCard = ({
 
                     {/* TOTAL */}
 
-                    <div className="flex flex-col justify-between rounded-xl border bg-gradient-to-br from-emerald-50 to-emerald-100 p-5">
+                    <div className="flex flex-col justify-between rounded-xl border bg-linear-to-br from-emerald-50 to-emerald-100 p-5">
                         <div>
                             <p className="text-sm text-emerald-700">
                                 Total Payment

@@ -75,6 +75,7 @@ export interface GetAllGuardsParams {
   limit?: number;
   page?: number;
   search?: string;
+  guardId?: string;
 }
 
 // Create guard request
@@ -95,15 +96,16 @@ export interface CreateGuardAdminResponse {
 export const guardsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllGuards: builder.query<GetAllGuardsResponse, GetAllGuardsParams | void>({
-      query: (params) => {
+      query: (params = {}) => {
         const queryParams = new URLSearchParams();
-        
+
         if (params) {
           if (params.limit) queryParams.append('limit', params.limit.toString());
           if (params.page) queryParams.append('page', params.page.toString());
           if (params.search) queryParams.append('search', params.search);
+          if (params.guardId) queryParams.append('guardId', params.guardId);
         }
-        
+
         return {
           url: `/users/getAllGuards${queryParams.toString() ? `?${queryParams.toString()}` : ''}`,
           method: "GET",
@@ -131,8 +133,8 @@ export const guardsApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { 
-  useGetAllGuardsQuery, 
-  useGetGuardByIdQuery, 
-  useCreateGuardByAdminMutation 
+export const {
+  useGetAllGuardsQuery,
+  useGetGuardByIdQuery,
+  useCreateGuardByAdminMutation
 } = guardsApi;

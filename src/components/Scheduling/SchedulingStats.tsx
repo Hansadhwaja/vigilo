@@ -1,14 +1,18 @@
 import { useMemo } from "react";
 import { Calendar, Clock, MapPin, User } from "lucide-react";
-import { OrganizedShifts } from "@/types";
 import StatCards from "../common/StatCard/StatCards";
+import { useSchedulingData } from "./hook/useSchedulingData";
 
-interface Props {
-  organizedShifts: OrganizedShifts;
-  today: Date;
+interface SchedulingStatsProps {
+  scheduling: ReturnType<typeof useSchedulingData>;
 }
 
-const SchedulingStats = ({ organizedShifts, today }: Props) => {
+const SchedulingStats = ({ scheduling }: SchedulingStatsProps) => {
+  const {
+    organizedShifts,
+    today
+  } = scheduling;
+
   const stats = useMemo(() => {
     const allAssignments = Object.values(organizedShifts)
       .flatMap((slots: any) => Object.values(slots).flat());

@@ -27,7 +27,7 @@ const ImagesCard = ({ images }: Props) => {
         >
             <div className="space-y-6">
                 {/* Top Info */}
-                <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-gradient-to-r from-slate-50 to-white p-5 shadow-sm">
+                <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-linear-to-r from-slate-50 to-white p-5 shadow-sm">
                     <div className="flex items-center gap-4">
                         <div
                             className="
@@ -114,7 +114,7 @@ const ImagesCard = ({ images }: Props) => {
                                 className="
                   absolute
                   inset-0
-                  bg-gradient-to-t
+                  bg-linear-to-t
                   from-black/70
                   via-black/10
                   to-transparent

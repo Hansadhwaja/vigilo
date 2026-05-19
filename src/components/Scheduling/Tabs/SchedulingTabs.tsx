@@ -1,54 +1,66 @@
 import {
     Tabs,
+    TabsContent,
     TabsList,
     TabsTrigger,
-    TabsContent,
 } from "@/components/ui/tabs";
 
 import WeeklyCalendar from "../WeeklyCalendar";
 import DailyTimeline from "../DailyTimeline";
-import { OrganizedAssignment } from "@/types";
+import { useSchedulingData } from "../hook/useSchedulingData";
 
 interface SchedulingTabsProps {
-    weekDays: Date[];
-    selectedDate: Date;
-    setSelectedDate: (d: Date) => void;
-    navigateWeek: (v: number) => void;
-    getAssignmentsForSlot: (date: Date, time: string) => any[];
-    assignments: OrganizedAssignment[];
+    scheduling: ReturnType<typeof useSchedulingData>;
 }
 
-const SchedulingTabs = ({
-    weekDays,
-    selectedDate,
-    setSelectedDate,
-    navigateWeek,
-    getAssignmentsForSlot,
-    assignments
-}: SchedulingTabsProps) => {
+const SchedulingTabs = ({ scheduling }: SchedulingTabsProps) => {
     return (
-        <Tabs defaultValue="weekly">
-            <TabsList className="w-[60vw]">
-                <TabsTrigger value="weekly">Weekly</TabsTrigger>
-                <TabsTrigger value="daily">Daily</TabsTrigger>
+        <Tabs
+            defaultValue="weekly"
+            className="space-y-4"
+        >
+            <TabsList className="min-h-14 rounded-full border border-slate-200 bg-gradient-to-r from-orange-50 via-white to-sky-50 p-1.5 shadow-sm">
+                <TabsTrigger
+                    value="weekly"
+                    className="
+            min-w-35 rounded-full px-6 py-2.5
+            text-sm font-semibold text-slate-600
+            transition-all duration-300
+            data-[state=active]:bg-orange-500
+            data-[state=active]:text-white
+            data-[state=active]:shadow-md
+          "
+                >
+                    Weekly
+                </TabsTrigger>
+
+                <TabsTrigger
+                    value="daily"
+                    className="
+            min-w-35 rounded-full px-6 py-2.5
+            text-sm font-semibold text-slate-600
+            transition-all duration-300
+            data-[state=active]:bg-sky-500
+            data-[state=active]:text-white
+            data-[state=active]:shadow-md
+          "
+                >
+                    Daily
+                </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="weekly">
-                <WeeklyCalendar
-                    weekDays={weekDays}
-                    selectedDate={selectedDate}
-                    setSelectedDate={setSelectedDate}
-                    navigateWeek={navigateWeek}
-                    getAssignmentsForSlot={getAssignmentsForSlot}
-                />
+            <TabsContent
+                value="weekly"
+                className="mt-0"
+            >
+                <WeeklyCalendar scheduling={scheduling} />
             </TabsContent>
 
-            <TabsContent value="daily">
-                <DailyTimeline
-                    selectedDate={selectedDate}
-                    setSelectedDate={setSelectedDate}
-                    assignments={assignments}
-                />
+            <TabsContent
+                value="daily"
+                className="mt-0"
+            >
+                <DailyTimeline scheduling={scheduling} />
             </TabsContent>
         </Tabs>
     );

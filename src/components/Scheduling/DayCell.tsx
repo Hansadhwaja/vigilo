@@ -1,11 +1,17 @@
-
 import { cn } from "@/lib/utils";
+
+import { Badge } from "../ui/badge";
+import { Card, CardContent } from "../ui/card";
+
 import CreateAssignmentModal from "./Modal/CreateAssignmentModal";
 import EditAssignmentModal from "./Modal/EditAssignmentModal";
-import { Badge } from "../ui/badge";
+
 import { OrganizedAssignment } from "@/types";
-import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
-import { Card, CardContent } from "../ui/card";
+
+import {
+    getStatusColor,
+    getStatusStyle,
+} from "@/utils/statusColors";
 
 interface DayCellProps {
     assignments: OrganizedAssignment[];
@@ -19,46 +25,80 @@ const DayCell = ({
     return (
         <div
             className={cn(
-                "p-2 border-r min-h-20 transition-all",
-                isSelected ? "bg-blue-50" : "hover:bg-gray-50"
+                "min-h-24 p-2 transition-all duration-200",
+                isSelected
+                    ? "bg-orange-50/30"
+                    : "hover:bg-slate-50/80"
             )}
         >
             {assignments.length > 0 ? (
-                <div className="space-y-1">
-                    {assignments.map((a: OrganizedAssignment) => (
-                        <Card key={a.id} className="p-0">
-                            <CardContent
-                                className={cn(
-                                    "p-2 rounded-md text-sm border cursor-pointer transition relative group space-y-1",
-                                    a.type === "patrol"
-                                        ? "bg-orange-100 text-orange-900 hover:bg-orange-200"
-                                        : "bg-green-100 text-green-900 hover:bg-green-200"
-                                )}
-                            >
-                                <div className="font-medium truncate">
-                                    {a.guardName}
+                <div className="space-y-2">
+                    {assignments.map((assignment: OrganizedAssignment) => (
+                        <Card
+                            key={assignment.id}
+                            className={cn(
+                                "group overflow-hidden border-0 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
+                                assignment.type === "patrol"
+                                    ? "bg-linear-to-br from-orange-50 to-orange-100/80"
+                                    : "bg-linear-to-br from-emerald-50 to-emerald-100/80"
+                            )}
+                        >
+                            <CardContent className="space-y-2 p-3">
+                                {/* Top */}
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0 flex-1">
+                                        <h4 className="truncate text-sm font-semibold text-slate-800">
+                                            {assignment.guardName}
+                                        </h4>
+
+                                        <p className="truncate text-xs text-slate-500">
+                                            {assignment.orderName}
+                                        </p>
+                                    </div>
+
+                                    <div className="lg:opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                                        <EditAssignmentModal
+                                            id={assignment.shiftId}
+                                            assignment={assignment}
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="text-xs opacity-80 truncate">
-                                    {a.orderName}
+                                {/* Time */}
+                                <div className="text-xs font-medium text-slate-600">
+                                    {assignment.start} - {assignment.end}
                                 </div>
-                                <p className="text-xs">{a.start}-{a.end}</p>
 
-                                <Badge
-                                    variant="outline"
-                                    style={getStatusStyle(a.status)}
-                                >
-                                    {getStatusColor(a.status).label}
-                                </Badge>
-                                <div className="absolute lg:opacity-0 bottom-1 right-1 group-hover:opacity-100">
-                                    <EditAssignmentModal id={a.shiftId} assignment={a} />
+                                {/* Footer */}
+                                <div className="flex items-center justify-between gap-2">
+                                    <Badge
+                                        variant="outline"
+                                        className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
+                                        style={getStatusStyle(
+                                            assignment.status
+                                        )}
+                                    >
+                                        {
+                                            getStatusColor(assignment.status)
+                                                .label
+                                        }
+                                    </Badge>
+
+                                    <div
+                                        className={cn(
+                                            "h-2 w-2 rounded-full",
+                                            assignment.type === "patrol"
+                                                ? "bg-orange-500"
+                                                : "bg-emerald-500"
+                                        )}
+                                    />
                                 </div>
                             </CardContent>
                         </Card>
                     ))}
                 </div>
             ) : (
-                <div className="flex items-center justify-center h-full text-gray-400 opacity-0 hover:opacity-100">
+                <div className="flex h-full min-h-20 items-center justify-center opacity-0 transition-opacity duration-200 hover:opacity-100">
                     <CreateAssignmentModal title="Add" />
                 </div>
             )}

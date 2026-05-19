@@ -178,112 +178,200 @@ export const organizeShifts = (
 
   const toMinutes = (hhmm: string): number => {
     const [h, m] = hhmm.split(":").map(Number);
+
     return h * 60 + m;
   };
 
   scheduleList.forEach((shift) => {
+    /* ---------------- LOCAL DATES ---------------- */
 
-    const startDateStr = shift.startTime.split("T")[0];
-    const endDateStr = shift.endTime.split("T")[0];
+    const startDateObj = new Date(
+      shift.startTime
+    );
 
-    const start = toLocalTime(shift.startTime);
-    const end = toLocalTime(shift.endTime);
+    const endDateObj = new Date(
+      shift.endTime
+    );
 
-    const [sy, sm, sd] = startDateStr.split("-").map(Number);
-    const [ey, em, ed] = endDateStr.split("-").map(Number);
+    startDateObj.setHours(0, 0, 0, 0);
+    endDateObj.setHours(0, 0, 0, 0);
 
-    const startDateObj = new Date(sy, sm - 1, sd);
-    const endDateObj = new Date(ey, em - 1, ed);
+    /* ---------------- LOCAL TIMES ---------------- */
+
+    const start = toLocalTime(
+      shift.startTime
+    );
+
+    const end = toLocalTime(
+      shift.endTime
+    );
+
+    /* ---------------- DAYS DIFF ---------------- */
 
     const daysDiff = Math.floor(
-      (endDateObj.getTime() - startDateObj.getTime()) /
+      (endDateObj.getTime() -
+        startDateObj.getTime()) /
       (1000 * 60 * 60 * 24)
     );
 
-    for (let dayOffset = 0; dayOffset <= daysDiff; dayOffset++) {
-      const currentDateObj = new Date(startDateObj);
-      currentDateObj.setDate(startDateObj.getDate() + dayOffset);
+    /* ---------------- SLOT MATCH ---------------- */
 
-      const year = currentDateObj.getFullYear();
-      const month = String(currentDateObj.getMonth() + 1).padStart(2, "0");
-      const day = String(currentDateObj.getDate()).padStart(2, "0");
+    const shiftStartHHMM =
+      getTimeHHMM(start);
 
-      const dateKey = `${year}-${month}-${day}`;
+    const shiftStartMin =
+      toMinutes(shiftStartHHMM);
 
-      const shiftStartHHMM = getTimeHHMM(start);
-      const shiftStartMin = toMinutes(shiftStartHHMM);
+    let matchedSlot: string | null =
+      null;
 
-      let matchedSlot: string | null = null;
+    for (
+      let i = 0;
+      i < timeSlots.length;
+      i++
+    ) {
+      const curr = toMinutes(
+        timeSlots[i].time
+      );
 
-      for (let i = 0; i < timeSlots.length; i++) {
-        const curr = toMinutes(timeSlots[i].time);
-        const next =
-          i < timeSlots.length - 1
-            ? toMinutes(timeSlots[i + 1].time)
-            : 9999;
+      const next =
+        i < timeSlots.length - 1
+          ? toMinutes(
+            timeSlots[i + 1].time
+          )
+          : 9999;
 
-        if (shiftStartMin >= curr && shiftStartMin < next) {
-          matchedSlot = timeSlots[i].time;
-          break;
-        }
+      if (
+        shiftStartMin >= curr &&
+        shiftStartMin < next
+      ) {
+        matchedSlot =
+          timeSlots[i].time;
+
+        break;
+      }
+    }
+
+    if (!matchedSlot) return;
+
+    /* ---------------- LOOP DAYS ---------------- */
+
+    for (
+      let dayOffset = 0;
+      dayOffset <= daysDiff;
+      dayOffset++
+    ) {
+      const currentDateObj =
+        new Date(startDateObj);
+
+      currentDateObj.setDate(
+        currentDateObj.getDate() +
+        dayOffset
+      );
+
+      const dateKey =
+        formatDateKey(currentDateObj);
+
+      if (!organized[dateKey]) {
+        organized[dateKey] = {};
       }
 
-      if (!matchedSlot) continue;
+      if (
+        !organized[dateKey][matchedSlot]
+      ) {
+        organized[dateKey][
+          matchedSlot
+        ] = [];
+      }
 
-      if (!organized[dateKey]) organized[dateKey] = {};
-      if (!organized[dateKey][matchedSlot])
-        organized[dateKey][matchedSlot] = [];
+      /* ---------------- ASSIGNMENTS ---------------- */
 
       shift.guards.forEach((guard) => {
-        const assignment: OrganizedAssignment = {
+        const assignment: OrganizedAssignment =
+        {
           shiftId: shift.id,
+
           guardId: guard.id,
+
           id: `${shift.id}-${guard.id}-${dateKey}`,
 
           guardName: guard.name,
+
           guardEmail: guard.email,
+
           guardStatus:
-            guard.StaticGuards?.status || shift.status,
+            guard.StaticGuards
+              ?.status ||
+            shift.status,
 
           orderId: shift.orderId,
+
           orderLocationName:
-            shift.orderLocationName || "Unknown Location",
+            shift.orderLocationName ||
+            "Unknown Location",
+
           orderName:
-            shift.orderLocationName || "Unknown Location",
+            shift.orderLocationName ||
+            "Unknown Location",
+
           orderAddress:
             shift.orderLocationAddress ||
             "Address not available",
 
-          description: shift.description,
+          description:
+            shift.description,
+
           type: shift.type,
+
           status: shift.status,
 
-          statusColors: getStatusColor(shift.status),
+          statusColors:
+            getStatusColor(
+              shift.status
+            ),
 
           timeSlot: matchedSlot,
-          start: start.toLocaleTimeString("en-IN", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          end: end.toLocaleTimeString("en-IN", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
+
+          start:
+            start.toLocaleTimeString(
+              "en-IN",
+              {
+                hour: "2-digit",
+                minute: "2-digit",
+              }
+            ),
+
+          end:
+            end.toLocaleTimeString(
+              "en-IN",
+              {
+                hour: "2-digit",
+                minute: "2-digit",
+              }
+            ),
+
           duration: getDuration(
             shift.startTime,
             shift.endTime
           ),
 
           displayDate: dateKey,
-          originalStartDate: shift.startTime,
-          originalEndDate: shift.endTime,
 
-          allGuardIdsForShift: shift.guards.map(
-            (g) => g.id
-          ),
+          originalStartDate:
+            shift.startTime,
+
+          originalEndDate:
+            shift.endTime,
+
+          allGuardIdsForShift:
+            shift.guards.map(
+              (g) => g.id
+            ),
         };
 
-        organized[dateKey][matchedSlot].push(assignment);
+        organized[dateKey][
+          matchedSlot
+        ].push(assignment);
       });
     }
   });
@@ -538,4 +626,12 @@ export const checkSLABreach = (alarm: any) => {
   }
 
   return null;
+};
+
+export const formatDateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 };

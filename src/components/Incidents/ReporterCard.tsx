@@ -41,7 +41,7 @@ const ReporterCard = ({
             rounded-2xl
             border
             border-slate-200
-            bg-gradient-to-br
+            bg-linear-to-br
             from-slate-50
             via-white
             to-slate-100
@@ -62,7 +62,7 @@ const ReporterCard = ({
                 items-center
                 justify-center
                 rounded-2xl
-                bg-gradient-to-br
+                bg-linear-to-br
                 from-blue-500
                 to-indigo-600
                 text-2xl
@@ -135,7 +135,7 @@ const ReporterCard = ({
               rounded-2xl
               border
               border-slate-200
-              bg-gradient-to-br
+              bg-linear-to-br
               from-slate-50
               to-white
               p-5
@@ -184,7 +184,7 @@ const ReporterCard = ({
               rounded-2xl
               border
               border-slate-200
-              bg-gradient-to-br
+              bg-linear-to-br
               from-slate-50
               to-white
               p-5

@@ -1,88 +1,153 @@
-import { OrganizedAssignment } from '@/types'
-import { Calendar, Clock, User } from 'lucide-react'
-import { Card, CardContent } from '../ui/card'
-import ShiftPill from './ShiftPill'
-import StatCards from '../common/StatCard/StatCards';
-import { Separator } from '../ui/separator';
+import { OrganizedAssignment } from "@/types";
+
+import { Calendar, Clock, User, ShieldCheck } from "lucide-react";
+
+import { Card, CardContent } from "../ui/card";
+import { Separator } from "../ui/separator";
+
+import ShiftPill from "./ShiftPill";
+import StatCards from "../common/StatCard/StatCards";
+
+import { useSchedulingData } from "./hook/useSchedulingData";
 
 interface QuickSummaryProps {
-    selectedDate: Date;
-    assignments: OrganizedAssignment[];
+    scheduling: ReturnType<typeof useSchedulingData>;
 }
 
-const QuickSummary = ({
-    selectedDate,
-    assignments
-}: QuickSummaryProps) => {
+const QuickSummary = ({ scheduling }: QuickSummaryProps) => {
+    const { selectedDate, selectedDayAssignments: assignments } = scheduling;
+
+    const activeAssignments = assignments.filter(
+        (assignment: OrganizedAssignment) =>
+            assignment.status?.toLowerCase() === "active"
+    );
+
+    const completedAssignments = assignments.filter(
+        (assignment: OrganizedAssignment) =>
+            assignment.status?.toLowerCase() === "completed"
+    );
 
     const stats = [
         {
             label: "Total",
             Icon: User,
             value: assignments.length,
-            color: "bg-blue-50 text-blue-700 border-blue-200"
+            color:
+                "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/10 dark:text-sky-300",
         },
         {
             label: "Active",
             Icon: Clock,
-            value: assignments.filter((a: OrganizedAssignment) => a.status === "active").length,
-            color: "bg-green-50 text-green-700 border-green-200"
+            value: activeAssignments.length,
+            color:
+                "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300",
+        },
+        {
+            label: "Completed",
+            Icon: ShieldCheck,
+            value: completedAssignments.length,
+            color:
+                "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-500/10 dark:text-orange-300",
         },
     ];
-    return (
-        <Card className="bg-linear-to-r from-blue-50 to-indigo-50 border border-blue-200 p-0">
-            <CardContent className="p-4 space-y-4">
 
-                <div className="flex max-sm:flex-col justify-between sm:items-center gap-2">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                            <Calendar className="h-5 w-5 text-blue-600" />
+    return (
+        <Card className="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-sm">
+            <div className="h-1.5 w-full bg-linear-to-r from-orange-500 via-orange-400 to-sky-500" />
+
+            <CardContent className="space-y-5 p-5">
+                {/* Header */}
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    {/* Date Info */}
+                    <div className="flex items-center gap-4">
+                        <div className="flex size-14 items-center justify-center rounded-2xl bg-linear-to-br from-orange-100 to-sky-100 shadow-inner">
+                            <Calendar className="size-6 text-orange-600" />
                         </div>
-                        <div>
-                            <h3 className="font-semibold text-gray-900 text-base leading-tight">
+
+                        <div className="space-y-1">
+                            <h3 className="text-lg font-semibold tracking-tight text-slate-900">
                                 {selectedDate.toLocaleDateString("en-US", {
                                     weekday: "long",
                                     month: "short",
                                     day: "numeric",
                                 })}
                             </h3>
-                            <p className="text-xs text-gray-500">
-                                {selectedDate.getFullYear()}
+
+                            <p className="text-sm text-slate-500">
+                                Schedule overview for{" "}
+                                <span className="font-medium text-slate-700">
+                                    {selectedDate.getFullYear()}
+                                </span>
                             </p>
                         </div>
                     </div>
-                    <div className='flex justify-end flex-1'>
+
+                    {/* Stats */}
+                    <div className="flex justify-end">
                         <StatCards items={stats} />
                     </div>
-
                 </div>
-                <Separator />
 
+                <Separator className="bg-slate-200" />
+
+                {/* Assignments */}
                 {assignments.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                        {assignments.slice(0, 4).map((a: OrganizedAssignment) => (
-                            <ShiftPill key={a.id} assignment={a} />
-                        ))}
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-semibold tracking-wide text-slate-700 uppercase">
+                                Assigned Shifts
+                            </h4>
 
-                        {assignments.length > 4 && (
-                            <div className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-white border-2 border-dashed border-gray-300 text-gray-600">
-                                <span className="font-semibold">
-                                    +{assignments.length - 4}
-                                </span>
-                                <span>more assignments</span>
-                            </div>
-                        )}
+                            <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-medium text-orange-600">
+                                {assignments.length} Assignments
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                            {assignments
+                                .slice(0, 4)
+                                .map((assignment: OrganizedAssignment) => (
+                                    <div
+                                        key={assignment.id}
+                                        className="rounded-2xl border border-slate-200/70 bg-linear-to-br from-white to-slate-50 p-2 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+                                    >
+                                        <ShiftPill assignment={assignment} />
+                                    </div>
+                                ))}
+
+                            {assignments.length > 4 && (
+                                <div className="flex min-h-[80px] items-center justify-center rounded-2xl border-2 border-dashed border-orange-200 bg-orange-50/50 text-center transition-all hover:border-orange-300 hover:bg-orange-50">
+                                    <div className="space-y-1">
+                                        <p className="text-2xl font-bold text-orange-600">
+                                            +{assignments.length - 4}
+                                        </p>
+
+                                        <p className="text-xs font-medium text-slate-600">
+                                            More Assignments
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 ) : (
-                    <div className="text-center py-2">
-                        <p className="text-sm text-gray-500">
-                            No assignments scheduled for this date
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 py-10 text-center">
+                        <div className="mb-3 flex size-14 items-center justify-center rounded-full bg-white shadow-sm">
+                            <Calendar className="size-6 text-slate-400" />
+                        </div>
+
+                        <h4 className="text-sm font-semibold text-slate-700">
+                            No Assignments Found
+                        </h4>
+
+                        <p className="mt-1 text-sm text-slate-500">
+                            There are no shifts scheduled for this date.
                         </p>
                     </div>
                 )}
             </CardContent>
         </Card>
-    )
-}
+    );
+};
 
-export default QuickSummary
+export default QuickSummary;

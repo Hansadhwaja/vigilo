@@ -28,7 +28,7 @@ const SectionCard = ({
             <CardHeader
                 className="
           border-b
-          bg-gradient-to-r
+          bg-linear-to-r
           from-slate-50
           to-gray-50
           pb-4

@@ -1,6 +1,7 @@
+"use client";
+
 import { useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Button } from "../ui/button";
+
 import {
     CalendarIcon,
     ChevronLeft,
@@ -8,155 +9,288 @@ import {
     Clock,
     User,
 } from "lucide-react";
+
+import { Button } from "../ui/button";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "../ui/card";
+
 import CreateAssignmentModal from "./Modal/CreateAssignmentModal";
-import { OrganizedAssignment } from "@/types";
 import AssignmentCard from "./AssignmentCard";
 import Stat from "./Stat";
 
+import { OrganizedAssignment } from "@/types";
+
+import { useSchedulingData } from "./hook/useSchedulingData";
+
 interface DailyTimelineProps {
-    selectedDate: Date;
-    setSelectedDate: (d: Date) => void;
-    assignments: OrganizedAssignment[];
+    scheduling: ReturnType<typeof useSchedulingData>;
 }
 
 const DailyTimeline = ({
-    selectedDate,
-    setSelectedDate,
-    assignments,
+    scheduling,
 }: DailyTimelineProps) => {
+    const {
+        selectedDate,
+        setSelectedDate,
+        selectedDayAssignments: assignments,
+    } = scheduling;
 
     const grouped = useMemo(() => {
         return Object.entries(
-            assignments.reduce((acc: Record<string, OrganizedAssignment[]>, a) => {
-                const key = a.start; // ✅ FIXED
-                if (!acc[key]) acc[key] = [];
-                acc[key].push(a);
-                return acc;
-            }, {})
-        ).sort(([a], [b]) => a.localeCompare(b));
+            assignments.reduce(
+                (
+                    acc: Record<
+                        string,
+                        OrganizedAssignment[]
+                    >,
+                    assignment
+                ) => {
+                    const key =
+                        assignment.start;
+
+                    if (!acc[key]) {
+                        acc[key] = [];
+                    }
+
+                    acc[key].push(
+                        assignment
+                    );
+
+                    return acc;
+                },
+                {}
+            )
+        ).sort(([a], [b]) =>
+            a.localeCompare(b)
+        );
     }, [assignments]);
 
     return (
-        <div className="space-y-4">
-            <Card className="shadow-lg border-0 bg-gradient-to-br from-white to-gray-50">
-                <CardHeader className="pb-3 px-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle className="text-lg font-bold text-gray-900">
-                                Daily Schedule Timeline
-                            </CardTitle>
-                            <p className="text-gray-600 text-sm">
-                                {selectedDate.toLocaleDateString("en-US", {
-                                    weekday: "long",
-                                    month: "long",
+        <Card className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm p-0">
+            {/* Header */}
+            <CardHeader className="border-b border-slate-100 bg-linear-to-r from-orange-50 via-white to-sky-50 px-5 py-4">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    {/* Left */}
+                    <div>
+                        <CardTitle className="text-xl font-bold tracking-tight text-slate-900">
+                            Daily Timeline
+                        </CardTitle>
+
+                        <p className="mt-1 text-sm text-slate-500">
+                            {selectedDate.toLocaleDateString(
+                                "en-US",
+                                {
+                                    weekday:
+                                        "long",
+                                    month:
+                                        "long",
                                     day: "numeric",
                                     year: "numeric",
-                                })}
-                            </p>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                size="icon-sm"
-                                onClick={() => {
-                                    const d = new Date(selectedDate);
-                                    d.setDate(d.getDate() - 1);
-                                    setSelectedDate(d);
-                                }}
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                            </Button>
-
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                    const today = new Date();
-                                    setSelectedDate(today);
-                                }}
-                            >
-                                Today
-                            </Button>
-
-                            <Button
-                                variant="outline"
-                                size="icon-sm"
-                                onClick={() => {
-                                    const d = new Date(selectedDate);
-                                    d.setDate(d.getDate() + 1);
-                                    setSelectedDate(d);
-                                }}
-                            >
-                                <ChevronRight className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                </CardHeader>
-
-                <CardContent className="px-4 pb-4 space-y-4">
-                    <div className="flex flex-wrap gap-4 p-4 rounded-lg border bg-blue-50">
-                        <Stat label="Total" value={assignments.length} icon={<User />} />
-                        <Stat
-                            label="Patrol"
-                            value={assignments.filter((a) => a.type === "patrol").length}
-                        />
-                        <Stat
-                            label="Static"
-                            value={assignments.filter((a) => a.type === "static").length}
-                        />
-                        <Stat
-                            label="Orders"
-                            value={new Set(assignments.map((a) => a.orderId)).size}
-                            icon={<CalendarIcon />}
-                        />
+                                }
+                            )}
+                        </p>
                     </div>
 
-                    {assignments.length === 0 ? (
-                        <div className="flex justify-center items-center flex-col text-center py-12 border-2 border-dashed rounded-lg">
-                            <CalendarIcon className="h-10 w-10 mx-auto text-gray-400 mb-3" />
-                            <p className="text-gray-600 mb-3">No shifts scheduled</p>
-                            <CreateAssignmentModal />
-                        </div>
-                    ) : (
-                        <div className="space-y-5">
-                            {grouped.map(([time, shifts]) => (
-                                <div key={time} className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <Clock className="h-4 w-4 text-gray-500" />
-                                        <span className="font-semibold text-gray-700">
-                                            {time}
-                                        </span>
-                                        <div className="flex-1 h-px bg-gray-300" />
-                                        <span className="text-xs text-gray-500">
-                                            {shifts.length} shift
-                                            {shifts.length > 1 ? "s" : ""}
-                                        </span>
+                    {/* Right */}
+                    <div className="flex items-center gap-2">
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => {
+                                const d =
+                                    new Date(
+                                        selectedDate
+                                    );
+
+                                d.setDate(
+                                    d.getDate() -
+                                    1
+                                );
+
+                                setSelectedDate(
+                                    d
+                                );
+                            }}
+                            className="rounded-xl border-slate-200 bg-white hover:bg-orange-50"
+                        >
+                            <ChevronLeft className="size-4" />
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setSelectedDate(
+                                    new Date()
+                                );
+                            }}
+                            className="rounded-xl border-slate-200 bg-white px-5 font-medium hover:bg-sky-50"
+                        >
+                            Today
+                        </Button>
+
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => {
+                                const d =
+                                    new Date(
+                                        selectedDate
+                                    );
+
+                                d.setDate(
+                                    d.getDate() +
+                                    1
+                                );
+
+                                setSelectedDate(
+                                    d
+                                );
+                            }}
+                            className="rounded-xl border-slate-200 bg-white hover:bg-orange-50"
+                        >
+                            <ChevronRight className="size-4" />
+                        </Button>
+                    </div>
+                </div>
+            </CardHeader>
+
+            {/* Content */}
+            <CardContent className="space-y-5 p-5">
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-4">
+                    <Stat
+                        label="Total"
+                        value={
+                            assignments.length
+                        }
+                        icon={<User />}
+                    />
+
+                    <Stat
+                        label="Patrol"
+                        value={
+                            assignments.filter(
+                                (a) =>
+                                    a.type ===
+                                    "patrol"
+                            ).length
+                        }
+                    />
+
+                    <Stat
+                        label="Static"
+                        value={
+                            assignments.filter(
+                                (a) =>
+                                    a.type ===
+                                    "static"
+                            ).length
+                        }
+                    />
+
+                    <Stat
+                        label="Orders"
+                        value={
+                            new Set(
+                                assignments.map(
+                                    (a) =>
+                                        a.orderId
+                                )
+                            ).size
+                        }
+                        icon={
+                            <CalendarIcon />
+                        }
+                    />
+                </div>
+
+                {/* Empty State */}
+                {assignments.length ===
+                    0 ? (
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 py-14 text-center">
+                        <CalendarIcon className="mb-4 size-10 text-slate-400" />
+
+                        <h3 className="text-base font-semibold text-slate-700">
+                            No assignments
+                            scheduled
+                        </h3>
+
+                        <p className="mt-1 mb-4 text-sm text-slate-500">
+                            There are no
+                            shifts assigned
+                            for this day.
+                        </p>
+
+                        <CreateAssignmentModal />
+                    </div>
+                ) : (
+                    <div className="space-y-5">
+                        {grouped.map(
+                            (
+                                [
+                                    time,
+                                    shifts,
+                                ]
+                            ) => (
+                                <div
+                                    key={
+                                        time
+                                    }
+                                    className="rounded-2xl border border-slate-200 bg-white p-4 space-y-4"
+                                >
+                                    {/* Timeline Header */}
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700">
+                                            <Clock className="size-4" />
+
+                                            {
+                                                time
+                                            }
+                                        </div>
+
+                                        <div className="h-px flex-1 bg-slate-200" />
+
+                                        <p className="text-xs font-medium text-slate-500">
+                                            {
+                                                shifts.length
+                                            }{" "}
+                                            shift
+                                            {shifts.length >
+                                                1
+                                                ? "s"
+                                                : ""}
+                                        </p>
                                     </div>
 
-                                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                        {shifts.map((a) => (
-                                            <AssignmentCard key={a.id} assignment={a} />
-                                        ))}
+                                    {/* Cards */}
+                                    <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                                        {shifts.map(
+                                            (
+                                                assignment
+                                            ) => (
+                                                <AssignmentCard
+                                                    key={
+                                                        assignment.id
+                                                    }
+                                                    assignment={
+                                                        assignment
+                                                    }
+                                                />
+                                            )
+                                        )}
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
+                            )
+                        )}
+                    </div>
+                )}
+            </CardContent>
+        </Card>
     );
 };
 
 export default DailyTimeline;
-
-
-
-
-
-
-
-
-
-

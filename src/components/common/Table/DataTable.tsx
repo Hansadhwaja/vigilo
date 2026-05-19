@@ -50,7 +50,7 @@ export function DataTable<T extends RowWithId>({
             <div className="overflow-x-auto">
                 <Table className="min-w-full">
                     {/* HEADER */}
-                    <TableHeader className="bg-gradient-to-r from-slate-50 via-white to-blue-50/40">
+                    <TableHeader className="bg-linear-to-r from-slate-50 via-white to-blue-50/40">
                         <TableRow className="border-slate-200 hover:bg-transparent">
                             {columns.map((col) => (
                                 <TableHead

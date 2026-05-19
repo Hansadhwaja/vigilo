@@ -49,7 +49,7 @@ const MetaCard = ({
             rounded-2xl
             border
             border-slate-200
-            bg-gradient-to-br
+            bg-linear-to-br
             from-red-900
             via-rose-800
             to-red-900
@@ -96,7 +96,7 @@ const MetaCard = ({
               rounded-2xl
               border
               border-slate-200
-              bg-gradient-to-br
+              bg-linear-to-br
               from-slate-50
               to-white
               p-5
@@ -166,7 +166,7 @@ const MetaCard = ({
               rounded-2xl
               border
               border-slate-200
-              bg-gradient-to-br
+              bg-linear-to-br
               from-slate-50
               to-white
               p-5
@@ -225,7 +225,7 @@ const MetaCard = ({
             rounded-2xl
             border
             border-slate-200
-            bg-gradient-to-br
+            bg-linear-to-br
             from-blue-50
             to-indigo-50
             p-5
@@ -284,7 +284,7 @@ const MetaCard = ({
               rounded-2xl
               border
               border-slate-200
-              bg-gradient-to-br
+              bg-linear-to-br
               from-orange-50
               to-amber-50
               p-5
@@ -343,7 +343,7 @@ const MetaCard = ({
             rounded-2xl
             border
             border-slate-200
-            bg-gradient-to-br
+            bg-linear-to-br
             from-slate-50
             to-white
             p-5

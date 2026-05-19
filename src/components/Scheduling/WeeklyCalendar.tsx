@@ -1,138 +1,166 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
+import { cn, formatDateKey } from "@/lib/utils";
+import { timeSlots } from "@/constants";
+
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { timeSlots } from "@/constants";
+
 import TimeRow from "./TimeRow";
-import { cn } from "@/lib/utils";
+
+import { useSchedulingData } from "./hook/useSchedulingData";
 
 interface WeeklyCalendarProps {
-    weekDays: Date[];
-    selectedDate: Date;
-    setSelectedDate: (d: Date) => void;
-    navigateWeek: (v: number) => void;
-    getAssignmentsForSlot: (date: Date, time: string) => any[];
-
+    scheduling: ReturnType<typeof useSchedulingData>;
 }
 
-const WeeklyCalendar = ({
-    weekDays,
-    selectedDate,
-    setSelectedDate,
-    navigateWeek,
-    getAssignmentsForSlot,
-}: WeeklyCalendarProps) => {
-    const today = new Date();
-    const selectedKey = selectedDate.toDateString();
+const WeeklyCalendar = ({ scheduling }: WeeklyCalendarProps) => {
+    const {
+        today,
+        weekDays,
+        setSelectedDate,
+        navigateWeek,
+        selectedKey,
+    } = scheduling;
 
     return (
-        <div className="border rounded-lg overflow-hidden">
-            <Card className="shadow-lg border-0 bg-linear-to-br from-white to-gray-50">
-                <CardHeader className="pb-3 px-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle className="sub-heading font-bold">
-                                Weekly Schedule
-                            </CardTitle>
-                            <p className="text-gray-600 description">
-                                {weekDays[0].toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                })}{" "}
-                                -{" "}
-                                {weekDays[6].toLocaleDateString("en-US", {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                })}
-                            </p>
-                        </div>
+        <Card className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm p-0">
+            {/* Header */}
+            <CardHeader className="border-b border-slate-100 bg-linear-to-r from-orange-50 via-white to-sky-50 px-5 py-4">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    {/* Left */}
+                    <div>
+                        <CardTitle className="text-xl font-bold tracking-tight text-slate-900">
+                            Weekly Schedule
+                        </CardTitle>
 
-                        <div className="flex gap-2">
-                            <Button size="icon-sm" variant="outline" onClick={() => navigateWeek(-1)}>
-                                <ChevronLeft />
-                            </Button>
-
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                    const today = new Date();
-                                    setSelectedDate(today);
-                                }}
-                            >
-                                Today
-                            </Button>
-
-                            <Button size="icon-sm" variant="outline" onClick={() => navigateWeek(1)}>
-                                <ChevronRight />
-                            </Button>
-                        </div>
+                        <p className="mt-1 text-sm text-slate-500">
+                            {weekDays[0].toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                            })}{" "}
+                            -{" "}
+                            {weekDays[6].toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                            })}
+                        </p>
                     </div>
-                </CardHeader>
 
-                <CardContent className="px-4 pb-4">
-                    <div className="bg-white rounded-lg border overflow-x-auto">
-                        <div className="min-w-250">
+                    {/* Right */}
+                    <div className="flex items-center gap-2">
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => navigateWeek(-1)}
+                            className="rounded-xl border-slate-200 bg-white hover:bg-orange-50"
+                        >
+                            <ChevronLeft className="size-4" />
+                        </Button>
 
-                            <div className="grid grid-cols-8 bg-gray-100 sticky top-0 z-10">
-                                <div className="p-3 border-r font-semibold">TIME</div>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setSelectedDate(new Date());
+                            }}
+                            className="rounded-xl border-slate-200 bg-white px-5 font-medium hover:bg-sky-50"
+                        >
+                            Today
+                        </Button>
 
-                                {weekDays.map((day, index) => {
-                                    const isToday =
-                                        day.toDateString() === today.toDateString();
-                                    const isSelected =
-                                        day.toDateString() === selectedKey;
+                        <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => navigateWeek(1)}
+                            className="rounded-xl border-slate-200 bg-white hover:bg-orange-50"
+                        >
+                            <ChevronRight className="size-4" />
+                        </Button>
+                    </div>
+                </div>
+            </CardHeader>
 
-                                    return (
-                                        <div
-                                            key={index}
-                                            onClick={() => setSelectedDate(new Date(day))}
-                                            className={cn(
-                                                "p-3 text-center cursor-pointer border-r",
-                                                isSelected
-                                                    ? "bg-blue-900 text-white"
-                                                    : isToday
-                                                        ? "bg-blue-100 text-blue-900"
-                                                        : "hover:bg-gray-200"
-                                            )}
-                                        >
-                                            <div className="font-semibold">
-                                                {day.toLocaleDateString("en-US", {
-                                                    weekday: "short",
-                                                })}
-                                            </div>
-                                            <div className="font-bold">{day.getDate()}</div>
-                                            <div
-                                                className={cn(
-                                                    isSelected ? "text-blue-100" : "text-gray-500"
-                                                )}
-                                            >
-                                                {day.toLocaleDateString("en-US", {
-                                                    month: "short",
-                                                })}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
+            {/* Calendar */}
+            <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                    <div className="min-w-300">
+                        {/* Week Header */}
+                        <div className="grid grid-cols-8 border-b border-slate-200 bg-slate-50/80">
+                            {/* Time */}
+                            <div className="flex items-center border-r border-slate-200 px-4 py-4 text-sm font-semibold tracking-wide text-slate-500">
+                                TIME
                             </div>
 
+                            {/* Days */}
+                            {weekDays.map((day, index) => {
+                                const isToday =
+                                    day.toDateString() === today.toDateString();
+
+                                const isSelected =
+                                    formatDateKey(day) === selectedKey;
+
+                                return (
+                                    <Button
+                                        variant="ghost"
+                                        key={index}
+                                        onClick={() => setSelectedDate(new Date(day))}
+                                        className={cn("h-auto rounded-none border-r border-slate-200 px-3 py-4 flex flex-col items-center justify-center gap-1 transition-all duration-200",
+                                            isSelected && "bg-linear-to-br from-orange-500 to-sky-500 text-white hover:from-orange-500 hover:to-sky-500 hover:text-white",
+                                            !isSelected && "hover:bg-slate-100",
+                                            isToday && !isSelected && "bg-orange-50 text-orange-600"
+                                        )}
+                                    >
+                                        <p
+                                            className={cn(
+                                                "text-xs font-medium uppercase tracking-wide",
+                                                isSelected
+                                                    ? "text-white/80"
+                                                    : "text-slate-500"
+                                            )}
+                                        >
+                                            {day.toLocaleDateString("en-US", {
+                                                weekday: "short",
+                                            })}
+                                        </p>
+
+                                        <h3 className="text-xl font-bold">
+                                            {day.getDate()}
+                                        </h3>
+
+                                        <p
+                                            className={cn(
+                                                "text-xs font-medium",
+                                                isSelected
+                                                    ? "text-white/80"
+                                                    : "text-slate-500"
+                                            )}
+                                        >
+                                            {day.toLocaleDateString("en-US", {
+                                                month: "short",
+                                            })}
+                                        </p>
+                                    </Button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Time Rows */}
+                        <div className="bg-white">
                             {timeSlots.map((slot) => (
                                 <TimeRow
                                     key={slot.time}
                                     slot={slot}
-                                    weekDays={weekDays}
-                                    selectedDate={selectedDate}
-                                    getAssignmentsForSlot={getAssignmentsForSlot}
+                                    scheduling={scheduling}
                                 />
                             ))}
-
                         </div>
                     </div>
-                </CardContent>
-            </Card>
-        </div>
+                </div>
+            </CardContent>
+        </Card>
     );
 };
 

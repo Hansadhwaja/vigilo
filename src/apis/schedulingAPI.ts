@@ -153,13 +153,36 @@ export interface UpdateScheduleResponse {
 
 export interface DeleteScheduleDto {
   id: string;
+
+
+}
+
+export interface GetScheduleParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  guardId?: string;
+  orderId?: string;
+  role?: string;
 }
 
 export const schedulingApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
 
-    getAllSchedules: builder.query<GetAllSchedulesResponse, void>({
-      query: () => `/scheduling/getAllSchedules`,
+    getAllSchedules: builder.query<GetAllSchedulesResponse, GetScheduleParams | void>({
+      query: (params = {}) => {
+        const qs = new URLSearchParams();
+        if (params) {
+          if (params.limit) qs.set('limit', params.limit.toString());
+          if (params.page) qs.set('page', params.page.toString());
+          if (params.search) qs.set('search', params.search);
+          if (params.guardId) qs.set('guardId', params.guardId);
+          if (params.orderId) qs.set('orderId', params.orderId);
+          if (params.role) qs.set('role', params.role);
+
+        }
+        return `/scheduling/getAllSchedules?${qs.toString()}`
+      },
       providesTags: ["Schedules"],
     }),
     createSchedule: builder.mutation<CreateScheduleResponse, CreateScheduleDto>({
