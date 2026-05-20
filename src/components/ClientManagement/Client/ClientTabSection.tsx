@@ -27,34 +27,6 @@ const ClientTabSection = () => {
     pagination,
   } = data ?? {};
 
-  // Search
-  const handleSearch = (
-    value: string
-  ) => {
-    setMultipleParams({
-      search: value,
-      page: "1",
-    });
-  };
-
-  const handleServiceChange = (
-    value: string
-  ) => {
-    setMultipleParams({
-      serviceType: value,
-      page: "1",
-    });
-  };
-
-  const handleStatusChange = (
-    value: string
-  ) => {
-    setMultipleParams({
-      status: value,
-      page: "1",
-    });
-  };
-
   // Pagination
   const handlePageChange = (
     newPage: number
@@ -73,7 +45,7 @@ const ClientTabSection = () => {
   };
 
   return (
-    <div>
+    <div className="space-y-4">
       <ClientSearchFilters />
       <ClientTable
         clients={clients}

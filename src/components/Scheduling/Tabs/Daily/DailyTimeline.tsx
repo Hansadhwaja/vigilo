@@ -10,21 +10,20 @@ import {
     User,
 } from "lucide-react";
 
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
-} from "../ui/card";
+} from "@/components/ui/card";
 
-import CreateAssignmentModal from "./Modal/CreateAssignmentModal";
 import AssignmentCard from "./AssignmentCard";
 import Stat from "./Stat";
 
 import { OrganizedAssignment } from "@/types";
-
-import { useSchedulingData } from "./hook/useSchedulingData";
+import { useSchedulingData } from "../../hook/useSchedulingData";
+import CreateAssignmentModal from "../../Modal/CreateAssignmentModal";
 
 interface DailyTimelineProps {
     scheduling: ReturnType<typeof useSchedulingData>;

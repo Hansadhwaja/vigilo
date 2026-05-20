@@ -35,11 +35,6 @@ export default function ClientsPage() {
     avatar: "",
   });
 
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  const [showActionDialog, setShowActionDialog] = useState(false);
-  const [actionType, setActionType] = useState<"accept" | "reject" | null>(null);
-  const [actionMessage, setActionMessage] = useState("");
-  const [activeTab, setActiveTab] = useState("directory");
   const [showClientDialog, setShowClientDialog] = useState(false);
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);

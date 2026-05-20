@@ -42,34 +42,6 @@ const OrderTabSection = () => {
         pagination,
     } = data ?? {};
 
-    // Search
-    const handleSearch = (
-        value: string
-    ) => {
-        setMultipleParams({
-            search: value,
-            page: "1",
-        });
-    };
-
-    const handleServiceChange = (
-        value: string
-    ) => {
-        setMultipleParams({
-            serviceType: value,
-            page: "1",
-        });
-    };
-
-    const handleStatusChange = (
-        value: string
-    ) => {
-        setMultipleParams({
-            status: value,
-            page: "1",
-        });
-    };
-
     // Pagination
     const handlePageChange = (
         newPage: number
@@ -89,18 +61,7 @@ const OrderTabSection = () => {
 
     return (
         <div className="space-y-4">
-            <OrderSearchFilters
-            // search={search}
-            // status={status}
-            // serviceType={serviceType}
-            // onSearch={handleSearch}
-            // onStatusChange={
-            //     handleStatusChange
-            // }
-            // onServiceChange={
-            //     handleServiceChange
-            // }
-            />
+            <OrderSearchFilters />
 
             <OrderTable
                 orders={orders}

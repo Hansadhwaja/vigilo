@@ -8,7 +8,6 @@ import CustomHeader from "@/components/common/Header/CustomHeader";
 import Loader from "@/components/common/Loader";
 
 import IncidentInfoCard from "@/components/Incidents/IncidentInfoCard";
-import ImagesCard from "@/components/Incidents/ImagesCard";
 import ReporterCard from "@/components/Incidents/ReporterCard";
 import DateTimeCard from "@/components/Incidents/DateTimeCard";
 import ShiftCard from "@/components/Incidents/ShiftCard";
@@ -17,6 +16,7 @@ import IncidentAssignmentCard from "@/components/Incidents/AssignmentCard";
 
 import { customFormatDateTime } from "@/lib/utils";
 import IncidentHeroSection from "@/components/Incidents/Details/IncidentHeroSection";
+import ImagesCard from "@/components/common/Card/ImagesCard";
 
 export default function IncidentDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -88,8 +88,10 @@ export default function IncidentDetailsPage() {
             <IncidentInfoCard
               incident={incident}
             />
-
             <ImagesCard
+              title="Evidence Images"
+              description="Incident related photos and documentation"
+              emptyDescription="No evidence images uploaded."
               images={incident?.images || []}
             />
 

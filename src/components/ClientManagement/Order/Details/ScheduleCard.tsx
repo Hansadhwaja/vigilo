@@ -1,108 +1,315 @@
-import { Clock } from "lucide-react";
-
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  CalendarDays,
+  Clock,
+  Timer,
+  TimerReset,
+} from "lucide-react";
 
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+
+import SectionCard from "@/components/common/Card/SectionCard";
+import InfoItem from "./InfoItem";
+import { formatDate, formatTime } from "@/lib/utils";
 
 interface Props {
   order: any;
 }
 
-const formatDate = (iso?: string) => {
-  if (!iso) return "—";
-
-  try {
-    return new Date(iso).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "2-digit",
-    });
-  } catch {
-    return iso;
-  }
-};
-
-const formatTime = (isoOrTime?: string) => {
-  if (!isoOrTime) return "—";
-
-  try {
-    const d = new Date(isoOrTime);
-
-    if (!isNaN(d.getTime())) {
-      return d.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    }
-  } catch {}
-
-  return isoOrTime;
-};
-
-const ScheduleCard = ({ order }: Props) => {
+const ScheduleCard = ({
+  order,
+}: Props) => {
   return (
-    <Card className="border-2 border-gray-200 shadow-sm bg-white">
-      <CardHeader className="border-b-2 border-gray-200 pb-4">
-        <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
-          <Clock className="h-6 w-6" />
-          Schedule
-        </CardTitle>
-      </CardHeader>
+    <SectionCard
+      title="Schedule"
+      icon={<Clock className="h-5 w-5" />}
+    >
+      <div className="space-y-6">
+        {/* HERO */}
+        <div
+          className="
+            relative overflow-hidden
+            rounded-3xl
+            border border-slate-700/60
+            bg-linear-to-br
+            from-slate-900
+            via-slate-800
+            to-slate-900
+            p-5
+            text-white
+            shadow-xl
+          "
+        >
+          {/* Glow */}
+          <div
+            className="
+              absolute -right-6 -top-6
+              h-32 w-32
+              rounded-full
+              bg-cyan-400/20
+              blur-3xl
+            "
+          />
 
-      <CardContent className="p-6 space-y-5">
+          <div
+            className="
+              absolute -bottom-10 left-10
+              h-28 w-28
+              rounded-full
+              bg-violet-500/20
+              blur-3xl
+            "
+          />
 
-        <InfoItem
-          label="Start Date"
-          value={formatDate(order.startDate)}
-        />
+          <div className="relative flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-300">
+                Service Timeline
+              </p>
 
-        <InfoItem
-          label="End Date"
-          value={formatDate(order.endDate)}
-        />
+              <h3
+                className="
+                  mt-1 text-2xl
+                  font-bold tracking-tight
+                "
+              >
+                Active Schedule
+              </h3>
+            </div>
 
-        <Separator />
+            <div
+              className="
+                flex h-14 w-14
+                items-center justify-center
+                rounded-2xl
+                bg-white/10
+                backdrop-blur
+              "
+            >
+              <TimerReset className="h-7 w-7 text-cyan-300" />
+            </div>
+          </div>
+        </div>
 
-        <InfoItem
-          label="Start Time"
-          value={formatTime(order.startTime)}
-        />
+        {/* DATES */}
+        <div className="grid gap-4">
+          <div
+            className="
+              rounded-2xl
+              border border-slate-200
+              bg-linear-to-br
+              from-blue-50
+              to-white
+              p-5
+              shadow-sm
+              transition-all
+              hover:shadow-md
+            "
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className="
+                  flex h-12 w-12
+                  items-center justify-center
+                  rounded-xl
+                  bg-blue-100
+                  text-blue-600
+                  shadow-sm
+                "
+              >
+                <CalendarDays className="h-6 w-6" />
+              </div>
 
-        <InfoItem
-          label="End Time"
-          value={formatTime(order.endTime)}
-        />
-      </CardContent>
-    </Card>
+              <div className="space-y-2">
+                <p
+                  className="
+                    text-xs font-semibold
+                    uppercase tracking-[0.2em]
+                    text-slate-500
+                  "
+                >
+                  Start Date
+                </p>
+
+                <p
+                  className="
+                    text-lg font-semibold
+                    text-slate-800
+                  "
+                >
+                  {formatDate(
+                    order.startDate
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="
+              rounded-2xl
+              border border-slate-200
+              bg-linear-to-br
+              from-orange-50
+              to-white
+              p-5
+              shadow-sm
+              transition-all
+              hover:shadow-md
+            "
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className="
+                  flex h-12 w-12
+                  items-center justify-center
+                  rounded-xl
+                  bg-orange-100
+                  text-orange-600
+                  shadow-sm
+                "
+              >
+                <CalendarDays className="h-6 w-6" />
+              </div>
+
+              <div className="space-y-2">
+                <p
+                  className="
+                    text-xs font-semibold
+                    uppercase tracking-[0.2em]
+                    text-slate-500
+                  "
+                >
+                  End Date
+                </p>
+
+                <p
+                  className="
+                    text-lg font-semibold
+                    text-slate-800
+                  "
+                >
+                  {formatDate(
+                    order.endDate
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Separator className="bg-slate-200" />
+
+        {/* TIMES */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div
+            className="
+              rounded-2xl
+              border border-slate-200
+              bg-linear-to-br
+              from-violet-50
+              to-white
+              p-5
+              shadow-sm
+              transition-all
+              hover:shadow-md
+            "
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className="
+                  flex h-12 w-12
+                  items-center justify-center
+                  rounded-xl
+                  bg-violet-100
+                  text-violet-600
+                  shadow-sm
+                "
+              >
+                <Clock className="h-6 w-6" />
+              </div>
+
+              <div className="space-y-2">
+                <p
+                  className="
+                    text-xs font-semibold
+                    uppercase tracking-[0.2em]
+                    text-slate-500
+                  "
+                >
+                  Start Time
+                </p>
+
+                <p
+                  className="
+                    text-2xl font-bold
+                    tracking-tight
+                    text-slate-800
+                  "
+                >
+
+                  {order.startTime}
+
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="
+              rounded-2xl
+              border border-slate-200
+              bg-linear-to-br
+              from-cyan-50
+              to-white
+              p-5
+              shadow-sm
+              transition-all
+              hover:shadow-md
+            "
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className="
+                  flex h-12 w-12
+                  items-center justify-center
+                  rounded-xl
+                  bg-cyan-100
+                  text-cyan-600
+                  shadow-sm
+                "
+              >
+                <Clock className="h-6 w-6" />
+              </div>
+
+              <div className="space-y-2">
+                <p
+                  className="
+                    text-xs font-semibold
+                    uppercase tracking-[0.2em]
+                    text-slate-500
+                  "
+                >
+                  End Time
+                </p>
+
+                <p
+                  className="
+                    text-2xl font-bold
+                    tracking-tight
+                    text-slate-800
+                  "
+                >
+
+                  {order.endTime}
+
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </SectionCard>
   );
 };
 
 export default ScheduleCard;
-
-interface InfoItemProps {
-  label: string;
-  value?: React.ReactNode;
-}
-
-const InfoItem = ({
-  label,
-  value,
-}: InfoItemProps) => {
-  return (
-    <div>
-      <Label className="text-base font-semibold text-gray-900 mb-2 block">
-        {label}
-      </Label>
-
-      <div className="text-base text-gray-700">
-        {value || "—"}
-      </div>
-    </div>
-  );
-};

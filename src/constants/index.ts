@@ -505,3 +505,13 @@ export const dummyVehicles = [
     { id: crypto.randomUUID(), callsign: "V-Bravo" },
     { id: crypto.randomUUID(), callsign: "V-Charlie" },
 ];
+
+//Orders
+export const orderStatus = [
+    { label: "Ongoing", value: "ongoing" },
+    { label: "Upcoming", value: "upcoming" },
+    { label: "Missed", value: "missed" },
+    { label: "Pending", value: "pending" },
+    { label: "Completed", value: "completed" },
+    { label: "Cancelled", value: "cancelled" },
+];

@@ -5,12 +5,12 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn, formatDateKey } from "@/lib/utils";
 import { timeSlots } from "@/constants";
 
-import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import TimeRow from "./TimeRow";
 
-import { useSchedulingData } from "./hook/useSchedulingData";
+import { useSchedulingData } from "../../hook/useSchedulingData";
 
 interface WeeklyCalendarProps {
     scheduling: ReturnType<typeof useSchedulingData>;

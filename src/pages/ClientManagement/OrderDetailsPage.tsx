@@ -1,56 +1,149 @@
+import {
+  Badge as BadgeIcon,
+  ClipboardList,
+} from "lucide-react";
 
-import { Badge as BadgeIcon } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
+
 import { useGetOrderByIdQuery } from "@/apis/ordersApi";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import EditOrderModal from "@/components/ClientManagement/Order/Modal/EditOrderModal";
 import ServiceInformationCard from "@/components/ClientManagement/Order/Details/ServiceInformationCard";
-import LocationImagesCard from "@/components/ClientManagement/Order/Details/LocationImagesCard";
 import ClientInformationCard from "@/components/ClientManagement/Order/Details/ClientInformationCard";
 import ScheduleCard from "@/components/ClientManagement/Order/Details/ScheduleCard";
 import OrderStatusCard from "@/components/ClientManagement/Order/Details/OrderStatusCard";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/common/Loader";
-
+import ImagesCard from "@/components/common/Card/ImagesCard";
 
 export default function OrderDetailsPage() {
   const navigate = useNavigate();
-  const { id } = useParams<{ id: string }>();
+
+  const { id } = useParams<{
+    id: string;
+  }>();
 
   const {
     data: orderResponse,
     isLoading,
-  } = useGetOrderByIdQuery(id || "", {
-    skip: !id,
-  });
+  } = useGetOrderByIdQuery(
+    id || "",
+    {
+      skip: !id,
+    }
+  );
 
-  const order = orderResponse?.data ?? orderResponse ?? null;
+  const order =
+    orderResponse?.data ??
+    orderResponse ??
+    null;
 
-  if (isLoading) return <Loader />;
+  if (isLoading) {
+    return (
+      <div
+        className="
+          flex h-[70vh] items-center
+          justify-center
+        "
+      >
+        <div
+          className="
+            flex flex-col items-center gap-4
+          "
+        >
+          <div
+            className="
+              flex h-16 w-16 items-center
+              justify-center rounded-3xl
+              bg-gradient-to-br
+              from-orange-100 to-sky-100
+            "
+          >
+            <Loader className="h-7 w-7" />
+          </div>
+
+          <div className="space-y-1 text-center">
+            <h3 className="font-semibold text-slate-800">
+              Loading Order
+            </h3>
+
+            <p className="text-sm text-slate-500">
+              Fetching complete order
+              details...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <BadgeIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+      <div
+        className="
+          flex min-h-[70vh] items-center
+          justify-center
+        "
+      >
+        <div
+          className="
+            w-full max-w-lg rounded-[2rem]
+            border border-slate-200
+            bg-white p-10 text-center
+            shadow-sm
+          "
+        >
+          <div
+            className="
+              mx-auto mb-6 flex h-24 w-24
+              items-center justify-center
+              rounded-[2rem]
+              bg-gradient-to-br
+              from-orange-100 to-sky-100
+            "
+          >
+            <ClipboardList
+              className="
+                h-12 w-12 text-slate-500
+              "
+            />
+          </div>
 
-          <h3 className="text-xl font-semibold mb-2">
-            No order found
-          </h3>
+          <h2
+            className="
+              text-2xl font-bold
+              text-slate-900
+            "
+          >
+            No Order Found
+          </h2>
 
-          <p className="text-lg text-gray-500">
-            Please select an order to view details
+          <p
+            className="
+              mt-3 text-sm leading-7
+              text-slate-500
+            "
+          >
+            The order you are trying to
+            access may have been deleted
+            or does not exist anymore.
           </p>
 
-          <div className="mt-6">
-            <Button
-              variant="outline"
-              onClick={() => navigate("/clients")}
-              className="text-lg px-6 py-2"
-            >
-              Back
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            onClick={() =>
+              navigate("/clients")
+            }
+            className="
+              mt-7 h-11 rounded-2xl
+              border-slate-200 px-6
+            "
+          >
+            Back to Orders
+          </Button>
         </div>
       </div>
     );
@@ -61,20 +154,34 @@ export default function OrderDetailsPage() {
       <CustomHeader
         previousLink="/clients"
         title="Complete Order Details"
-        description="Full order information including location and requirements"
+        description="Full order information including schedule, client details, service configuration, and location requirements"
         others={
           <div className="flex justify-end">
-            <EditOrderModal order={order} />
+            <EditOrderModal
+              order={order}
+            />
           </div>
         }
       />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <ServiceInformationCard order={order} />
-          <LocationImagesCard
+
+      <div
+        className="grid grid-cols-1 gap-6 lg:grid-cols-3"
+      >
+        {/* LEFT */}
+        <div
+          className="
+            space-y-6 lg:col-span-2
+          "
+        >
+          <ServiceInformationCard
+            order={order}
+          />
+          <ImagesCard
+            title="Location Images"
+            description="Location preview and site images"
+            emptyDescription="No location images available."
             images={order.images || []}
           />
-
           {order.client && (
             <ClientInformationCard
               client={order.client}
@@ -82,12 +189,17 @@ export default function OrderDetailsPage() {
           )}
         </div>
 
+        {/* RIGHT */}
         <div className="space-y-6">
-          <ScheduleCard order={order} />
-          <OrderStatusCard order={order} />
+          <ScheduleCard
+            order={order}
+          />
+
+          <OrderStatusCard
+            order={order}
+          />
         </div>
       </div>
     </div>
-
   );
 }

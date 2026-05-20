@@ -1,35 +1,30 @@
-import {
-    Tabs,
-    TabsList,
-    TabsTrigger,
-    TabsContent,
-} from "@/components/ui/tabs";
-;
+import AppTabs from "@/components/common/Tab/AppTabs";
+
 import OrderTabSection from "../Order/OrderTabSection";
 import ClientTabSection from "../Client/ClientTabSection";
 
-interface SchedulingTabsProps {
-
-}
-
-const ClientOperationsTabs = ({
-
-}: SchedulingTabsProps) => {
+const ClientOperationsTabs = () => {
+    const tabs = [
+        {
+            value: "order",
+            label: "Order",
+            activeColor:
+                "data-[state=active]:bg-orange-500",
+            content: <OrderTabSection />,
+        },
+        {
+            value: "client",
+            label: "Client",
+            activeColor:
+                "data-[state=active]:bg-sky-500",
+            content: <ClientTabSection />,
+        },
+    ]
     return (
-        <Tabs defaultValue="order">
-            <TabsList className="w-[60vw]">
-                <TabsTrigger value="order">Order</TabsTrigger>
-                <TabsTrigger value="client">Client</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="order">
-                <OrderTabSection />
-            </TabsContent>
-
-            <TabsContent value="client">
-                <ClientTabSection />
-            </TabsContent>
-        </Tabs>
+        <AppTabs
+            defaultValue="order"
+            tabs={tabs}
+        />
     );
 };
 

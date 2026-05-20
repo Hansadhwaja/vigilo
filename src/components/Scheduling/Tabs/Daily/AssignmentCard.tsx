@@ -5,14 +5,14 @@ import {
   User,
 } from "lucide-react";
 
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 
 import {
   getStatusColor,
   getStatusStyle,
 } from "@/utils/statusColors";
 
-import DeleteAssignmentModal from "./Modal/DeleteAssignmentModal";
+import DeleteAssignmentModal from "../../Modal/DeleteAssignmentModal";
 
 import { OrganizedAssignment } from "@/types";
 

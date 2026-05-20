@@ -2,8 +2,8 @@ import { OrganizedAssignment } from "@/types";
 
 import { Calendar, Clock, User, ShieldCheck } from "lucide-react";
 
-import { Card, CardContent } from "../ui/card";
-import { Separator } from "../ui/separator";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 import ShiftPill from "./ShiftPill";
 import StatCards from "../common/StatCard/StatCards";

@@ -3,24 +3,29 @@ import {
     DataTable,
     RowWithId,
 } from "@/components/common/Table/DataTable";
-import TablePagination from "@/components/common/Table/TablePagination";
-import { Button } from "@/components/ui/button";
+
 import {
-    AlertCircle,
     Building,
-    Ellipsis,
     EllipsisVertical,
-    Eye,
     Mail,
     Phone,
-    Trash2,
+    User,
 } from "lucide-react";
-import EditClientModal from "../Modal/EditClientModal";
+
 import { Client } from "@/apis/usersApi";
+
+import EditClientModal from "../Modal/EditClientModal";
 import ViewClientModal from "../Modal/ViewClientModal";
 import DeleteClientModal from "../Modal/DeleteClientModal";
-import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
-import { DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 interface ClientTableProps {
     page: number;
     totalPages: number;
@@ -34,7 +39,6 @@ interface ClientTableProps {
 
     onPageChange: (n: number) => void;
     onLimitChange: (n: number) => void;
-
 }
 
 const ClientTable = ({
@@ -49,172 +53,172 @@ const ClientTable = ({
 
     onPageChange,
     onLimitChange,
-
 }: ClientTableProps) => {
-    const columns: Column<
-        Client & RowWithId
-    >[] = [
-            {
-                key: "name",
-                header: "Client",
+    const columns: Column<Client & RowWithId>[] = [
+        {
+            key: "name",
+            header: "Client",
 
-                render: (row) => (
-                    <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">
-                            {row.name}
-                        </span>
-
-                        <span className="text-xs text-gray-500 font-mono">
-                            #{row.id.slice(0, 8)}
-                        </span>
+            render: (row) => (
+                <div className="flex items-start gap-3">
+                    <div className="rounded-full bg-orange-100 p-2">
+                        <User className="h-4 w-4 text-orange-600" />
                     </div>
-                ),
-            },
 
-            {
-                key: "email",
-                header: "Email",
+                    <div className="space-y-1">
+                        <p className="font-semibold text-slate-800">
+                            {row.name}
+                        </p>
 
-                render: (row) => (
-                    <div className="flex items-center gap-2 min-w-0">
-                        <Mail className="h-4 w-4 text-gray-400 shrink-0" />
+                        <p className="font-mono text-xs text-slate-400">
+                            #{row.id.slice(0, 8)}
+                        </p>
+                    </div>
+                </div>
+            ),
+        },
 
-                        <span
-                            className="truncate text-sm text-gray-700"
+        {
+            key: "email",
+            header: "Email",
+
+            render: (row) => (
+                <div className="flex min-w-0 items-start gap-3">
+                    <div className="rounded-full bg-sky-100 p-2">
+                        <Mail className="h-4 w-4 text-sky-600" />
+                    </div>
+
+                    <div className="min-w-0 space-y-1">
+                        <p
+                            className="truncate font-medium text-slate-700"
                             title={row.email}
                         >
                             {row.email}
-                        </span>
+                        </p>
+
+                        <p className="text-xs text-slate-400">
+                            Email Address
+                        </p>
                     </div>
-                ),
-            },
+                </div>
+            ),
+        },
 
-            {
-                key: "mobile",
-                header: "Phone",
+        {
+            key: "mobile",
+            header: "Phone",
 
-                render: (row) => (
-                    <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-gray-400 shrink-0" />
+            render: (row) => (
+                <div className="flex items-start gap-3">
+                    <div className="rounded-full bg-emerald-100 p-2">
+                        <Phone className="h-4 w-4 text-emerald-600" />
+                    </div>
 
-                        <span className="text-sm text-gray-700">
+                    <div className="space-y-1">
+                        <p className="font-medium text-slate-700">
                             {row.mobile}
-                        </span>
+                        </p>
+
+                        <p className="text-xs text-slate-400">
+                            Mobile Number
+                        </p>
                     </div>
-                ),
-            },
+                </div>
+            ),
+        },
 
-            {
-                key: "address",
-                header: "Address",
+        {
+            key: "address",
+            header: "Address",
 
-                render: (row) => (
-                    <div
-                        className="truncate max-w-[250px] text-sm text-gray-600"
-                        title={row.address || "—"}
+            render: (row) => (
+                <div className="max-w-[260px] space-y-1">
+                    <p
+                        className="line-clamp-2 leading-5 text-slate-700"
+                        title={row.address || "No address"}
                     >
                         {row.address || "—"}
-                    </div>
-                ),
-            },
+                    </p>
 
-            {
-                key: "actions",
-                header: "Actions",
-                align: "center",
+                    <p className="text-xs text-slate-400">
+                        Client Address
+                    </p>
+                </div>
+            ),
+        },
 
-                render: (row) => (
-                    <div className="flex items-center justify-center gap-2">
-                        <ViewClientModal client={row} />
-                        <DropdownMenu>
-                            <DropdownMenuTrigger className="cursor-pointer">
-                                <EllipsisVertical size={16} />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem>
-                                    <div onClick={(e) => e.stopPropagation()}>
-                                        <EditClientModal client={row} />
-                                    </div>
+        {
+            key: "actions",
+            header: "Actions",
+            align: "center",
 
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem>
-                                    <div onClick={(e) => e.stopPropagation()}>
-                                        <DeleteClientModal client={row} />
-                                    </div>
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                ),
-            },
-        ];
+            render: (row) => (
+                <div className="flex items-center justify-center gap-2">
+                    <ViewClientModal client={row} />
 
-    if (isLoading) {
-        return (
-            <div className="flex flex-col items-center justify-center py-10">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-r-transparent" />
+                    <DropdownMenu>
+                        <DropdownMenuTrigger
+                            className="
+                                rounded-xl border border-slate-200
+                                p-2 text-slate-500 transition-all
+                                hover:border-slate-300
+                                hover:bg-slate-50
+                                hover:text-slate-700
+                            "
+                        >
+                            <EllipsisVertical className="h-4 w-4" />
+                        </DropdownMenuTrigger>
 
-                <p className="mt-3 text-gray-600">
-                    Loading clients...
-                </p>
-            </div>
-        );
-    }
+                        <DropdownMenuContent
+                            align="end"
+                            className="w-44 rounded-2xl"
+                        >
+                            <DropdownMenuItem>
+                                <div
+                                    onClick={(e) =>
+                                        e.stopPropagation()
+                                    }
+                                >
+                                    <EditClientModal client={row} />
+                                </div>
+                            </DropdownMenuItem>
 
-    if (isError) {
-        return (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-                <AlertCircle className="h-10 w-10 text-red-500 mb-3" />
+                            <DropdownMenuSeparator />
 
-                <p className="text-red-600 font-medium">
-                    Failed to load clients
-                </p>
-
-                <p className="text-sm text-gray-500 mt-1">
-                    {error &&
-                        "data" in error
-                        ? JSON.stringify(
-                            error.data
-                        )
-                        : "An error occurred"}
-                </p>
-            </div>
-        );
-    }
-
-    if (clients.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-                <Building className="h-10 w-10 text-gray-400 mb-3" />
-
-                <p className="text-gray-700 font-medium">
-                    No clients found
-                </p>
-            </div>
-        );
-    }
+                            <DropdownMenuItem>
+                                <div
+                                    onClick={(e) =>
+                                        e.stopPropagation()
+                                    }
+                                >
+                                    <DeleteClientModal client={row} />
+                                </div>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+            ),
+        },
+    ];
 
     return (
-        <div className="bg-white rounded-xl space-y-2">
-            <DataTable
-                columns={columns}
-                data={clients}
-                emptyText="No clients available."
-            />
-
-            <TablePagination
-                currentPage={page}
-                totalPages={totalPages}
-                limit={limit}
-                onLimitChange={
-                    onLimitChange
-                }
-                onPageChange={
-                    onPageChange
-                }
-            />
-        </div>
+        <DataTable
+            columns={columns}
+            data={clients}
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            loadingText="Loading clients..."
+            emptyText="No clients found"
+            emptyIcon={
+                <Building className="h-10 w-10 text-slate-400" />
+            }
+            page={page}
+            totalPages={totalPages}
+            limit={limit}
+            onPageChange={onPageChange}
+            onLimitChange={onLimitChange}
+        />
     );
 };
 

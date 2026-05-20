@@ -2,7 +2,7 @@ import EditAssignmentModal from './Modal/EditAssignmentModal'
 import { User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { OrganizedAssignment } from '@/types'
-import { Card, CardContent } from '../ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 
 const ShiftPill = ({ assignment }: { assignment: OrganizedAssignment }) => {
     return (

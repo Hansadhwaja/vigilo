@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 import DayCell from "./DayCell";
 
-import { useSchedulingData } from "./hook/useSchedulingData";
+import { useSchedulingData } from "../../hook/useSchedulingData";
 
 interface TimeRowProps {
     slot: {

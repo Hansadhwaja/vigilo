@@ -75,7 +75,6 @@ export interface GetAllOrdersParams {
   search?: string;
   userId?: string;
   nonInvoiced?: boolean;
-  orderId?: string;
 }
 
 // Add this interface at the top with other interfaces
@@ -117,7 +116,6 @@ export const ordersApi = baseApi.injectEndpoints({
           if (params.serviceType) queryParams.append('serviceType', params.serviceType);
           if (params.search) queryParams.append('search', params.search);
           if (params.userId) queryParams.append('userId', params.userId);
-          if (params.orderId) queryParams.append('orderId', params.orderId);
           if (params.nonInvoiced) queryParams.append('nonInvoiced', String(params.nonInvoiced));
         }
 
