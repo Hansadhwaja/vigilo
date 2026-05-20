@@ -10,7 +10,7 @@ export default function ShiftPage() {
   const scheduling = useSchedulingData();
 
   return (
-    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full">
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       <div className="space-y-3">
         <CustomHeader
           title="Scheduling Calendar"

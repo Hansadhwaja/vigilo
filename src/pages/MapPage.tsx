@@ -64,7 +64,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
   };
 
   return (
-    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full">
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       {/* API Status Bar */}
       <Card className={`${apiConnected ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
         <CardContent className="p-4">
@@ -287,7 +287,7 @@ export default function MapPage({ onSelectGuard }: MapPageProps) {
                     </div>
                     <Badge className={`${getVehicleColor(vehicle) === '#22c55e' ? 'bg-green-100 text-green-800' : 
                                              getVehicleColor(vehicle) === '#f59e0b' ? 'bg-yellow-100 text-yellow-800' : 
-                                             'bg-blue-100 text-blue-800'}`} size="sm">
+                                             'bg-blue-100 text-blue-800'}`}>
                       {vehicle.status}
                     </Badge>
                   </div>

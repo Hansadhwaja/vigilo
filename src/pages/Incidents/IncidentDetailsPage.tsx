@@ -71,9 +71,8 @@ export default function IncidentDetailsPage() {
   );
 
   return (
-    <div
-      className="h-full overflow-y-auto "
-    >
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
+
       <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6">
         <CustomHeader
           previousLink="/incidents"

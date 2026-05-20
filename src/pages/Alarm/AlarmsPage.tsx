@@ -212,7 +212,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       <CustomHeader
         title="Alarm Management"
         description="Real-time Response & Guard Assignment"

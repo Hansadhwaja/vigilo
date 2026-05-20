@@ -1,6 +1,5 @@
-import React from 'react'
+
 import PaymentCard from './PaymentCard'
-import { payments } from '@/constants';
 
 const PaymentList = ({ guardPayments }: { guardPayments: any[] }) => {
     return (

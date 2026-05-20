@@ -9,16 +9,9 @@ import {
     User,
 } from "lucide-react";
 
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-
-import { Separator } from "@/components/ui/separator";
-
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import SectionCard from "@/components/common/Card/SectionCard";
 
 import { Link } from "react-router-dom";
 
@@ -28,44 +21,46 @@ const GuardContactCard = ({
     guard: Guard;
 }) => {
     return (
-        <Card className="border-2 border-gray-200 shadow-sm bg-white">
+        <SectionCard
+            title="Contact Information"
+            icon={<User className="h-5 w-5" />}
+        >
+            <div className="space-y-6">
 
-            <CardHeader className="border-b-2 border-gray-200 pb-4">
+                {/* HERO */}
+                <div className="
+                    relative overflow-hidden
+                    rounded-2xl
+                    border border-slate-200
+                    bg-gradient-to-br
+                    from-slate-50
+                    to-white
+                    p-5
+                ">
+                    <p className="text-sm text-slate-500">
+                        Guard Communication Details
+                    </p>
 
-                <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
+                    <h3 className="mt-1 text-xl font-semibold text-slate-800">
+                        Primary Contact Profile
+                    </h3>
+                </div>
 
-                    <User className="h-6 w-6" />
-
-                    Contact Information
-
-                </CardTitle>
-
-            </CardHeader>
-
-            <CardContent className="p-6 space-y-5">
-
-                {/* Phone */}
+                {/* PHONE */}
                 <div className="space-y-2">
 
-                    <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
-
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
                         <Phone className="h-4 w-4" />
-
                         Phone Number
-
                     </div>
 
                     <div className="flex items-center justify-between gap-3">
 
-                        <p className="text-lg font-semibold text-gray-900">
+                        <p className="text-lg font-semibold text-slate-800">
                             {guard.mobile}
                         </p>
 
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            asChild
-                        >
+                        <Button size="sm" variant="outline" asChild>
                             <Link to={`tel:${guard.mobile}`}>
                                 Call
                             </Link>
@@ -74,30 +69,23 @@ const GuardContactCard = ({
                     </div>
                 </div>
 
-                <Separator />
+                <Separator className="bg-slate-200" />
 
-                {/* Email */}
+                {/* EMAIL */}
                 <div className="space-y-2">
 
-                    <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
-
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
                         <Mail className="h-4 w-4" />
-
                         Email Address
-
                     </div>
 
                     <div className="flex items-start justify-between gap-3">
 
-                        <p className="text-base font-medium text-gray-900 break-all">
+                        <p className="text-base font-medium text-slate-800 break-all">
                             {guard.email}
                         </p>
 
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            asChild
-                        >
+                        <Button size="sm" variant="outline" asChild>
                             <Link to={`mailto:${guard.email}`}>
                                 Email
                             </Link>
@@ -106,27 +94,24 @@ const GuardContactCard = ({
                     </div>
                 </div>
 
-                <Separator />
+                <Separator className="bg-slate-200" />
 
-                {/* Address */}
+                {/* ADDRESS */}
                 <div className="space-y-2">
 
-                    <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
-
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
                         <MapPin className="h-4 w-4" />
-
                         Address
-
                     </div>
 
-                    <p className="text-base text-gray-700 leading-relaxed">
+                    <p className="text-base text-slate-700 leading-relaxed">
                         {guard.address || "No address available"}
                     </p>
 
                 </div>
 
-            </CardContent>
-        </Card>
+            </div>
+        </SectionCard>
     );
 };
 

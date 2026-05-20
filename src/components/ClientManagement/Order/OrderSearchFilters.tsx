@@ -1,6 +1,6 @@
 import { orderStatus, services } from '@/constants';
 import { useQueryParams } from '@/lib/hooks/useQueryParams';
-import DataFilters from '@/components/common/Filter/DataFilters';
+import DataFilters, { FilterItem } from '@/components/common/Filter/DataFilters';
 
 const OrderSearchFilters = () => {
 
@@ -43,6 +43,7 @@ const OrderSearchFilters = () => {
     const filters = [
         {
             key: "status",
+            type: "select",
             placeholder: "Select Status",
             value: status,
             options: orderStatus,
@@ -51,13 +52,14 @@ const OrderSearchFilters = () => {
         },
         {
             key: "serviceType",
+            type: "select",
             placeholder: "Select Service",
             value: serviceType,
             options: services,
             onChange: handleServiceChange,
             width: "w-[180px]",
         },
-    ];
+    ] satisfies FilterItem[];
 
     return (
         <DataFilters

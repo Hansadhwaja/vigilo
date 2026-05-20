@@ -29,7 +29,7 @@ export default function HRPage() {
   ];
 
   return (
-    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full">
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       <CustomHeader
         title="HR & Compliance"
         description="Manage guards, assignments & compliance"

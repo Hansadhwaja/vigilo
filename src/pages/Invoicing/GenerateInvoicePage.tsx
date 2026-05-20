@@ -53,7 +53,7 @@ const GenerateInvoicePage = () => {
   }
 
   return (
-    <div className='flex flex-col h-full gap-4'>
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       <CustomHeader
         title="Generate Client Invoice"
         description="Create new invoice with flexible service pricing"

@@ -1,62 +1,46 @@
-import { Input } from '@/components/ui/input';
-import { Filter, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Guard } from '@/apis/guardsApi';
-import Loader from '@/components/common/Loader';
-import { useQueryParams } from '@/lib/hooks/useQueryParams';
-import { Label } from '@/components/ui/label';
+"use client";
 
-interface TimeSheetSearchFiltersProps {
+import DataFilters from "@/components/common/Filter/DataFilters";
+import { useQueryParams } from "@/lib/hooks/useQueryParams";
+import { Guard } from "@/apis/guardsApi";
+
+interface GuardPaymentSearchFiltersProps {
     guards: Guard[];
     isGuardsLoading: boolean;
 }
 
 const GuardPaymentSearchFilters = ({
     guards,
-    isGuardsLoading,
-}: TimeSheetSearchFiltersProps) => {
-    const {
-        getParam,
-        setMultipleParams,
-    } = useQueryParams();
+}: GuardPaymentSearchFiltersProps) => {
+    const { getParam, setMultipleParams } = useQueryParams();
 
-    const guardId = getParam("guardId");
-    const search = getParam("search");
-    const fromDate = getParam("fromDate");
-    const toDate = getParam("toDate");
+    const search = getParam("search", "");
+    const guardId = getParam("guardId", "");
+    const fromDate = getParam("fromDate", "");
+    const toDate = getParam("toDate", "");
 
-    // Search
-    const handleSearch = (
-        value: string
-    ) => {
+    const handleSearch = (value: string) => {
         setMultipleParams({
             search: value,
             page: "1",
         });
     };
 
-    const handleGuardChange = (
-        value: string
-    ) => {
+    const handleGuardChange = (value: string) => {
         setMultipleParams({
             guardId: value,
             page: "1",
         });
     };
 
-    const handleFromDateChange = (
-        value: string
-    ) => {
+    const handleFromDateChange = (value: string) => {
         setMultipleParams({
             fromDate: value,
             page: "1",
         });
     };
 
-    const handleToDateChange = (
-        value: string
-    ) => {
+    const handleToDateChange = (value: string) => {
         setMultipleParams({
             toDate: value,
             page: "1",
@@ -65,66 +49,50 @@ const GuardPaymentSearchFilters = ({
 
     const clearParams = () => {
         setMultipleParams({
+            search: "",
             guardId: "",
-            page: "1",
             fromDate: "",
-            toDate: ""
-        })
-    }
+            toDate: "",
+            page: "",
+        });
+    };
+
+    const filters = [
+        {
+            key: "guardId",
+            type: "select" as const,
+            placeholder: "Select Guard",
+            value: guardId,
+            options: guards.map((g) => ({
+                label: g.name,
+                value: g.id,
+            })),
+            onChange: handleGuardChange,
+            width: "w-[200px]",
+        },
+        {
+            key: "fromDate",
+            type: "date" as const,
+            value: fromDate,
+            onChange: handleFromDateChange,
+        },
+        {
+            key: "toDate",
+            type: "date" as const,
+            value: toDate,
+            onChange: handleToDateChange,
+        },
+    ];
 
     return (
-        <div className="flex flex-wrap gap-2 items-center bg-white p-3 rounded-lg border">
-            <Filter className="h-4 w-4 text-gray-500" />
-            <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3 w-3" />
-                <Input
-                    placeholder="Search clients..."
-                    className="pl-9 w-40 h-8"
-                    value={search}
-                    onChange={(e) => handleSearch(e.target.value)}
-                />
-            </div>
-            <Select value={guardId} onValueChange={(val) => handleGuardChange(val)}>
-                <SelectTrigger className="w-36 h-8">
-                    {isGuardsLoading ? <Loader /> : (<SelectValue placeholder="Select Guard" />)}
-                </SelectTrigger>
-                <SelectContent>
-                    {guards.map(g => (
-                        <SelectItem value={g.id}>{g.name}</SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-            <div className="flex gap-1 items-center">
-                <div className="flex gap-1 items-center">
-                    <Label>From</Label>
-                    <Input
-                        type="date"
-                        placeholder='Start Date'
-                        value={fromDate}
-                        onChange={(e) => handleFromDateChange(e.target.value)}
-                    />
-                </div>
-                <div className="flex gap-1 items-center">
-                    <Label>To</Label>
-                    <Input
-                        type="date"
-                        placeholder='End Date'
-                        value={toDate}
-                        onChange={(e) => handleToDateChange(e.target.value)}
-                    />
-                </div>
-            </div>
-            <Button
-                variant="outline"
-                size="lg"
-                className="h-8"
-                onClick={clearParams}
-            >
-                Clear
-            </Button>
+        <DataFilters
+            searchValue={search}
+            searchPlaceholder="Search payments..."
+            onSearchChange={handleSearch}
+            onClear={clearParams}
+            filters={filters}
+        />
+    );
+};
 
-        </div>
-    )
-}
-
-export default GuardPaymentSearchFilters
+export default GuardPaymentSearchFilters;

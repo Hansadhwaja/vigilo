@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
-import DataFilters from "../common/Filter/DataFilters";
+import DataFilters, { FilterItem } from "../common/Filter/DataFilters";
 
 const SchedulingSearchFilters = () => {
   const { getParam, setMultipleParams } = useQueryParams();
@@ -92,9 +92,9 @@ const SchedulingSearchFilters = () => {
   const filters = [
     {
       key: "guard",
+      type: "select",
       placeholder: "Select Guard",
       value: guardId,
-      loading: isGuardsLoading,
       width: "w-[180px]",
       onChange: handleGuardChange,
       options: guards.map((guard) => ({
@@ -104,9 +104,9 @@ const SchedulingSearchFilters = () => {
     },
     {
       key: "order",
+      type: "select",
       placeholder: "Select Site",
       value: orderId,
-      loading: isOrdersLoading,
       width: "w-[220px]",
       onChange: handleOrderChange,
       options: orders.map((order) => ({
@@ -116,13 +116,14 @@ const SchedulingSearchFilters = () => {
     },
     {
       key: "role",
+      type: "select",
       placeholder: "Select Role",
       value: role,
       width: "w-[160px]",
       onChange: handleRoleChange,
       options: roles,
     },
-  ];
+  ] satisfies FilterItem[];
 
   return (
     <DataFilters

@@ -1,57 +1,54 @@
-import {
-    Tabs,
-    TabsList,
-    TabsTrigger,
-    TabsContent,
-} from "@/components/ui/tabs";
+import { useSearchParams } from "react-router-dom";
+import AppTabs from "@/components/common/Tab/AppTabs";
 import GuardsTab from "../Guard/GuardsTab";
 import ComplianceTab from "../Compliance/ComplianceTab";
 import TimeSheetsTab from "../TimeSheet/TimeSheetsTab";
 import GuardPaymentsTab from "../GuardPayment/GuardPaymentsTab";
-import { useSearchParams } from "react-router-dom";
+import { useQueryParams } from "@/lib/hooks/useQueryParams";
 
 const HRTabs = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
+    const { getParam, setParam } = useQueryParams();
 
-    const activeTab = searchParams.get("tab") || "guards";
+    const activeTab = getParam("tab", "guards");
 
-    const handleTabChange = (
-        value: string
-    ) => {
-
-        // clear all params and set only tab
-        setSearchParams({
-            tab: value,
-        });
+    const handleTabChange = (value: string) => {
+        setParam("tab", value);
     };
+
+    const tabs = [
+        {
+            value: "guards",
+            label: "Guards",
+            content: <GuardsTab />,
+            activeColor: "data-[state=active]:bg-orange-500",
+        },
+        {
+            value: "timeSheets",
+            label: "Time Sheets",
+            content: <TimeSheetsTab />,
+            activeColor: "data-[state=active]:bg-sky-500",
+        },
+        {
+            value: "guardPayments",
+            label: "Guard Payment",
+            content: <GuardPaymentsTab />,
+            activeColor: "data-[state=active]:bg-emerald-500",
+        },
+        {
+            value: "compliance",
+            label: "Compliance",
+            content: <ComplianceTab />,
+            activeColor: "data-[state=active]:bg-violet-500",
+        },
+    ];
+
     return (
-        <Tabs
+        <AppTabs
             value={activeTab}
             onValueChange={handleTabChange}
-        >
-            <TabsList className="w-full overflow-x-auto">
-                <TabsTrigger value="guards">Guards</TabsTrigger>
-                <TabsTrigger value="timeSheets">Time Sheets</TabsTrigger>
-                <TabsTrigger value="guardPayments">Guard Payment</TabsTrigger>
-                <TabsTrigger value="compliance">Compliance</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="guards">
-                <GuardsTab />
-            </TabsContent>
-
-            <TabsContent value="timeSheets">
-                <TimeSheetsTab />
-            </TabsContent>
-
-            <TabsContent value="guardPayments">
-                <GuardPaymentsTab />
-            </TabsContent>
-
-            <TabsContent value="compliance">
-                <ComplianceTab />
-            </TabsContent>
-        </Tabs>
+            tabs={tabs}
+            tabsListClassName="w-full overflow-x-auto"
+        />
     );
 };
 

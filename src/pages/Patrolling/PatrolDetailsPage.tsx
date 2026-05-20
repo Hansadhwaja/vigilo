@@ -710,7 +710,7 @@ export default function PatrolDetailsPage() {
   };
 
   return (
-    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full">
+      <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       <CustomHeader
         previousLink="/patrol"
         title="Patrol Run Details"

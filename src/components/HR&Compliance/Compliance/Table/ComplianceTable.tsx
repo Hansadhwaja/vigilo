@@ -3,12 +3,12 @@ import {
     DataTable,
     RowWithId,
 } from "@/components/common/Table/DataTable";
-import TablePagination from "@/components/common/Table/TablePagination";
+
 import {
-    AlertCircle,
-    Eye,
     ShieldAlert,
+    Eye,
 } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -27,8 +27,13 @@ interface ComplianceTableProps {
     page: number;
     totalPages: number;
     limit: number;
+
     compliances: Compliance[];
+
     isLoading: boolean;
+    isError?: boolean;
+    error?: any;
+
     onPageChange: (n: number) => void;
     onLimitChange: (n: number) => void;
 }
@@ -58,12 +63,13 @@ const getStatusColor = (status: string) => {
 const ComplianceTable = ({
     compliances,
     isLoading,
-    page,
-    totalPages,
+    isError,
+    error,
+    page = 1,
+    totalPages = 1,
     limit,
     onPageChange,
     onLimitChange,
-
 }: ComplianceTableProps) => {
 
     const columns: Column<Compliance & RowWithId>[] = [
@@ -72,14 +78,14 @@ const ComplianceTable = ({
             header: "Guard",
 
             render: (row) => (
-                <div className="flex flex-col">
-                    <span className="font-medium text-gray-900">
+                <div className="space-y-1">
+                    <p className="font-semibold text-slate-800">
                         {row.guardName}
-                    </span>
+                    </p>
 
-                    <span className="text-xs text-gray-500">
+                    <p className="text-xs text-slate-400">
                         {row.guardId}
-                    </span>
+                    </p>
                 </div>
             ),
         },
@@ -87,6 +93,12 @@ const ComplianceTable = ({
         {
             key: "type",
             header: "Type",
+
+            render: (row) => (
+                <p className="text-sm text-slate-700 capitalize">
+                    {row.type}
+                </p>
+            ),
         },
 
         {
@@ -94,18 +106,24 @@ const ComplianceTable = ({
             header: "Description",
 
             render: (row) => (
-                <div
-                    className="max-w-72 truncate text-sm text-gray-600"
+                <p
+                    className="text-sm text-slate-700 line-clamp-2 max-w-72"
                     title={row.description}
                 >
                     {row.description}
-                </div>
+                </p>
             ),
         },
 
         {
             key: "dueDate",
             header: "Due Date",
+
+            render: (row) => (
+                <p className="text-sm text-slate-700">
+                    {row.dueDate}
+                </p>
+            ),
         },
 
         {
@@ -135,65 +153,45 @@ const ComplianceTable = ({
             header: "Actions",
             align: "center",
 
-            render: (row) => (
-                <div className="flex items-center justify-center gap-2">
-
+            render: () => (
+                <div className="flex justify-center">
                     <Button
                         variant="outline"
                         size="icon"
-                        className="h-8 w-8"
+                        className="
+                            h-8 w-8
+                            border-slate-200
+                            text-slate-500
+                            hover:bg-orange-50
+                            hover:text-orange-600
+                            hover:border-orange-200
+                        "
                     >
                         <Eye className="h-4 w-4" />
                     </Button>
-
                 </div>
             ),
         },
     ];
 
-    if (isLoading) {
-        return (
-            <div className="flex flex-col items-center justify-center py-10">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-r-transparent" />
-
-                <p className="mt-3 text-gray-600">
-                    Loading compliances...
-                </p>
-            </div>
-        );
-    }
-
-
-    if (compliances.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-                <ShieldAlert className="h-10 w-10 text-gray-400 mb-3" />
-
-                <p className="text-gray-700 font-medium">
-                    No compliances found
-                </p>
-            </div>
-        );
-    }
-
     return (
-        <div className="bg-white rounded-xl space-y-2">
-
-            <DataTable
-                columns={columns}
-                data={compliances}
-                emptyText="No compliances available."
-            />
-
-            <TablePagination
-                currentPage={page}
-                totalPages={totalPages}
-                limit={limit}
-                onLimitChange={onLimitChange}
-                onPageChange={onPageChange}
-            />
-
-        </div>
+        <DataTable
+            columns={columns}
+            data={compliances}
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            loadingText="Loading compliances..."
+            emptyText="No compliances found"
+            emptyIcon={
+                <ShieldAlert className="h-10 w-10 text-slate-400" />
+            }
+            page={page}
+            totalPages={totalPages}
+            limit={limit}
+            onPageChange={onPageChange}
+            onLimitChange={onLimitChange}
+        />
     );
 };
 

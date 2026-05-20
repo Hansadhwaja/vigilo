@@ -1,285 +1,191 @@
-import UserAvatar from "@/components/common/Avatar/UserAvatar";
+"use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import UserAvatar from "@/components/common/Avatar/UserAvatar";
 import {
     Card,
     CardContent,
 } from "@/components/ui/card";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
 
-import { GuardPayment } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 import {
-    BadgeDollarSign,
-    Clock3,
-    Edit,
     Eye,
+    Edit,
+    Clock3,
 } from "lucide-react";
 
+import { GuardPayment } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 
-const PaymentCard = ({
-    payment,
-}: {
-    payment: GuardPayment;
-}) => {
+const PaymentCard = ({ payment }: { payment: GuardPayment }) => {
     return (
-        <Card className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm transition-all duration-200 hover:shadow-md p-0">
-            <CardContent className="p-0">
-                {/* TOP BAR */}
+        <Card className="rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-all p-0">
+            <CardContent className="p-3">
 
-                <div className="flex items-center justify-between border-b bg-slate-50 px-6 py-4">
-                    <div className="flex items-center gap-4">
-                        <UserAvatar
-                            src=""
-                            name={
-                                payment.guard
-                                    .name
-                            }
-                        />
+                <Accordion type="single" collapsible>
 
-                        <div>
-                            <h2 className="text-lg font-semibold text-slate-900">
-                                {
-                                    payment.guard
-                                        .name
-                                }
-                            </h2>
+                    <AccordionItem value="details" className="border-none">
 
-                            <p className="text-sm text-slate-500">
-                                {
-                                    payment.guard
-                                        .email
-                                }
-                            </p>
-                        </div>
-                    </div>
+                        {/* HEADER ONLY SUMMARY */}
+                        <AccordionTrigger className="hover:no-underline p-0 flex justify-center items-center">
 
-                    <Badge
-                        className={`
-                            capitalize border px-3 py-1 text-xs font-medium
-                            ${payment.status ===
-                                "paid"
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                : payment.status ===
-                                    "pending"
-                                    ? "border-yellow-200 bg-yellow-50 text-yellow-700"
-                                    : "border-slate-200 bg-slate-100 text-slate-700"
-                            }
-                        `}
-                    >
-                        {payment.status}
-                    </Badge>
-                </div>
+                            <div className="flex items-center justify-between w-full gap-4">
 
-                {/* BODY */}
+                                {/* LEFT */}
+                                <div className="flex items-center gap-3 min-w-0">
 
-                <div className="grid grid-cols-1 gap-6 p-6 lg:grid-cols-4">
-                    {/* HOURS */}
+                                    <UserAvatar
+                                        src=""
+                                        name={payment.guard.name}
+                                    />
 
-                    <div className="rounded-xl border bg-slate-50 p-4">
-                        <div className="mb-3 flex items-center gap-2 text-sm text-slate-500">
-                            <Clock3 className="h-4 w-4" />
-                            Hours Summary
-                        </div>
+                                    <div className="min-w-0">
+                                        <p className="text-sm font-semibold text-slate-900 truncate">
+                                            {payment.guard.name}
+                                        </p>
+                                        <p className="text-xs text-slate-500 truncate">
+                                            {payment.guard.email}
+                                        </p>
+                                    </div>
 
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-500">
-                                    Regular
-                                </span>
+                                </div>
 
-                                <span className="font-medium">
-                                    {
-                                        payment.regularHours
-                                    }
-                                    h
-                                </span>
+                                {/* CENTER STATS */}
+                                <div className="hidden md:flex items-center gap-3">
+
+                                    <div className="px-3 py-1.5 rounded-lg bg-slate-50 border">
+                                        <p className="text-[11px] text-slate-500 flex items-center gap-1">
+                                            <Clock3 className="h-3 w-3" />
+                                            Hours
+                                        </p>
+                                        <p className="text-sm font-semibold">
+                                            {payment.totalHours}h
+                                        </p>
+                                    </div>
+
+                                    <div className="px-3 py-1.5 rounded-lg bg-slate-50 border">
+                                        <p className="text-[11px] text-slate-500">
+                                            Rate
+                                        </p>
+                                        <p className="text-sm font-semibold">
+                                            ${payment.hourlyRate}
+                                        </p>
+                                    </div>
+
+                                    <div className="px-3 py-1.5 rounded-lg bg-orange-50 border border-orange-100">
+                                        <p className="text-[11px] text-orange-600">
+                                            Overtime
+                                        </p>
+                                        <p className="text-sm font-semibold text-orange-600">
+                                            +{payment.overtimeHours}h
+                                        </p>
+                                    </div>
+
+                                </div>
+
+                                {/* RIGHT SUMMARY */}
+                                <div className="text-right leading-tight">
+                                    <p className="text-[11px] text-slate-500">
+                                        Total
+                                    </p>
+                                    <p className="text-base font-bold text-emerald-600">
+                                        {formatCurrency(Number(payment.totalPay))}
+                                    </p>
+                                </div>
+
+                                <Badge
+                                    className={`capitalize text-[11px] px-2 py-0.5 rounded-full ${
+                                        payment.status === "paid"
+                                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                            : payment.status === "pending"
+                                            ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                                            : "bg-slate-100 text-slate-600 border"
+                                    }`}
+                                >
+                                    {payment.status}
+                                </Badge>
+
                             </div>
 
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-500">
-                                    Overtime
-                                </span>
+                        </AccordionTrigger>
 
-                                <span className="font-medium text-orange-600">
-                                    +
-                                    {
-                                        payment.overtimeHours
-                                    }
-                                    h
-                                </span>
+                        {/* EXPANDED SECTION */}
+                        <AccordionContent className="pt-4 space-y-4">
+
+                            {/* HOURS + RATE */}
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+
+                                <div className="rounded-lg border bg-slate-50 p-3">
+                                    <p className="text-xs text-slate-500">Regular Hours</p>
+                                    <p className="text-sm font-semibold">
+                                        {payment.regularHours}h
+                                    </p>
+                                </div>
+
+                                <div className="rounded-lg border bg-slate-50 p-3">
+                                    <p className="text-xs text-slate-500">Overtime</p>
+                                    <p className="text-sm font-semibold text-orange-600">
+                                        {payment.overtimeHours}h
+                                    </p>
+                                </div>
+
+                                <div className="rounded-lg border bg-slate-50 p-3">
+                                    <p className="text-xs text-slate-500">Base Pay</p>
+                                    <p className="text-sm font-medium">
+                                        {formatCurrency(Number(payment.basePay))}
+                                    </p>
+                                </div>
+
                             </div>
 
-                            <div className="border-t pt-2" />
+                            {/* BREAKDOWN */}
+                            <div className="rounded-lg border bg-slate-50 p-3 text-xs space-y-1">
 
-                            <div className="flex items-center justify-between">
-                                <span className="font-medium">
-                                    Total
-                                </span>
+                                <div className="flex justify-between">
+                                    <span>Overtime</span>
+                                    <span>{formatCurrency(Number(payment.overtimePay))}</span>
+                                </div>
 
-                                <span className="text-lg font-bold">
-                                    {
-                                        payment.totalHours
-                                    }
-                                    h
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                                <div className="flex justify-between text-red-500">
+                                    <span>Tax</span>
+                                    <span>-{formatCurrency(Number(payment.taxDeduction))}</span>
+                                </div>
 
-                    {/* RATE */}
+                                <div className="flex justify-between text-red-500">
+                                    <span>Other</span>
+                                    <span>-{formatCurrency(Number(payment.otherDeductions))}</span>
+                                </div>
 
-                    <div className="rounded-xl border bg-slate-50 p-4">
-                        <div className="mb-3 flex items-center gap-2 text-sm text-slate-500">
-                            <BadgeDollarSign className="h-4 w-4" />
-                            Rate Details
-                        </div>
-
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-500">
-                                    Regular
-                                </span>
-
-                                <span className="font-medium">
-                                    $
-                                    {
-                                        payment.hourlyRate
-                                    }
-                                    /hr
-                                </span>
                             </div>
 
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-slate-500">
-                                    Overtime
-                                </span>
+                            {/* ACTIONS (NOW HERE ✅) */}
+                            <div className="flex justify-end gap-2 pt-2">
 
-                                <span className="font-medium text-orange-600">
-                                    $
-                                    {
-                                        payment.overtimeHourlyRate
-                                    }
-                                    /hr
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                                <Button size="sm" variant="outline">
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View
+                                </Button>
 
-                    {/* BREAKDOWN */}
+                                <Button size="sm">
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Edit
+                                </Button>
 
-                    <div className="rounded-xl border bg-slate-50 p-4">
-                        <div className="mb-3 text-sm text-slate-500">
-                            Payment Breakdown
-                        </div>
-
-                        <div className="space-y-2 text-sm">
-                            <div className="flex items-center justify-between">
-                                <span className="text-slate-500">
-                                    Base Pay
-                                </span>
-
-                                <span>
-                                    {formatCurrency(
-                                        Number(
-                                            payment.basePay
-                                        )
-                                    )}
-                                </span>
                             </div>
 
-                            <div className="flex items-center justify-between">
-                                <span className="text-slate-500">
-                                    Overtime
-                                </span>
+                        </AccordionContent>
 
-                                <span>
-                                    {formatCurrency(
-                                        Number(
-                                            payment.overtimePay
-                                        )
-                                    )}
-                                </span>
-                            </div>
+                    </AccordionItem>
 
-                            <div className="flex items-center justify-between">
-                                <span className="text-slate-500">
-                                    Tax
-                                </span>
+                </Accordion>
 
-                                <span className="text-red-500">
-                                    -
-                                    {formatCurrency(
-                                        Number(
-                                            payment.taxDeduction
-                                        )
-                                    )}
-                                </span>
-                            </div>
-
-                            <div className="flex items-center justify-between">
-                                <span className="text-slate-500">
-                                    Other
-                                </span>
-
-                                <span className="text-red-500">
-                                    -
-                                    {formatCurrency(
-                                        Number(
-                                            payment.otherDeductions
-                                        )
-                                    )}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* TOTAL */}
-
-                    <div className="flex flex-col justify-between rounded-xl border bg-linear-to-br from-emerald-50 to-emerald-100 p-5">
-                        <div>
-                            <p className="text-sm text-emerald-700">
-                                Total Payment
-                            </p>
-
-                            <h3 className="mt-2 text-4xl font-bold text-emerald-700">
-                                {formatCurrency(
-                                    Number(
-                                        payment.totalPay
-                                    )
-                                )}
-                            </h3>
-
-                            <p className="mt-2 text-xs text-slate-500">
-                                Payment ID:
-                            </p>
-
-                            <p className="truncate text-xs font-mono text-slate-600">
-                                {payment.id}
-                            </p>
-                        </div>
-
-                        <div className="mt-6 flex items-center gap-2">
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                className="flex-1"
-                            >
-                                <Eye className="mr-2 h-4 w-4" />
-                                View
-                            </Button>
-
-                            <Button
-                                size="sm"
-                                className="flex-1"
-                            >
-                                <Edit className="mr-2 h-4 w-4" />
-                                Edit
-                            </Button>
-                        </div>
-                    </div>
-                </div>
             </CardContent>
         </Card>
     );

@@ -5,10 +5,10 @@ import { Activity } from "@/apis/guardsApi";
 import {
     Building,
     Calendar,
-    ChevronRight,
     Clock,
     ExternalLink,
     MapPin,
+    ChevronRight,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,6 @@ import {
 
 import {
     formatDate,
-    formatDateTime,
     formatTime,
 } from "@/lib/utils";
 
@@ -36,54 +35,59 @@ const GuardActivityCard = ({
     const navigate = useNavigate();
 
     return (
-        <div className="border-2 border-gray-200 rounded-xl p-5 hover:border-blue-300 hover:shadow-md transition-all bg-white">
+        <div className="
+            rounded-2xl
+            border border-slate-200
+            bg-white
+            p-5
+            shadow-sm
+            transition-all
+            hover:shadow-md
+        ">
 
-            {/* Header */}
-            <div className="flex items-start justify-between mb-4">
+            {/* HEADER */}
+            <div className="flex items-start justify-between gap-4">
 
-                <div className="flex-1">
+                <div className="space-y-2">
 
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-3 flex-wrap">
 
-                        <Building className="h-5 w-5 text-blue-600 shrink-0" />
+                        <div className="flex items-center gap-2">
 
-                        <h3 className="text-lg font-bold text-gray-900 capitalize">
-                            {shift.order.locationName}
-                        </h3>
+                            <Building className="h-5 w-5 text-slate-500" />
+
+                            <h3 className="text-lg font-semibold text-slate-800 capitalize">
+                                {shift.order.locationName}
+                            </h3>
+
+                        </div>
 
                         <Badge
-                            className="text-sm px-3 py-1 border-2"
-                            style={getStatusStyle(
-                                shift.assignmentStatus
-                            )}
+                            className="border px-3 py-1 text-xs font-semibold"
+                            style={getStatusStyle(shift.assignmentStatus)}
                         >
-                            {
-                                getStatusColor(
-                                    shift.assignmentStatus
-                                ).label
-                            }
+                            {getStatusColor(shift.assignmentStatus).label}
                         </Badge>
 
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm text-gray-600 ml-8">
+                    <div className="flex items-center gap-2 text-sm text-slate-500">
 
                         <MapPin className="h-4 w-4 shrink-0" />
 
-                        <span className="capitalize">
+                        <span>
                             {shift.order.locationAddress}
                         </span>
 
                     </div>
+
                 </div>
 
                 <Button
                     variant="ghost"
                     size="icon"
                     onClick={() =>
-                        navigate(
-                            `/scheduling/${shift.shiftId}`
-                        )
+                        navigate(`/scheduling/${shift.shiftId}`)
                     }
                 >
                     <ExternalLink className="h-4 w-4" />
@@ -93,176 +97,135 @@ const GuardActivityCard = ({
 
             <Separator className="my-4" />
 
-            {/* Details Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {/* CORE INFO */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                <div className="bg-gray-50 rounded-lg p-3 border">
-
-                    <p className="text-sm text-gray-600 mb-1">
+                <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">
                         Date
                     </p>
 
                     <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-slate-500" />
 
-                        <Calendar className="h-4 w-4 text-blue-500" />
-
-                        <span className="text-lg font-semibold">
+                        <p className="font-semibold text-slate-800">
                             {formatDate(shift.date)}
-                        </span>
-
+                        </p>
                     </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-3 border">
-
-                    <p className="text-sm text-gray-600 mb-1">
+                <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">
                         Service Type
                     </p>
 
-                    <span className="text-lg font-semibold capitalize">
-                        {shift.order.serviceType
-                            .replace(/([A-Z])/g, " $1")
-                            .trim()}
-                    </span>
-
+                    <p className="font-semibold text-slate-800 capitalize">
+                        {shift.order.serviceType}
+                    </p>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-3 border">
-
-                    <p className="text-sm text-gray-600 mb-1">
-                        Start Time
+                <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">
+                        Shift Start
                     </p>
 
                     <div className="flex items-center gap-2">
-
                         <Clock className="h-4 w-4 text-green-500" />
 
-                        <span className="text-lg font-semibold">
+                        <p className="font-semibold text-slate-800">
                             {formatTime(shift.startTime)}
-                        </span>
-
+                        </p>
                     </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-3 border">
-
-                    <p className="text-sm text-gray-600 mb-1">
-                        End Time
+                <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-slate-400">
+                        Shift End
                     </p>
 
                     <div className="flex items-center gap-2">
-
                         <Clock className="h-4 w-4 text-red-500" />
 
-                        <span className="text-lg font-semibold">
+                        <p className="font-semibold text-slate-800">
                             {formatTime(shift.endTime)}
-                        </span>
-
+                        </p>
                     </div>
                 </div>
+
             </div>
 
-            {/* Timesheet */}
-            <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-100">
+            {/* TIMESHEET */}
+            <Separator className="my-4" />
 
-                <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+            <div className="space-y-4">
 
-                    <Clock className="h-5 w-5 text-blue-600" />
-
-                    Timesheet Details
-
+                <h4 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-slate-500" />
+                    Timesheet
                 </h4>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-
-                    <div>
-
-                        <p className="text-sm text-gray-600 mb-1">
-                            Clock In
-                        </p>
-
-                        <p className="text-lg font-semibold">
-                            {shift.timesheet?.clockInTime
-                            }
-                        </p>
-
-                    </div>
-
-                    <div>
-
-                        <p className="text-sm text-gray-600 mb-1">
-                            Clock Out
-                        </p>
-
-                        <p className="text-lg font-semibold">
-                            {shift.timesheet?.clockOutTime}
-                        </p>
-
-                    </div>
-
-                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                    <div className="bg-white rounded-lg p-3 border-2 border-blue-200">
+                    <div className="rounded-xl border border-slate-200 p-4">
+                        <p className="text-xs text-slate-400">
+                            Clock In
+                        </p>
 
-                        <p className="text-sm text-gray-600 mb-1">
+                        <p className="font-semibold text-slate-800">
+                            {shift.timesheet?.clockInTime || "—"}
+                        </p>
+                    </div>
+
+                    <div className="rounded-xl border border-slate-200 p-4">
+                        <p className="text-xs text-slate-400">
+                            Clock Out
+                        </p>
+
+                        <p className="font-semibold text-slate-800">
+                            {shift.timesheet?.clockOutTime || "—"}
+                        </p>
+                    </div>
+
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+
+                    <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                        <p className="text-xs text-slate-500">
                             Total Hours
                         </p>
 
                         <p className="text-lg font-bold text-blue-600">
-                            {Math.abs(
-                                shift.timesheet?.totalHours || 0
-                            ).toFixed(2)}
-                            h
+                            {(shift.timesheet?.totalHours || 0).toFixed(2)}h
                         </p>
-
                     </div>
 
-                    <div className="bg-white rounded-lg p-3 border-2 border-orange-200">
-
-                        <p className="text-sm text-gray-600 mb-1">
-                            Overtime Hours
+                    <div className="rounded-xl border border-orange-100 bg-orange-50 p-4">
+                        <p className="text-xs text-slate-500">
+                            Overtime
                         </p>
 
                         <p className="text-lg font-bold text-orange-600">
-                            {shift.timesheet?.overtime?.hours?.toFixed(
-                                2
-                            ) || "0.00"}
-                            h
+                            {shift.timesheet?.overtime?.hours?.toFixed(2) || "0.00"}h
                         </p>
-
                     </div>
 
                 </div>
 
-                {shift.timesheet?.overtime &&
-                    shift.timesheet.overtime.hours > 0 &&
-                    shift.timesheet.overtime.startTime && (
+                {shift.timesheet?.overtime?.hours > 0 && (
+                    <div className="text-sm text-slate-600 flex items-center gap-2">
+                        <span className="font-medium">
+                            {shift.timesheet.overtime.startTime}
+                        </span>
 
-                        <div className="mt-3 pt-3 border-t-2 border-blue-200">
+                        <ChevronRight className="h-4 w-4" />
 
-                            <p className="text-sm text-gray-600 mb-2 font-medium">
-                                Overtime Period
-                            </p>
+                        <span className="font-medium">
+                            {shift.timesheet.overtime.endTime}
+                        </span>
+                    </div>
+                )}
 
-                            <div className="flex items-center gap-2 text-sm">
-
-                                <span className="font-semibold">
-                                    {
-                                        shift.timesheet.overtime.startTime
-                                    }
-                                </span>
-
-                                <ChevronRight className="h-4 w-4 text-gray-400" />
-
-                                <span className="font-semibold">
-                                    {shift.timesheet.overtime.endTime}
-                                </span>
-
-                            </div>
-                        </div>
-                    )}
             </div>
         </div>
     );

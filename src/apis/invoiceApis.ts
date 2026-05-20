@@ -3,7 +3,12 @@ import { baseApi } from "./baseApi";
 export const invoiceApis = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         getAllInvoice: builder.query({
-            query: () => "/invoicing/getAllInvoice",
+            query: (params = {}) => {
+                const qs = new URLSearchParams();
+                if (params.status) qs.set("status", params.status);
+
+                return `/invoicing/getAllInvoice?${qs.toString()}`
+            },
             providesTags: ["Invoice"],
         }),
         generateInvoice: builder.mutation({
@@ -37,7 +42,7 @@ export const invoiceApis = baseApi.injectEndpoints({
         generateInvoicePDF: builder.mutation({
             query: (id) => ({
                 url: `/invoicing/generateInvoicePDF/${id}`,
-                method:"POST"
+                method: "POST"
             }),
             invalidatesTags: ["Invoice"]
         }),

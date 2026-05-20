@@ -1,6 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
-
-import { useGetAllIncidentsQuery } from "@/apis/incidentsApi";
+import { AlertTriangle } from "lucide-react";
 
 import CustomHeader from "@/components/common/Header/CustomHeader";
 
@@ -8,13 +6,10 @@ import IncidentStats from "@/components/Incidents/IncidentStats";
 import IncidentsTable from "@/components/Incidents/Table/IncidentsTable";
 import IncidentsSearchFilters from "@/components/Incidents/IncidentsSearchFilters";
 
+import { useGetAllIncidentsQuery } from "@/apis/incidentsApi";
+
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";
-
-import {
-  AlertTriangle,
-  ShieldAlert,
-} from "lucide-react";
 
 export default function IncidentsPage() {
   const {
@@ -60,7 +55,6 @@ export default function IncidentsPage() {
     pagination,
   } = data ?? {};
 
-  // Pagination
   const handlePageChange = (
     newPage: number
   ) => {
@@ -70,7 +64,6 @@ export default function IncidentsPage() {
     );
   };
 
-  // Limit
   const handleLimitChange = (
     value: number
   ) => {
@@ -81,113 +74,86 @@ export default function IncidentsPage() {
   };
 
   return (
-    <div
-      className="
-    h-full
-    overflow-y-auto
-    bg-linear-to-br
-    from-slate-50
-    via-blue-50/40
-    to-indigo-50/30
-  "
-    >
-      <div className="space-y-6 py-6">
-        <div
-          className="
-        relative
-        overflow-hidden
-        rounded-3xl
-        border
-        border-slate-200
-        bg-linear-to-br
-        from-white
-        via-blue-50
-        to-indigo-50
-        p-6
-        shadow-sm
-      "
-        >
-          <div className="absolute -top-10 right-0 h-56 w-56 rounded-full bg-blue-200/40 blur-3xl" />
-
-          <div className="relative z-10 space-y-4">
-            <CustomHeader
-              title="Incident Management"
-              description="View and manage incidents raised by guards and clients"
-            />
-
-            <IncidentStats />
-          </div>
-        </div>
-
-        <Card
-          className="
-        overflow-hidden
-        rounded-3xl
-        border
-        border-slate-200
-        bg-white/90
-        shadow-sm
-        backdrop-blur
-      "
-        >
-          {/* TABLE HEADER */}
-          <div
-            className="
-          border-b
-          border-slate-200
-          bg-linear-to-r
-          from-slate-50
-          via-white
-          to-blue-50/40
-          px-6
-          py-5
-        "
-          >
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
+      {/* HEADER */}
+      <div className="space-y-3">
+        <CustomHeader
+          title="Incident Management"
+          description="View and manage incidents raised by guards and clients"
+          others={
             <div
               className="
-            flex
-            flex-col
-            gap-5
-            lg:flex-row
-            lg:items-center
-            lg:justify-between
-          "
-            >
-              <div>
-                <h2
-                  className="
-                heading
-                font-bold
-                tracking-tight
-                text-slate-900
+                flex items-center gap-3
+                rounded-2xl border border-orange-100
+                bg-linear-to-r
+                from-orange-50
+                to-sky-50
+                px-5 py-3
+                shadow-sm
               "
-                >
-                  Incident Reports
-                </h2>
-
-                <p className="mt-1 description text-slate-500">
-                  Review, track, and manage all reported incidents
-                </p>
+            >
+              <div
+                className="
+                  flex h-11 w-11 items-center
+                  justify-center rounded-xl
+                  bg-linear-to-br
+                  from-orange-500
+                  to-sky-500
+                  text-white shadow-md
+                "
+              >
+                <AlertTriangle className="h-5 w-5" />
               </div>
 
-              <IncidentsSearchFilters />
-            </div>
-          </div>
+              <div>
+                <p
+                  className="
+                    text-xs font-semibold uppercase
+                    tracking-wide text-slate-500
+                  "
+                >
+                  Incident Tracking
+                </p>
 
-          {/* TABLE */}
-          <CardContent className="p-0">
-            <IncidentsTable
-              incidents={incidents}
-              page={pagination?.page ?? 1}
-              totalPages={Number(pagination?.totalPages) ?? 1}
-              limit={limit}
-              onPageChange={handlePageChange}
-              onLimitChange={handleLimitChange}
-              isLoading={isLoading || isFetching}
-            />
-          </CardContent>
-        </Card>
+                <p
+                  className="
+                    text-sm font-semibold
+                    text-slate-800
+                  "
+                >
+                  Real-time Monitoring
+                </p>
+              </div>
+            </div>
+          }
+        />
+
+        <IncidentStats />
       </div>
+
+      {/* FILTERS */}
+      <IncidentsSearchFilters />
+
+      {/* TABLE */}
+      <IncidentsTable
+        incidents={incidents}
+        page={pagination?.page ?? 1}
+        totalPages={
+          Number(
+            pagination?.totalPages
+          ) ?? 1
+        }
+        limit={limit}
+        onPageChange={
+          handlePageChange
+        }
+        onLimitChange={
+          handleLimitChange
+        }
+        isLoading={
+          isLoading || isFetching
+        }
+      />
     </div>
   );
 }

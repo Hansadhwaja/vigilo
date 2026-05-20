@@ -14,16 +14,10 @@ import {
     ShieldCheck,
 } from "lucide-react";
 
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-
 import { Badge } from "@/components/ui/badge";
-
 import { Separator } from "@/components/ui/separator";
+
+import SectionCard from "@/components/common/Card/SectionCard";
 
 import { formatDate } from "@/lib/utils";
 
@@ -34,7 +28,6 @@ const GuardEmploymentCard = ({
     guard: Guard;
     activity: Activity[];
 }) => {
-
     const totalShifts = activity.length;
 
     const completedShifts = activity.filter(
@@ -45,9 +38,7 @@ const GuardEmploymentCard = ({
 
     const completionRate =
         totalShifts > 0
-            ? Math.round(
-                (completedShifts / totalShifts) * 100
-            )
+            ? Math.round((completedShifts / totalShifts) * 100)
             : 0;
 
     const totalHoursWorked = activity.reduce(
@@ -57,155 +48,128 @@ const GuardEmploymentCard = ({
     );
 
     return (
-        <Card className="border-2 border-gray-200 shadow-sm bg-white">
+        <SectionCard
+            title="Employment Details"
+            icon={<ShieldCheck className="h-5 w-5" />}
+        >
+            <div className="space-y-6">
 
-            <CardHeader className="border-b-2 border-gray-200 pb-4">
+                {/* HERO */}
+                <div className="
+                    relative overflow-hidden
+                    rounded-2xl
+                    border border-slate-200
+                    bg-gradient-to-br
+                    from-slate-50
+                    to-white
+                    p-5
+                ">
+                    <p className="text-sm text-slate-500">
+                        Guard Employment Overview
+                    </p>
 
-                <CardTitle className="text-xl font-semibold flex items-center gap-3 text-gray-900">
+                    <h3 className="mt-1 text-xl font-semibold text-slate-800">
+                        Performance & Work Summary
+                    </h3>
+                </div>
 
-                    <ShieldCheck className="h-6 w-6" />
+                {/* JOINED + ID */}
+                <div className="grid gap-4 sm:grid-cols-2">
 
-                    Employment Details
+                    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                            <Calendar className="h-4 w-4" />
+                            Joined Date
+                        </div>
 
-                </CardTitle>
-
-            </CardHeader>
-
-            <CardContent className="p-6 space-y-5">
-
-                {/* Joined Date */}
-                <div className="space-y-2">
-
-                    <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
-
-                        <Calendar className="h-4 w-4" />
-
-                        Joined Date
-
+                        <p className="mt-2 text-lg font-semibold text-slate-800">
+                            {formatDate(guard.createdAt)}
+                        </p>
                     </div>
 
-                    <p className="text-lg font-semibold text-gray-900">
-                        {formatDate(guard.createdAt)}
-                    </p>
+                    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                            <IdCard className="h-4 w-4" />
+                            Guard ID
+                        </div>
+
+                        <p className="mt-2 text-sm font-mono text-slate-700 break-all">
+                            {guard.id}
+                        </p>
+                    </div>
 
                 </div>
 
-                <Separator />
+                <Separator className="bg-slate-200" />
 
-                {/* Guard ID */}
-                <div className="space-y-2">
-
-                    <div className="flex items-center gap-2 text-sm font-medium text-gray-500">
-
-                        <IdCard className="h-4 w-4" />
-
-                        Guard ID
-
-                    </div>
-
-                    <p className="text-sm font-mono break-all text-gray-700 leading-relaxed">
-                        {guard.id}
-                    </p>
-
-                </div>
-
-                <Separator />
-
-                {/* Shift Summary */}
-                <div className="space-y-4">
+                {/* STATS */}
+                <div className="grid gap-4">
 
                     <div className="flex items-center justify-between">
-
-                        <div className="flex items-center gap-2 text-gray-700">
-
+                        <div className="flex items-center gap-2 text-slate-700">
                             <ActivityIcon className="h-4 w-4" />
-
-                            <span className="font-medium">
-                                Total Shifts
-                            </span>
-
+                            Total Shifts
                         </div>
 
                         <Badge variant="secondary">
                             {totalShifts}
                         </Badge>
-
                     </div>
 
                     <div className="flex items-center justify-between">
-
-                        <div className="flex items-center gap-2 text-gray-700">
-
+                        <div className="flex items-center gap-2 text-slate-700">
                             <CheckCircle className="h-4 w-4 text-green-600" />
-
-                            <span className="font-medium">
-                                Completed Shifts
-                            </span>
-
+                            Completed Shifts
                         </div>
 
-                        <Badge className="bg-green-100 text-green-700 border border-green-200">
+                        <Badge className="bg-green-100 text-green-700 border-0">
                             {completedShifts}
                         </Badge>
-
                     </div>
 
                     <div className="flex items-center justify-between">
-
-                        <div className="flex items-center gap-2 text-gray-700">
-
+                        <div className="flex items-center gap-2 text-slate-700">
                             <Clock className="h-4 w-4 text-blue-600" />
-
-                            <span className="font-medium">
-                                Total Hours Worked
-                            </span>
-
+                            Total Hours Worked
                         </div>
 
-                        <Badge className="bg-blue-100 text-blue-700 border border-blue-200">
+                        <Badge className="bg-blue-100 text-blue-700 border-0">
                             {totalHoursWorked.toFixed(2)}h
                         </Badge>
-
                     </div>
 
                 </div>
 
-                <Separator />
+                <Separator className="bg-slate-200" />
 
-                {/* Completion Rate */}
+                {/* PROGRESS */}
                 <div className="space-y-3">
 
                     <div className="flex items-center justify-between">
-
-                        <span className="text-sm font-medium text-gray-700">
+                        <span className="text-sm text-slate-600">
                             Completion Rate
                         </span>
 
-                        <span className="text-sm font-semibold text-gray-900">
+                        <span className="text-sm font-semibold text-slate-800">
                             {completionRate}%
                         </span>
-
                     </div>
 
-                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-
+                    <div className="h-2 w-full rounded-full bg-slate-200 overflow-hidden">
                         <div
                             className="h-full bg-green-500 transition-all"
-                            style={{
-                                width: `${completionRate}%`,
-                            }}
+                            style={{ width: `${completionRate}%` }}
                         />
-
                     </div>
 
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-slate-500">
                         {completedShifts} of {totalShifts} shifts completed
                     </p>
 
                 </div>
 
-            </CardContent>
-        </Card>
+            </div>
+        </SectionCard>
     );
 };
 

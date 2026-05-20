@@ -126,7 +126,7 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="space-y-4 overflow-y-auto min-w-0 min-h-0 h-full">
+       <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
 
       <LiveStatusHeader
         currentTime={currentTime}

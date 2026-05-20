@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 
 import SectionCard from "@/components/common/Card/SectionCard";
+import InfoItem from "./InfoItem";
 
 interface Props {
   client: any;
@@ -103,41 +104,29 @@ const ClientInformationCard = ({
             md:grid-cols-2
           "
         >
-          <InfoCard
+          <InfoItem
             label="Email Address"
             value={client.email}
             icon={
               <Mail className="h-5 w-5" />
             }
-            iconClassName="
-              bg-sky-100
-              text-sky-600
-            "
           />
 
-          <InfoCard
+          <InfoItem
             label="Mobile Number"
             value={client.mobile}
             icon={
               <Phone className="h-5 w-5" />
             }
-            iconClassName="
-              bg-emerald-100
-              text-emerald-600
-            "
           />
 
           <div className="md:col-span-2">
-            <InfoCard
+            <InfoItem
               label="Address"
               value={client.address}
               icon={
                 <MapPin className="h-5 w-5" />
               }
-              iconClassName="
-                bg-orange-100
-                text-orange-600
-              "
             />
           </div>
         </div>
@@ -147,77 +136,3 @@ const ClientInformationCard = ({
 };
 
 export default ClientInformationCard;
-
-interface InfoCardProps {
-  label: string;
-  value?: React.ReactNode;
-  icon?: React.ReactNode;
-  iconClassName?: string;
-}
-
-const InfoCard = ({
-  label,
-  value,
-  icon,
-  iconClassName,
-}: InfoCardProps) => {
-  return (
-    <div
-      className="
-        rounded-2xl
-        border border-slate-200
-        bg-linear-to-br
-        from-slate-50
-        to-white
-        p-5
-        shadow-sm
-        transition-all
-        hover:-translate-y-0.5
-        hover:shadow-md
-      "
-    >
-      <div className="flex items-start gap-4">
-        <div
-          className={`
-            flex h-12 w-12
-            shrink-0
-            items-center
-            justify-center
-            rounded-xl
-            shadow-sm
-            ${iconClassName}
-          `}
-        >
-          {icon}
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <p
-            className="
-              text-xs
-              font-semibold
-              uppercase
-              tracking-[0.2em]
-              text-slate-500
-            "
-          >
-            {label}
-          </p>
-
-          <p
-            className="
-              mt-2
-              wrap-break-word
-              text-sm
-              font-medium
-              leading-6
-              text-slate-800
-            "
-          >
-            {value || "—"}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};

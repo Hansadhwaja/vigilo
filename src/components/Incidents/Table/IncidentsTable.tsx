@@ -1,12 +1,10 @@
 import { IncidentType } from "@/apis/incidentsApi";
 import UserAvatar from "@/components/common/Avatar/UserAvatar";
-import Loader from "@/components/common/Loader";
 import {
     Column,
     DataTable,
     RowWithId,
 } from "@/components/common/Table/DataTable";
-import TablePagination from "@/components/common/Table/TablePagination";
 
 import { Button } from "@/components/ui/button";
 import { formatDate, formatTime } from "@/lib/utils";
@@ -18,7 +16,11 @@ interface IncidentsTableProps {
     page: number;
     totalPages: number;
     limit: number;
+
     isLoading: boolean;
+    isError?: boolean;
+    error?: any;
+
     onPageChange: (n: number) => void;
     onLimitChange: (n: number) => void;
 }
@@ -26,10 +28,11 @@ interface IncidentsTableProps {
 const IncidentsTable = ({
     incidents,
     isLoading,
+    isError,
+    error,
     page = 1,
     totalPages = 1,
     limit,
-
     onPageChange,
     onLimitChange,
 }: IncidentsTableProps) => {
@@ -38,16 +41,23 @@ const IncidentsTable = ({
         {
             key: "name",
             header: "Name",
-            render: (row) => <h2 className="w-32 truncate font-semibold">{row.name}</h2>
+
+            render: (row) => (
+                <p className="font-semibold text-slate-800 truncate w-32">
+                    {row.name}
+                </p>
+            ),
         },
+
         {
             key: "location",
             header: "Location",
-            render: (row) => (
-                <div className="flex items-center gap-1 text-gray-900">
-                    <MapPin className="h-4 w-4 shrink-0" />
 
-                    <span className="line-clamp-2 truncate w-32">
+            render: (row) => (
+                <div className="flex items-center gap-2 text-slate-700">
+                    <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
+
+                    <span className="line-clamp-2 w-32 text-sm">
                         {row.location}
                     </span>
                 </div>
@@ -57,24 +67,26 @@ const IncidentsTable = ({
         {
             key: "description",
             header: "Description",
+
             render: (row) => (
-                <div className="max-w-xs line-clamp-2 text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm text-slate-700 line-clamp-2 max-w-xs">
                     {row.description}
-                </div>
+                </p>
             ),
         },
 
         {
-            key: "assignedGuard",
+            key: "reporter",
             header: "Reported By",
+
             render: (row) => (
-                <div className="flex gap-2 items-center">
+                <div className="flex items-center gap-2">
                     <UserAvatar
                         src=""
                         name={row.reporter?.name || "Unknown"}
                     />
 
-                    <p className="text-sm font-semibold">
+                    <p className="text-sm font-medium text-slate-800">
                         {row.reporter?.name || "Unknown"}
                     </p>
                 </div>
@@ -82,17 +94,18 @@ const IncidentsTable = ({
         },
 
         {
-            key: "dateTime",
+            key: "createdAt",
             header: "Date/Time",
-            render: (row) => (
-                <div>
-                    <div className="text-sm font-medium text-gray-900">
-                        {formatDate(row.createdAt)}
-                    </div>
 
-                    <div className="text-xs text-gray-500 mt-0.5">
+            render: (row) => (
+                <div className="space-y-1">
+                    <p className="font-medium text-slate-700">
+                        {formatDate(row.createdAt)}
+                    </p>
+
+                    <p className="text-xs text-slate-400">
                         {formatTime(row.createdAt)}
-                    </div>
+                    </p>
                 </div>
             ),
         },
@@ -101,46 +114,41 @@ const IncidentsTable = ({
             key: "actions",
             header: "Actions",
             align: "center",
-            render: (row) => (
-                <div className="flex justify-center items-center">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 px-3 text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                    >
-                        <Link to={`/incidents/${row.id}`}>
-                            <Eye className="h-4 w-4" />
-                        </Link>
 
-                    </Button>
+            render: (row) => (
+                <div className="flex justify-center">
+                    <Link
+                        to={`/incidents/${row.id}`}
+                        className="
+                            rounded-xl border border-slate-200
+                            p-2 text-slate-500 transition-all
+                            hover:border-orange-200
+                            hover:bg-orange-50
+                            hover:text-orange-600
+                        "
+                    >
+                        <Eye className="h-4 w-4" />
+                    </Link>
                 </div>
             ),
         },
     ];
 
-    if (isLoading) return <Loader />;
-
     return (
-        <div className="bg-white rounded-xl space-y-2">
-            <DataTable
-                columns={columns}
-                data={incidents}
-                emptyText="No incidents available."
-            />
-
-            <TablePagination
-                currentPage={page}
-                totalPages={totalPages}
-                limit={limit}
-                onLimitChange={
-                    onLimitChange
-                }
-                onPageChange={
-                    onPageChange
-                }
-            />
-        </div>
-
+        <DataTable
+            columns={columns}
+            data={incidents}
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            loadingText="Loading incidents..."
+            emptyText="No incidents found"
+            page={page}
+            totalPages={totalPages}
+            limit={limit}
+            onPageChange={onPageChange}
+            onLimitChange={onLimitChange}
+        />
     );
 };
 

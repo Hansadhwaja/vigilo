@@ -10,7 +10,6 @@ import PatrolDetailsPage from '@/pages/Patrolling/PatrolDetailsPage';
 import InvoicingPage from '@/pages/Invoicing/InvoicingPage';
 import Sidebar from '../common/Navbar/Sidebar';
 import GenerateInvoicePage from '@/pages/Invoicing/GenerateInvoicePage';
-import InvoiceDetailsPage from '@/pages/Invoicing/InvoiceDetailsPage';
 import AlarmsPage from '@/pages/Alarm/AlarmsPage';
 
 const MainLayout = () => {
@@ -116,7 +115,6 @@ const MainLayout = () => {
                         <Route path="/invoicing" >
                             <Route index element={<InvoicingPage />} />
                             <Route path="new" element={<GenerateInvoicePage />} />
-                            <Route path=":invoiceId" element={<InvoiceDetailsPage />} />
                         </Route>
 
                         <Route

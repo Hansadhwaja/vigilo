@@ -1,102 +1,175 @@
+"use client";
 
-import { useGenerateInvoicePDFMutation } from '@/apis/invoiceApis';
-import Loader from '@/components/common/Loader';
-import { Column, DataTable, RowWithId } from '@/components/common/Table/DataTable'
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { formatCurrency } from '@/lib/utils';
-import { InvoiceType } from '@/types';
-import { Download, Eye } from 'lucide-react'
-import { useState } from 'react';
-import { toast } from 'sonner';
+import {
+    Column,
+    DataTable,
+    RowWithId,
+} from "@/components/common/Table/DataTable";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+import {
+    Download,
+    FileText,
+    User,
+    Calendar,
+    DollarSign,
+} from "lucide-react";
+
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { InvoiceType } from "@/types";
+
+import { useGenerateInvoicePDFMutation } from "@/apis/invoiceApis";
+import { useState } from "react";
+import Loader from "@/components/common/Loader";
+import { toast } from "sonner";
 
 interface InvoicingTableProps {
     invoices: InvoiceType[];
 }
 
-export const InvoicingTable = ({ invoices }: InvoicingTableProps) => {
+const InvoicingTable = ({ invoices }: InvoicingTableProps) => {
+    const [loadingId, setLoadingId] = useState<string | null>(null);
+    const [generateInvoicePDF] = useGenerateInvoicePDFMutation();
 
-    const [loadingInvoiceId, setLoadingInvoiceId] = useState<string | null>(null);
-    const [generateInvoicePDF, { isLoading }] = useGenerateInvoicePDFMutation();
-
-    const handleGeneratePdf = async (id: string) => {
-        setLoadingInvoiceId(id);
+    const handleDownload = async (id: string) => {
+        setLoadingId(id);
         try {
             const res = await generateInvoicePDF(id).unwrap();
             window.open(res?.data?.invoiceUrl, "_blank");
-            toast.success("Invoice Fetched Successfully");
-
-        } catch (error) {
-            toast.error("Error while fetching invoice pdf");
+            toast.success("Invoice downloaded");
+        } catch {
+            toast.error("Failed to generate invoice");
         } finally {
-
-            setLoadingInvoiceId(null);
+            setLoadingId(null);
         }
-    }
+    };
 
     const columns: Column<InvoiceType & RowWithId>[] = [
         {
-            key: 'invoiceNumber',
-            header: 'Invoice ID',
+            key: "invoiceNumber",
+            header: "Invoice",
+
+            render: (row) => (
+                <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-slate-500" />
+                        <p className="font-semibold text-slate-800">
+                            {row.invoiceNumber}
+                        </p>
+                    </div>
+
+                    <p className="text-xs text-slate-400 font-mono">
+                        #{row.id.slice(0, 8)}
+                    </p>
+                </div>
+            ),
         },
+
         {
-            key: 'clientName',
-            header: 'Client',
+            key: "clientName",
+            header: "Client",
+
+            render: (row) => (
+                <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-sky-500" />
+                    <p className="font-medium text-slate-700">
+                        {row.clientName}
+                    </p>
+                </div>
+            ),
         },
+
         {
-            key: 'services',
-            header: 'Service Provided',
+            key: "services",
+            header: "Services",
+
             render: (row) => {
                 const s = row.services;
-
                 if (!s) return "-";
 
                 const parts = [];
-
                 if (s.orders > 0) parts.push(`${s.orders} Orders`);
                 if (s.custom > 0) parts.push(`${s.custom} Custom`);
                 if (s.alarms > 0) parts.push(`${s.alarms} Alarms`);
 
-                return parts.length > 0 ? parts.join(", ") : "-";
-            }
+                return (
+                    <p className="text-sm text-slate-600">
+                        {parts.length ? parts.join(", ") : "-"}
+                    </p>
+                );
+            },
         },
+
         {
-            key: 'billingPeriod',
-            header: 'Period/Days',
+            key: "billingPeriod",
+            header: "Period",
         },
+
         {
-            key: 'amount',
-            header: 'Amount',
-            render: row => formatCurrency(row.amount)
-        },
-        {
-            key: 'status',
-            header: 'Status',
-            render: (row) => <Badge className='capitalize'>{row.status}</Badge>
-        },
-        {
-            key: 'dueDate',
-            header: 'Due Date',
-        },
-        {
-            key: 'actions',
-            header: 'Actions',
-            align: 'center',
+            key: "amount",
+            header: "Amount",
+
             render: (row) => (
-                <div className="flex gap-2 justify-center items-center">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className='cursor-pointer'
-                        onClick={() => handleGeneratePdf(row.id)}
-                        disabled={loadingInvoiceId === row.id}
-                    >
-                        {loadingInvoiceId === row.id
-                            ? <Loader />
-                            : <Download size={14} />
-                        }
-                    </Button>
+                <div className="flex items-center gap-2 font-semibold text-green-500">
+                    {formatCurrency(row.amount)}
                 </div>
+            ),
+        },
+
+        {
+            key: "status",
+            header: "Status",
+
+            render: (row) => (
+                <Badge
+                    className={`capitalize rounded-full px-3 py-1 text-xs font-semibold
+                        ${row.status === "paid"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                            : row.status === "pending"
+                                ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                                : "bg-slate-100 text-slate-700 border"
+                        }
+                    `}
+                >
+                    {row.status}
+                </Badge>
+            ),
+        },
+
+        {
+            key: "dueDate",
+            header: "Due Date",
+
+            render: (row) => (
+                <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <Calendar className="h-4 w-4 text-orange-500" />
+                    {formatDate(row.dueDate)}
+                </div>
+            ),
+        },
+
+        {
+            key: "actions",
+            header: "Actions",
+            align: "center",
+
+            render: (row) => (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => handleDownload(row.id)}
+                    disabled={loadingId === row.id}
+                >
+                    {loadingId === row.id ? (
+                        <Loader />
+                    ) : (
+                        <Download className="h-4 w-4" />
+                    )}
+                    PDF
+                </Button>
             ),
         },
     ];
@@ -105,9 +178,9 @@ export const InvoicingTable = ({ invoices }: InvoicingTableProps) => {
         <DataTable
             columns={columns}
             data={invoices}
-            emptyText="No invoice available."
+            emptyText="No invoices found"
         />
-    )
-}
+    );
+};
 
-export default InvoicingTable
+export default InvoicingTable;

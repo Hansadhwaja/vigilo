@@ -31,6 +31,7 @@ const SchedulingTabs = ({ scheduling }: SchedulingTabsProps) => {
         <AppTabs
             defaultValue="weekly"
             tabs={tabs}
+            tabsListClassName="w-200 overflow-x-auto"
         />
     );
 };

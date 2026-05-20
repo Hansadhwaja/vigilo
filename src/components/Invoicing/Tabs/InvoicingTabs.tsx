@@ -1,34 +1,57 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import InvoicingTable from '../Table/InvoicingTable'
-import { InvoiceType } from '@/types'
-
+import AppTabs from "@/components/common/Tab/AppTabs";
+import InvoicingTable from "../Table/InvoicingTable";
+import { InvoiceType } from "@/types";
+import { useQueryParams } from "@/lib/hooks/useQueryParams";
 interface InvoicingTabsProps {
     invoices: InvoiceType[];
 }
 
 const InvoicingTabs = ({ invoices }: InvoicingTabsProps) => {
+    const { getParam, setParam } = useQueryParams();
+
+    const activeTab = getParam("status", "all");
+
+    const handleTabChange = (value: string) => {
+        setParam("status", value);
+    };
+
+    const tabs = [
+        {
+            value: "all",
+            label: "All",
+            activeColor: "data-[state=active]:bg-sky-500",
+            content: <InvoicingTable invoices={invoices} />,
+        },
+        {
+            value: "paid",
+            label: "Paid",
+            activeColor: "data-[state=active]:bg-green-500",
+            content: (
+                <InvoicingTable
+                    invoices={invoices}
+                />
+            ),
+        },
+        {
+            value: "overdue",
+            label: "Overdue",
+            activeColor: "data-[state=active]:bg-orange-500",
+            content: (
+                <InvoicingTable
+                    invoices={invoices}
+                />
+            ),
+        },
+    ];
 
     return (
-        <Tabs defaultValue="all">
-            <TabsList className='w-[60vw]'>
-                <TabsTrigger value='all'>All</TabsTrigger>
-                <TabsTrigger value='paid'>Paid</TabsTrigger>
-                <TabsTrigger value='overdue'>Overdue</TabsTrigger>
-            </TabsList>
+        <AppTabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            tabs={tabs}
+            tabsListClassName="w-[60vw] overflow-x-auto"
+        />
+    );
+};
 
-            <TabsContent value='all'>
-                <InvoicingTable invoices={invoices} />
-            </TabsContent>
-
-            <TabsContent value='paid'>
-                <InvoicingTable invoices={invoices} />
-            </TabsContent>
-
-            <TabsContent value='overdue'>
-                <InvoicingTable invoices={invoices} />
-            </TabsContent>
-        </Tabs>
-    )
-}
-
-export default InvoicingTabs
+export default InvoicingTabs;

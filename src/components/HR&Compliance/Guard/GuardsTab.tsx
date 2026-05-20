@@ -47,11 +47,16 @@ const GuardsTab = () => {
     };
 
     return (
-        <Card className='p-0'>
-            <CardHeader className="p-2">
-                <CardTitle className="text-lg font-semibold">Guard Directory</CardTitle>
+        <Card className="p-0">
+
+            <CardHeader className="p-2 space-y-2">
+                <CardTitle className="text-lg font-semibold">
+                    Guard Directory
+                </CardTitle>
+
                 <GuardSearchFilters />
             </CardHeader>
+
             <CardContent className="p-2">
                 <GuardTable
                     guards={guards}
@@ -65,6 +70,7 @@ const GuardsTab = () => {
                     error={error}
                 />
             </CardContent>
+
         </Card>
     )
 }

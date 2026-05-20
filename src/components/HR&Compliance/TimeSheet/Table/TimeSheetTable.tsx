@@ -9,15 +9,8 @@ import {
 } from "@/components/common/Table/DataTable";
 
 import {
-    AlertCircle,
-    Building2,
-} from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
-
-import { TimeSheet } from "@/types";
-
-import EditTimeSheetModal from "../Modal/EditTimeSheetModal";
+    TimeSheet,
+} from "@/types";
 
 import {
     Select,
@@ -27,19 +20,21 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import { useEditTimeSheetMutation } from "@/apis/schedulingAPI";
+import { Badge } from "@/components/ui/badge";
 
 import { toast } from "sonner";
 
+import {
+    useEditTimeSheetMutation,
+} from "@/apis/schedulingAPI";
+
+import EditTimeSheetModal from "../Modal/EditTimeSheetModal";
 import Loader from "@/components/common/Loader";
 
 interface TimeSheetTableProps {
     timeSheets: TimeSheet[];
-
     isLoading: boolean;
-
     isError: boolean;
-
     error: any;
 }
 
@@ -66,256 +61,174 @@ const TimeSheetTable = ({
 
             await editTimeSheet({
                 id,
-                data: {
-                    approvedStatus: status,
-                },
+                data: { approvedStatus: status },
             }).unwrap();
 
-            toast.success(
-                "Status updated successfully"
-            );
-
+            toast.success("Status updated successfully");
         } catch (error) {
             console.log(error);
-
-            toast.error(
-                "Error while updating status"
-            );
-
+            toast.error("Error while updating status");
         } finally {
             setUpdatingId(null);
         }
     };
 
-    const columns: Column<
-        TimeSheet & RowWithId
-    >[] = [
-            {
-                key: "guard",
-                header: "Guard",
+    const columns: Column<TimeSheet & RowWithId>[] = [
+        {
+            key: "guard",
+            header: "Guard",
 
-                render: (row) => (
-                    <div className="flex flex-col">
+            render: (row) => (
+                <div className="space-y-1">
+                    <p className="font-semibold text-slate-800">
+                        {row.guard.name}
+                    </p>
 
-                        <span className="font-medium text-gray-900">
-                            {row.guard.name}
-                        </span>
+                    <p className="text-xs font-mono text-slate-400">
+                        #{row.guard.id.slice(0, 8)}
+                    </p>
+                </div>
+            ),
+        },
 
-                        <span className="text-xs text-gray-500 font-mono">
-                            #{row.guard.id.slice(0, 8)}
-                        </span>
+        {
+            key: "serviceType",
+            header: "Service",
 
-                    </div>
-                ),
-            },
+            render: (row) => (
+                <Badge variant="outline" className="capitalize">
+                    {row.serviceType}
+                </Badge>
+            ),
+        },
 
-            {
-                key: "serviceType",
-                header: "Service",
+        {
+            key: "date",
+            header: "Date",
 
-                render: (row) => (
-                    <Badge
-                        variant="outline"
-                        className="capitalize"
+            render: (row) => (
+                <p className="text-sm text-slate-700">
+                    {row.date}
+                </p>
+            ),
+        },
+
+        {
+            key: "shiftTime",
+            header: "Shift Time",
+
+            render: (row) => (
+                <p className="text-sm font-medium text-slate-800">
+                    {row.shiftStartTime} - {row.shiftEndTime}
+                </p>
+            ),
+        },
+
+        {
+            key: "totalHours",
+            header: "Hours",
+
+            render: (row) => (
+                <p className="font-medium text-slate-800">
+                    {row.totalHours}h
+                </p>
+            ),
+        },
+
+        {
+            key: "overtime",
+            header: "Regular / OT",
+
+            render: (row) => (
+                <div className="flex items-center gap-2 text-sm">
+                    <span className="font-medium text-slate-800">
+                        {row.shiftTotalHours.toFixed(2)}h
+                    </span>
+
+                    <span className="text-slate-400">/</span>
+
+                    <span className="font-medium text-red-600">
+                        {row.overtimeHours.toFixed(2)}h OT
+                    </span>
+                </div>
+            ),
+        },
+
+        {
+            key: "status",
+            header: "Approval",
+
+            render: (row) => {
+                const isUpdating = updatingId === row.shiftId;
+
+                return (
+                    <Select
+                        value={row.approvedStatus}
+                        disabled={isUpdating}
+                        onValueChange={(value) =>
+                            handleUpdateStatus({
+                                id: row.shiftId,
+                                status: value,
+                            })
+                        }
                     >
-                        {row.serviceType}
-                    </Badge>
-                ),
+                        <SelectTrigger className="w-36">
+
+                            {isUpdating ? (
+                                <div className="flex justify-center w-full">
+                                    <Loader className="h-4 w-4" />
+                                </div>
+                            ) : (
+                                <SelectValue placeholder="Select" />
+                            )}
+
+                        </SelectTrigger>
+
+                        <SelectContent>
+                            <SelectItem value="pending">
+                                Pending
+                            </SelectItem>
+
+                            <SelectItem value="approved">
+                                Approved
+                            </SelectItem>
+
+                            <SelectItem value="rejected">
+                                Rejected
+                            </SelectItem>
+                        </SelectContent>
+
+                    </Select>
+                );
             },
+        },
 
-            {
-                key: "date",
-                header: "Date",
+        {
+            key: "actions",
+            header: "Actions",
+            align: "center",
 
-                render: (row) => (
-                    <span className="text-sm text-gray-700">
-                        {row.date}
-                    </span>
-                ),
-            },
-
-            {
-                key: "shiftTime",
-                header: "Shift Time",
-
-                render: (row) => (
-                    <div className="flex flex-col">
-
-                        <span className="text-sm font-medium text-gray-900">
-                            {row.shiftStartTime}
-                            {" - "}
-                            {row.shiftEndTime}
-                        </span>
-
-                    </div>
-                ),
-            },
-
-            {
-                key: "totalHours",
-                header: "Total Hours",
-
-                render: (row) => (
-                    <span className="text-sm font-medium">
-                        {row.totalHours}h
-                    </span>
-                ),
-            },
-
-            {
-                key: "regularOvertime",
-                header: "Regular / OT",
-
-                render: (row) => (
-                    <div className="flex items-center gap-2 text-sm">
-
-                        <span className="font-medium">
-                            {row.shiftTotalHours}h
-                        </span>
-
-                        <span className="text-gray-400">
-                            /
-                        </span>
-
-                        <span className="font-medium text-red-700">
-                            {row.overtimeHours}h OT
-                        </span>
-
-                    </div>
-                ),
-            },
-
-            {
-                key: "status",
-                header: "Approval Status",
-
-                render: (row) => {
-
-                    const isCurrentUpdating =
-                        updatingId === row.shiftId;
-
-                    return (
-                        <Select
-                            value={row.approvedStatus}
-                            disabled={isCurrentUpdating}
-                            onValueChange={(value) =>
-                                handleUpdateStatus({
-                                    id: row.shiftId,
-                                    status: value,
-                                })
-                            }
-                        >
-                            <SelectTrigger className="w-36">
-
-                                {isCurrentUpdating ? (
-                                    <div className="flex items-center justify-center w-full">
-                                        <Loader className="w-4 h-4" />
-                                    </div>
-                                ) : (
-                                    <SelectValue placeholder="Select Status" />
-                                )}
-
-                            </SelectTrigger>
-
-                            <SelectContent>
-
-                                <SelectItem value="pending">
-                                    Pending
-                                </SelectItem>
-
-                                <SelectItem value="approved">
-                                    Approved
-                                </SelectItem>
-
-                                <SelectItem value="rejected">
-                                    Rejected
-                                </SelectItem>
-
-                            </SelectContent>
-                        </Select>
-                    );
-                },
-            },
-
-            {
-                key: "actions",
-                header: "Actions",
-                align: "center",
-
-                render: (row) => (
-                    <div className="flex items-center justify-center">
-
-                        <EditTimeSheetModal
-                            timeSheet={row}
-                        />
-
-                    </div>
-                ),
-            },
-        ];
-
-    if (isLoading) {
-        return (
-            <div className="flex flex-col items-center justify-center py-10">
-
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-r-transparent" />
-
-                <p className="mt-3 text-gray-600">
-                    Loading timesheets...
-                </p>
-
-            </div>
-        );
-    }
-
-    if (isError) {
-        return (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-
-                <AlertCircle className="h-10 w-10 text-red-500 mb-3" />
-
-                <p className="text-red-600 font-medium">
-                    Failed to load timesheets
-                </p>
-
-                <p className="text-sm text-gray-500 mt-1">
-                    {error &&
-                        "data" in error
-                        ? JSON.stringify(error.data)
-                        : "An error occurred"}
-                </p>
-
-            </div>
-        );
-    }
-
-    if (timeSheets.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-
-                <Building2 className="h-10 w-10 text-gray-400 mb-3" />
-
-                <p className="text-gray-700 font-medium">
-                    No timesheets found
-                </p>
-
-            </div>
-        );
-    }
+            render: (row) => (
+                <div className="flex justify-center">
+                    <EditTimeSheetModal timeSheet={row} />
+                </div>
+            ),
+        },
+    ];
 
     return (
-        <div className="bg-white rounded-xl space-y-2">
-
-            <DataTable
-                columns={columns}
-                data={timeSheets.map((t) => ({
-                    ...t,
-                    id: t.shiftId,
-                }))}
-                emptyText="No time sheets available."
-            />
-
-        </div>
+        <DataTable
+            columns={columns}
+            data={timeSheets.map((t) => ({
+                ...t,
+                id: t.shiftId,
+            }))}
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            loadingText="Loading timesheets..."
+            emptyText="No timesheets found"
+        />
     );
 };
 

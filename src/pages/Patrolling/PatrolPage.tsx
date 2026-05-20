@@ -21,7 +21,7 @@ export default function PatrolPage() {
   const patrols = data?.data ?? []
 
   return (
-    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full">
+      <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       <CustomHeader
         title="Patrol Management"
         description="QR Scanning, Real-time Tracking & Proof of Service"

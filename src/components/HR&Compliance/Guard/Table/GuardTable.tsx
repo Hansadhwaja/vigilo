@@ -3,17 +3,20 @@ import {
     DataTable,
     RowWithId,
 } from "@/components/common/Table/DataTable";
-import TablePagination from "@/components/common/Table/TablePagination";
+
 import {
-    AlertCircle,
     Building,
     Eye,
     Mail,
     Phone,
+    AlertCircle,
 } from "lucide-react";
+
 import { Link } from "react-router-dom";
 import { formatDate } from "@/lib/utils";
 import { Guard } from "@/apis/guardsApi";
+
+import { Badge } from "@/components/ui/badge";
 
 interface GuardTableProps {
     page: number;
@@ -28,7 +31,6 @@ interface GuardTableProps {
 
     onPageChange: (n: number) => void;
     onLimitChange: (n: number) => void;
-
 }
 
 const GuardTable = ({
@@ -36,14 +38,11 @@ const GuardTable = ({
     isLoading,
     isError,
     error,
-
     page = 1,
     totalPages = 1,
     limit,
-
     onPageChange,
     onLimitChange,
-
 }: GuardTableProps) => {
 
     const columns: Column<Guard & RowWithId>[] = [
@@ -52,14 +51,14 @@ const GuardTable = ({
             header: "Guard",
 
             render: (row) => (
-                <div className="flex flex-col">
-                    <span className="font-medium text-gray-900">
+                <div className="space-y-1">
+                    <p className="font-semibold text-slate-800">
                         {row.name}
-                    </span>
+                    </p>
 
-                    <span className="text-xs text-gray-500 font-mono">
+                    <p className="text-xs font-mono text-slate-400">
                         #{row.id.slice(0, 8)}
-                    </span>
+                    </p>
                 </div>
             ),
         },
@@ -69,11 +68,11 @@ const GuardTable = ({
             header: "Email",
 
             render: (row) => (
-                <div className="flex items-center gap-2 min-w-0">
-                    <Mail className="h-4 w-4 text-gray-400 shrink-0" />
+                <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-slate-400" />
 
                     <span
-                        className="truncate text-sm text-gray-700"
+                        className="text-sm text-slate-700 truncate"
                         title={row.email}
                     >
                         {row.email}
@@ -88,9 +87,9 @@ const GuardTable = ({
 
             render: (row) => (
                 <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-gray-400 shrink-0" />
+                    <Phone className="h-4 w-4 text-slate-400" />
 
-                    <span className="text-sm text-gray-700">
+                    <span className="text-sm text-slate-700">
                         {row.mobile}
                     </span>
                 </div>
@@ -102,19 +101,32 @@ const GuardTable = ({
             header: "Address",
 
             render: (row) => (
-                <div
-                    className="truncate max-w-62.5 text-sm text-gray-600"
+                <p
+                    className="text-sm text-slate-600 line-clamp-2 max-w-60"
                     title={row.address || "—"}
                 >
                     {row.address || "—"}
-                </div>
+                </p>
             ),
         },
+
         {
             key: "createdAt",
             header: "Joined",
-            render: (row) => formatDate(row.createdAt),
+
+            render: (row) => (
+                <div className="space-y-1">
+                    <p className="font-medium text-slate-700">
+                        {formatDate(row.createdAt)}
+                    </p>
+
+                    <p className="text-xs text-slate-400">
+                        Member since
+                    </p>
+                </div>
+            ),
         },
+
         {
             key: "actions",
             header: "Actions",
@@ -122,79 +134,41 @@ const GuardTable = ({
 
             render: (row) => (
                 <div className="flex items-center justify-center gap-2">
-                    <Link to={`/guard-details/${row.id}`}>
-                        <Eye size={16} />
+                    <Link
+                        to={`/guard-details/${row.id}`}
+                        className="
+                            rounded-xl border border-slate-200
+                            p-2 text-slate-500 transition-all
+                            hover:border-orange-200
+                            hover:bg-orange-50
+                            hover:text-orange-600
+                        "
+                    >
+                        <Eye className="h-4 w-4" />
                     </Link>
                 </div>
             ),
         },
     ];
 
-    if (isLoading) {
-        return (
-            <div className="flex flex-col items-center justify-center py-10">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-current border-r-transparent" />
-
-                <p className="mt-3 text-gray-600">
-                    Loading clients...
-                </p>
-            </div>
-        );
-    }
-
-    if (isError) {
-        return (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-                <AlertCircle className="h-10 w-10 text-red-500 mb-3" />
-
-                <p className="text-red-600 font-medium">
-                    Failed to load clients
-                </p>
-
-                <p className="text-sm text-gray-500 mt-1">
-                    {error &&
-                        "data" in error
-                        ? JSON.stringify(
-                            error.data
-                        )
-                        : "An error occurred"}
-                </p>
-            </div>
-        );
-    }
-
-    if (guards.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-                <Building className="h-10 w-10 text-gray-400 mb-3" />
-
-                <p className="text-gray-700 font-medium">
-                    No clients found
-                </p>
-            </div>
-        );
-    }
-
     return (
-        <div className="bg-white rounded-xl space-y-2">
-            <DataTable
-                columns={columns}
-                data={guards}
-                emptyText="No guards available."
-            />
-
-            <TablePagination
-                currentPage={page}
-                totalPages={totalPages}
-                limit={limit}
-                onLimitChange={
-                    onLimitChange
-                }
-                onPageChange={
-                    onPageChange
-                }
-            />
-        </div>
+        <DataTable
+            columns={columns}
+            data={guards}
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            loadingText="Loading guards..."
+            emptyText="No guards found"
+            emptyIcon={
+                <Building className="h-10 w-10 text-slate-400" />
+            }
+            page={page}
+            totalPages={totalPages}
+            limit={limit}
+            onPageChange={onPageChange}
+            onLimitChange={onLimitChange}
+        />
     );
 };
 

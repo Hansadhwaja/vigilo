@@ -17,21 +17,32 @@ interface FilterOption {
     value: string;
 }
 
-interface SelectFilter {
+type SelectFilter = {
+    type: "select";
     key: string;
     placeholder: string;
     value: string;
     options: FilterOption[];
     width?: string;
     onChange: (value: string) => void;
-}
+};
+
+type DateFilter = {
+    type: "date";
+    key: string;
+    value: string;
+    width?: string;
+    onChange: (value: string) => void;
+};
+
+export type FilterItem = SelectFilter | DateFilter;
 
 interface DataFiltersProps {
     searchValue?: string;
     searchPlaceholder?: string;
     onSearchChange?: (value: string) => void;
 
-    filters?: SelectFilter[];
+    filters?: FilterItem[];
 
     onClear?: () => void;
     others?: React.ReactNode;
@@ -70,32 +81,42 @@ const DataFilters = ({
                         </div>
                     )}
 
-                    {/* Dynamic Select Filters */}
-                    {filters.map((filter) => (
-                        <Select
-                            key={filter.key}
-                            value={filter.value}
-                            onValueChange={filter.onChange}
-                        >
-                            <SelectTrigger
-                                className={`h-10 rounded-2xl border-slate-200 bg-white shadow-none ${filter.width || "w-[180px]"
-                                    }`}
-                            >
-                                <SelectValue placeholder={filter.placeholder} />
-                            </SelectTrigger>
+                    {filters.map((filter) => {
+                        if (filter.type === "date") {
+                            return (
+                                <input
+                                    key={filter.key}
+                                    type="date"
+                                    value={filter.value}
+                                    onChange={(e) => filter.onChange(e.target.value)}
+                                    className="h-10 rounded-2xl border border-slate-200 bg-white px-3 text-sm shadow-none focus-visible:ring-2 focus-visible:ring-orange-200"
+                                />
+                            );
+                        }
 
-                            <SelectContent>
-                                {filter.options.map((option) => (
-                                    <SelectItem
-                                        key={option.value}
-                                        value={option.value}
-                                    >
-                                        {option.label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    ))}
+                        return (
+                            <Select
+                                key={filter.key}
+                                value={filter.value}
+                                onValueChange={filter.onChange}
+                            >
+                                <SelectTrigger
+                                    className={`h-10 rounded-2xl border-slate-200 bg-white shadow-none ${filter.width || "w-45"
+                                        }`}
+                                >
+                                    <SelectValue placeholder={filter.placeholder} />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                    {filter.options.map((option) => (
+                                        <SelectItem key={option.value} value={option.value}>
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        );
+                    })}
                 </div>
 
                 {/* Right */}
