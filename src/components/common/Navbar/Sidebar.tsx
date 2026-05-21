@@ -37,13 +37,13 @@ export default function Sidebar({ isOpen }: SidebarProps) {
         isOpen ? "w-72 px-4 py-5" : "w-22 px-3 py-5"
       )}
     >
-      {/* Logo */}
       <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
+
         <div
           onClick={() => navigate("/", { replace: true })}
-          className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-2xl bg-sky-600 shadow-sm transition-all hover:scale-[1.03]"
+          className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-xl  shadow-sm transition-all hover:scale-[1.03]"
         >
-          <Shield className="h-5 w-5 text-white" />
+          <img src={"/assets/logo/logo.png"} alt="logo" />
         </div>
 
         {isOpen && (
