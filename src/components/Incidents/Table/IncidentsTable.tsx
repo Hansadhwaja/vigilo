@@ -57,7 +57,7 @@ const IncidentsTable = ({
                 <div className="flex items-center gap-2 text-slate-700">
                     <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
 
-                    <span className="line-clamp-2 w-32 text-sm">
+                    <span className="line-clamp-2 w-40 uppercase text-sm truncate font-semibold">
                         {row.location}
                     </span>
                 </div>
@@ -69,7 +69,7 @@ const IncidentsTable = ({
             header: "Description",
 
             render: (row) => (
-                <p className="text-sm text-slate-700 line-clamp-2 max-w-xs">
+                <p className="text-sm text-slate-700 line-clamp-2 max-w-xs truncate">
                     {row.description}
                 </p>
             ),

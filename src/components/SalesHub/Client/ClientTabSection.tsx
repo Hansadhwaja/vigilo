@@ -3,6 +3,7 @@ import ClientTable from './Table/ClientTable'
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { useQueryParams } from '@/lib/hooks/useQueryParams';
 import { useGetAllClientsQuery } from '@/apis/ordersApi';
+import ClientStats from './ClientStats';
 
 const ClientTabSection = () => {
   const {
@@ -25,6 +26,7 @@ const ClientTabSection = () => {
   const {
     data: clients = [],
     pagination,
+    summary
   } = data ?? {};
 
   // Pagination
@@ -47,6 +49,10 @@ const ClientTabSection = () => {
   return (
     <div className="space-y-4">
       <ClientSearchFilters />
+      <ClientStats
+        totalUsers={summary?.total ?? 0}
+        activeUsers={summary?.active ?? 0}
+      />
       <ClientTable
         clients={clients}
         page={pagination?.page ?? 1}

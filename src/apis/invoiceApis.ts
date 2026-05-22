@@ -6,6 +6,10 @@ export const invoiceApis = baseApi.injectEndpoints({
             query: (params = {}) => {
                 const qs = new URLSearchParams();
                 if (params.status) qs.set("status", params.status);
+                if (params.search) qs.set("search", params.search);
+                if (params.month) qs.set("month", params.month);
+                if (params.page) qs.set("page", params.page);
+                if (params.limit) qs.set("limit", params.limit);
 
                 return `/invoicing/getAllInvoice?${qs.toString()}`
             },

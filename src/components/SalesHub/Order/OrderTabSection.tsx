@@ -5,6 +5,7 @@ import OrderTable from "./Table/OrderTable";
 
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import OrderStats from "./OrderStats";
 
 const OrderTabSection = () => {
     const {
@@ -30,16 +31,14 @@ const OrderTabSection = () => {
         page,
         limit,
         status,
-        serviceType:
-            serviceType !== "all"
-                ? serviceType
-                : undefined,
+        serviceType: serviceType !== "all" ? serviceType : undefined,
         search: debouncedSearch.trim() || undefined,
     });
 
     const {
         data: orders = [],
         pagination,
+        summary
     } = data ?? {};
 
     // Pagination
@@ -61,6 +60,12 @@ const OrderTabSection = () => {
 
     return (
         <div className="space-y-4">
+            <OrderStats
+                totalOrders={summary?.total ?? 0}
+                activeOrders={summary?.active ?? 0}
+                totalRevenue={summary?.totalRevenue ?? 0}
+                avgOrderValue={summary?.avgvalue ?? 0}
+            />
             <OrderSearchFilters />
 
             <OrderTable

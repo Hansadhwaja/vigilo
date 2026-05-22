@@ -13,8 +13,8 @@ export const navLinks = [
     },
     {
         icon: Building2,
-        label: "Client Management",
-        link: "/clients"
+        label: "Sales Hub",
+        link: "/sales"
     },
     {
         icon: TriangleAlert,

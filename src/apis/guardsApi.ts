@@ -56,11 +56,18 @@ export interface Pagination {
 }
 
 // Response interfaces
+
+export type GuardsSummary = {
+  totalGuards: number;
+  activeGuards: number;
+  totalIssues: number;
+}
 export interface GetAllGuardsResponse {
   success: boolean;
   message: string;
   data: Guard[];
   pagination: Pagination;
+  summary: GuardsSummary;
 }
 
 // ✅ CORRECT: This matches your API response

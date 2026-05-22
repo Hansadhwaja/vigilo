@@ -69,8 +69,10 @@ const OrderForm = ({
         handleSubmit,
         control,
         reset,
-        formState: { isValid },
+        formState: { isValid, errors },
     } = form;
+
+    console.log(errors);
 
     const onFormSubmit = async (
         data: OrderFormValues

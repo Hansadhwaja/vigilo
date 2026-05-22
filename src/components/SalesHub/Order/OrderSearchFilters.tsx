@@ -64,7 +64,7 @@ const OrderSearchFilters = () => {
     return (
         <DataFilters
             searchValue={search}
-            searchPlaceholder="Search orders..."
+            searchPlaceholder="Search by order location..."
             onSearchChange={handleSearch}
             onClear={clearParams}
             filters={filters}

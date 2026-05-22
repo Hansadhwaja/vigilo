@@ -72,54 +72,52 @@ export default function IncidentDetailsPage() {
 
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
+      <CustomHeader
+        previousLink="/incidents"
+        title="Incident Details"
+        description="Full incident information including location and evidence documentation"
+      />
 
-      <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 md:px-6">
-        <CustomHeader
-          previousLink="/incidents"
-          title="Incident Details"
-          description="Full incident information including location and evidence documentation"
-        />
+      <IncidentHeroSection incident={incident} />
 
-        <IncidentHeroSection incident={incident} />
+      <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="space-y-8">
+          <IncidentInfoCard
+            incident={incident}
+          />
+          <ImagesCard
+            title="Evidence Images"
+            description="Incident related photos and documentation"
+            emptyDescription="No evidence images uploaded."
+            images={incident?.images || []}
+          />
 
-        <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
-          <div className="space-y-8">
-            <IncidentInfoCard
-              incident={incident}
-            />
-            <ImagesCard
-              title="Evidence Images"
-              description="Incident related photos and documentation"
-              emptyDescription="No evidence images uploaded."
-              images={incident?.images || []}
-            />
+          <ReporterCard
+            reporter={incident?.reporter}
+          />
+        </div>
 
-            <ReporterCard
-              reporter={incident?.reporter}
-            />
-          </div>
+        {/* RIGHT */}
+        <div className="space-y-8 lg:sticky lg:top-6">
+          <DateTimeCard
+            date={dateTime.date}
+            time={dateTime.time}
+          />
 
-          {/* RIGHT */}
-          <div className="space-y-8 lg:sticky lg:top-6">
-            <DateTimeCard
-              date={dateTime.date}
-              time={dateTime.time}
-            />
+          <ShiftCard
+            shift={incident?.shift}
+          />
 
-            <ShiftCard
-              shift={incident?.shift}
-            />
+          <MetaCard incident={incident} />
 
-            <MetaCard incident={incident} />
-
-            <IncidentAssignmentCard
-              assignedGuard={
-                incident?.assignedGuard
-              }
-            />
-          </div>
+          <IncidentAssignmentCard
+            assignedGuard={
+              incident?.assignedGuard
+            }
+          />
         </div>
       </div>
+
     </div>
   );
 }

@@ -2,8 +2,19 @@
 import { useCallback, useState } from 'react'
 import { Route, Routes } from 'react-router-dom';
 import TopBar from '../common/TopBar';
-import { ClientsPage, Dashboard, GuardDetailsPage, HRPage, IncidentDetailsPage, IncidentsPage, MapPage, PatrolPage, SchedulingPage, SettingsPage } from '@/pages';
-import OrderDetailsPage from '@/pages/ClientManagement/OrderDetailsPage';
+import {
+    Dashboard,
+    GuardDetailsPage,
+    HRPage,
+    IncidentDetailsPage,
+    IncidentsPage,
+    MapPage,
+    PatrolPage,
+    SalesPage,
+    SchedulingPage,
+    SettingsPage
+} from '@/pages';
+import OrderDetailsPage from '@/pages/SalesHub/OrderDetailsPage';
 import AssignmentDetailsPage from '../AssignmentDetails/AssignmentDetailsPage';
 import MessagesPage from '@/pages/Messages/MessagesPage';
 import PatrolDetailsPage from '@/pages/Patrolling/PatrolDetailsPage';
@@ -80,8 +91,8 @@ const MainLayout = () => {
                             <Route index element={<SchedulingPage />} />
                             <Route path=":id" element={<AssignmentDetailsPage />} />
                         </Route>
-                        <Route path="/clients">
-                            <Route index element={<ClientsPage />} />
+                        <Route path="/sales">
+                            <Route index element={<SalesPage />} />
                             <Route path=":id" element={<OrderDetailsPage />} />
                         </Route>
                         <Route

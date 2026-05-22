@@ -8,16 +8,27 @@ import Loader from "@/components/common/Loader";
 import InvoiceSearchFilters from "@/components/Invoicing/InvoiceSearchFilters";
 import InvoiceStats from "@/components/Invoicing/InvoiceStats";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
+import InvoicingTable from "@/components/Invoicing/Table/InvoicingTable";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 
 export default function InvoicingPage() {
   const { getParam } = useQueryParams();
   const status = getParam("status", "all");
-  const { data, isLoading } = useGetAllInvoiceQuery({
+  const month = getParam("month");
+  const search = getParam("search");
+  const page = getParam("page", "1");
+  const limit = getParam("limit", "10");
+  const debouncedSearch = useDebounce(search);
+  const { data, isLoading, isFetching } = useGetAllInvoiceQuery({
     status,
+    month,
+    search: debouncedSearch,
+    page,
+    limit: limit
   });
   const invoices = data?.data ?? [];
 
-  if (isLoading) return <Loader />;
+  if (isLoading || isFetching) return <Loader />;
 
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
@@ -29,17 +40,7 @@ export default function InvoicingPage() {
           <Button
             asChild
             size="sm"
-            className="
-    rounded-xl 
-    bg-linear-to-r from-emerald-500 to-emerald-600 
-    px-4 py-2 
-    text-white 
-    shadow-sm 
-    transition-all 
-    hover:from-emerald-600 hover:to-emerald-700 
-    hover:shadow-md 
-    active:scale-[0.98]
-  "
+            className="rounded-full bg-linear-to-r from-emerald-500 to-emerald-600 shadow-sm hover:shadow-md"
           >
             <Link to="/invoicing/new" className="text-xs md:text-sm">
               <Plus size={14} className="shrink-0" />
@@ -51,8 +52,9 @@ export default function InvoicingPage() {
       <InvoiceStats />
 
       <InvoiceSearchFilters />
-      <InvoicingTabs invoices={invoices} />
-
+      <InvoicingTable
+        invoices={invoices}
+      />
     </div>
   );
 }

@@ -41,11 +41,19 @@ export interface Pagination {
   limit: number;
 }
 
+export type OrderSummary = {
+  active: number;
+  avgvalue: number;
+  total: number;
+  totalRevenue: number;
+}
+
 export interface GetAllOrdersResponse {
   success: boolean;
   message: string;
   data: Order[];
   pagination: Pagination;
+  summary: OrderSummary;
 }
 
 export interface GetOrderByIdResponse {
@@ -101,6 +109,30 @@ export interface EditOrderResponse {
   data: Order;
 }
 
+export type Client = {
+  id: string;
+  name: string;
+  email: string;
+  mobile: string;
+  address: string;
+  avatar?: string;
+}
+export interface GetAllClientResponse {
+  success: boolean;
+  message: string;
+  data: Client[];
+  pagination?: Pagination;
+  summary: {
+    total: number;
+    active: number;
+  }
+}
+
+export interface GetAllClientParams {
+  search?: string;
+  page?: number;
+  limit?: number
+}
 
 export const ordersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -179,27 +211,7 @@ export const ordersApi = baseApi.injectEndpoints({
 
     // Get all clients
     // Get all clients with search support
-    getAllClients: builder.query<
-      {
-        success: boolean;
-        message: string;
-        data: Array<{
-          id: string;
-          name: string;
-          email: string;
-          mobile: string;
-          address: string;
-          avatar?: string;
-        }>;
-        pagination?: {
-          total: number;
-          page: number;
-          totalPages: number;
-          limit: number;
-        };
-      },
-      { search?: string; page?: number; limit?: number } | void  //Now accepts params
-    >({
+    getAllClients: builder.query<GetAllClientResponse, GetAllClientParams | void>({
       query: (params = {}) => {
         const queryParams = new URLSearchParams();
 
@@ -217,13 +229,8 @@ export const ordersApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Clients", id: "LIST" }],
     }),
 
-
-
     // Delete client
-    deleteClient: builder.mutation<
-      { success: boolean; message: string },
-      { id: string }
-    >({
+    deleteClient: builder.mutation<{ success: boolean; message: string }, { id: string }>({
       query: (body) => ({
         url: `/users/deleteClient`,
         method: "POST",
@@ -235,10 +242,7 @@ export const ordersApi = baseApi.injectEndpoints({
     }),
 
     // ---- GET ONE ORDER BY ID (ADMIN VIEW) ----
-    getOrderById: builder.query<
-      { success: boolean; message: string; data: any },
-      string
-    >({
+    getOrderById: builder.query<{ success: boolean; message: string; data: any }, string>({
       query: (id: string) => ({
         url: `/orders/getAdminOrderById/${id}`,
         method: "GET",
@@ -291,8 +295,6 @@ export const ordersApi = baseApi.injectEndpoints({
 
       providesTags: (_result, _error, id) => [{ type: "Orders", id }],
     }),
-
-
 
   }),
 });

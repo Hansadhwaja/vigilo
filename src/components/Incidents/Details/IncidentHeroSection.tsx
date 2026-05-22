@@ -7,7 +7,7 @@ const IncidentHeroSection = ({ incident }: { incident: IncidentType }) => {
         incident?.createdAt
     );
     return (
-        <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-slate-900 via-slate-800  to-slate-900  p-8 shadow-2xl " >
+        <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-slate-900 via-slate-800 to-slate-900 p-8 hover:shadow-lg" >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_35%)]" />
             <div className="relative flex flex-col gap-8 xl:flex-row xl:items-center xl:justify-between">
                 <div className="space-y-5">

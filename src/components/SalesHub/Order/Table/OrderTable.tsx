@@ -134,7 +134,8 @@ const OrderTable = ({
                     </div>
 
                     <div className="space-y-1">
-                        <p className="line-clamp-2 font-medium leading-5 text-slate-700">
+                        <p className="font-semibold uppercase truncate w-40">{row.locationName}</p>
+                        <p className="line-clamp-2 font-medium leading-5 text-slate-500 truncate w-40">
                             {row.locationAddress}
                         </p>
                     </div>
@@ -229,7 +230,7 @@ const OrderTable = ({
             render: (row) => (
                 <div className="flex items-center justify-center gap-2">
                     <Link
-                        to={`/clients/${row.id}`}
+                        to={`/sales/${row.id}`}
                         className="
                             rounded-xl border border-slate-200
                             p-2 text-slate-500 transition-all

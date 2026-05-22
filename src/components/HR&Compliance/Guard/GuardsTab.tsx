@@ -1,9 +1,9 @@
 import GuardSearchFilters from './GuardSearchFilters'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import GuardTable from './Table/GuardTable'
 import { useQueryParams } from '@/lib/hooks/useQueryParams';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { useGetAllGuardsQuery } from '@/apis/guardsApi';
+import GuardStats from './GuardStats';
 
 const GuardsTab = () => {
     const {
@@ -17,7 +17,6 @@ const GuardsTab = () => {
     const search = getParam("search");
     const debouncedSearch = useDebounce(search, 500);
 
-
     const { data, isLoading, isError, isFetching, error } = useGetAllGuardsQuery({
         search: debouncedSearch,
         page,
@@ -27,6 +26,7 @@ const GuardsTab = () => {
     const {
         data: guards = [],
         pagination,
+        summary
     } = data ?? {};
 
     // Pagination
@@ -47,31 +47,25 @@ const GuardsTab = () => {
     };
 
     return (
-        <Card className="p-0">
-
-            <CardHeader className="p-2 space-y-2">
-                <CardTitle className="text-lg font-semibold">
-                    Guard Directory
-                </CardTitle>
-
-                <GuardSearchFilters />
-            </CardHeader>
-
-            <CardContent className="p-2">
-                <GuardTable
-                    guards={guards}
-                    page={pagination?.page ?? 1}
-                    totalPages={Number(pagination?.totalPages) ?? 1}
-                    limit={limit}
-                    onPageChange={handlePageChange}
-                    onLimitChange={handleLimitChange}
-                    isLoading={isLoading || isFetching}
-                    isError={isError}
-                    error={error}
-                />
-            </CardContent>
-
-        </Card>
+        <div className="space-y-4">
+            <GuardSearchFilters />
+            <GuardStats
+                activeGuards={summary?.activeGuards ?? 0}
+                totalGuards={summary?.totalGuards ?? 0}
+                totalIssues={summary?.totalIssues ?? 0}
+            />
+            <GuardTable
+                guards={guards}
+                page={pagination?.page ?? 1}
+                totalPages={Number(pagination?.totalPages) ?? 1}
+                limit={limit}
+                onPageChange={handlePageChange}
+                onLimitChange={handleLimitChange}
+                isLoading={isLoading || isFetching}
+                isError={isError}
+                error={error}
+            />
+        </div>
     )
 }
 

@@ -10,11 +10,11 @@ import {
 
 import { useGetOrderByIdQuery } from "@/apis/ordersApi";
 import CustomHeader from "@/components/common/Header/CustomHeader";
-import EditOrderModal from "@/components/ClientManagement/Order/Modal/EditOrderModal";
-import ServiceInformationCard from "@/components/ClientManagement/Order/Details/ServiceInformationCard";
-import ClientInformationCard from "@/components/ClientManagement/Order/Details/ClientInformationCard";
-import ScheduleCard from "@/components/ClientManagement/Order/Details/ScheduleCard";
-import OrderStatusCard from "@/components/ClientManagement/Order/Details/OrderStatusCard";
+import EditOrderModal from "@/components/SalesHub/Order/Modal/EditOrderModal";
+import ServiceInformationCard from "@/components/SalesHub/Order/Details/ServiceInformationCard";
+import ClientInformationCard from "@/components/SalesHub/Order/Details/ClientInformationCard";
+import ScheduleCard from "@/components/SalesHub/Order/Details/ScheduleCard";
+import OrderStatusCard from "@/components/SalesHub/Order/Details/OrderStatusCard";
 import { Button } from "@/components/ui/button";
 import Loader from "@/components/common/Loader";
 import ImagesCard from "@/components/common/Card/ImagesCard";
@@ -58,11 +58,11 @@ export default function OrderDetailsPage() {
             className="
               flex h-16 w-16 items-center
               justify-center rounded-3xl
-              bg-gradient-to-br
+              bg-linear-to-br
               from-orange-100 to-sky-100
             "
           >
-            <Loader className="h-7 w-7" />
+            <Loader />
           </div>
 
           <div className="space-y-1 text-center">
@@ -152,7 +152,7 @@ export default function OrderDetailsPage() {
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       <CustomHeader
-        previousLink="/clients"
+        previousLink="/sales"
         title="Complete Order Details"
         description="Full order information including schedule, client details, service configuration, and location requirements"
         others={

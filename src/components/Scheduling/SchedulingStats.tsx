@@ -9,48 +9,37 @@ interface SchedulingStatsProps {
 
 const SchedulingStats = ({ scheduling }: SchedulingStatsProps) => {
   const {
-    organizedShifts,
-    today
+    summary
   } = scheduling;
 
   const stats = useMemo(() => {
-    const allAssignments = Object.values(organizedShifts)
-      .flatMap((slots: any) => Object.values(slots).flat());
-
-    const todayKey = today.toISOString().split("T")[0];
-    const todayAssignments = Object.values(
-      organizedShifts[todayKey] || {}
-    ).flat();
-
     return [
       {
         label: "Active Now",
-        value: todayAssignments.filter((a: any) => a.status === "active").length,
+        value: summary?.activeNow ?? 0,
         Icon: Clock,
         color: "bg-green-100 text-green-700",
       },
       {
         label: "Today",
-        value: todayAssignments.length,
+        value: summary?.today ?? 0,
         Icon: Calendar,
         color: "bg-blue-100 text-blue-700",
       },
       {
         label: "This Week",
-        value: allAssignments.length,
+        value: summary?.thisWeek ?? 0,
         Icon: User,
         color: "bg-purple-100 text-purple-700",
       },
       {
         label: "Patrols",
-        value: allAssignments.filter(
-          (a: any) => a.type === "patrol" && a.status === "active"
-        ).length,
+        value: summary?.patrols ?? 0,
         Icon: MapPin,
         color: "bg-orange-100 text-orange-700",
       },
     ];
-  }, [organizedShifts, today]);
+  }, [summary]);
 
   return <StatCards items={stats} />;
 };

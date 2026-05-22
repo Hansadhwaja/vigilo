@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useCreateScheduleMutation, useEditScheduleMutation } from "@/apis/schedulingAPI";
+import { Schedule, useCreateScheduleMutation, useEditScheduleMutation } from "@/apis/schedulingAPI";
 
 import {
   Dialog,
@@ -17,8 +17,10 @@ import { Edit } from "lucide-react";
 import AssignmentForm from "../Form/AssignmentForm";
 import { toast } from "sonner";
 import { mapAssignmentToForm } from "@/lib/utils";
+import { AssignmentFormValues } from "@/schemas";
+import { OrganizedAssignment } from "@/types";
 
-const EditAssignmentModal = ({ assignment, id }: { assignment: any, id: string }) => {
+const EditAssignmentModal = ({ assignment, id }: { assignment: OrganizedAssignment, id: string }) => {
   const [open, setOpen] = useState(false);
   const [editSchedule, { isLoading }] = useEditScheduleMutation();
 
@@ -26,7 +28,9 @@ const EditAssignmentModal = ({ assignment, id }: { assignment: any, id: string }
     return mapAssignmentToForm(assignment);
   }, [assignment]);
 
-  const handleSubmit = async (data: any) => {
+  console.log(initialFormData);
+
+  const handleSubmit = async (data: AssignmentFormValues) => {
     try {
       const payload = {
         description: data.description,

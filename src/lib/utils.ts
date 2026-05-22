@@ -101,9 +101,7 @@ export const calculateWork = (
   };
 };
 
-export const formatCurrency = (
-  val: number
-) =>
+export const formatCurrency = (val: number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
@@ -488,7 +486,7 @@ export const formatDateTime = (dateTime: string) => {
   };
 };
 
-export const mapAssignmentToForm = (a: any) => {
+export const mapAssignmentToForm = (a: OrganizedAssignment) => {
   if (!a) return undefined;
 
   return {
@@ -506,16 +504,12 @@ export const mapAssignmentToForm = (a: any) => {
     orderId: a.orderId || "",
 
     // ✅ Multi guards
-    guardIds: a.allGuardIdsForShift || [],
+    guardIds: a?.allGuardIdsForShift || [],
 
     // ✅ Time (HH:mm)
-    startTime: a.originalStartDate
-      ? new Date(a.originalStartDate).toISOString().slice(11, 16)
-      : "",
+    startTime: convertTo24Hour(a.start),
 
-    endTime: a.originalEndDate
-      ? new Date(a.originalEndDate).toISOString().slice(11, 16)
-      : "",
+    endTime: convertTo24Hour(a.end),
   };
 };
 
@@ -530,16 +524,27 @@ export const formatTime = (date: string) => {
   );
 };
 
+export const formatTimeForInput = (date: string) => {
+  const d = new Date(date);
+
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+
+  return `${hours}:${minutes}`;
+};
+
 export const convertTo24Hour = (time: string) => {
   const [timePart, modifier] = time.split(" ");
 
   let [hours, minutes] = timePart.split(":");
 
-  if (hours === "12") {
+  const mod = modifier.toLowerCase();
+
+  if (mod === "am" && hours === "12") {
     hours = "00";
   }
 
-  if (modifier === "PM") {
+  if (mod === "pm" && hours !== "12") {
     hours = String(Number(hours) + 12);
   }
 

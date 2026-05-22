@@ -119,10 +119,19 @@ export interface CreateScheduleDto {
   endTime: string;
 }
 
+export type ScheduleSummary = {
+  activeNow: number;
+  patrols: number;
+  thisWeek: number;
+  today: number;
+}
+
+
 export interface GetAllSchedulesResponse {
   success: boolean;
   message: string;
   data: Schedule[];
+  summary: ScheduleSummary;
 }
 
 export interface CreateScheduleResponse {

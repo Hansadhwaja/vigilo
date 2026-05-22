@@ -30,6 +30,8 @@ import { AssignmentFormValues, assignmentSchema } from "@/schemas";
 import { useGetAllOrdersQuery } from "@/apis/ordersApi";
 import { useGetAllGuardsQuery } from "@/apis/guardsApi";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
 
 interface Props {
     isLoading: boolean;
@@ -148,8 +150,15 @@ const AssignmentForm = ({ isLoading, onSubmit, onCancel, initialData }: Props) =
                                 </SelectTrigger>
                                 <SelectContent>
                                     {activeOrders.map((o: any) => (
-                                        <SelectItem key={o.id} value={o.id}>
-                                            {o.locationName}
+                                        <SelectItem key={o.id} value={o.id} >
+                                            <p className="uppercase">{o.locationName}</p>
+
+                                            <Badge
+                                                className="rounded-full border px-3 py-1 text-xs font-semibold shadow-sm"
+                                                style={getStatusStyle(o.status)}
+                                            >
+                                                {getStatusColor(o.status).label}
+                                            </Badge>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>

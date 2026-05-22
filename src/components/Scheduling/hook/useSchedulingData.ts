@@ -41,6 +41,7 @@ export const useSchedulingData = () => {
     });
 
     const schedules = schedulingResponse?.data ?? [];
+    const summary = schedulingResponse?.summary;
 
     const organizedShifts = useMemo(() => {
         return organizeShifts(
@@ -126,5 +127,6 @@ export const useSchedulingData = () => {
         selectedDayAssignments,
 
         selectedKey,
+        summary
     };
 };

@@ -75,14 +75,13 @@ export default function IncidentsPage() {
 
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
-      {/* HEADER */}
-      <div className="space-y-3">
-        <CustomHeader
-          title="Incident Management"
-          description="View and manage incidents raised by guards and clients"
-          others={
-            <div
-              className="
+
+      <CustomHeader
+        title="Incident Management"
+        description="View and manage incidents raised by guards and clients"
+        others={
+          <div
+            className="
                 flex items-center gap-3
                 rounded-2xl border border-orange-100
                 bg-linear-to-r
@@ -91,9 +90,9 @@ export default function IncidentsPage() {
                 px-5 py-3
                 shadow-sm
               "
-            >
-              <div
-                className="
+          >
+            <div
+              className="
                   flex h-11 w-11 items-center
                   justify-center rounded-xl
                   bg-linear-to-br
@@ -101,35 +100,35 @@ export default function IncidentsPage() {
                   to-sky-500
                   text-white shadow-md
                 "
-              >
-                <AlertTriangle className="h-5 w-5" />
-              </div>
+            >
+              <AlertTriangle className="h-5 w-5" />
+            </div>
 
-              <div>
-                <p
-                  className="
+            <div>
+              <p
+                className="
                     text-xs font-semibold uppercase
                     tracking-wide text-slate-500
                   "
-                >
-                  Incident Tracking
-                </p>
+              >
+                Incident Tracking
+              </p>
 
-                <p
-                  className="
+              <p
+                className="
                     text-sm font-semibold
                     text-slate-800
                   "
-                >
-                  Real-time Monitoring
-                </p>
-              </div>
+              >
+                Real-time Monitoring
+              </p>
             </div>
-          }
-        />
+          </div>
+        }
+      />
 
-        <IncidentStats />
-      </div>
+      <IncidentStats />
+
 
       {/* FILTERS */}
       <IncidentsSearchFilters />
@@ -138,21 +137,11 @@ export default function IncidentsPage() {
       <IncidentsTable
         incidents={incidents}
         page={pagination?.page ?? 1}
-        totalPages={
-          Number(
-            pagination?.totalPages
-          ) ?? 1
-        }
+        totalPages={pagination?.totalPages ?? 1}
         limit={limit}
-        onPageChange={
-          handlePageChange
-        }
-        onLimitChange={
-          handleLimitChange
-        }
-        isLoading={
-          isLoading || isFetching
-        }
+        onPageChange={handlePageChange}
+        onLimitChange={handleLimitChange}
+        isLoading={isLoading || isFetching}
       />
     </div>
   );
