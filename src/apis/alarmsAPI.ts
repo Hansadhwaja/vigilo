@@ -68,6 +68,9 @@ export interface GetAllAlarmsResponse {
   success: boolean;
   count: number;
   data: Alarm[];
+  summary:{
+    
+  }
 }
 
 export interface CreateAlarmResponse {
@@ -101,6 +104,14 @@ export interface CreateAlarmPayload {
   price: number;
 }
 
+interface GetAlarmParams {
+  page?: string;
+  limit?: string;
+  search?: string;
+  status?: string;
+  priority?: string;
+}
+
 export interface DeleteAlarmResponse {
   success: boolean;
   message: string;
@@ -121,11 +132,18 @@ export const alarmsApi = baseApi.injectEndpoints({
 
       invalidatesTags: [{ type: "Alarms", id: "LIST" }],
     }),
-    getAllAlarms: builder.query<GetAllAlarmsResponse, void>({
-      query: () => ({
-        url: `/alarm/getAllAlarms`,
-        method: "GET",
-      }),
+    getAllAlarms: builder.query<GetAllAlarmsResponse, GetAlarmParams>({
+      query: (params = {}) => {
+        const qs = new URLSearchParams();
+
+        if (params.page) qs.set("page", params.page);
+        if (params.limit) qs.set("limit", params.limit);
+        if (params.search) qs.set("search", params.search);
+        if (params.status) qs.set("status", params.status);
+        if (params.priority) qs.set("priority", params.priority);
+
+        return `/alarm/getAllAlarms?${qs.toString()}`
+      },
 
       providesTags: [{ type: "Alarms", id: "LIST" }],
     }),

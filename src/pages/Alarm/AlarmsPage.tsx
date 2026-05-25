@@ -1,27 +1,20 @@
-import { useState, useEffect, useCallback } from "react";
-import { User, MapPin, Bell, CheckCircle, Download, FileText, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { User, MapPin, Bell, CheckCircle, Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { sampleGuards } from "@/data/sampleData";
 import { toast } from "sonner";
-import { useDeleteAlarmMutation, useGetAllAlarmsQuery } from "@/apis/alarmsAPI";
-import { useGetAllPatrolRunsForAdminQuery } from "@/apis/patrollingAPI";
+import { Alarm, useDeleteAlarmMutation, useGetAllAlarmsQuery } from "@/apis/alarmsAPI";
 import { getStatusStyle, getStatusColor } from "@/utils/statusColors";
 import CreateAlarmModal from "../../components/Alarm/Modal/CreateAlarmModal";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import AlarmStats from "@/components/Alarm/AlarmStats";
 import AlarmSearchFilters from "@/components/Alarm/AlarmSearchFilters";
-import { checkSLABreach, formatDate, formatTime } from "@/lib/utils";
-
-interface AlarmsPageProps {
-  alarmList: any[];
-  onAssign: (alarm: any) => void;
-  onResolve: (id: string) => void;
-  onSelectAlarm: (alarm: any) => void;
-}
+import { formatDate, formatTime } from "@/lib/utils";
+import { useQueryParams } from "@/lib/hooks/useQueryParams";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 
 // Advanced GPS-based guard assignment logic
 const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
@@ -63,114 +56,129 @@ const findOptimalGuard = (alarmLocation: { lat: number, lng: number }, priority:
 // SLA Escalation Logic
 
 
-export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAlarm }: AlarmsPageProps) {
+export default function AlarmsPage() {
   const [escalatedAlarms, setEscalatedAlarms] = useState<Set<string>>(new Set());
+
+  const { getParam } = useQueryParams();
+
+  const status = getParam("status", "");
+  const priority = getParam("priority", "");
+  const page = getParam("page", "1");
+  const limit = getParam("limit", "10");
+  const search = getParam("search", "");
+  const debouncedSearch = useDebounce(search);
 
   const [deleteAlarm, { isLoading: isDeletingAlarm }] = useDeleteAlarmMutation();
 
-  const { data } = useGetAllAlarmsQuery();
+  const { data } = useGetAllAlarmsQuery({
+    page,
+    limit,
+    status,
+    priority,
+    search: debouncedSearch
+  });
 
-  const alarms = data?.data ?? [];
+  const { data: alarms, summary } = data ?? {};
 
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      alarmList.forEach(alarm => {
-        if (!alarm.completed) {
-          const slaStatus = checkSLABreach(alarm);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     alarms.forEach(alarm => {
+  //       if (!alarm.completed) {
+  //         const slaStatus = checkSLABreach(alarm);
 
-          if (slaStatus && !escalatedAlarms.has(alarm.id)) {
-            setEscalatedAlarms(prev => new Set(prev).add(alarm.id));
+  //         if (slaStatus && !escalatedAlarms.has(alarm.id)) {
+  //           setEscalatedAlarms(prev => new Set(prev).add(alarm.id));
 
-            // Show toast notification
-            if (slaStatus.level === "CRITICAL_BREACH") {
-              toast.error(slaStatus.message, {
-                description: `Alarm ${alarm.id} at ${alarm.site}`,
-                action: {
-                  label: "View",
-                  onClick: () => { }
-                }
-              });
-            } else if (slaStatus.level === "WARNING") {
-              toast.warning(slaStatus.message, {
-                description: `Alarm ${alarm.id} at ${alarm.site}`
-              });
-            }
-          }
-        }
-      });
-    }, 60000); // Check every minute
+  //           // Show toast notification
+  //           if (slaStatus.level === "CRITICAL_BREACH") {
+  //             toast.error(slaStatus.message, {
+  //               description: `Alarm ${alarm.id} at ${alarm.site}`,
+  //               action: {
+  //                 label: "View",
+  //                 onClick: () => { }
+  //               }
+  //             });
+  //           } else if (slaStatus.level === "WARNING") {
+  //             toast.warning(slaStatus.message, {
+  //               description: `Alarm ${alarm.id} at ${alarm.site}`
+  //             });
+  //           }
+  //         }
+  //       }
+  //     });
+  //   }, 60000); // Check every minute
 
-    return () => clearInterval(interval);
-  }, [alarmList, escalatedAlarms]);
+  //   return () => clearInterval(interval);
+  // }, [alarmList, escalatedAlarms]);
 
-  // Enhanced GPS-based guard assignment
-  const handleSmartAssign = useCallback((alarm: any) => {
-    const alarmLocation = { lat: -37.815, lng: 144.965 }; // Mock location - in real app, get from alarm data
-    const optimalGuard = findOptimalGuard(alarmLocation, alarm.priority);
+  // // Enhanced GPS-based guard assignment
+  // const handleSmartAssign = useCallback((alarm: any) => {
+  //   const alarmLocation = { lat: -37.815, lng: 144.965 }; // Mock location - in real app, get from alarm data
+  //   const optimalGuard = findOptimalGuard(alarmLocation, alarm.priority);
 
-    if (optimalGuard) {
-      onAssign({
-        ...alarm,
-        assigned: optimalGuard.name,
-        assignedId: optimalGuard.id,
-        eta: `${optimalGuard.eta} min`,
-        assignedAt: new Date()
-      });
+  //   if (optimalGuard) {
+  //     onAssign({
+  //       ...alarm,
+  //       assigned: optimalGuard.name,
+  //       assignedId: optimalGuard.id,
+  //       eta: `${optimalGuard.eta} min`,
+  //       assignedAt: new Date()
+  //     });
 
-      toast.success(`Guard ${optimalGuard.name} assigned to ${alarm.site}`, {
-        description: `ETA: ${optimalGuard.eta} minutes (${optimalGuard.distance.toFixed(1)}km away)`
-      });
+  //     toast.success(`Guard ${optimalGuard.name} assigned to ${alarm.site}`, {
+  //       description: `ETA: ${optimalGuard.eta} minutes (${optimalGuard.distance.toFixed(1)}km away)`
+  //     });
 
-      // Auto-notify client
-      handleNotifyClient(alarm, `Guard ${optimalGuard.name} assigned - ETA ${optimalGuard.eta} minutes`);
-    } else {
-      toast.error("No guards available for assignment", {
-        description: "All guards are currently occupied or off duty"
-      });
-    }
-  }, [onAssign]);
+  //     // Auto-notify client
+  //     handleNotifyClient(alarm, `Guard ${optimalGuard.name} assigned - ETA ${optimalGuard.eta} minutes`);
+  //   } else {
+  //     toast.error("No guards available for assignment", {
+  //       description: "All guards are currently occupied or off duty"
+  //     });
+  //   }
+  // }, [onAssign]);
 
-  const handleResolveWithBilling = useCallback((alarm: any) => {
-    // Calculate actual response time
-    const responseTime = alarm.assignedAt ?
-      Math.round((new Date().getTime() - new Date(alarm.assignedAt).getTime()) / 60000) :
-      alarm.sinceMins;
+  // const handleResolveWithBilling = useCallback((alarm: any) => {
+  //   // Calculate actual response time
+  //   const responseTime = alarm.assignedAt ?
+  //     Math.round((new Date().getTime() - new Date(alarm.assignedAt).getTime()) / 60000) :
+  //     alarm.sinceMins;
 
-    // Create billing record
-    const billingRecord = {
-      alarmId: alarm.id,
-      site: alarm.site,
-      monitoringCompany: alarm.monitoringCompany,
-      license: alarm.license,
-      unitPrice: alarm.unitPrice,
-      resolvedAt: new Date(),
-      responseTime: responseTime,
-      withinSLA: responseTime <= alarm.slaTargetMins,
-      billingMonth: new Date().toISOString().slice(0, 7) // YYYY-MM format
-    };
+  //   // Create billing record
+  //   const billingRecord = {
+  //     alarmId: alarm.id,
+  //     site: alarm.site,
+  //     monitoringCompany: alarm.monitoringCompany,
+  //     license: alarm.license,
+  //     unitPrice: alarm.unitPrice,
+  //     resolvedAt: new Date(),
+  //     responseTime: responseTime,
+  //     withinSLA: responseTime <= alarm.slaTargetMins,
+  //     billingMonth: new Date().toISOString().slice(0, 7) // YYYY-MM format
+  //   };
 
-    // In real app, this would be sent to billing API
-    console.log("Creating billing record:", billingRecord);
+  //   // In real app, this would be sent to billing API
+  //   console.log("Creating billing record:", billingRecord);
 
-    onResolve(alarm.id);
+  //   onResolve(alarm.id);
 
-    toast.success(`Alarm ${alarm.id} resolved`, {
-      description: `Response time: ${responseTime}min | Billing: ${alarm.unitPrice}`
-    });
+  //   toast.success(`Alarm ${alarm.id} resolved`, {
+  //     description: `Response time: ${responseTime}min | Billing: ${alarm.unitPrice}`
+  //   });
 
-    // Auto-notify client of resolution
-    handleNotifyClient(alarm, `Alarm resolved in ${responseTime} minutes`);
-  }, [onResolve]);
+  //   // Auto-notify client of resolution
+  //   handleNotifyClient(alarm, `Alarm resolved in ${responseTime} minutes`);
+  // }, [onResolve]);
 
-  const handleNotifyClient = (alarm: any, message: string) => {
-    // In real app, this would send notifications via email/SMS
-    console.log(`CLIENT NOTIFICATION for ${alarm.site}: ${message}`);
+  // const handleNotifyClient = (alarm: any, message: string) => {
+  //   // In real app, this would send notifications via email/SMS
+  //   console.log(`CLIENT NOTIFICATION for ${alarm.site}: ${message}`);
 
-    toast.info("Client notified", {
-      description: `Notification sent to ${alarm.monitoringCompany}`
-    });
-  };
+  //   toast.info("Client notified", {
+  //     description: `Notification sent to ${alarm.monitoringCompany}`
+  //   });
+  // };
 
   const handleDeleteAlarm = async (alarmId: string) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this alarm?");
@@ -241,18 +249,18 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
 
         <CardContent className="p-4">
           <div className="space-y-3">
-            {alarms.map((alarm) => (
+            {alarms?.map((alarm: Alarm) => (
               <Card key={alarm.id} className="border border-gray-200 hover:border-gray-300 transition-colors">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4">
                       {/* Alarm Info */}
                       <div className="mt-3 flex flex-col justify-between">
-                        <div className="font-medium text-gray-900">{alarm.site}</div>
-                        <div className="text-xl text-gray-600">{alarm.type}</div>
+                        <div className="font-medium text-gray-900">{alarm.siteName}</div>
+                        <div className="text-xl text-gray-600">{alarm.alarmType}</div>
                         <div className="flex items-center gap-1 mt-1">
                           <MapPin className="h-3 w-3 text-gray-400" />
-                          <span className="text-lg text-gray-600">{alarm.location || 'Location TBD'}</span>
+                          <span className="text-lg text-gray-600">{alarm.siteAddress || 'Location TBD'}</span>
                         </div>
                       </div>
 
@@ -270,17 +278,17 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                             {formatTime(alarm.createdAt)}
                           </p>
                         </div>
-                        <div className={`text-lg font-medium ${getSLAColor(alarm.sinceMins, alarm.slaTargetMins)}`}>
-                          SLA: {alarm.slaTargetMins}min
+                        <div className={`text-lg font-medium ${getSLAColor(alarm.slaTimeMinutes, alarm.totalTimeMinutes ?? 1)}`}>
+                          SLA: {alarm.slaTimeMinutes}min
                         </div>
                       </div>
 
                       {/* Assignment */}
                       <div className="mt-4 flex flex-col justify-between">
-                        {alarm.assigned ? (
+                        {alarm.status == "assigned" ? (
                           <>
-                            <div className="text-xl text-gray-900">{alarm.assigned}</div>
-                            <div className="text-lg text-gray-600">ETA: {alarm.eta || 'Calculating...'}</div>
+                            <div className="text-xl text-gray-900">{alarm.status}</div>
+                            <div className="text-lg text-gray-600">ETA: {alarm.etaMinutes || 'Calculating...'}</div>
                             <div className="flex items-center gap-1 mt-1">
                               <User className="h-3 w-3 text-green-500" />
                               <span className="text-lg text-green-600">Assigned</span>
@@ -326,7 +334,7 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                           {!alarm.status && (
                             <Button
                               size="sm"
-                              onClick={() => handleResolveWithBilling(alarm)}
+                              onClick={() => { }}
                               className="h-8 px-2 text-lg bg-green-600 hover:bg-green-700"
                             >
                               <CheckCircle className="h-3 w-3 mr-1" />
@@ -349,14 +357,14 @@ export default function AlarmsPage({ alarmList, onAssign, onResolve, onSelectAla
                   </div>
 
                   {/* SLA Progress Bar */}
-                  {!alarm.status && alarm.slaTargetMins > 0 && (
+                  {!alarm.status && alarm.slaTimeMinutes > 0 && (
                     <div className="mt-3">
                       <div className="flex items-center justify-between text-lg text-gray-600 mb-1">
                         <span>SLA Progress</span>
-                        <span>{Math.round((alarm.sinceMins / alarm.slaTargetMins) * 100)}%</span>
+                        <span>{Math.round((alarm.slaTimeMinutes / (alarm?.totalTimeMinutes ?? 1)) * 100)}%</span>
                       </div>
                       <Progress
-                        value={Math.min((alarm.sinceMins / alarm.slaTargetMins) * 100, 100)}
+                        value={Math.min((alarm.slaTimeMinutes / (alarm?.totalTimeMinutes ?? 1)) * 100, 100)}
                         className="h-2"
                       />
                     </div>

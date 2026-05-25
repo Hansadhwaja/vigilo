@@ -325,7 +325,20 @@ export interface GetAllPatrolRunsForAdminResponse {
     totalPages: number;
     limit: number;
   };
+  summary: {
+    active: number;
+    pending: number;
+    completion: number;
+  }
 }
+
+export interface GetPatrolParams {
+  page?: string;
+  limit?: string;
+  status?: string;
+  search?: string;
+}
+
 
 /* =====================================================
    📌 GET PATROL RUN BY ID (ADMIN)
@@ -665,48 +678,22 @@ export const patrollingApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
-    // ===============================
-    // 🟢 GET ALL PATROL RUNS (ADMIN)
-    // ===============================
-    getAllPatrolRunsForAdmin: builder.query<
-      GetAllPatrolRunsForAdminResponse,
-      {
-        page?: number;
-        limit?: number;
-        status?: string;
-        search?: string;
-      }
-    >({
-      query: ({
-        page = 1,
-        limit = 10,
-        status,
-        search,
-      }) => {
-        const params = new URLSearchParams();
 
-        params.append("page", String(page));
-        params.append("limit", String(limit));
+    getAllPatrolRunsForAdmin: builder.query<GetAllPatrolRunsForAdminResponse, GetPatrolParams>({
+      query: (params = {}) => {
+        const qs = new URLSearchParams();
 
-        if (status && status !== "all") {
-          params.append("status", status);
-        }
+        qs.append("page", String(params.page));
+        qs.append("limit", String(params.limit));
 
-        if (search && search.trim() !== "") {
-          params.append("search", search.trim());
-        }
-
-        return {
-          url: `/patrolling/getAllPatrolRunsForAdmin?${params.toString()}`,
-          method: "GET",
-        };
+        if (params.status) qs.set("status", params.status);
+        if (params.search) qs.set("search", params.search);
+        return `/patrolling/getAllPatrolRunsForAdmin?${qs.toString()}`
       },
 
       providesTags: [{ type: "Patrol", id: "LIST" }],
     }),
-    // ===============================
-    // 🟢 GET PATROL RUN BY ID (ADMIN)
-    // ===============================
+
     getPatrolRunByIdForAdmin: builder.query<
       AdminPatrolRunDetailsResponse,
       string
@@ -720,9 +707,7 @@ export const patrollingApi = baseApi.injectEndpoints({
         { type: "Patrol", id },
       ],
     }),
-    // ===============================
-    // 🟡 EDIT PATROL RUN
-    // ===============================
+
     editPatrolRun: builder.mutation<
       EditPatrolRunResponse,
       { patrolRunId: string; body: EditPatrolRunRequest }
@@ -738,9 +723,7 @@ export const patrollingApi = baseApi.injectEndpoints({
         { type: "Patrol", id: "LIST" },
       ],
     }),
-    // ===============================
-    // 🟢 GET ALL PATROL SUB-SITES
-    // ===============================
+
     getAllPatrolSubSites: builder.query<
       GetAllPatrolSubSitesResponse,
       {

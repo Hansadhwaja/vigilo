@@ -1,27 +1,35 @@
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useGetAllPatrolRunsForAdminQuery } from "@/apis/patrollingAPI";
+import { AdminPatrolRun, useGetAllPatrolRunsForAdminQuery } from "@/apis/patrollingAPI";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import PatrollingStats from "@/components/Patrolling/PatrollingStats";
 import PatrollingSearchFilters from "@/components/Patrolling/PatrollingSearchFilers";
 import CreatePatrolModal from "@/components/Patrolling/Modal/CreatePatrolModal";
 import PatrolCard from "../../components/Patrolling/PatrolCard";
 import Loader from "@/components/common/Loader";
+import { useQueryParams } from "@/lib/hooks/useQueryParams";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 
 export default function PatrolPage() {
+  const { getParam } = useQueryParams();
+  const status = getParam("status", "");
+  const search = getParam("search", "");
+  const page = getParam("page", "1");
+  const limit = getParam("limit", "10");
+  const debouncedSearch = useDebounce(search);
 
-  const { data, isLoading } = useGetAllPatrolRunsForAdminQuery({
-    page: 1,
-    limit: 10,
-    status: "",
-    search: "",
+  const { data, isLoading, isFetching } = useGetAllPatrolRunsForAdminQuery({
+    page,
+    limit,
+    status,
+    search: debouncedSearch,
   });
 
-  const patrols = data?.data ?? []
+  const { data: patrols = [], summary } = data ?? {};
 
   return (
-      <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
+    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       <CustomHeader
         title="Patrol Management"
         description="QR Scanning, Real-time Tracking & Proof of Service"
@@ -40,20 +48,28 @@ export default function PatrolPage() {
           </div>
         }
       />
-      <PatrollingStats />
+      <PatrollingStats
+        active={summary?.active ?? 0}
+        pending={summary?.pending ?? 0}
+        completed={summary?.completion ?? 0}
+        revenue={0}
+      />
       <PatrollingSearchFilters />
       <Card className="p-0 flex flex-col gap-0">
         <CardHeader className="p-4">
           <CardTitle className="text-lg">Patrol Operations</CardTitle>
         </CardHeader>
         <CardContent className="p-4">
-          {isLoading ? <Loader /> : (
-            <div className="space-y-3">
-              {patrols.map((patrol) => (
-                <PatrolCard key={patrol.id} patrol={patrol} />
-              ))}
-            </div>
-          )}
+          {isLoading || isFetching ? <Loader /> :
+            patrols.length > 0 ? (
+              <div className="space-y-3">
+                {patrols.map((patrol: AdminPatrolRun) => (
+                  <PatrolCard key={patrol.id} patrol={patrol} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center font-semibold">No Patrol found</p>
+            )}
         </CardContent>
       </Card>
     </div>
