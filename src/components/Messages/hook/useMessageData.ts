@@ -10,6 +10,8 @@ import {
 
 import { Guard, useGetAllGuardsQuery } from "@/apis/guardsApi";
 import { PresenceUpdateEvent } from "@/types";
+import { useQueryParams } from "@/lib/hooks/useQueryParams";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 
 export const useMessageData = () => {
     const [activeConversationId, setActiveConversationId] = useState<string>("");
@@ -21,11 +23,17 @@ export const useMessageData = () => {
     const emojiRef = useRef<HTMLDivElement | null>(null);
 
     const [heartbeatPresence] = useHeartbeatPresenceMutation();
+    const { getParam } = useQueryParams();
+
+    const search = getParam("search", "");
+    const debouncedSearch = useDebounce(search);
+
 
     const { data: guardsResponse, isLoading: isGuardsLoading } =
         useGetAllGuardsQuery({
             page: 1,
-            limit: 1000,
+            limit: 100,
+            search: debouncedSearch
         });
 
     const guards = guardsResponse?.data ?? [];

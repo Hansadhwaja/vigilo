@@ -14,8 +14,6 @@ const MessagesPage = () => {
     presenceMap,
     authUserId,
     isOpeningConversation,
-
-    setEmojiOpen,
     setLivePresenceByUserId,
 
     openGuardChat,
