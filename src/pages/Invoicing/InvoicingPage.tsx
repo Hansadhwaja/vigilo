@@ -28,8 +28,6 @@ export default function InvoicingPage() {
   });
   const invoices = data?.data ?? [];
 
-  if (isLoading || isFetching) return <Loader />;
-
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
 
@@ -49,12 +47,18 @@ export default function InvoicingPage() {
           </Button>
         }
       />
-      <InvoiceStats />
+
 
       <InvoiceSearchFilters />
-      <InvoicingTable
-        invoices={invoices}
-      />
+      {isLoading || isFetching ? <Loader /> : (
+        <>
+          <InvoiceStats />
+          <InvoicingTable
+            invoices={invoices}
+          />
+        </>
+      )}
+
     </div>
   );
 }
