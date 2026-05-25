@@ -46,6 +46,7 @@ interface DataFiltersProps {
 
     onClear?: () => void;
     others?: React.ReactNode;
+    searchOnly?: boolean;
 }
 
 const DataFilters = ({
@@ -54,7 +55,8 @@ const DataFilters = ({
     onSearchChange,
     filters = [],
     onClear,
-    others
+    others,
+    searchOnly = false
 }: DataFiltersProps) => {
     return (
         <div className="rounded-3xl border border-slate-200/70 bg-white/80 p-4 shadow-sm backdrop-blur-sm">
@@ -62,10 +64,12 @@ const DataFilters = ({
                 {/* Left */}
                 <div className="flex flex-1 flex-wrap items-center gap-3">
                     {/* Badge */}
-                    <div className="flex h-10 items-center gap-2 rounded-2xl bg-orange-50 px-4 text-sm font-medium text-orange-600">
-                        <Filter className="size-4" />
-                        Filters
-                    </div>
+                    {!searchOnly && (
+                        <div className="flex h-10 items-center gap-2 rounded-2xl bg-orange-50 px-4 text-sm font-medium text-orange-600">
+                            <Filter className="size-4" />
+                            Filters
+                        </div>
+                    )}
 
                     {/* Search */}
                     {onSearchChange && (
@@ -120,7 +124,7 @@ const DataFilters = ({
                 </div>
 
                 {/* Right */}
-                {onClear && (
+                {!searchOnly && onClear && (
                     <div className="flex items-center gap-2">
                         <Button
                             variant="outline"

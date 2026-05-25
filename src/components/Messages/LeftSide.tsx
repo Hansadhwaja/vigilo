@@ -1,94 +1,86 @@
-import { RefObject, useEffect, useRef, useState } from 'react'
-import {
-    MessageCircle,
-    Search,
-    ShieldCheck,
-    UserRound,
-    ChevronDown,
-} from "lucide-react";
-import { ContactItem, ContactRole } from '@/types';
-import { getAvatarColor, getInitials } from '@/lib/utils';
-import { PresenceItem } from '@/apis/messagesAPI';
-import MessageTabs from './Tabs';
-import { Separator } from '@/components/ui/separator';
+import { RefObject } from "react";
+import { MessageCircle, Sparkles } from "lucide-react";
 
+import { PresenceItem } from "@/apis/messagesAPI";
+import { Separator } from "@/components/ui/separator";
+
+import CustomHeader from "../common/Header/CustomHeader";
+import MessageTabs from "./Tabs";
+
+import { Guard } from "@/apis/guardsApi";
 
 interface LeftSideProps {
-    contactFilter: ContactRole;
-    setContactFilter: (c: ContactRole) => void
-    searchTerm: string;
-    setSearchTerm: (s: string) => void;
-    emojiRef: RefObject<HTMLDivElement | null>;
-    setEmojiOpen: (e: boolean) => void;
-    filteredContacts: ContactItem[];
+    guards: Guard[];
+
     isLoading: boolean;
-    openContactChat: (c: ContactItem) => void;
+
+    openGuardChat: (c: Guard) => void;
+
     activeConversationId: string;
-    selectedContact: ContactItem | null;
+
+    selectedGuard: Guard | null;
+
     conversationByUserId: Record<string, string>;
+
     presenceMap: Map<string, PresenceItem>;
+
     openingUserId: string;
 }
 
 const LeftSide = ({
-    contactFilter,
-    setContactFilter,
-    searchTerm,
-    setSearchTerm,
-    setEmojiOpen,
-    filteredContacts,
+    guards,
     isLoading,
-    openContactChat,
+    openGuardChat,
     activeConversationId,
-    selectedContact,
+    selectedGuard,
     conversationByUserId,
     presenceMap,
-    openingUserId
+    openingUserId,
 }: LeftSideProps) => {
-    const [dropdownOpen, setDropdownOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handler = (e: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setDropdownOpen(false);
-        };
-        document.addEventListener("mousedown", handler);
-        return () => document.removeEventListener("mousedown", handler);
-    }, []);
-
     return (
-        <aside className="w-85 shrink-0 flex flex-col bg-white border-r border-gray-100">
-            <div className="h-full px-3 py-4 flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-[17px] font-bold text-gray-900 tracking-tight">Messages</h1>
-                        <p className="text-[11px] text-gray-400 mt-0.5">Secure communications hub</p>
-                    </div>
-                    <div className="h-9 w-9 rounded-xl bg-emerald-500 flex items-center justify-center shadow-sm shadow-emerald-200">
-                        <MessageCircle size={18} className="text-white" />
-                    </div>
-                </div>
-                <Separator />
-                <MessageTabs
-                    contactFilter={contactFilter}
-                    setContactFilter={setContactFilter}
-                    searchTerm={searchTerm}
-                    setSearchTerm={setSearchTerm}
-                    setEmojiOpen={setEmojiOpen}
-                    filteredContacts={filteredContacts}
-                    isLoading={isLoading}
-                    openContactChat={openContactChat}
-                    activeConversationId={activeConversationId}
-                    selectedContact={selectedContact}
-                    conversationByUserId={conversationByUserId}
-                    presenceMap={presenceMap}
-                    openingUserId={openingUserId}
+        <aside className="relative flex w-90 shrink-0 flex-col overflow-hidden border-r border-border/60 bg-linear-to-b from-background via-background to-muted/20">
+            <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-emerald-500/10 to-transparent pointer-events-none" />
+
+            <div className="relative z-10 flex h-full min-h-0 flex-col gap-4 p-4">
+                <CustomHeader
+                    title="Messages"
+                    description="Secure communications hub"
+                    others={
+                        <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500 shadow-lg shadow-emerald-500/20">
+                            <MessageCircle
+                                size={20}
+                                className="text-white"
+                            />
+
+                            <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-background bg-white">
+                                <Sparkles
+                                    size={10}
+                                    className="text-emerald-500"
+                                />
+                            </div>
+                        </div>
+                    }
                 />
+                <Separator />
+                <div className="min-h-0 flex-1 overflow-hidden">
+                    <MessageTabs
+                        guards={guards}
+                        isLoading={isLoading}
+                        openGuardChat={openGuardChat}
+                        activeConversationId={
+                            activeConversationId
+                        }
+                        selectedGuard={selectedGuard}
+                        conversationByUserId={
+                            conversationByUserId
+                        }
+                        presenceMap={presenceMap}
+                        openingUserId={openingUserId}
+                    />
+                </div>
             </div>
         </aside>
-    )
-}
+    );
+};
 
-export default LeftSide
-
-
+export default LeftSide;

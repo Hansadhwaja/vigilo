@@ -1,42 +1,91 @@
+import {
+    Clock3,
+    MessageCircle,
+    ShieldCheck,
+    Sparkles,
+    UserRound,
+    Wifi,
+} from "lucide-react";
 
-import { ContactRole } from '@/types'
-import { Clock, MessageCircle, ShieldCheck, UserRound } from 'lucide-react'
-
-const EmptyConversion = ({ contactFilter }: { contactFilter: ContactRole }) => {
+const EmptyConversion = () => {
     return (
-        <div className="flex-1 flex items-center justify-center bg-linear-to-br from-emerald-50/60 via-white to-teal-50/40 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-200/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-72 h-72 bg-teal-200/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-            <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-green-100/30 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-            <div className="relative z-10 text-center max-w-sm px-6">
-                <div className="relative mx-auto w-24 h-24 mb-6">
-                    <div className="h-24 w-24 rounded-3xl bg-white shadow-xl shadow-emerald-100 flex items-center justify-center">
-                        <MessageCircle className="h-11 w-11 text-emerald-500" />
+        <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-gradient-to-br from-emerald-50/70 via-background to-teal-50/50">
+            {/* ambient glow */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -top-24 right-[-120px] h-80 w-80 rounded-full bg-emerald-300/20 blur-3xl" />
+
+                <div className="absolute bottom-[-140px] left-[-80px] h-72 w-72 rounded-full bg-teal-300/20 blur-3xl" />
+
+                <div className="absolute left-1/2 top-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-green-100/30 blur-3xl" />
+            </div>
+
+            {/* content */}
+            <div className="relative z-10 flex max-w-md flex-col items-center px-8 text-center">
+                {/* icon section */}
+                <div className="relative mb-8">
+                    {/* outer glow */}
+                    <div className="absolute inset-0 scale-125 rounded-full bg-emerald-400/10 blur-2xl" />
+
+                    {/* main icon */}
+                    <div className="relative flex h-28 w-28 items-center justify-center rounded-[2rem] border border-white/70 bg-white/90 shadow-2xl shadow-emerald-100 backdrop-blur-xl">
+                        <MessageCircle className="h-12 w-12 text-emerald-500" />
                     </div>
-                    <div className="absolute -top-2 -right-2 h-8 w-8 rounded-xl bg-emerald-500 shadow-md shadow-emerald-200 flex items-center justify-center">
-                        <ShieldCheck className="h-4 w-4 text-white" />
+
+                    {/* top badge */}
+                    <div className="absolute -right-2 -top-2 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/60 bg-emerald-500 shadow-lg shadow-emerald-300/30">
+                        <ShieldCheck className="h-5 w-5 text-white" />
                     </div>
-                    <div className="absolute -bottom-2 -left-2 h-7 w-7 rounded-xl bg-teal-500 shadow-md shadow-teal-200 flex items-center justify-center">
-                        <UserRound className="h-3.5 w-3.5 text-white" />
+
+                    {/* bottom badge */}
+                    <div className="absolute -bottom-2 -left-2 flex h-9 w-9 items-center justify-center rounded-2xl border border-white/60 bg-teal-500 shadow-lg shadow-teal-300/30">
+                        <UserRound className="h-4 w-4 text-white" />
+                    </div>
+
+                    {/* sparkle */}
+                    <div className="absolute right-5 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-md">
+                        <Sparkles className="h-3 w-3 text-amber-500" />
                     </div>
                 </div>
-                <h2 className="text-[22px] font-bold text-gray-900 tracking-tight">Start a conversation</h2>
-                <p className="mt-2 text-sm text-gray-500 leading-relaxed">
-                    Select a {contactFilter === "guard" ? "guard" : "client"} from the sidebar to open a secure chat.
+
+                {/* title */}
+                <h2 className="text-3xl font-bold tracking-tight text-foreground">
+                    Start a conversation
+                </h2>
+
+                {/* description */}
+                <p className="mt-3 max-w-sm text-sm leading-relaxed text-muted-foreground">
+                    Select a guard from the sidebar to
+                    open a secure real-time conversation
+                    and manage communications instantly.
                 </p>
-                <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+
+                {/* feature pills */}
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-700 shadow-sm">
+                        <span className="relative flex h-2 w-2">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+
+                            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                        </span>
+
                         Live presence active
-                    </span>
-                    <span className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-full px-3 py-1.5">
-                        <Clock size={11} />
-                        Message receipts on
-                    </span>
+                    </div>
+
+                    <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700 shadow-sm">
+                        <Clock3 size={13} />
+
+                        Message receipts enabled
+                    </div>
+
+                    <div className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-4 py-2 text-xs font-semibold text-violet-700 shadow-sm">
+                        <Wifi size={13} />
+
+                        Real-time sync
+                    </div>
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default EmptyConversion
+export default EmptyConversion;

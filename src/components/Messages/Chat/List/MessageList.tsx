@@ -1,19 +1,38 @@
-import { toast } from "sonner";
-import { MessageItem, useDeleteMessageForEveryoneMutation, useDeleteMessageForMeMutation, useEditMessageMutation, useGetMessagesQuery } from "@/apis/messagesAPI";
-import { useSocket } from "@/lib/hooks/useSocket";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ContactItem } from "@/types";
+
+import { toast } from "sonner";
+
+import {
+    MessageItem,
+    useDeleteMessageForEveryoneMutation,
+    useDeleteMessageForMeMutation,
+    useEditMessageMutation,
+    useGetMessagesQuery,
+} from "@/apis/messagesAPI";
+
+import { Guard } from "@/apis/guardsApi";
+
+import { useSocket } from "@/lib/hooks/useSocket";
+
 import EmptyMessage from "./EmptyMessage";
 import MessageLoading from "./MessageLoading";
 import MessageGroup from "./MessageGroup";
 
 interface MessageListProps {
     activeConversationId: string;
+
     authUserId: string;
-    refetchMessages: ReturnType<typeof useGetMessagesQuery>["refetch"];
+
+    refetchMessages:
+    ReturnType<
+        typeof useGetMessagesQuery
+    >["refetch"];
+
     isMessagesFetching: boolean;
+
     messageList: MessageItem[];
-    selectedContact: ContactItem | null;
+
+    selectedGuard: Guard | null;
 }
 
 const MessageList = ({
@@ -21,155 +40,450 @@ const MessageList = ({
     authUserId,
     isMessagesFetching,
     messageList,
-    selectedContact,
+    selectedGuard,
     refetchMessages,
-
 }: MessageListProps) => {
     const socketRef = useSocket();
 
-    const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
-    const [editDraft, setEditDraft] = useState("");
+    const bottomRef =
+        useRef<HTMLDivElement | null>(
+            null
+        );
 
-    const bottomRef = useRef<HTMLDivElement | null>(null);
+    // edit state
+    const [
+        editingMessageId,
+        setEditingMessageId,
+    ] = useState<string | null>(
+        null
+    );
 
-    const [editMessage, { isLoading: isEditingMessage }] = useEditMessageMutation();
-    const [deleteMessageForEveryone] = useDeleteMessageForEveryoneMutation();
-    const [deleteMessageForMe] = useDeleteMessageForMeMutation();
+    const [editDraft, setEditDraft] =
+        useState("");
 
+    // mutations
+    const [
+        editMessage,
+        {
+            isLoading:
+            isEditingMessage,
+        },
+    ] = useEditMessageMutation();
+
+    const [
+        deleteMessageForEveryone,
+    ] =
+        useDeleteMessageForEveryoneMutation();
+
+    const [deleteMessageForMe] =
+        useDeleteMessageForMeMutation();
+
+    // auto scroll
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        bottomRef.current?.scrollIntoView(
+            {
+                behavior: "smooth",
+            }
+        );
     }, [messageList]);
 
-
+    // group messages by date
     const groupedMessages = useMemo(() => {
-        const groups: { label: string; messages: typeof messageList }[] = [];
-        const fmt = (d: Date) => d.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-        const today = fmt(new Date()); const yesterday = fmt(new Date(Date.now() - 86400000));
+        const groups: {
+            label: string;
 
-        messageList.forEach((msg) => {
-            const key = fmt(new Date(msg.createdAt));
-            const label = key === today ? "Today" : key === yesterday ? "Yesterday" : key;
-            const last = groups[groups.length - 1];
-            if (last && last.label === label) last.messages.push(msg);
-            else groups.push({ label, messages: [msg] });
-        });
+            messages: typeof messageList;
+        }[] = [];
+
+        const formatDate = (
+            date: Date
+        ) =>
+            date.toLocaleDateString(
+                "en-US",
+                {
+                    weekday:
+                        "long",
+
+                    year: "numeric",
+
+                    month: "long",
+
+                    day: "numeric",
+                }
+            );
+
+        const today =
+            formatDate(
+                new Date()
+            );
+
+        const yesterday =
+            formatDate(
+                new Date(
+                    Date.now() -
+                    86400000
+                )
+            );
+
+        messageList.forEach(
+            (message) => {
+                const dateKey =
+                    formatDate(
+                        new Date(
+                            message.createdAt
+                        )
+                    );
+
+                const label =
+                    dateKey ===
+                        today
+                        ? "Today"
+                        : dateKey ===
+                            yesterday
+                            ? "Yesterday"
+                            : dateKey;
+
+                const lastGroup =
+                    groups[
+                    groups.length -
+                    1
+                    ];
+
+                if (
+                    lastGroup &&
+                    lastGroup.label ===
+                    label
+                ) {
+                    lastGroup.messages.push(
+                        message
+                    );
+                } else {
+                    groups.push({
+                        label,
+
+                        messages: [
+                            message,
+                        ],
+                    });
+                }
+            }
+        );
 
         return groups;
     }, [messageList]);
 
-    const startEditMessage = (id: string, content: string | null) => {
+    // edit handlers
+    const startEditMessage = (
+        id: string,
+        content:
+            | string
+            | null
+    ) => {
         setEditingMessageId(id);
+
         setEditDraft(content || "");
     };
 
     const cancelEditMessage = () => {
         setEditingMessageId(null);
+
         setEditDraft("");
     };
 
     const handleSaveEditedMessage = async () => {
-        if (!editingMessageId || !editDraft.trim()) {
-            toast.error("Content required");
+        if (
+            !editingMessageId ||
+            !editDraft.trim()
+        ) {
+            toast.error(
+                "Message content required"
+            );
+
             return;
         }
+
         try {
-            if (socketRef.current?.connected && activeConversationId) {
-                socketRef.current.emit("x", {
-                    messageId: editingMessageId,
-                    conversationId: activeConversationId,
-                    content: editDraft.trim(),
-                });
+            // socket
+            if (
+                socketRef.current
+                    ?.connected &&
+                activeConversationId
+            ) {
+                socketRef.current.emit(
+                    "editMessage",
+                    {
+                        messageId:
+                            editingMessageId,
+
+                        conversationId:
+                            activeConversationId,
+
+                        content:
+                            editDraft.trim(),
+                    }
+                );
+
                 cancelEditMessage();
+
                 return;
             }
 
+            // api fallback
             await editMessage({
-                messageId: editingMessageId,
-                content: editDraft.trim()
+                messageId:
+                    editingMessageId,
+
+                content:
+                    editDraft.trim(),
             }).unwrap();
 
             cancelEditMessage();
+
             await refetchMessages();
         } catch (error: any) {
-            toast.error(error?.data?.message || "Failed to edit");
+            toast.error(
+                error?.data
+                    ?.message ||
+                "Failed to edit message"
+            );
         }
     };
 
-    const handleDeleteForEveryone = async (messageId: string) => {
-        if (!window.confirm("Delete for everyone?")) return;
+    // delete everyone
+    const handleDeleteForEveryone = async (
+        messageId: string
+    ) => {
+        const confirmed =
+            window.confirm(
+                "Delete message for everyone?"
+            );
+
+        if (!confirmed)
+            return;
+
         try {
-            if (socketRef.current?.connected && activeConversationId) {
-                socketRef.current.emit("deleteMessage", { messageId, conversationId: activeConversationId });
-                if (editingMessageId === messageId) cancelEditMessage();
+            if (
+                socketRef.current
+                    ?.connected &&
+                activeConversationId
+            ) {
+                socketRef.current.emit(
+                    "deleteMessage",
+                    {
+                        messageId,
+
+                        conversationId:
+                            activeConversationId,
+                    }
+                );
+
+                if (
+                    editingMessageId ===
+                    messageId
+                ) {
+                    cancelEditMessage();
+                }
+
                 return;
             }
 
-            await deleteMessageForEveryone({ messageId }).unwrap();
-            if (editingMessageId === messageId) cancelEditMessage();
+            await deleteMessageForEveryone(
+                {
+                    messageId,
+                }
+            ).unwrap();
+
+            if (
+                editingMessageId ===
+                messageId
+            ) {
+                cancelEditMessage();
+            }
+
             await refetchMessages();
         } catch (error: any) {
-            toast.error(error?.data?.message || "Failed to delete");
+            toast.error(
+                error?.data
+                    ?.message ||
+                "Failed to delete message"
+            );
         }
     };
 
-    const handleDeleteForMe = async (messageId: string) => {
-        if (!window.confirm("Delete for you only?")) return;
+    // delete me
+    const handleDeleteForMe = async (
+        messageId: string
+    ) => {
+        const confirmed =
+            window.confirm(
+                "Delete message for you only?"
+            );
+
+        if (!confirmed)
+            return;
+
         try {
-            if (socketRef.current?.connected && activeConversationId) {
-                socketRef.current.emit("deleteMessageForMe", { messageId, conversationId: activeConversationId });
-                if (editingMessageId === messageId) cancelEditMessage();
+            if (
+                socketRef.current
+                    ?.connected &&
+                activeConversationId
+            ) {
+                socketRef.current.emit(
+                    "deleteMessageForMe",
+                    {
+                        messageId,
+
+                        conversationId:
+                            activeConversationId,
+                    }
+                );
+
+                if (
+                    editingMessageId ===
+                    messageId
+                ) {
+                    cancelEditMessage();
+                }
+
                 return;
             }
 
-            await deleteMessageForMe({ messageId }).unwrap();
-            if (editingMessageId === messageId) cancelEditMessage();
+            await deleteMessageForMe(
+                {
+                    messageId,
+                }
+            ).unwrap();
+
+            if (
+                editingMessageId ===
+                messageId
+            ) {
+                cancelEditMessage();
+            }
+
             await refetchMessages();
         } catch (error: any) {
-            toast.error(error?.data?.message || "Failed to delete");
+            toast.error(
+                error?.data
+                    ?.message ||
+                "Failed to delete message"
+            );
         }
     };
-
 
     return (
         <div
-            className="flex-1 overflow-y-auto px-4 py-4 space-y-1 flex"
+            className="
+                relative
+                flex-1
+                overflow-y-auto
+                px-5
+                py-6
+                no-scrollbar
+            "
             style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2310b981' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #f0faf4 100%)`,
-                backgroundSize: "60px 60px, 100% 100%",
+                background: `
+        radial-gradient(circle at top right, rgba(168,85,247,0.08), transparent 25%),
+        radial-gradient(circle at bottom left, rgba(16,185,129,0.08), transparent 25%),
+        linear-gradient(
+            135deg,
+            #f8fafc 0%,
+            #f0fdf4 35%,
+            #fdfdfd 100%
+        )
+    `
             }}
         >
-            {!activeConversationId || isMessagesFetching ? (
-                <MessageLoading />
-            ) : messageList.length === 0 ? (
-                <EmptyMessage name={selectedContact?.name ?? "User"} />
-            ) : (
+            {/* overlay pattern */}
+            <div
+                className="
+                    pointer-events-none
+                    absolute
+                    inset-0
+                    opacity-[0.03]
+                "
+                style={{
+                    backgroundImage:
+                        "radial-gradient(#10b981 1px, transparent 1px)",
 
-                <div className="h-96 w-full">
-                    {groupedMessages.map((group) => (
-                        <MessageGroup
-                            key={group.label}
-                            group={group}
-                            isEditingMessage={isEditingMessage}
-                            authUserId={authUserId}
-                            selectedContact={selectedContact}
-                            editingMessageId={editingMessageId}
-                            editDraft={editDraft}
-                            setEditDraft={setEditDraft}
-                            startEdit={(msg) => startEditMessage(msg.id, msg.content)}
-                            cancelEdit={cancelEditMessage}
-                            saveEdit={handleSaveEditedMessage}
-                            onDeleteForEveryone={handleDeleteForEveryone}
-                            onDeleteForMe={handleDeleteForMe}
-                        />
-                    ))}
-                    <div ref={bottomRef} />
+                    backgroundSize:
+                        "22px 22px",
+                }}
+            />
+
+            {!activeConversationId ||
+                isMessagesFetching ? (
+                <MessageLoading />
+            ) : messageList.length ===
+                0 ? (
+                <EmptyMessage
+                    name={
+                        selectedGuard?.name ??
+                        "User"
+                    }
+                />
+            ) : (
+                <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col gap-6">
+                    {groupedMessages.map(
+                        (group) => (
+                            <MessageGroup
+                                key={
+                                    group.label
+                                }
+                                group={
+                                    group
+                                }
+                                isEditingMessage={
+                                    isEditingMessage
+                                }
+                                authUserId={
+                                    authUserId
+                                }
+                                selectedGuard={
+                                    selectedGuard
+                                }
+                                editingMessageId={
+                                    editingMessageId
+                                }
+                                editDraft={
+                                    editDraft
+                                }
+                                setEditDraft={
+                                    setEditDraft
+                                }
+                                startEdit={(
+                                    message
+                                ) =>
+                                    startEditMessage(
+                                        message.id,
+                                        message.content
+                                    )
+                                }
+                                cancelEdit={
+                                    cancelEditMessage
+                                }
+                                saveEdit={
+                                    handleSaveEditedMessage
+                                }
+                                onDeleteForEveryone={
+                                    handleDeleteForEveryone
+                                }
+                                onDeleteForMe={
+                                    handleDeleteForMe
+                                }
+                            />
+                        )
+                    )}
+
+                    <div
+                        ref={
+                            bottomRef
+                        }
+                    />
                 </div>
             )}
-
         </div>
     );
 };
 
 export default MessageList;
-
-

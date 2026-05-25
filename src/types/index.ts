@@ -1,3 +1,4 @@
+import { Guard } from "@/apis/guardsApi";
 import { MessageItem } from "@/apis/messagesAPI";
 import { InvoiceAlarmsFormValues, InvoiceOrdersFormValues } from "@/schemas";
 
@@ -56,7 +57,7 @@ export interface MessageController {
 
 export interface BaseMessageProps {
     authUserId: string;
-    selectedContact: ContactItem | null;
+    selectedGuard: Guard | null;
 }
 
 //Broadcast Message
@@ -346,12 +347,6 @@ export interface GuardPayment {
     guard: Guard;
 
     statics: GuardStatic[];
-}
-
-export interface Guard {
-    id: string;
-    name: string;
-    email: string;
 }
 
 export interface GuardStatic {

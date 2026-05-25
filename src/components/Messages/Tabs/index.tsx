@@ -1,68 +1,84 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import BroadcastTab from './BroadCast/BroadcastTab'
-import ChatsTab from './ChatsTab'
-import { ContactItem, ContactRole } from '@/types';
-import { PresenceItem } from '@/apis/messagesAPI';
+import AppTabs from "@/components/common/Tab/AppTabs";
+import BroadcastTab from "./BroadCast/BroadcastTab";
+import ChatsTab from "./ChatsTab/ChatsTab";
+import { PresenceItem } from "@/apis/messagesAPI";
+import { useQueryParams } from "@/lib/hooks/useQueryParams";
+import { Guard } from "@/apis/guardsApi";
 
 interface MessageTabsProps {
-    contactFilter: ContactRole;
-    setContactFilter: (c: ContactRole) => void
-    searchTerm: string;
-    setSearchTerm: (s: string) => void;
-    setEmojiOpen: (e: boolean) => void;
-    filteredContacts: ContactItem[];
+    guards: Guard[];
     isLoading: boolean;
-    openContactChat: (c: ContactItem) => void;
+    openGuardChat: (c: Guard) => void;
     activeConversationId: string;
-    selectedContact: ContactItem | null;
+    selectedGuard: Guard | null;
     conversationByUserId: Record<string, string>;
     presenceMap: Map<string, PresenceItem>;
     openingUserId: string;
 }
 
 const MessageTabs = ({
-    contactFilter,
-    setContactFilter,
-    searchTerm,
-    setSearchTerm,
-    setEmojiOpen,
-    filteredContacts,
+    guards,
     isLoading,
-    openContactChat,
+    openGuardChat,
     activeConversationId,
-    selectedContact,
+    selectedGuard,
     conversationByUserId,
     presenceMap,
-    openingUserId
+    openingUserId,
 }: MessageTabsProps) => {
-    return (
-        <Tabs defaultValue='chats' className='flex-1'>
-            <TabsList className="grid w-full h-auto grid-cols-2">
-                <TabsTrigger value="chats">Chats</TabsTrigger>
-                <TabsTrigger value="broadcast">Broadcast</TabsTrigger>
-            </TabsList>
-            <TabsContent value='chats'>
+    const { getParam, setParam } = useQueryParams();
+
+    const activeTab = getParam("tab", "chats");
+
+    const handleTabChange = (value: string) => {
+        setParam("tab", value);
+    };
+
+    const tabs = [
+        {
+            value: "chats",
+            label: "Chats",
+
+            content: (
                 <ChatsTab
-                    contactFilter={contactFilter}
-                    setContactFilter={setContactFilter}
-                    searchTerm={searchTerm}
-                    setSearchTerm={setSearchTerm}
-                    setEmojiOpen={setEmojiOpen}
-                    filteredContacts={filteredContacts}
+                    guards={guards}
                     isLoading={isLoading}
-                    openContactChat={openContactChat}
+                    openGuardChat={openGuardChat}
                     activeConversationId={activeConversationId}
-                    selectedContact={selectedContact}
+                    selectedGuard={selectedGuard}
                     conversationByUserId={conversationByUserId}
                     presenceMap={presenceMap}
                     openingUserId={openingUserId}
                 />
-            </TabsContent>
-            <TabsContent value='broadcast'>
-                <BroadcastTab />
-            </TabsContent>
-        </Tabs>
-    )
-}
+            ),
 
-export default MessageTabs
+            activeColor:
+                "data-[state=active]:bg-sky-500",
+        },
+
+        {
+            value: "broadcast",
+
+            label: "Broadcast",
+
+            content: <BroadcastTab />,
+
+            activeColor:
+                "data-[state=active]:bg-violet-500",
+        },
+    ];
+
+    return (
+        <div className="flex h-full min-h-0 flex-col">
+            <AppTabs
+                value={activeTab}
+                onValueChange={handleTabChange}
+                tabs={tabs}
+                className="flex h-full min-h-0 flex-col"
+                tabsListClassName="grid w-full grid-cols-2 shrink-0"
+                contentClassName="flex-1 min-h-0 overflow-hidden"
+            />
+        </div>
+    );
+};
+export default MessageTabs;

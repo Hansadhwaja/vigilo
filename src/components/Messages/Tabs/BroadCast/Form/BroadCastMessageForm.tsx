@@ -8,31 +8,17 @@ import {
 } from "@/components/ui/field";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
-} from "@/components/ui/select";
-
 import { BroadCastFormValues, broadcastSchema } from "@/schemas";
-
+import { Send } from "lucide-react";
 
 const BroadCastMessageForm = ({
     onSubmit,
-
 }: {
-    onSubmit: (data: BroadCastFormValues) => void,
+    onSubmit: (data: BroadCastFormValues) => void;
 }) => {
-    // const { data, isLoading } = useGetAllGuardsQuery();
-
-    // const guards = data?.data ?? [];
-
     const form = useForm<BroadCastFormValues>({
         resolver: zodResolver(broadcastSchema),
         mode: "onChange",
@@ -44,114 +30,31 @@ const BroadCastMessageForm = ({
         },
     });
 
-    // const sendToAll = form.watch("sendToAll");
-
     const onFormSubmit = async (data: BroadCastFormValues) => {
         await onSubmit(data);
         form.reset();
-
     };
 
     return (
-        <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-2 py-4">
-
-            {/* Send To All */}
+        <form
+            onSubmit={form.handleSubmit(onFormSubmit)}
+            className="space-y-4 py-4"
+        >
             <Controller
                 control={form.control}
                 name="sendToAll"
-                render={({ field }) => (
+                render={() => (
                     <Field>
-                        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-sm">
-                            <Checkbox
-                                checked
-                                disabled
-                            />
-                            <span>Send to all guards</span>
+                        <div className="flex items-center gap-2 rounded-xl border border-green-100 bg-green-50 px-3 py-2">
+                            <Checkbox checked disabled />
+                            <span className="text-sm font-medium text-green-700">
+                                Sending to all guards
+                            </span>
                         </div>
                     </Field>
                 )}
             />
 
-            {/* Select Recipients */}
-            {/* {!sendToAll && (
-                <Controller
-                    control={form.control}
-                    name="guardIds"
-                    render={({ field, fieldState }) => (
-                        <Field>
-                            <FieldLabel>Select Recipients</FieldLabel>
-
-                            {isLoading ? <Loader /> : (<div className="space-y-2 border rounded-md p-3 h-40 overflow-y-auto">
-
-                                {guards?.map((guard) => {
-                                    const isChecked = field.value?.includes(guard.id);
-
-                                    return (
-                                        <div
-                                            key={guard.id}
-                                            className="flex items-center gap-2"
-                                        >
-                                            <Checkbox
-                                                checked={isChecked}
-                                                onCheckedChange={(checked) => {
-                                                    if (checked) {
-                                                        field.onChange([
-                                                            ...(field.value || []),
-                                                            guard.id,
-                                                        ]);
-                                                    } else {
-                                                        field.onChange(
-                                                            field.value?.filter(
-                                                                (id) => id !== guard.id
-                                                            )
-                                                        );
-                                                    }
-                                                }}
-                                            />
-                                            <span>{guard.name}</span>
-                                        </div>
-                                    );
-                                })}
-
-                            </div>)}
-
-                            {fieldState.error && (
-                                <FieldError errors={[fieldState.error]} />
-                            )}
-                        </Field>
-                    )}
-                />
-            )} */}
-
-            {/* Project */}
-            {/* <Controller
-                control={form.control}
-                name="projectId"
-                render={({ field, fieldState }) => (
-                    <Field>
-                        <FieldLabel>Project (Optional)</FieldLabel>
-
-                        <Select
-                            value={field.value}
-                            onValueChange={field.onChange}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select Project" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="p1">Project 1</SelectItem>
-                                <SelectItem value="p2">Project 2</SelectItem>
-                            </SelectContent>
-                        </Select>
-
-                        {fieldState.error && (
-                            <FieldError errors={[fieldState.error]} />
-                        )}
-                    </Field>
-                )}
-            /> */}
-
-            {/* Message */}
             <Controller
                 control={form.control}
                 name="message"
@@ -159,7 +62,11 @@ const BroadCastMessageForm = ({
                     <Field>
                         <FieldLabel>Message</FieldLabel>
 
-                        <Textarea placeholder="Enter message..." {...field} />
+                        <Textarea
+                            placeholder="Write your announcement..."
+                            className="min-h-32 resize-none rounded-xl"
+                            {...field}
+                        />
 
                         {fieldState.error && (
                             <FieldError errors={[fieldState.error]} />
@@ -168,29 +75,13 @@ const BroadCastMessageForm = ({
                 )}
             />
 
-            {/* Attachment */}
-            {/* <Controller
-                control={form.control}
-                name="attachment"
-                render={({ field, fieldState }) => (
-                    <Field>
-                        <FieldLabel>Attachment</FieldLabel>
-
-                        <Input
-                            type="file"
-                            onChange={(e) =>
-                                field.onChange(e.target.files?.[0])
-                            }
-                        />
-
-                        {fieldState.error && (
-                            <FieldError errors={[fieldState.error]} />
-                        )}
-                    </Field>
-                )}
-            /> */}
-
-            <Button type="submit" className="w-full bg-green-500 hover:bg-green-600">Send Broadcast</Button>
+            <Button
+                type="submit"
+                className="w-full rounded-xl bg-green-500 hover:bg-green-600"
+            >
+                <Send className="mr-2 h-4 w-4" />
+                Send Broadcast
+            </Button>
         </form>
     );
 };
