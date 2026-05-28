@@ -365,3 +365,29 @@ export interface GuardStatic {
     | "ended_early"
     | "overtime_ended";
 }
+
+//Settings
+//User
+export interface UserType {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    status: string;
+    lastLogin: string;
+}
+
+export type VehicleStatus =
+    | "Active"
+    | "Maintenance"
+    | "Inactive";
+
+export interface VehicleType {
+    id: string;
+    type: string;
+    registration: string;
+    status: VehicleStatus;
+    assignedPatrols: string[];
+    nextMaintenance: string;
+    fuelUsage: string;
+}

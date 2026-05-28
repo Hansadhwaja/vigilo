@@ -3,7 +3,7 @@ export { default as Dashboard } from './DashBoard/Dashboard';
 export { default as MapPage } from './MapPage';
 export { default as DispatchPage } from './DispatchPage';
 export { default as IncidentsPage } from './Incidents/IncidentsPage';
-export { default as SettingsPage } from './SettingsPage';
+export { default as SettingsPage } from './Settings/SettingsPage';
 
 // Export all the other pages
 export { default as SchedulingPage } from './Scheduling/SchedulingPage';

@@ -10,10 +10,12 @@ import {
 } from "@/components/ui/tabs";
 
 import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
 
 interface TabItem {
     value: string;
     label: string;
+    icon?: LucideIcon;
     content: ReactNode;
     activeColor?: string;
 }
@@ -53,31 +55,33 @@ const AppTabs = ({
                 className
             )}
         >
-            <TabsList
-                className={cn(
-                    `
-                    shrink-0
-                    min-h-14
-                    rounded-full
-                    border
-                    border-slate-200
-                    bg-linear-to-r
-                    from-orange-50
-                    via-white
-                    to-sky-50
-                    p-1.5
-                    shadow-sm
-                    `,
-                    tabsListClassName
-                )}
-            >
-                {tabs.map((tab) => (
-                    <TabsTrigger
-                        key={tab.value}
-                        value={tab.value}
-                        className={cn(
-                            `
-                            min-w-35
+            <div className="w-full overflow-x-auto no-scrollbar">
+                <TabsList
+                    className={cn(
+                        `
+            w-max
+            min-w-full
+            justify-start
+            min-h-14
+            rounded-full
+            border
+            border-slate-200
+            bg-linear-to-r
+            from-orange-50
+            via-white
+            to-sky-50
+            shadow-sm
+            `,
+                        tabsListClassName
+                    )}
+                >
+                    {tabs.map((tab) => (
+                        <TabsTrigger
+                            key={tab.value}
+                            value={tab.value}
+                            className={cn(
+                                `
+                            shrink-0
                             rounded-full
                             px-6
                             py-2.5
@@ -89,25 +93,24 @@ const AppTabs = ({
                             data-[state=active]:text-white
                             data-[state=active]:shadow-md
                             `,
-                            tab.activeColor ||
-                            "data-[state=active]:bg-orange-500"
-                        )}
-                    >
-                        {tab.label}
-                    </TabsTrigger>
-                ))}
-            </TabsList>
-
+                                tab.activeColor ||
+                                "data-[state=active]:bg-orange-500"
+                            )}
+                        >
+                            {tab.icon && (<tab.icon size={16} />)}
+                            {tab.label}
+                        </TabsTrigger>
+                    ))}
+                </TabsList>
+            </div>
             {tabs.map((tab) => (
                 <TabsContent
                     key={tab.value}
                     value={tab.value}
                     className={cn(
-                        `
-                        mt-0
+                        `mt-0
                         flex-1
                         min-h-0
-                        overflow-hidden
                         `,
                         contentClassName
                     )}

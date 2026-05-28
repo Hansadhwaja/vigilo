@@ -515,3 +515,46 @@ export const orderStatus = [
     { label: "Completed", value: "completed" },
     { label: "Cancelled", value: "cancelled" },
 ];
+
+//Settings
+//General
+const notificationSettings = [
+    {
+        title: "Email notifications",
+        description: "Receive alerts via email",
+        defaultChecked: true,
+    },
+    {
+        title: "SMS alerts",
+        description: "Critical incidents only",
+    },
+    {
+        title: "Push notifications",
+        description: "Mobile app notifications",
+        defaultChecked: true,
+    },
+    {
+        title: "Sound alerts",
+        description: "Audio notifications for critical alarms",
+        defaultChecked: true,
+    },
+];
+
+const operationSettings = [
+    {
+        title: "Auto-assign alarms",
+        description: "Based on proximity and availability",
+        defaultChecked: true,
+    },
+    {
+        title: "Auto-escalate overdue alarms",
+        description: "Escalate after SLA threshold",
+        defaultChecked: true,
+    },
+    {
+        title: "Real-time tracking",
+        description: "GPS tracking for all guards",
+        defaultChecked: true,
+    },
+];
+
