@@ -149,10 +149,10 @@ const NotificationModal = () => {
                 </div>
 
                 {/* BODY */}
-                <div className="max-h-[400px] overflow-y-auto p-2">
+                <div className="max-h-100 overflow-y-auto p-2 no-scrollbar">
                     {notifications.length > 0 ? (
                         <div className="space-y-2">
-                            {notifications.slice(0, 5).map((notification) => (
+                            {notifications.map((notification) => (
                                 <div
                                     key={notification.id}
                                     className={`group rounded-xl border p-3 transition-all hover:bg-slate-50 ${notification.isRead

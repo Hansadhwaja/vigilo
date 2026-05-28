@@ -1,4 +1,4 @@
-import { Bell, Building2, Euro, LayoutDashboard, Map, MessageSquareText, Radar, Settings, Timer, TriangleAlert, User } from "lucide-react";
+import { AlertTriangle, Bell, Building2, Car, CheckCircle2, Euro, LayoutDashboard, Map, MessageSquareText, Radar, Radio, Settings, Timer, TriangleAlert, User } from "lucide-react";
 
 export const navLinks = [
     {
@@ -558,3 +558,21 @@ const operationSettings = [
     },
 ];
 
+export const authFeatures = [
+    {
+        icon: AlertTriangle,
+        title: "Incident Management",
+    },
+    {
+        icon: Radio,
+        title: "Patrol Tracking",
+    },
+    {
+        icon: Car,
+        title: "Fleet Monitoring",
+    },
+    {
+        icon: CheckCircle2,
+        title: "Real-time Response",
+    },
+];

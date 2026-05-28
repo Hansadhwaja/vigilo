@@ -5,16 +5,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+
 import {
     Field,
     FieldLabel,
     FieldError,
 } from "@/components/ui/field";
 
-import { Eye, EyeOff } from "lucide-react";
+import {
+    Eye,
+    EyeOff,
+    Mail,
+    Lock,
+    LogIn,
+} from "lucide-react";
 
-
-// ✅ Schema
 const loginSchema = z.object({
     email: z.email("Enter a valid email"),
     password: z.string().min(6, "Minimum 6 characters"),
@@ -27,10 +32,17 @@ interface Props {
     isLoading?: boolean;
 }
 
-export function LoginForm({ onSubmit, isLoading }: Props) {
-    const [showPassword, setShowPassword] = useState(false);
+export function LoginForm({
+    onSubmit,
+    isLoading,
+}: Props) {
+    const [showPassword, setShowPassword] =
+        useState(false);
 
-    const { control, handleSubmit } = useForm<LoginFormValues>({
+    const {
+        control,
+        handleSubmit,
+    } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
             email: "",
@@ -39,23 +51,41 @@ export function LoginForm({ onSubmit, isLoading }: Props) {
     });
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
+        <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-5"
+        >
             {/* EMAIL */}
             <Controller
                 name="email"
                 control={control}
                 render={({ field, fieldState }) => (
                     <Field>
-                        <FieldLabel>Email</FieldLabel>
+                        <FieldLabel>
+                            Email Address
+                        </FieldLabel>
 
-                        <Input
-                            placeholder="admin@example.com"
-                            {...field}
-                        />
+                        <div className="relative">
+                            <Mail
+                                className="
+                                    absolute left-3 top-1/2
+                                    h-4 w-4
+                                    -translate-y-1/2
+                                    text-slate-400
+                                "
+                            />
 
-                        {fieldState.invalid && fieldState.error && (
-                            <FieldError errors={[fieldState.error]} />
+                            <Input
+                                {...field}
+                                placeholder="admin@vigilo.com"
+                                className="pl-10"
+                            />
+                        </div>
+
+                        {fieldState.error && (
+                            <FieldError
+                                errors={[fieldState.error]}
+                            />
                         )}
                     </Field>
                 )}
@@ -67,19 +97,44 @@ export function LoginForm({ onSubmit, isLoading }: Props) {
                 control={control}
                 render={({ field, fieldState }) => (
                     <Field>
-                        <FieldLabel>Password</FieldLabel>
+                        <FieldLabel>
+                            Password
+                        </FieldLabel>
 
                         <div className="relative">
+                            <Lock
+                                className="
+                                    absolute left-3 top-1/2
+                                    h-4 w-4
+                                    -translate-y-1/2
+                                    text-slate-400
+                                "
+                            />
+
                             <Input
-                                type={showPassword ? "text" : "password"}
                                 {...field}
-                                className="pr-10"
+                                type={
+                                    showPassword
+                                        ? "text"
+                                        : "password"
+                                }
+                                className="pl-10 pr-10"
+                                placeholder="Enter your password"
                             />
 
                             <button
                                 type="button"
-                                onClick={() => setShowPassword((prev) => !prev)}
-                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                onClick={() =>
+                                    setShowPassword(
+                                        (prev) => !prev
+                                    )
+                                }
+                                className="
+                                    absolute right-3 top-1/2
+                                    -translate-y-1/2
+                                    text-slate-400
+                                    hover:text-slate-600
+                                "
                             >
                                 {showPassword ? (
                                     <Eye className="h-4 w-4" />
@@ -89,16 +144,31 @@ export function LoginForm({ onSubmit, isLoading }: Props) {
                             </button>
                         </div>
 
-                        {fieldState.invalid && fieldState.error && (
-                            <FieldError errors={[fieldState.error]} />
+                        {fieldState.error && (
+                            <FieldError
+                                errors={[fieldState.error]}
+                            />
                         )}
                     </Field>
                 )}
             />
 
-            {/* SUBMIT */}
-            <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+            <Button
+                type="submit"
+                disabled={isLoading}
+                className="
+                    h-11
+                    w-full
+                    gap-2
+                    bg-blue-600
+                    hover:bg-blue-700
+                "
+            >
+                <LogIn className="h-4 w-4" />
+
+                {isLoading
+                    ? "Signing In..."
+                    : "Sign In"}
             </Button>
         </form>
     );
