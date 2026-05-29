@@ -1,7 +1,7 @@
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AdminPatrolRun, useGetAllPatrolRunsForAdminQuery } from "@/apis/patrollingAPI";
+import { AdminPatrolRun, useExportPatrolsMutation, useGetAllPatrolRunsForAdminQuery } from "@/apis/patrollingAPI";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import PatrollingStats from "@/components/Patrolling/PatrollingStats";
 import PatrollingSearchFilters from "@/components/Patrolling/PatrollingSearchFilers";
@@ -10,6 +10,7 @@ import PatrolCard from "../../components/Patrolling/PatrolCard";
 import Loader from "@/components/common/Loader";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { toast } from "sonner";
 
 export default function PatrolPage() {
   const { getParam } = useQueryParams();
@@ -28,6 +29,29 @@ export default function PatrolPage() {
 
   const { data: patrols = [], summary } = data ?? {};
 
+  const [exportPatrol, { isLoading: isExporting }] = useExportPatrolsMutation();
+
+  const handleExport = async () => {
+    try {
+      const blob = await exportPatrol(undefined).unwrap();
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `patrol-report-${Date.now()}.csv`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+      toast.success("Patrols Exported Successfully");
+    } catch (error) {
+      console.log(error);
+      toast.error("Error while exporting Patrols")
+    }
+  }
+
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       <CustomHeader
@@ -39,9 +63,18 @@ export default function PatrolPage() {
               variant="outline"
               size="sm"
               className="cursor-pointer"
+              onClick={handleExport}
+              disabled={isExporting}
             >
-              <Download className="h-4 w-4" />
-              Export
+
+              {isExporting ? <Loader /> : (
+                <>
+                  <Download className="h-4 w-4" />
+                  Export
+                </>
+
+
+              )}
             </Button>
 
             <CreatePatrolModal />

@@ -50,6 +50,14 @@ export const invoiceApis = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["Invoice"]
         }),
+        exportInvoices: builder.mutation({
+            query: () => ({
+                url: "/invoicing/export",
+                method: "GET",
+                responseHandler: (response) => response.blob(),
+            }),
+            invalidatesTags: ["Invoice"],
+        })
     }),
 });
 
@@ -59,5 +67,6 @@ export const {
     useGetAllGuardPaymentsQuery,
     useGenerateGuardPaymentMutation,
     useUpdateGuardPaymentStatusMutation,
-    useGenerateInvoicePDFMutation
+    useGenerateInvoicePDFMutation,
+    useExportInvoicesMutation
 } = invoiceApis;

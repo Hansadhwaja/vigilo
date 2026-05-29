@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { sampleGuards } from "@/data/sampleData";
 import { toast } from "sonner";
-import { Alarm, useDeleteAlarmMutation, useGetAllAlarmsQuery } from "@/apis/alarmsAPI";
+import { Alarm, useDeleteAlarmMutation, useExportAlarmsMutation, useGetAllAlarmsQuery } from "@/apis/alarmsAPI";
 import { getStatusStyle, getStatusColor } from "@/utils/statusColors";
 import CreateAlarmModal from "../../components/Alarm/Modal/CreateAlarmModal";
 import CustomHeader from "@/components/common/Header/CustomHeader";
@@ -15,6 +15,7 @@ import AlarmSearchFilters from "@/components/Alarm/AlarmSearchFilters";
 import { formatDate, formatTime } from "@/lib/utils";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import Loader from "@/components/common/Loader";
 
 // Advanced GPS-based guard assignment logic
 const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
@@ -219,6 +220,29 @@ export default function AlarmsPage() {
     return "text-green-600";
   };
 
+  const [exportAlarms, { isLoading: isExporting }] = useExportAlarmsMutation();
+
+  const handleExport = async () => {
+    try {
+      const blob = await exportAlarms(undefined).unwrap();
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `alarms-report-${Date.now()}.csv`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+      toast.success("Alarms Exported Successfully");
+    } catch (error) {
+      console.log(error);
+      toast.error("Error while exporting Alarms")
+    }
+  }
+
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       <CustomHeader
@@ -228,10 +252,20 @@ export default function AlarmsPage() {
           <div className="flex gap-2 items-center">
             <Button
               variant="outline"
-              className="flex items-center gap-2"
+              size="sm"
+              className="cursor-pointer"
+              onClick={handleExport}
+              disabled={isExporting}
             >
-              <Download className="h-4 w-4" />
-              Export
+
+              {isExporting ? <Loader /> : (
+                <>
+                  <Download className="h-4 w-4" />
+                  Export
+                </>
+
+
+              )}
             </Button>
 
             <CreateAlarmModal />

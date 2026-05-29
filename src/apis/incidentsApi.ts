@@ -138,10 +138,20 @@ export const incidentsApi = baseApi.injectEndpoints({
         { type: "Incidents", id },
       ],
     }),
+
+    exportIncidents: builder.mutation({
+      query: () => ({
+        url: "/incidents/export",
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+      invalidatesTags: ["Incidents"],
+    })
   }),
 });
 
 export const {
   useGetAllIncidentsQuery,
   useGetIncidentByIdQuery,
+  useExportIncidentsMutation
 } = incidentsApi;

@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Download } from "lucide-react";
 
 import CustomHeader from "@/components/common/Header/CustomHeader";
 
@@ -6,10 +6,13 @@ import IncidentStats from "@/components/Incidents/IncidentStats";
 import IncidentsTable from "@/components/Incidents/Table/IncidentsTable";
 import IncidentsSearchFilters from "@/components/Incidents/IncidentsSearchFilters";
 
-import { useGetAllIncidentsQuery } from "@/apis/incidentsApi";
+import { useExportIncidentsMutation, useGetAllIncidentsQuery } from "@/apis/incidentsApi";
 
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { Button } from "@/components/ui/button";
+import Loader from "@/components/common/Loader";
+import { toast } from "sonner";
 
 export default function IncidentsPage() {
   const {
@@ -73,6 +76,29 @@ export default function IncidentsPage() {
     });
   };
 
+  const [exportIncidents, { isLoading: isExporting }] = useExportIncidentsMutation();
+
+  const handleExport = async () => {
+    try {
+      const blob = await exportIncidents(undefined).unwrap();
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `incidents-report-${Date.now()}.csv`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+      toast.success("Incidents Exported Successfully");
+    } catch (error) {
+      console.log(error);
+      toast.error("Error while exporting Incidents")
+    }
+  }
+
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
 
@@ -80,8 +106,26 @@ export default function IncidentsPage() {
         title="Incident Management"
         description="View and manage incidents raised by guards and clients"
         others={
-          <div
-            className="
+          <div className="flex gap-2 items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              className="cursor-pointer"
+              onClick={handleExport}
+              disabled={isExporting}
+            >
+
+              {isExporting ? <Loader /> : (
+                <>
+                  <Download className="h-4 w-4" />
+                  Export
+                </>
+
+
+              )}
+            </Button>
+            <div
+              className="
                 flex items-center gap-3
                 rounded-2xl border border-orange-100
                 bg-linear-to-r
@@ -90,9 +134,10 @@ export default function IncidentsPage() {
                 px-5 py-3
                 shadow-sm
               "
-          >
-            <div
-              className="
+            >
+
+              <div
+                className="
                   flex h-11 w-11 items-center
                   justify-center rounded-xl
                   bg-linear-to-br
@@ -100,28 +145,29 @@ export default function IncidentsPage() {
                   to-sky-500
                   text-white shadow-md
                 "
-            >
-              <AlertTriangle className="h-5 w-5" />
-            </div>
+              >
+                <AlertTriangle className="h-5 w-5" />
+              </div>
 
-            <div>
-              <p
-                className="
+              <div>
+                <p
+                  className="
                     text-xs font-semibold uppercase
                     tracking-wide text-slate-500
                   "
-              >
-                Incident Tracking
-              </p>
+                >
+                  Incident Tracking
+                </p>
 
-              <p
-                className="
+                <p
+                  className="
                     text-sm font-semibold
                     text-slate-800
                   "
-              >
-                Real-time Monitoring
-              </p>
+                >
+                  Real-time Monitoring
+                </p>
+              </div>
             </div>
           </div>
         }

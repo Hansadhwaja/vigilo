@@ -111,6 +111,15 @@ export const usersApi = baseApi.injectEndpoints({
         body: formData,
       }),
     }),
+
+    exportUsers: builder.mutation({
+      query: () => ({
+        url: "/users/export",
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+      invalidatesTags: ["Clients"],
+    })
   }),
 });
 
@@ -121,4 +130,5 @@ export const {
   useEditClientMutation,
   useDeleteClientMutation,
   useUploadImageMutation,
+  useExportUsersMutation
 } = usersApi;

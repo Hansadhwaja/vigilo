@@ -68,8 +68,8 @@ export interface GetAllAlarmsResponse {
   success: boolean;
   count: number;
   data: Alarm[];
-  summary:{
-    
+  summary: {
+
   }
 }
 
@@ -154,6 +154,14 @@ export const alarmsApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Alarms", id: "LIST" }],
     }),
+    exportAlarms: builder.mutation({
+      query: () => ({
+        url: "/alarm/export",
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+      invalidatesTags: ["Alarms"],
+    })
   }),
 });
 
@@ -161,4 +169,5 @@ export const {
   useCreateAlarmMutation,
   useGetAllAlarmsQuery,
   useDeleteAlarmMutation,
+  useExportAlarmsMutation
 } = alarmsApi;

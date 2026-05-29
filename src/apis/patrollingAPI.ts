@@ -494,26 +494,15 @@ export interface GetAllPatrolCheckpointsResponse {
 
 export const patrollingApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-
-    createPatrolSite: builder.mutation<
-      CreatePatrolSiteResponse,
-      CreatePatrolSiteRequest
-    >({
+    createPatrolSite: builder.mutation<CreatePatrolSiteResponse, CreatePatrolSiteRequest>({
       query: (data) => ({
         url: "/patrolling/createPatrolSite",
         method: "POST",
         body: data,
       }),
-
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
-    // ===============================
-    // 🟢 CREATE SUB SITE
-    // ===============================
-    createSubSite: builder.mutation<
-      CreateSubSiteResponse,
-      CreateSubSiteRequest
-    >({
+    createSubSite: builder.mutation<CreateSubSiteResponse, CreateSubSiteRequest>({
       query: (body) => ({
         url: "/patrolling/createPatrolSubSite", // adjust if route differs
         method: "POST",
@@ -546,13 +535,7 @@ export const patrollingApi = baseApi.injectEndpoints({
 
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
-    // ===============================
-    // 🟢 GET ALL PATROL SITES
-    // ===============================
-    getAllPatrolSites: builder.query<
-      GetAllPatrolSitesResponse,
-      { page?: number; limit?: number }
-    >({
+    getAllPatrolSites: builder.query<GetAllPatrolSitesResponse, { page?: number; limit?: number }>({
       query: ({ page = 1, limit = 10 }) => ({
         url: `/patrolling/getAllPatrolSites?page=${page}&limit=${limit}`,
         method: "GET",
@@ -560,14 +543,7 @@ export const patrollingApi = baseApi.injectEndpoints({
 
       providesTags: [{ type: "Patrol", id: "LIST" }],
     }),
-
-    // ===============================
-    // 🟢 CREATE CHECKPOINT
-    // ===============================
-    createCheckpoint: builder.mutation<
-      CreateCheckpointResponse,
-      CreateCheckpointRequest
-    >({
+    createCheckpoint: builder.mutation<CreateCheckpointResponse, CreateCheckpointRequest>({
       query: (body) => ({
         url: "/patrolling/createCheckpoint", // adjust if needed
         method: "POST",
@@ -816,6 +792,15 @@ export const patrollingApi = baseApi.injectEndpoints({
         responseHandler: async (response) => response.blob(),
       }),
     }),
+
+    exportPatrols: builder.mutation({
+      query: () => ({
+        url: "/patrolling/export",
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+      invalidatesTags: ["Patrol"],
+    })
   }),
 });
 
@@ -840,4 +825,5 @@ export const {
   useGetAllPatrolCheckpointsQuery,
   useLazyDownloadQRQuery,
   useLazyDownloadSiteQRsPdfQuery,
+  useExportPatrolsMutation
 } = patrollingApi;

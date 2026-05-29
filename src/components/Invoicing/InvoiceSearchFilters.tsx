@@ -4,6 +4,9 @@ import DataFilters from "@/components/common/Filter/DataFilters";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Loader from "../common/Loader";
+import { toast } from "sonner";
+import { useExportInvoicesMutation } from "@/apis/invoiceApis";
 
 const InvoiceSearchFilters = () => {
     const { getParam, setMultipleParams } = useQueryParams();
@@ -11,6 +14,31 @@ const InvoiceSearchFilters = () => {
     const search = getParam("search", "");
     const status = getParam("status", "");
     const month = getParam("month", "");
+
+
+    const [exportInvoices, { isLoading: isExporting }] = useExportInvoicesMutation();
+
+    const handleExport = async () => {
+        try {
+            const blob = await exportInvoices(undefined).unwrap();
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `invoices-report-${Date.now()}.csv`;
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            window.URL.revokeObjectURL(url);
+            toast.success("Invoices Exported Successfully");
+        } catch (error) {
+            console.log(error);
+            toast.error("Error while exporting Invoices")
+        }
+    }
+
 
     const handleSearch = (value: string) => {
         setMultipleParams({
@@ -87,9 +115,22 @@ const InvoiceSearchFilters = () => {
             onClear={clearParams}
             filters={filters}
             others={
-                <Button className="flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2 text-sm text-white hover:bg-slate-800">
-                    <Download className="h-4 w-4" />
-                    Export
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="cursor-pointer"
+                    onClick={handleExport}
+                    disabled={isExporting}
+                >
+
+                    {isExporting ? <Loader /> : (
+                        <>
+                            <Download className="h-4 w-4" />
+                            Export
+                        </>
+
+
+                    )}
                 </Button>
             }
         />
