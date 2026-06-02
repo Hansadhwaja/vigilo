@@ -269,7 +269,15 @@ export const schedulingApi = baseApi.injectEndpoints({
         return `/scheduling/getGuardTimeSheetSummary?${qs.toString()}`
       },
       providesTags: ["Schedules"],
-    })
+    }),
+    exportTimeSheets: builder.mutation({
+      query: () => ({
+        url: "/scheduling/export-timesheets",
+        method: "GET",
+        responseHandler: (response) => response.blob(),
+      }),
+      invalidatesTags: ["Schedules"],
+    }),
   }),
 });
 
@@ -281,5 +289,6 @@ export const {
   useEditScheduleMutation,
   useGetAllTimeSheetsQuery,
   useEditTimeSheetMutation,
-  useGetGuardTimeSheetSummaryQuery
+  useGetGuardTimeSheetSummaryQuery,
+  useExportTimeSheetsMutation
 } = schedulingApi;

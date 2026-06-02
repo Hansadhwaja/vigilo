@@ -27,7 +27,7 @@ const GeneratePaymentModal = () => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button size="sm" className='cursor-pointer'>
+                <Button size="sm" className='cursor-pointer rounded-full bg-linear-to-r from-emerald-500 via-green-600 to-green-700'>
                     <Plus />
                     Generate Payment
                 </Button>

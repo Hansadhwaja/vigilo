@@ -33,9 +33,14 @@ import Loader from "@/components/common/Loader";
 
 interface TimeSheetTableProps {
     timeSheets: TimeSheet[];
+    page: number;
+    totalPages: number;
+    limit: number;
     isLoading: boolean;
     isError: boolean;
     error: any;
+    onPageChange: (n: number) => void;
+    onLimitChange: (n: number) => void;
 }
 
 const TimeSheetTable = ({
@@ -43,6 +48,11 @@ const TimeSheetTable = ({
     isLoading,
     isError,
     error,
+    page = 1,
+    totalPages = 1,
+    limit,
+    onPageChange,
+    onLimitChange,
 }: TimeSheetTableProps) => {
 
     const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -228,6 +238,11 @@ const TimeSheetTable = ({
             error={error}
             loadingText="Loading timesheets..."
             emptyText="No timesheets found"
+            page={page}
+            totalPages={totalPages}
+            limit={limit}
+            onPageChange={onPageChange}
+            onLimitChange={onLimitChange}
         />
     );
 };

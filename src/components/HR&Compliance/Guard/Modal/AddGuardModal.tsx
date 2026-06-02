@@ -26,7 +26,7 @@ const AddGuardModal = () => {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className='cursor-pointer'>
+                <Button className='cursor-pointer rounded-full bg-linear-to-r from-orange-500 via-orange-600 to-orange-700'>
                     <Plus />
                     Add Guard
                 </Button>

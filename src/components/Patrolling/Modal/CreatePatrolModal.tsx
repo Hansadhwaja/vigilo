@@ -27,7 +27,7 @@ const CreatePatrolModal = () => {
     return (
         <Dialog open={open} onOpenChange={setOpen} >
             <DialogTrigger asChild>
-                <Button className="cursor-pointer">
+                <Button className="rounded-full bg-linear-to-r from-indigo-500 via-violet-600 to-indigo-700">
                     <Plus />
                     Create Patrol
                 </Button>

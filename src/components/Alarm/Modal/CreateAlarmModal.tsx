@@ -47,7 +47,7 @@ const CreateAlarmModal = () => {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
+                <Button className="rounded-full bg-linear-to-r from-rose-500 via-pink-600 to-rose-700">
                     <Plus className="h-4 w-4" />
                     Create Alarm
                 </Button>

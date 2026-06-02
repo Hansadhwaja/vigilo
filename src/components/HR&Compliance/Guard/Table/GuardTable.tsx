@@ -9,7 +9,6 @@ import {
     Eye,
     Mail,
     Phone,
-    AlertCircle,
 } from "lucide-react";
 
 import { Link } from "react-router-dom";

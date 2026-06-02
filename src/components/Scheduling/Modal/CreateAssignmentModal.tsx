@@ -90,7 +90,7 @@ const CreateAssignmentModal = ({
                     className={
                         title
                             ? "rounded-xl border border-dashed border-slate-300 bg-white font-medium text-slate-700 hover:border-slate-400 hover:bg-slate-50"
-                            : "rounded-xl bg-slate-900 px-5 font-medium text-white shadow-sm hover:bg-slate-800"
+                            : "rounded-full bg-linear-to-r from-sky-500 via-sky-600 to-sky-700 px-5 font-medium text-white shadow-sm"
                     }
                 >
                     <Plus className="size-4" />

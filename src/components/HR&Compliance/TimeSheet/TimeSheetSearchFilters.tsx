@@ -3,6 +3,11 @@
 import DataFilters, { FilterItem } from "@/components/common/Filter/DataFilters";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { Guard } from "@/apis/guardsApi";
+import { useExportTimeSheetsMutation } from "@/apis/schedulingAPI";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import Loader from "@/components/common/Loader";
+import { Download } from "lucide-react";
 
 interface TimeSheetSearchFiltersProps {
     guards: Guard[];
@@ -18,6 +23,29 @@ const TimeSheetSearchFilters = ({
     const guardId = getParam("guardId", "");
     const fromDate = getParam("fromDate", "");
     const toDate = getParam("toDate", "");
+
+    const [exportTimeSheet, { isLoading: isExporting }] = useExportTimeSheetsMutation();
+
+    const handleExport = async () => {
+        try {
+            const blob = await exportTimeSheet(undefined).unwrap();
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `time-sheet-report-${Date.now()}.csv`;
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            window.URL.revokeObjectURL(url);
+            toast.success("Time Sheets Exported Successfully");
+        } catch (error) {
+            console.log(error);
+            toast.error("Error while exporting Time Sheets")
+        }
+    }
 
     const handleSearch = (value: string) => {
         setMultipleParams({
@@ -91,6 +119,27 @@ const TimeSheetSearchFilters = ({
             onSearchChange={handleSearch}
             onClear={clearParams}
             filters={filters}
+            others={
+                <div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="cursor-pointer"
+                        onClick={handleExport}
+                        disabled={isExporting}
+                    >
+
+                        {isExporting ? <Loader /> : (
+                            <>
+                                <Download className="h-4 w-4" />
+                                Export
+                            </>
+
+
+                        )}
+                    </Button>
+                </div>
+            }
         />
     );
 };
