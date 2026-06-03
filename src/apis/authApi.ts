@@ -6,7 +6,10 @@ export const authApi = baseApi.injectEndpoints({
       query: (body) => ({
         url: "/users/login",
         method: "POST",
-        body,
+        body: {
+          ...body,
+          role: "admin"
+        },
       }),
     }),
   }),
