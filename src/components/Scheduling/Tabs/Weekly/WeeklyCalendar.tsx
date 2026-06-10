@@ -85,12 +85,12 @@ const WeeklyCalendar = ({ scheduling }: WeeklyCalendarProps) => {
 
             {/* Calendar */}
             <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                    <div className="min-w-300">
+                <div className="h-200 overflow-x-auto">
+                    <div className="min-w-340">
                         {/* Week Header */}
-                        <div className="grid grid-cols-8 border-b border-slate-200 bg-slate-50/80">
+                        <div className="sticky top-0 z-30 grid grid-cols-8 border-b border-slate-200 bg-slate-50">
                             {/* Time */}
-                            <div className="flex items-center border-r border-slate-200 px-4 py-4 text-sm font-semibold tracking-wide text-slate-500">
+                            <div className="sticky left-0 z-40 bg-slate-50 flex items-center border-r border-slate-200 px-4 py-4 text-sm font-semibold tracking-wide text-slate-500">
                                 TIME
                             </div>
 
@@ -115,7 +115,7 @@ const WeeklyCalendar = ({ scheduling }: WeeklyCalendarProps) => {
                                     >
                                         <p
                                             className={cn(
-                                                "text-xs font-medium uppercase tracking-wide",
+                                                "text-sm font-medium uppercase tracking-wide",
                                                 isSelected
                                                     ? "text-white/80"
                                                     : "text-slate-500"
@@ -132,7 +132,7 @@ const WeeklyCalendar = ({ scheduling }: WeeklyCalendarProps) => {
 
                                         <p
                                             className={cn(
-                                                "text-xs font-medium",
+                                                "text-sm font-medium",
                                                 isSelected
                                                     ? "text-white/80"
                                                     : "text-slate-500"

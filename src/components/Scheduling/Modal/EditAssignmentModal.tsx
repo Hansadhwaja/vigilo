@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import { mapAssignmentToForm } from "@/lib/utils";
 import { AssignmentFormValues } from "@/schemas";
 import { OrganizedAssignment } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
 
 const EditAssignmentModal = ({ assignment, id }: { assignment: OrganizedAssignment, id: string }) => {
   const [open, setOpen] = useState(false);
@@ -27,8 +29,6 @@ const EditAssignmentModal = ({ assignment, id }: { assignment: OrganizedAssignme
   const initialFormData = useMemo(() => {
     return mapAssignmentToForm(assignment);
   }, [assignment]);
-
-  console.log(initialFormData);
 
   const handleSubmit = async (data: AssignmentFormValues) => {
     try {
@@ -44,10 +44,10 @@ const EditAssignmentModal = ({ assignment, id }: { assignment: OrganizedAssignme
 
       await editSchedule({ id, data: payload }).unwrap();
 
-      toast.success("Assignment created successfully");
+      toast.success("Assignment edited successfully");
       setOpen(false);
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to create assignment");
+      toast.error(err?.data?.message || "Failed to edited assignment");
     }
   };
 
@@ -60,13 +60,21 @@ const EditAssignmentModal = ({ assignment, id }: { assignment: OrganizedAssignme
       </DialogTrigger>
 
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Guard Assignment</DialogTitle>
-          <DialogDescription>Editing shift with
-            1 guard(s)
-            assigned. You can add or remove guards from this shift.</DialogDescription>
-        </DialogHeader>
-
+        <div className="flex gap-4 items-center">
+          <DialogHeader>
+            <DialogTitle>Edit Guard Assignment</DialogTitle>
+            <DialogDescription>Editing shift with
+              1 guard(s)
+              assigned. You can add or remove guards from this shift.</DialogDescription>
+          </DialogHeader>
+          <Badge
+            variant="outline"
+            className="rounded-full border px-2.5 py-0.5 text-[10px] font-medium uppercase"
+            style={getStatusStyle(assignment.status)}
+          >
+            {getStatusColor(assignment.status).label}
+          </Badge>
+        </div>
         <AssignmentForm
           initialData={initialFormData}
           isLoading={isLoading}

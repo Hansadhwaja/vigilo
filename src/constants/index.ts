@@ -53,7 +53,7 @@ export const navLinks = [
     },
     {
         icon: Settings,
-        label: "Settings",
+        label: "Settings & Equipments",
         link: "/settings"
     },
 ];

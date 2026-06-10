@@ -92,7 +92,7 @@ const ViewClientModal = ({
                         </div>
 
                         <div className="space-y-1">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                            <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
                                 Email Address
                             </p>
 
@@ -115,7 +115,7 @@ const ViewClientModal = ({
                         </div>
 
                         <div className="space-y-1">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                            <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
                                 Mobile Number
                             </p>
 
@@ -138,7 +138,7 @@ const ViewClientModal = ({
                         </div>
 
                         <div className="space-y-1">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                            <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
                                 Address
                             </p>
 
@@ -161,7 +161,7 @@ const ViewClientModal = ({
                         </div>
 
                         <div className="space-y-1">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                            <p className="text-sm font-semibold uppercase tracking-wide text-slate-400">
                                 Client ID
                             </p>
 

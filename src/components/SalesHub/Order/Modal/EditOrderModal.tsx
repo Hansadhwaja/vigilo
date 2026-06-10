@@ -13,37 +13,22 @@ import OrderForm from "../Form/OrderForm";
 
 import { Button } from "@/components/ui/button";
 
-import {
-    Edit,
-    FilePenLine,
-} from "lucide-react";
+import { Edit, FilePenLine } from "lucide-react";
 
-import {
-    Order,
-    useEditOrderMutation,
-} from "@/apis/ordersApi";
+import { Order, useEditOrderMutation } from "@/apis/ordersApi";
 
 import { OrderFormValues } from "@/schemas";
 
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
 
-const EditOrderModal = ({
-    order,
-}: {
-    order: Order;
-}) => {
-    const [open, setOpen] =
-        useState(false);
+const EditOrderModal = ({ order }: { order: Order }) => {
+    const [open, setOpen] = useState(false);
 
-    const [
-        editOrder,
-        { isLoading },
-    ] = useEditOrderMutation();
+    const [editOrder, { isLoading }] = useEditOrderMutation();
 
-    const [
-        siteServiceLat,
-        siteServiceLng,
-    ] = order.siteService.coordinates;
+    const [siteServiceLat, siteServiceLng] = order.siteService.coordinates;
 
     const initialData = {
         ...order,
@@ -56,24 +41,15 @@ const EditOrderModal = ({
             const payload = {
                 ...data,
 
-                locationName:
-                    data.locationName ||
-                    "",
+                locationName: data.locationName || "",
 
                 siteService: {
-                    lat: Number(
-                        data.siteServiceLat
-                    ),
+                    lat: Number(data.siteServiceLat),
 
-                    lng: Number(
-                        data.siteServiceLng
-                    ),
+                    lng: Number(data.siteServiceLng),
                 },
 
-                guardsRequired:
-                    Number(
-                        data.guardsRequired
-                    ),
+                guardsRequired: Number(data.guardsRequired),
             };
 
             await editOrder({
@@ -81,23 +57,16 @@ const EditOrderModal = ({
                 data: payload,
             }).unwrap();
 
-            toast.success(
-                "Order updated successfully"
-            );
+            toast.success("Order updated successfully");
 
             setOpen(false);
         } catch (error) {
-            toast.error(
-                "Failed to update order"
-            );
+            toast.error("Failed to update order");
         }
     };
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={setOpen}
-        >
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button
                     size="sm"
@@ -111,7 +80,6 @@ const EditOrderModal = ({
                     "
                 >
                     <Edit className="mr-2 h-4 w-4" />
-
                     Edit Order
                 </Button>
             </DialogTrigger>
@@ -152,12 +120,16 @@ const EditOrderModal = ({
                                 </DialogTitle>
 
                                 <DialogDescription className="text-white/85">
-                                    Update order details,
-                                    schedules, service
-                                    information, and
+                                    Update order details, schedules, service information, and
                                     guard requirements
                                 </DialogDescription>
                             </div>
+                            <Badge
+                                className="uppercase text-[10px]"
+                                style={getStatusStyle(order.status)}
+                            >
+                                {getStatusColor(order.status).label}
+                            </Badge>
                         </div>
                     </DialogHeader>
                 </div>
@@ -168,24 +140,12 @@ const EditOrderModal = ({
                         bg-slate-50/40 p-4
                     "
                 >
-
                     <OrderForm
-                        onSubmit={
-                            handleSubmit
-                        }
-                        isLoading={
-                            isLoading
-                        }
-                        initialData={
-                            initialData
-                        }
-                        onCancel={() =>
-                            setOpen(
-                                false
-                            )
-                        }
+                        onSubmit={handleSubmit}
+                        isLoading={isLoading}
+                        initialData={initialData}
+                        onCancel={() => setOpen(false)}
                     />
-
                 </div>
             </DialogContent>
         </Dialog>

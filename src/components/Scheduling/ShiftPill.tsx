@@ -25,7 +25,7 @@ const ShiftPill = ({ assignment }: { assignment: OrganizedAssignment }) => {
                         {assignment.guardName}
                     </span>
 
-                    <span className="text-xs opacity-70 truncate max-w-35">
+                    <span className="text-sm opacity-70 truncate max-w-35">
                         {assignment.start} - {assignment.end}
                     </span>
                 </div>

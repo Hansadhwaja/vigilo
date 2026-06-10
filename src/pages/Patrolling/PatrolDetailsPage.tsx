@@ -946,7 +946,7 @@ export default function PatrolDetailsPage() {
                         {/* SITE DESCRIPTION */}
                         {site.description && (
                           <div className="bg-muted/40 rounded-lg p-3 text-sm">
-                            <p className="text-muted-foreground text-xs mb-1">
+                            <p className="text-muted-foreground text-sm mb-1">
                               Description
                             </p>
                             <p>{site.description}</p>
@@ -954,7 +954,7 @@ export default function PatrolDetailsPage() {
                         )}
 
                         {/* LAT LNG */}
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           Lat: {site.latitude} | Lng: {site.longitude}
                         </p>
 
@@ -973,10 +973,10 @@ export default function PatrolDetailsPage() {
                                 <div className="flex justify-between items-start">
                                   <div>
                                     <p className="font-medium">{sub.name}</p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-sm text-muted-foreground">
                                       {sub.description}
                                     </p>
-                                    <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                                    <div className="flex gap-4 mt-2 text-sm text-muted-foreground">
                                       <span>₹ {sub.unitPrice}</span>
                                       <span>{sub.estimatedDuration} min</span>
                                     </div>
@@ -1013,7 +1013,7 @@ export default function PatrolDetailsPage() {
                                       {cp.description}
                                     </p>
 
-                                    <div className="flex justify-between text-xs text-muted-foreground">
+                                    <div className="flex justify-between text-sm text-muted-foreground">
                                       <span>
                                         {cp.latitude}, {cp.longitude}
                                       </span>
@@ -1057,7 +1057,7 @@ export default function PatrolDetailsPage() {
                                   {cp.description}
                                 </p>
 
-                                <div className="flex justify-between text-xs text-muted-foreground">
+                                <div className="flex justify-between text-sm text-muted-foreground">
                                   <span>
                                     {cp.latitude}, {cp.longitude}
                                   </span>
@@ -1155,7 +1155,7 @@ export default function PatrolDetailsPage() {
                     />
                     <div>
                       <p className="font-medium text-lg">{guard.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         {guard.email}
                       </p>
                     </div>
@@ -1388,10 +1388,10 @@ export default function PatrolDetailsPage() {
                           <p className="font-medium text-sm mb-2">{site.name}</p>
                           <div className="space-y-1">
                             {availableSubSites.length === 0 && (
-                              <p className="text-xs text-muted-foreground">No available sub-sites.</p>
+                              <p className="text-sm text-muted-foreground">No available sub-sites.</p>
                             )}
                             {availableSubSites.map((sub: any) => (
-                              <label key={`${site.id}-${sub.id}`} className="flex items-center gap-2 text-xs cursor-pointer">
+                              <label key={`${site.id}-${sub.id}`} className="flex items-center gap-2 text-sm cursor-pointer">
                                 <input
                                   type="checkbox"
                                   checked={editForm.addSubSites.some(
@@ -1414,9 +1414,9 @@ export default function PatrolDetailsPage() {
                   <div className="space-y-3 max-h-64 overflow-y-auto border rounded-md p-3">
                     {sites.map((site: any) => (
                       <div key={`site-cp-${site.id}`} className="border rounded-md p-2 space-y-2">
-                        <p className="font-medium text-xs">Site: {site.name}</p>
+                        <p className="font-medium text-sm">Site: {site.name}</p>
                         {allCheckpointsFromMaster.map((cp: any) => (
-                          <label key={`site-${site.id}-${cp.id}`} className="flex items-center gap-2 text-xs cursor-pointer">
+                          <label key={`site-${site.id}-${cp.id}`} className="flex items-center gap-2 text-sm cursor-pointer">
                             <input
                               type="checkbox"
                               checked={editForm.addCheckpoints.some(
@@ -1436,9 +1436,9 @@ export default function PatrolDetailsPage() {
                     {sites.flatMap((site: any) =>
                       (site.subSites || []).map((sub: any) => (
                         <div key={`sub-cp-${sub.id}`} className="border rounded-md p-2 space-y-2">
-                          <p className="font-medium text-xs">Sub-Site: {site.name} / {sub.name}</p>
+                          <p className="font-medium text-sm">Sub-Site: {site.name} / {sub.name}</p>
                           {allCheckpointsFromMaster.map((cp: any) => (
-                            <label key={`sub-${sub.id}-${cp.id}`} className="flex items-center gap-2 text-xs cursor-pointer">
+                            <label key={`sub-${sub.id}-${cp.id}`} className="flex items-center gap-2 text-sm cursor-pointer">
                               <input
                                 type="checkbox"
                                 checked={editForm.addCheckpoints.some(
@@ -1513,7 +1513,7 @@ export default function PatrolDetailsPage() {
                       );
 
                       return [...siteCheckpoints, ...subSiteCheckpoints].map((cp) => (
-                        <label key={cp.id} className="flex items-center gap-2 text-xs cursor-pointer">
+                        <label key={cp.id} className="flex items-center gap-2 text-sm cursor-pointer">
                           <input
                             type="checkbox"
                             checked={editForm.removeCheckpointIds.includes(cp.id)}
@@ -1964,7 +1964,7 @@ export default function PatrolDetailsPage() {
 function Info({ label, value }: any) {
   return (
     <div>
-      <p className="text-muted-foreground text-xs">{label}</p>
+      <p className="text-muted-foreground text-sm">{label}</p>
       <p className="font-medium">{value || "-"}</p>
     </div>
   );
@@ -1975,7 +1975,7 @@ function StatCard({ title, value, danger }: any) {
     <div className={`rounded-lg p-4 border text-center
       ${danger ? "bg-red-50 text-red-600" : "bg-gray-50"}`}>
       <p className="text-lg font-semibold">{value}</p>
-      <p className="text-xs text-muted-foreground">{title}</p>
+      <p className="text-sm text-muted-foreground">{title}</p>
     </div>
   );
 }

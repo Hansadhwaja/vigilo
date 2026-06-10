@@ -17,7 +17,7 @@ const LiveStatusHeader = ({ currentTime, avgResponseTime, hourlyRevenue }: LiveS
                         <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
                         <div className="flex flex-col leading-tight">
                             <span className="text-sm font-semibold">System Live</span>
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-sm text-muted-foreground">
                                 {currentTime.toLocaleTimeString()}
                             </span>
                         </div>

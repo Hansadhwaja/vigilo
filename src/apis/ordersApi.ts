@@ -32,6 +32,13 @@ export interface Order {
   updatedAt: string;
   deletedAt: string | null;
   userId: string;
+  user?: {
+    address: string;
+    email: string;
+    id: string;
+    mobile: string;
+    name: string;
+  }
 }
 
 export interface Pagination {
@@ -156,13 +163,7 @@ export const ordersApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: (result) =>
-        result
-          ? [
-            ...result.data.map(({ id }) => ({ type: 'Orders' as const, id })),
-            { type: 'Orders', id: 'LIST' },
-          ]
-          : [{ type: 'Orders', id: 'LIST' }],
+      providesTags: ["Orders"],
     }),
 
     // Get order by ID
@@ -171,7 +172,7 @@ export const ordersApi = baseApi.injectEndpoints({
         url: `/orders/getAdminOrderById/${id}`,
         method: "GET",
       }),
-      providesTags: (_result, _error, id) => [{ type: "Orders", id }],
+      providesTags: ["Orders"],
     }),
 
     // Cancel order (Admin reject order)
@@ -181,6 +182,7 @@ export const ordersApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Orders"]
     }),
 
     // Accept order
@@ -189,10 +191,7 @@ export const ordersApi = baseApi.injectEndpoints({
         url: `/orders/acceptOrder/${id}`,
         method: "POST",
       }),
-      invalidatesTags: (_result, _error, id) => [
-        { type: "Orders", id },
-        { type: "Orders", id: "LIST" },
-      ],
+      invalidatesTags: ["Orders"]
     }),
 
     // Edit order
@@ -202,10 +201,7 @@ export const ordersApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Orders", id },
-        { type: "Orders", id: "LIST" },
-      ],
+      invalidatesTags: ["Orders"]
     }),
 
 
@@ -226,7 +222,7 @@ export const ordersApi = baseApi.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: [{ type: "Clients", id: "LIST" }],
+      providesTags: ["Clients"],
     }),
 
     // Delete client
@@ -236,64 +232,7 @@ export const ordersApi = baseApi.injectEndpoints({
         method: "POST",
         body, // contains { id }
       }),
-      invalidatesTags: [
-        { type: "Clients", id: "LIST" }
-      ],
-    }),
-
-    // ---- GET ONE ORDER BY ID (ADMIN VIEW) ----
-    getOrderById: builder.query<{ success: boolean; message: string; data: any }, string>({
-      query: (id: string) => ({
-        url: `/orders/getAdminOrderById/${id}`,
-        method: "GET",
-      }),
-
-      transformResponse: (res: any) => {
-        const o = res.data;
-
-        const mapped = {
-          id: o.id,
-          serviceType: o.serviceType,
-          locationName: o.locationName || "Unknown",
-          locationAddress: o.locationAddress || "Not Provided",
-
-          siteService: o.siteService || {
-            crs: { type: "", properties: { name: "" } },
-            type: "Point",
-            coordinates: [0, 0],
-          },
-
-          guardsRequired: o.guardsRequired || 0,
-          description: o.description || "",
-          startDate: o.startDate,
-          endDate: o.endDate,
-          startTime: o.startTime,
-          endTime: o.endTime,
-          status: o.status || "pending",
-
-          images: o.images || [],
-          createdAt: o.createdAt,
-          updatedAt: o.updatedAt,
-          deletedAt: o.deletedAt || null,
-
-          userId: o.userId,
-
-          // 👇 Mapping the User Object (Important!)
-          client: o.user
-            ? {
-              id: o.user.id,
-              name: o.user.name,
-              email: o.user.email,
-              mobile: o.user.mobile,
-              address: o.user.address,
-            }
-            : null,
-        };
-
-        return { ...res, data: mapped };
-      },
-
-      providesTags: (_result, _error, id) => [{ type: "Orders", id }],
+      invalidatesTags: ["Clients"],
     }),
 
   }),
@@ -307,5 +246,4 @@ export const {
   useEditOrderMutation,
   useGetAllClientsQuery,
   useDeleteClientMutation,
-  useGetOrderByIdQuery,
 } = ordersApi;

@@ -87,7 +87,7 @@ const ServiceInformationCard = ({
                 backdrop-blur
               "
             >
-              <p className="text-xs text-slate-300">
+              <p className="text-sm text-slate-300">
                 Guards
               </p>
 
@@ -210,7 +210,7 @@ const ServiceInformationCard = ({
                 <div>
                   <p
                     className="
-                      text-xs font-semibold uppercase
+                      text-sm font-semibold uppercase
                       tracking-[0.2em]
                       text-slate-500
                     "
@@ -259,7 +259,7 @@ const ServiceInformationCard = ({
                 <div>
                   <p
                     className="
-                      text-xs font-semibold uppercase
+                      text-sm font-semibold uppercase
                       tracking-[0.2em]
                       text-slate-500
                     "

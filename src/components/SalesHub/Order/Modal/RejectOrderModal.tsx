@@ -11,10 +11,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import {
-    ShieldX,
-    XCircle,
-} from "lucide-react";
+import { ShieldX, XCircle } from "lucide-react";
 
 import RejectOrderForm from "../Form/RejectForm";
 
@@ -24,46 +21,28 @@ import { RejectOrderFormValues } from "@/schemas";
 
 import { useCancelOrderMutation } from "@/apis/ordersApi";
 
-const RejectOrderModal = ({
-    id,
-}: {
-    id: string;
-}) => {
-    const [open, setOpen] =
-        useState(false);
+const RejectOrderModal = ({ id }: { id: string }) => {
+    const [open, setOpen] = useState(false);
 
-    const [
-        cancelOrder,
-        { isLoading },
-    ] = useCancelOrderMutation();
+    const [cancelOrder, { isLoading }] = useCancelOrderMutation();
 
-    const handleReject =
-        async (
-            data: RejectOrderFormValues
-        ) => {
-            try {
-                await cancelOrder({
-                    id,
-                    data,
-                }).unwrap();
+    const handleReject = async (data: RejectOrderFormValues) => {
+        try {
+            await cancelOrder({
+                id,
+                data,
+            }).unwrap();
 
-                toast.success(
-                    "Order rejected successfully"
-                );
+            toast.success("Order rejected successfully");
 
-                setOpen(false);
-            } catch (error) {
-                toast.error(
-                    "Failed to reject order"
-                );
-            }
-        };
+            setOpen(false);
+        } catch (error) {
+            toast.error("Failed to reject order");
+        }
+    };
 
     return (
-        <Dialog
-            open={open}
-            onOpenChange={setOpen}
-        >
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button
                     size="sm"
@@ -77,7 +56,6 @@ const RejectOrderModal = ({
                     "
                 >
                     <XCircle className="mr-2 h-4 w-4" />
-
                     Reject Order
                 </Button>
             </DialogTrigger>
@@ -92,7 +70,7 @@ const RejectOrderModal = ({
                 <div
                     className="
                         relative overflow-hidden
-                        bg-gradient-to-r
+                        bg-linear-to-r
                         from-red-500
                         via-orange-400
                         to-amber-400
@@ -101,58 +79,38 @@ const RejectOrderModal = ({
                 >
                     <div className="absolute inset-0 bg-black/5" />
 
-                    <DialogHeader className="relative space-y-3">
-                        <div
-                            className="
+                    <DialogHeader className="relative">
+                        <div className="flex gap-2 items-center">
+                            <div
+                                className="
                                 flex h-14 w-14 items-center
                                 justify-center rounded-2xl
                                 bg-white/15 backdrop-blur
                             "
-                        >
-                            <ShieldX className="h-7 w-7" />
-                        </div>
+                            >
+                                <ShieldX className="h-7 w-7" />
+                            </div>
 
-                        <div className="space-y-1">
-                            <DialogTitle className="text-2xl font-bold tracking-tight">
-                                Reject Order
-                            </DialogTitle>
+                            <div className="space-y-1">
+                                <DialogTitle className="text-2xl font-bold tracking-tight">
+                                    Reject Order
+                                </DialogTitle>
 
-                            <DialogDescription className="text-white/85">
-                                Provide a reason for
-                                rejecting this
-                                security service
-                                request
-                            </DialogDescription>
+                                <DialogDescription className="text-white/85">
+                                    Provide a reason for rejecting this security service request
+                                </DialogDescription>
+                            </div>
                         </div>
                     </DialogHeader>
                 </div>
 
                 {/* FORM */}
-                <div
-                    className="
-                        bg-slate-50/40 p-7
-                    "
-                >
-                    <div
-                        className="
-                            rounded-3xl border border-slate-200
-                            bg-white p-6 shadow-sm
-                        "
-                    >
-                        <RejectOrderForm
-                            onCancel={() =>
-                                setOpen(
-                                    false
-                                )
-                            }
-                            onSubmit={
-                                handleReject
-                            }
-                            isLoading={
-                                isLoading
-                            }
-                        />
-                    </div>
+                <div className="bg-slate-50/40 p-4">
+                    <RejectOrderForm
+                        onCancel={() => setOpen(false)}
+                        onSubmit={handleReject}
+                        isLoading={isLoading}
+                    />
                 </div>
             </DialogContent>
         </Dialog>

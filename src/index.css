@@ -244,13 +244,13 @@ html {
   }
 
   .heading {
-    @apply text-base sm:text-lg md:text-xl lg:text-2xl font-semibold;
+    @apply text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold;
   }
   .sub-heading {
-    @apply text-sm sm:text-base md:text-lg lg:text-xl font-semibold;
+    @apply text-base sm:text-lg md:text-xl lg:text-2xl font-semibold;
   }
   .description {
-    @apply text-xs md:text-sm;
+    @apply text-sm md:text-base;
   }
 }
 

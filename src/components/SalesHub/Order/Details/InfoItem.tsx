@@ -59,7 +59,7 @@ const InfoItem = ({
         <Label
           className={cn(
             `
-              text-xs font-semibold uppercase
+              text-sm font-semibold uppercase
               tracking-wide text-slate-500
             `,
             labelClassName

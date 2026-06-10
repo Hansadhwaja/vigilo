@@ -9,12 +9,20 @@ import ShiftPill from "./ShiftPill";
 import StatCards from "../common/StatCard/StatCards";
 
 import { useSchedulingData } from "./hook/useSchedulingData";
+import { useQueryParams } from "@/lib/hooks/useQueryParams";
+import { Button } from "../ui/button";
 
 interface QuickSummaryProps {
     scheduling: ReturnType<typeof useSchedulingData>;
 }
 
 const QuickSummary = ({ scheduling }: QuickSummaryProps) => {
+    const { setParam } = useQueryParams();
+
+    const handleRedirect = () => {
+        setParam("tab", "daily");
+    };
+
     const { selectedDate, selectedDayAssignments: assignments } = scheduling;
 
     const activeAssignments = assignments.filter(
@@ -52,12 +60,12 @@ const QuickSummary = ({ scheduling }: QuickSummaryProps) => {
     ];
 
     return (
-        <Card className="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-sm">
+        <Card className="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-sm p-0">
             <div className="h-1.5 w-full bg-linear-to-r from-orange-500 via-orange-400 to-sky-500" />
 
-            <CardContent className="space-y-5 p-5">
+            <CardContent className="space-y-4 p-4">
                 {/* Header */}
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
                     {/* Date Info */}
                     <div className="flex items-center gap-4">
                         <div className="flex size-14 items-center justify-center rounded-2xl bg-linear-to-br from-orange-100 to-sky-100 shadow-inner">
@@ -83,7 +91,7 @@ const QuickSummary = ({ scheduling }: QuickSummaryProps) => {
                     </div>
 
                     {/* Stats */}
-                    <div className="flex justify-end">
+                    <div className="flex justify-start flex-1">
                         <StatCards items={stats} />
                     </div>
                 </div>
@@ -98,7 +106,7 @@ const QuickSummary = ({ scheduling }: QuickSummaryProps) => {
                                 Assigned Shifts
                             </h4>
 
-                            <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-medium text-orange-600">
+                            <span className="rounded-full bg-orange-50 px-3 py-1 text-sm font-medium text-orange-600">
                                 {assignments.length} Assignments
                             </span>
                         </div>
@@ -116,17 +124,17 @@ const QuickSummary = ({ scheduling }: QuickSummaryProps) => {
                                 ))}
 
                             {assignments.length > 4 && (
-                                <div className="flex min-h-[80px] items-center justify-center rounded-2xl border-2 border-dashed border-orange-200 bg-orange-50/50 text-center transition-all hover:border-orange-300 hover:bg-orange-50">
+                                <Button variant="ghost" onClick={handleRedirect} className="flex min-h-[80px] items-center justify-center rounded-2xl border-2 border-dashed border-orange-200 bg-orange-50/50 text-center transition-all hover:border-orange-300 hover:bg-orange-50">
                                     <div className="space-y-1">
                                         <p className="text-2xl font-bold text-orange-600">
                                             +{assignments.length - 4}
                                         </p>
 
-                                        <p className="text-xs font-medium text-slate-600">
+                                        <p className="text-sm font-medium text-slate-600">
                                             More Assignments
                                         </p>
                                     </div>
-                                </div>
+                                </Button>
                             )}
                         </div>
                     </div>

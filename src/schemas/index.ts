@@ -166,61 +166,86 @@ export const assignmentSchema = z
 export type AssignmentFormValues = z.infer<typeof assignmentSchema>;
 
 //Client Management
-export const orderSchema = z.object({
-    serviceType: z
-        .string()
-        .min(1, "Please select a service type"),
+export const orderSchema = z
+    .object({
+        serviceType: z
+            .string()
+            .min(1, "Please select a service type"),
 
-    locationName: z
-        .string()
-        .optional(),
+        locationName: z
+            .string()
+            .min(1, "Location name is required"),
 
-    locationAddress: z
-        .string()
-        .min(1, "Location address is required"),
+        locationAddress: z
+            .string()
+            .min(1, "Location address is required"),
 
-    siteServiceLat: z
-        .number()
-        .min(1, "Latitude is required"),
+        siteServiceLat: z
+            .number()
+            .refine((val) => val !== 0, {
+                message: "Latitude is required",
+            }),
 
-    siteServiceLng: z
-        .number()
-        .min(1, "Longitude is required"),
+        siteServiceLng: z
+            .number()
+            .refine((val) => val !== 0, {
+                message: "Longitude is required",
+            }),
 
-    guardsRequired: z
-        .number()
-        .min(1, "At least 1 guard is required"),
+        guardsRequired: z
+            .number()
+            .min(1, "At least 1 guard is required"),
 
-    description: z
-        .string()
-        .min(10, "Description must be at least 10 characters")
-        .optional(),
+        description: z
+            .string()
+            .optional(),
 
-    startDate: z
-        .string()
-        .min(1, "Start date is required"),
+        startDate: z
+            .string()
+            .min(1, "Start date is required"),
 
-    endDate: z
-        .string()
-        .min(1, "End date is required"),
+        endDate: z
+            .string()
+            .min(1, "End date is required"),
 
-    startTime: z
-        .string()
-        .min(1, "Start time is required"),
+        startTime: z
+            .string()
+            .min(1, "Start time is required"),
 
-    endTime: z
-        .string()
-        .min(1, "End time is required"),
+        endTime: z
+            .string()
+            .min(1, "End time is required"),
 
-    images: z.array(z.string()).optional(),
-});
+        images: z
+            .array(z.string())
+            .optional(),
+    })
+    .refine(
+        (data) =>
+            new Date(data.endDate) >= new Date(data.startDate),
+        {
+            message: "End date must be after or equal to start date",
+            path: ["endDate"],
+        }
+    )
+    .refine(
+        (data) => {
+            if (data.startDate !== data.endDate) return true;
+
+            return data.endTime > data.startTime;
+        },
+        {
+            message: "End time must be after start time",
+            path: ["endTime"],
+        }
+    );
 
 export type OrderFormValues = z.infer<typeof orderSchema>;
 
 export const rejectOrderSchema = z.object({
     reason: z
         .string()
-        .optional(),
+        .min(1, "Rejection Reason Required"),
 });
 
 export type RejectOrderFormValues = z.infer<typeof rejectOrderSchema>;

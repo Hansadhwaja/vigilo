@@ -83,7 +83,7 @@ const ComplianceTable = ({
                         {row.guardName}
                     </p>
 
-                    <p className="text-xs text-slate-400">
+                    <p className="text-sm text-slate-400">
                         {row.guardId}
                     </p>
                 </div>

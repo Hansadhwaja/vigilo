@@ -122,7 +122,7 @@ const ScheduleCard = ({
               <div className="space-y-2">
                 <p
                   className="
-                    text-xs font-semibold
+                    text-sm font-semibold
                     uppercase tracking-[0.2em]
                     text-slate-500
                   "
@@ -174,7 +174,7 @@ const ScheduleCard = ({
               <div className="space-y-2">
                 <p
                   className="
-                    text-xs font-semibold
+                    text-sm font-semibold
                     uppercase tracking-[0.2em]
                     text-slate-500
                   "
@@ -231,7 +231,7 @@ const ScheduleCard = ({
               <div className="space-y-2">
                 <p
                   className="
-                    text-xs font-semibold
+                    text-sm font-semibold
                     uppercase tracking-[0.2em]
                     text-slate-500
                   "
@@ -284,7 +284,7 @@ const ScheduleCard = ({
               <div className="space-y-2">
                 <p
                   className="
-                    text-xs font-semibold
+                    text-sm font-semibold
                     uppercase tracking-[0.2em]
                     text-slate-500
                   "

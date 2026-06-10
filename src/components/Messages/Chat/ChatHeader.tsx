@@ -115,7 +115,7 @@ const ChatHeader = ({
                                 `
                                 mt-1
                                 truncate
-                                text-xs
+                                text-sm
                                 font-medium
                                 transition-colors
                                 `,

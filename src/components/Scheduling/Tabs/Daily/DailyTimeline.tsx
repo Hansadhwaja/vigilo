@@ -253,7 +253,7 @@ const DailyTimeline = ({
 
                                         <div className="h-px flex-1 bg-slate-200" />
 
-                                        <p className="text-xs font-medium text-slate-500">
+                                        <p className="text-sm font-medium text-slate-500">
                                             {
                                                 shifts.length
                                             }{" "}

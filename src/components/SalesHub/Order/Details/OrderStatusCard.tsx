@@ -177,7 +177,7 @@ const OrderStatusCard = ({
             <div className="min-w-0 flex-1">
               <p
                 className="
-                  text-xs font-semibold uppercase
+                  text-sm font-semibold uppercase
                   tracking-[0.2em]
                   text-slate-500
                 "

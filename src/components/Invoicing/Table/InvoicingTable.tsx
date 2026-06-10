@@ -60,7 +60,7 @@ const InvoicingTable = ({ invoices }: InvoicingTableProps) => {
                         </p>
                     </div>
 
-                    <p className="text-xs text-slate-400 font-mono">
+                    <p className="text-sm text-slate-400 font-mono">
                         #{row.id.slice(0, 8)}
                     </p>
                 </div>
@@ -124,7 +124,7 @@ const InvoicingTable = ({ invoices }: InvoicingTableProps) => {
 
             render: (row) => (
                 <Badge
-                    className={`capitalize rounded-full px-3 py-1 text-xs font-semibold
+                    className={`capitalize rounded-full px-3 py-1 text-sm font-semibold
                         ${row.status === "paid"
                             ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                             : row.status === "pending"

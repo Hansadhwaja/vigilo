@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/select";
 
 import { Filter, Search, X } from "lucide-react";
+import { ReactNode } from "react";
 
 interface FilterOption {
-    label: string;
+    label: ReactNode | string;
     value: string;
 }
 
@@ -65,7 +66,7 @@ const DataFilters = ({
                 <div className="flex flex-1 flex-wrap items-center gap-3">
                     {/* Badge */}
                     {!searchOnly && (
-                        <div className="flex h-10 items-center gap-2 rounded-2xl bg-orange-50 px-4 text-sm font-medium text-orange-600">
+                        <div className="flex h-10 items-center gap-2 rounded-2xl bg-orange-50 px-4 font-medium text-orange-600">
                             <Filter className="size-4" />
                             Filters
                         </div>
@@ -73,7 +74,7 @@ const DataFilters = ({
 
                     {/* Search */}
                     {onSearchChange && (
-                        <div className="relative min-w-[220px] max-w-sm flex-1">
+                        <div className="relative min-w-55 max-w-sm flex-1">
                             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
 
                             <Input
@@ -88,12 +89,12 @@ const DataFilters = ({
                     {filters.map((filter) => {
                         if (filter.type === "date") {
                             return (
-                                <input
+                                <Input
                                     key={filter.key}
                                     type="date"
                                     value={filter.value}
                                     onChange={(e) => filter.onChange(e.target.value)}
-                                    className="h-10 rounded-2xl border border-slate-200 bg-white px-3 text-sm shadow-none focus-visible:ring-2 focus-visible:ring-orange-200"
+                                    className="h-10 rounded-2xl border border-slate-200 bg-white px-3 shadow-none focus-visible:ring-2 focus-visible:ring-orange-200 max-w-40"
                                 />
                             );
                         }

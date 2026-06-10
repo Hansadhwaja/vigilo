@@ -131,7 +131,7 @@ export function DataTable<T extends RowWithId>({
                                         key={String(col.key)}
                                         className={cn(
                                             "h-14 whitespace-nowrap px-6",
-                                            "text-[11px] font-bold uppercase tracking-[0.12em]",
+                                            "font-bold uppercase tracking-[0.12em]",
                                             "text-slate-500",
                                             col.align === "right" && "text-right",
                                             col.align === "center" && "text-center",
@@ -161,7 +161,7 @@ export function DataTable<T extends RowWithId>({
                                                 key={String(col.key)}
                                                 className={cn(
                                                     "border-b border-slate-100/80 px-6 py-5 align-middle",
-                                                    "text-sm text-slate-700",
+                                                    "text-slate-700",
                                                     col.align === "right" && "text-right",
                                                     col.align === "center" && "text-center",
                                                     col.className
@@ -207,7 +207,7 @@ export function DataTable<T extends RowWithId>({
                                                     {emptyText}
                                                 </p>
 
-                                                <p className="text-xs text-slate-500">
+                                                <p className="text-sm text-slate-500">
                                                     Try adjusting your filters or
                                                     search query
                                                 </p>

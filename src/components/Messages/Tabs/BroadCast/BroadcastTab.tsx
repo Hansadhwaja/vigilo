@@ -41,7 +41,7 @@ const BroadcastTab = () => {
               Broadcast Message
             </h2>
 
-            <p className="text-xs text-violet-700/80">
+            <p className="text-sm text-violet-700/80">
               Send announcements to guards
             </p>
           </div>

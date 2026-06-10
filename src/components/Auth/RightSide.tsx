@@ -70,7 +70,7 @@ const RightSide = () => {
                                 />
                             </div>
 
-                            <p className=" text-xs font-semibold uppercase tracking-[0.25em] text-blue-600">
+                            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-600">
                                 Security Operations Platform
                             </p>
 
@@ -103,7 +103,7 @@ const RightSide = () => {
                                         Secure Access
                                     </p>
 
-                                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                                    <p className="mt-1 text-sm leading-relaxed text-slate-500">
                                         Authorized personnel only.
                                         All login activities are
                                         encrypted, monitored, and
@@ -113,7 +113,7 @@ const RightSide = () => {
                             </div>
                         </div>
 
-                        <p className="text-xs text-slate-400 text-center">
+                        <p className="text-sm text-slate-400 text-center">
                             © {year} VIGILO Security Platform
                         </p>
 

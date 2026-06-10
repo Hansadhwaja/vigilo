@@ -152,7 +152,7 @@ export default function IncidentsPage() {
               <div>
                 <p
                   className="
-                    text-xs font-semibold uppercase
+                    text-sm font-semibold uppercase
                     tracking-wide text-slate-500
                   "
                 >

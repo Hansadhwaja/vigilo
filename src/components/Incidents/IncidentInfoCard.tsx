@@ -26,7 +26,7 @@ const IncidentInfoCard = ({
                 <div className="space-y-3">
                     <Label
                         className="
-              text-xs
+              text-sm
               font-semibold
               uppercase
               tracking-[0.2em]
@@ -89,7 +89,7 @@ const IncidentInfoCard = ({
                 <div className="space-y-3">
                     <Label
                         className="
-              text-xs
+              text-sm
               font-semibold
               uppercase
               tracking-[0.2em]
@@ -150,7 +150,7 @@ const IncidentInfoCard = ({
                   bg-blue-50
                   px-3
                   py-1
-                  text-xs
+                  text-sm
                   font-medium
                   text-blue-700
                 "
@@ -167,7 +167,7 @@ const IncidentInfoCard = ({
                 <div className="space-y-3">
                     <Label
                         className="
-              text-xs
+              text-sm
               font-semibold
               uppercase
               tracking-[0.2em]

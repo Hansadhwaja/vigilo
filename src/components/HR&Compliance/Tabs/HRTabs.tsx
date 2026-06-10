@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+
 import AppTabs from "@/components/common/Tab/AppTabs";
 import GuardsTab from "../Guard/GuardsTab";
 import ComplianceTab from "../Compliance/ComplianceTab";

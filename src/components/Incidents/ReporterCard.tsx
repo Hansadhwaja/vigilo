@@ -96,7 +96,7 @@ const ReporterCard = ({
                     bg-emerald-100
                     px-3
                     py-1
-                    text-xs
+                    text-sm
                     font-medium
                     text-emerald-700
                   "
@@ -114,7 +114,7 @@ const ReporterCard = ({
                     bg-blue-100
                     px-3
                     py-1
-                    text-xs
+                    text-sm
                     font-medium
                     text-blue-700
                   "
@@ -161,7 +161,7 @@ const ReporterCard = ({
               <div className="space-y-2">
                 <Label
                   className="
-                    text-xs
+                    text-sm
                     font-semibold
                     uppercase
                     tracking-[0.2em]
@@ -210,7 +210,7 @@ const ReporterCard = ({
               <div className="space-y-2 min-w-0 flex-1">
                 <Label
                   className="
-                    text-xs
+                    text-sm
                     font-semibold
                     uppercase
                     tracking-[0.2em]

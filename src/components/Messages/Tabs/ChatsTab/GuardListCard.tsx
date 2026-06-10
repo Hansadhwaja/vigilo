@@ -103,7 +103,7 @@ const GuardListCard = ({
                         className="shrink-0 text-emerald-500"
                     />
 
-                    <p className="truncate text-xs text-muted-foreground">
+                    <p className="truncate text-sm text-muted-foreground">
                         {isOpening
                             ? "Opening conversation..."
                             : online

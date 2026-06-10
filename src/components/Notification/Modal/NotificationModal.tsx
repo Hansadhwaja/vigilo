@@ -120,7 +120,7 @@ const NotificationModal = () => {
                             Notifications
                         </h2>
 
-                        <p className="text-xs text-slate-500">
+                        <p className="text-sm text-slate-500">
                             {unreadCount} unread
                         </p>
                     </div>
@@ -228,7 +228,7 @@ const NotificationModal = () => {
                                 No notifications
                             </h3>
 
-                            <p className="mt-1 text-xs text-slate-500">
+                            <p className="mt-1 text-sm text-slate-500">
                                 You&apos;re all caught up.
                             </p>
                         </div>

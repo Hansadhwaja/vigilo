@@ -55,7 +55,7 @@ const GuardTable = ({
                         {row.name}
                     </p>
 
-                    <p className="text-xs font-mono text-slate-400">
+                    <p className="text-sm font-mono text-slate-400">
                         #{row.id.slice(0, 8)}
                     </p>
                 </div>
@@ -119,7 +119,7 @@ const GuardTable = ({
                         {formatDate(row.createdAt)}
                     </p>
 
-                    <p className="text-xs text-slate-400">
+                    <p className="text-sm text-slate-400">
                         Member since
                     </p>
                 </div>

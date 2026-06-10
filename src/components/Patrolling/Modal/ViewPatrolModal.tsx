@@ -173,7 +173,7 @@ const ViewPatrolModal = ({
                             <div className="space-y-4">
 
                                 <div className="rounded-xl border bg-slate-50 p-4">
-                                    <p className="text-xs uppercase tracking-wide text-gray-500">
+                                    <p className="text-sm uppercase tracking-wide text-gray-500">
                                         Start Time
                                     </p>
 
@@ -196,7 +196,7 @@ const ViewPatrolModal = ({
 
                                 {patrol.endTime && (
                                     <div className="rounded-xl border bg-emerald-50 p-4">
-                                        <p className="text-xs uppercase tracking-wide text-emerald-600">
+                                        <p className="text-sm uppercase tracking-wide text-emerald-600">
                                             End Time
                                         </p>
 

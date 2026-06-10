@@ -51,7 +51,7 @@ const RevenueMetrics = () => {
                                     {stream.change}%
                                 </span>
 
-                                <span className="text-xs text-muted-foreground ml-1">
+                                <span className="text-sm text-muted-foreground ml-1">
                                     vs last month
                                 </span>
                             </div>

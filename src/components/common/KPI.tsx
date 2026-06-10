@@ -57,7 +57,7 @@ export default function KPI({
         </div>
 
         {sub && (
-          <CardFooter className="flex items-center gap-1 text-xs text-muted-foreground px-0">
+          <CardFooter className="flex items-center gap-1 text-sm text-muted-foreground px-0">
             {trend === "up" && <TrendingUp className="h-3 w-3 text-green-600" />}
             {trend === "down" && <TrendingDown className="h-3 w-3 text-red-600" />}
             <span>{sub}</span>

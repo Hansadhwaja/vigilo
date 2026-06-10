@@ -1,14 +1,8 @@
-import {
-  Badge as BadgeIcon,
-  ClipboardList,
-} from "lucide-react";
+import { Badge as BadgeIcon, ClipboardList } from "lucide-react";
 
-import {
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-import { useGetOrderByIdQuery } from "@/apis/ordersApi";
+import { useGetAdminOrderByIdQuery } from "@/apis/ordersApi";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import EditOrderModal from "@/components/SalesHub/Order/Modal/EditOrderModal";
 import ServiceInformationCard from "@/components/SalesHub/Order/Details/ServiceInformationCard";
@@ -26,20 +20,14 @@ export default function OrderDetailsPage() {
     id: string;
   }>();
 
-  const {
-    data: orderResponse,
-    isLoading,
-  } = useGetOrderByIdQuery(
+  const { data: orderResponse, isLoading } = useGetAdminOrderByIdQuery(
     id || "",
     {
       skip: !id,
-    }
+    },
   );
 
-  const order =
-    orderResponse?.data ??
-    orderResponse ??
-    null;
+  const order = orderResponse?.data;
 
   if (isLoading) {
     return (
@@ -66,13 +54,10 @@ export default function OrderDetailsPage() {
           </div>
 
           <div className="space-y-1 text-center">
-            <h3 className="font-semibold text-slate-800">
-              Loading Order
-            </h3>
+            <h3 className="font-semibold text-slate-800">Loading Order</h3>
 
             <p className="text-sm text-slate-500">
-              Fetching complete order
-              details...
+              Fetching complete order details...
             </p>
           </div>
         </div>
@@ -127,16 +112,13 @@ export default function OrderDetailsPage() {
               text-slate-500
             "
           >
-            The order you are trying to
-            access may have been deleted
-            or does not exist anymore.
+            The order you are trying to access may have been deleted or does not
+            exist anymore.
           </p>
 
           <Button
             variant="outline"
-            onClick={() =>
-              navigate("/clients")
-            }
+            onClick={() => navigate("/clients")}
             className="
               mt-7 h-11 rounded-2xl
               border-slate-200 px-6
@@ -157,47 +139,33 @@ export default function OrderDetailsPage() {
         description="Full order information including schedule, client details, service configuration, and location requirements"
         others={
           <div className="flex justify-end">
-            <EditOrderModal
-              order={order}
-            />
+            <EditOrderModal order={order} />
           </div>
         }
       />
 
-      <div
-        className="grid grid-cols-1 gap-6 lg:grid-cols-3"
-      >
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* LEFT */}
         <div
           className="
             space-y-6 lg:col-span-2
           "
         >
-          <ServiceInformationCard
-            order={order}
-          />
+          <ServiceInformationCard order={order} />
           <ImagesCard
             title="Location Images"
             description="Location preview and site images"
             emptyDescription="No location images available."
             images={order.images || []}
           />
-          {order.client && (
-            <ClientInformationCard
-              client={order.client}
-            />
-          )}
+          {order?.user && <ClientInformationCard client={order?.user} />}
         </div>
 
         {/* RIGHT */}
         <div className="space-y-6">
-          <ScheduleCard
-            order={order}
-          />
+          <ScheduleCard order={order} />
 
-          <OrderStatusCard
-            order={order}
-          />
+          <OrderStatusCard order={order} />
         </div>
       </div>
     </div>

@@ -169,7 +169,7 @@ export default function TopBar({
                         <p className="text-sm font-semibold">
                           {profile.name}
                         </p>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-sm text-slate-500">
                           {profile.role}
                         </p>
                       </div>

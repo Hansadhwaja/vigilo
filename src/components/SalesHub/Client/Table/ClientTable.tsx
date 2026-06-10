@@ -70,7 +70,7 @@ const ClientTable = ({
                             {row.name}
                         </p>
 
-                        <p className="font-mono text-xs text-slate-400">
+                        <p className="font-mono text-sm text-slate-400">
                             #{row.id.slice(0, 8)}
                         </p>
                     </div>
@@ -96,7 +96,7 @@ const ClientTable = ({
                             {row.email}
                         </p>
 
-                        <p className="text-xs text-slate-400">
+                        <p className="text-sm text-slate-400">
                             Email Address
                         </p>
                     </div>
@@ -119,7 +119,7 @@ const ClientTable = ({
                             {row.mobile}
                         </p>
 
-                        <p className="text-xs text-slate-400">
+                        <p className="text-sm text-slate-400">
                             Mobile Number
                         </p>
                     </div>
@@ -140,7 +140,7 @@ const ClientTable = ({
                         {row.address || "—"}
                     </p>
 
-                    <p className="text-xs text-slate-400">
+                    <p className="text-sm text-slate-400">
                         Client Address
                     </p>
                 </div>

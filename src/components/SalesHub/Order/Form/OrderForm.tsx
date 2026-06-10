@@ -72,7 +72,7 @@ const OrderForm = ({
         formState: { isValid, errors },
     } = form;
 
-    console.log(errors);
+    console.log(errors,isValid);
 
     const onFormSubmit = async (
         data: OrderFormValues

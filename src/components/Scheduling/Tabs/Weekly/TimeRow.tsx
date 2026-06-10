@@ -29,7 +29,7 @@ const TimeRow = ({ slot, scheduling }: TimeRowProps) => {
                     {slot.time}
                 </h4>
 
-                <p className="text-xs text-slate-500">
+                <p className="text-sm text-slate-500">
                     {slot.label}
                 </p>
             </div>

@@ -41,7 +41,9 @@ interface Props {
 }
 
 const AssignmentForm = ({ isLoading, onSubmit, onCancel, initialData }: Props) => {
-    const { data: ordersRes } = useGetAllOrdersQuery({});
+    const { data: ordersRes } = useGetAllOrdersQuery({
+        status: "ongoing"
+    });
     const { data: guardsRes } = useGetAllGuardsQuery({ page: 1, limit: 100 });
 
     const orders = ordersRes?.data || [];
@@ -90,7 +92,6 @@ const AssignmentForm = ({ isLoading, onSubmit, onCancel, initialData }: Props) =
         form.reset();
     };
 
-    const isEdit = !!initialData;
 
     return (
         <form onSubmit={handleSubmit(submitHandler)}>
@@ -142,19 +143,19 @@ const AssignmentForm = ({ isLoading, onSubmit, onCancel, initialData }: Props) =
                     name="orderId"
                     control={control}
                     render={({ field, fieldState }) => (
-                        <Field>
+                        <Field className="col-span-2">
                             <FieldLabel>Order</FieldLabel>
                             <Select value={field.value} onValueChange={field.onChange}>
-                                <SelectTrigger disabled={isEdit}>
+                                <SelectTrigger>
                                     <SelectValue placeholder="Select order" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {activeOrders.map((o: any) => (
                                         <SelectItem key={o.id} value={o.id} >
-                                            <p className="uppercase">{o.locationName}</p>
+                                            <p className="uppercase truncate max-w-40">{o.locationName}</p>
 
                                             <Badge
-                                                className="rounded-full border px-3 py-1 text-xs font-semibold shadow-sm"
+                                                className="rounded-full border px-3 py-1 text-[10px] uppercase font-semibold shadow-sm"
                                                 style={getStatusStyle(o.status)}
                                             >
                                                 {getStatusColor(o.status).label}

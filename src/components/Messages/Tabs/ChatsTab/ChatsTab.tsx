@@ -49,12 +49,12 @@ const ChatsTab = ({
                             Guards
                         </p>
 
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                             Active contacts
                         </p>
                     </div>
                 </div>
-                <div className="flex h-7 min-w-7 items-center justify-center rounded-full bg-emerald-500 px-2 text-xs font-semibold text-white shadow-sm">
+                <div className="flex h-7 min-w-7 items-center justify-center rounded-full bg-emerald-500 px-2 text-sm font-semibold text-white shadow-sm">
                     {guards.length}
                 </div>
             </div>
@@ -92,7 +92,7 @@ const ChatsTab = ({
                             No guards found
                         </h3>
 
-                        <p className="mt-1 max-w-[220px] text-xs leading-relaxed text-muted-foreground">
+                        <p className="mt-1 max-w-[220px] text-sm leading-relaxed text-muted-foreground">
                             Try changing your search or
                             filters to find available
                             guards.

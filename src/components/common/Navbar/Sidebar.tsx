@@ -34,24 +34,24 @@ export default function Sidebar({ isOpen }: SidebarProps) {
     <aside
       className={cn(
         "max-lg:hidden flex h-full shrink-0 flex-col border-r border-slate-200 bg-slate-50 transition-all duration-300",
-        isOpen ? "w-72 px-4 py-5" : "w-22 px-3 py-5"
+        isOpen ? "w-80 px-4 py-5" : "w-24 px-3 py-5"
       )}
     >
       <div className="flex items-center gap-3 border-b border-slate-200 pb-4">
 
         <div
           onClick={() => navigate("/", { replace: true })}
-          className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-xl  shadow-sm transition-all hover:scale-[1.03]"
+          className="flex h-14 w-14 shrink-0 cursor-pointer items-center justify-center rounded-xl  shadow-sm transition-all hover:scale-[1.03]"
         >
           <img src={"/assets/logo/logo.png"} alt="logo" />
         </div>
 
         {isOpen && (
           <div className="min-w-0">
-            <h2 className="truncate text-lg font-bold tracking-tight text-slate-900">
+            <h2 className="truncate text-xl font-bold tracking-tight text-slate-900">
               VIGILO
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-sm text-slate-500">
               Workforce & Monitoring
             </p>
           </div>
@@ -66,7 +66,7 @@ export default function Sidebar({ isOpen }: SidebarProps) {
             to={item.link}
             className={({ isActive }) =>
               cn(
-                "group flex items-center rounded-2xl px-3 py-3 text-sm font-medium transition-all duration-200",
+                "group flex items-center rounded-2xl px-3 py-3 text-base font-medium transition-all duration-200",
 
                 isOpen ? "gap-3" : "justify-center",
 
@@ -124,20 +124,20 @@ export default function Sidebar({ isOpen }: SidebarProps) {
           onClick={handleLogout}
           variant="destructive"
           className={cn(
-            "h-11 rounded-2xl font-medium transition-all text-red-500 hover:bg-red-100 hover:text-red-600",
+            "h-12 rounded-2xl font-medium transition-all text-red-500 hover:bg-red-100 hover:text-red-600 text-base",
 
             isOpen
               ? "w-full justify-start gap-3 px-4"
-              : "w-11 justify-center p-0"
+              : "w-12 justify-center p-0"
           )}
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut />
 
           {isOpen && <span>Logout</span>}
         </Button>
 
         {isOpen && (
-          <div className="px-1 text-center text-xs text-slate-400">
+          <div className="px-1 text-center text-sm text-slate-400">
             © {new Date().getFullYear()} Vigilo
           </div>
         )}

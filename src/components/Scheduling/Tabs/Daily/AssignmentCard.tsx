@@ -80,7 +80,7 @@ const AssignmentCard = ({
                 {assignment.guardName}
               </h3>
 
-              <p className="text-xs text-slate-500">
+              <p className="text-sm text-slate-500">
                 Security Guard
               </p>
             </div>
@@ -127,7 +127,7 @@ const AssignmentCard = ({
               {assignment.orderName}
             </p>
 
-            <p className="truncate text-xs text-slate-500">
+            <p className="truncate text-sm text-slate-500">
               {assignment.orderAddress}
             </p>
           </div>

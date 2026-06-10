@@ -43,7 +43,7 @@ export default function SettingsPage({
                         <div>
                             <p
                                 className="
-                                    text-xs font-semibold uppercase
+                                    text-sm font-semibold uppercase
                                     tracking-wide text-slate-500
                                 "
                             >

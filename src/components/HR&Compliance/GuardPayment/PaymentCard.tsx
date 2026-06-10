@@ -50,7 +50,7 @@ const PaymentCard = ({ payment }: { payment: GuardPayment }) => {
                                         <p className="text-sm font-semibold text-slate-900 truncate">
                                             {payment.guard.name}
                                         </p>
-                                        <p className="text-xs text-slate-500 truncate">
+                                        <p className="text-sm text-slate-500 truncate">
                                             {payment.guard.email}
                                         </p>
                                     </div>
@@ -123,21 +123,21 @@ const PaymentCard = ({ payment }: { payment: GuardPayment }) => {
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
 
                                 <div className="rounded-lg border bg-slate-50 p-3">
-                                    <p className="text-xs text-slate-500">Regular Hours</p>
+                                    <p className="text-sm text-slate-500">Regular Hours</p>
                                     <p className="text-sm font-semibold">
                                         {payment.regularHours}h
                                     </p>
                                 </div>
 
                                 <div className="rounded-lg border bg-slate-50 p-3">
-                                    <p className="text-xs text-slate-500">Overtime</p>
+                                    <p className="text-sm text-slate-500">Overtime</p>
                                     <p className="text-sm font-semibold text-orange-600">
                                         {payment.overtimeHours}h
                                     </p>
                                 </div>
 
                                 <div className="rounded-lg border bg-slate-50 p-3">
-                                    <p className="text-xs text-slate-500">Base Pay</p>
+                                    <p className="text-sm text-slate-500">Base Pay</p>
                                     <p className="text-sm font-medium">
                                         {formatCurrency(Number(payment.basePay))}
                                     </p>
@@ -146,7 +146,7 @@ const PaymentCard = ({ payment }: { payment: GuardPayment }) => {
                             </div>
 
                             {/* BREAKDOWN */}
-                            <div className="rounded-lg border bg-slate-50 p-3 text-xs space-y-1">
+                            <div className="rounded-lg border bg-slate-50 p-3 text-sm space-y-1">
 
                                 <div className="flex justify-between">
                                     <span>Overtime</span>

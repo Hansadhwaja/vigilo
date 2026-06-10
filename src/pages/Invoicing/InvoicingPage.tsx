@@ -40,7 +40,7 @@ export default function InvoicingPage() {
             size="sm"
             className="rounded-full bg-linear-to-r from-emerald-500 to-emerald-600 shadow-sm hover:shadow-md"
           >
-            <Link to="/invoicing/new" className="text-xs md:text-sm">
+            <Link to="/invoicing/new" className="text-sm md:text-sm">
               <Plus size={14} className="shrink-0" />
               Generate Invoice
             </Link>

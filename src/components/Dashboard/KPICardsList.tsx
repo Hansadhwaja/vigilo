@@ -1,6 +1,7 @@
 
 import KPI from '../common/KPI';
-import { Bell, DollarSign, Target, Users } from 'lucide-react';
+import { Bell, Briefcase, Clock, DollarSign, MapPinned, Receipt, Shield, Target, Users } from 'lucide-react';
+import StatCards from '../common/StatCard/StatCards';
 
 interface KPICardsListProps {
     availableGuardsCount: number;
@@ -24,106 +25,70 @@ const KPICardsList = ({
 }: KPICardsListProps) => {
     const primaryKPIs = [
         {
-            icon: Users,
+            Icon: Shield,
             label: "Available Guards",
             value: availableGuardsCount,
-            sub: "ready for assignment",
             to: "/hr",
+            color: "bg-emerald-100 text-emerald-700",
         },
         {
-            icon: Bell,
+            Icon: Bell,
             label: "Active Alarms",
             value: activeAlarmsCount,
-            sub: "requiring response",
-            urgent: activeAlarmsCount > 2,
             to: "/alarms",
+            color: "bg-red-100 text-red-700",
         },
         {
-            icon: Users,
+            Icon: Users,
             label: "On Duty Guards",
             value: onDutyGuardsCount,
-            sub: "currently working",
             to: "/hr",
+            color: "bg-blue-100 text-blue-700",
         },
         {
-            icon: Target,
+            Icon: Clock,
             label: "Active Shifts",
             value: activeShiftsCount,
-            sub: "in progress",
             to: "/scheduling",
+            color: "bg-violet-100 text-violet-700",
         },
     ];
 
     const secondaryKPIs = [
         {
-            icon: Target,
+            Icon: Briefcase,
             label: "Active Orders",
             value: activeOrdersCount,
-            sub: "currently running",
             to: "/clients",
+            color: "bg-cyan-100 text-cyan-700",
         },
         {
-            icon: Target,
+            Icon: MapPinned,
             label: "Active Patrols",
             value: activePatrolsCount,
-            sub: "currently patrolling",
             to: "/patrol",
+            color: "bg-amber-100 text-amber-700",
         },
         {
-            icon: DollarSign,
+            Icon: DollarSign,
             label: "Total Revenue",
             value: `${Math.round(dailyRevenue / 1000)}k`,
-            sub: "monthly total",
-            trend: "up" as const,
             to: "/invoicing",
+            color: "bg-green-100 text-green-700",
         },
         {
-            icon: DollarSign,
+            Icon: Receipt,
             label: "Billing Cost",
             value: `${Math.round((dailyRevenue * 0.72) / 1000)}k`,
-            sub: "monthly cost",
             to: "/invoicing",
+            color: "bg-orange-100 text-orange-700",
         },
     ];
+    
     return (
         <div className="space-y-4">
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {primaryKPIs.map((item, index) => {
-                    const Icon = item.icon;
-
-                    return (
-                        <KPI
-                            key={index}
-                            icon={<Icon className="h-5 w-5" />}
-                            label={item.label}
-                            value={item.value}
-                            sub={item.sub}
-                            urgent={item.urgent}
-                            to={item.to}
-                        />
-                    )
-                })}
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {secondaryKPIs.map((item, index) => {
-                    const Icon = item.icon;
-
-                    return (
-                        <KPI
-                            key={index}
-                            icon={<Icon className="h-5 w-5" />}
-                            label={item.label}
-                            value={item.value}
-                            sub={item.sub}
-                            trend={item.trend}
-                            to={item.to}
-                        />
-                    )
-                })}
-            </div>
-
+            <StatCards items={primaryKPIs} />
+            <StatCards items={secondaryKPIs} />
         </div>
     )
 }

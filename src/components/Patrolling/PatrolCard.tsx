@@ -61,7 +61,7 @@ const PatrolCard = ({ patrol }: PatrolCardProps) => {
                                         {patrol.status}
                                     </Badge>
                                 </div>
-                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                <div className="flex items-center gap-2 text-sm text-slate-500">
 
                                     <div className="flex items-center gap-1">
                                         <Car className="h-3.5 w-3.5" />
@@ -97,7 +97,7 @@ const PatrolCard = ({ patrol }: PatrolCardProps) => {
                                     />
                                 </div>
 
-                                <div className="items-center gap-3 text-xs text-slate-500 flex">
+                                <div className="items-center gap-3 text-sm text-slate-500 flex">
                                     <div className="flex items-center gap-1">
                                         <Building className="h-3.5 w-3.5" />
                                         <span>{patrol.totalSites}</span>

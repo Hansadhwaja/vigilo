@@ -1,9 +1,9 @@
 // src/utils/statusColors.ts
 
-export type StatusType = 
+export type StatusType =
   // Shift/Guard Common Statuses
   | "absent"
-  | "pending" 
+  | "pending"
   | "upcoming"
   | "ongoing"
   | "completed"
@@ -36,10 +36,10 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
   // ACTIVE/POSITIVE STATES - Blue/Green Family
   // ============================================
   ongoing: {
-    bg: "#EFF6FF",        // Very light blue
-    text: "#1E40AF",      // Deep blue
-    border: "#3B82F6",    // Medium blue
-    label: "Ongoing"
+    bg: "#EEF2FF",      // Indigo-50
+    text: "#4338CA",    // Indigo-700
+    border: "#6366F1",  // Indigo-500
+    label: "Ongoing",
   },
   completed: {
     bg: "#F0FDF5",        // Very light emerald
@@ -59,7 +59,7 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
     border: "#22C55E",    // Medium green
     label: "Accepted"
   },
-  
+
   // ============================================
   // PENDING/WAITING STATES - Amber Family
   // ============================================
@@ -75,7 +75,7 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
     border: "#F59E0B",    // Medium amber
     label: "Request Off Pending"
   },
-  
+
   // ============================================
   // APPROVED/SUCCESS STATES - Green Family
   // ============================================
@@ -85,7 +85,7 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
     border: "#10B981",    // Medium emerald
     label: "Request Off Approved"
   },
-  
+
   // ============================================
   // REJECTED/NEGATIVE STATES - Red Family
   // ============================================
@@ -101,47 +101,51 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
     border: "#DC2626",    // Medium dark red
     label: "Request Off Rejected"
   },
-  
+
   // ============================================
   // CRITICAL/URGENT STATES - Red Family (Distinct shades)
   // ============================================
   absent: {
-    bg: "#FEE2E2",        // Light red
-    text: "#7F1D1D",      // Very deep red
-    border: "#DC2626",    // Medium dark red
-    label: "Absent"
+    bg: "#FEE2E2",
+    text: "#991B1B",
+    border: "#DC2626",
+    label: "Absent",
   },
+
   cancelled: {
-    bg: "#FEF2F2",        // Very light red
-    text: "#991B1B",      // Deep dark red
-    border: "#EF4444",    // Medium red
-    label: "Cancelled"
+    bg: "#FFE4E6",      // Rose
+    text: "#9F1239",
+    border: "#E11D48",
+    label: "Cancelled",
   },
+
   missed: {
-    bg: "#FEE2E2",        // Light red
-    text: "#991B1B",      // Deep dark red
-    border: "#DC2626",    // Medium dark red
-    label: "Missed"
+    bg: "#FEF2F2",      // Soft red
+    text: "#B91C1C",
+    border: "#EF4444",
+    label: "Missed",
   },
+
   order_missed: {
-    bg: "#FECACA",        // Medium light red
-    text: "#7F1D1D",      // Very deep red
-    border: "#B91C1C",    // Deep red
-    label: "Order Missed"
+    bg: "#FFF1F2",      // Pink-red
+    text: "#BE123C",
+    border: "#F43F5E",
+    label: "Order Missed",
   },
+
   missed_respond: {
-    bg: "#FEE2E2",        // Light red
-    text: "#7F1D1D",      // Very deep red
-    border: "#B91C1C",    // Deep red
-    label: "Missed Response"
+    bg: "#FDF2F8",      // Pink
+    text: "#9D174D",
+    border: "#DB2777",
+    label: "Missed Response",
   },
+
   missed_endovertime: {
-    bg: "#FECACA",        // Medium light red
-    text: "#7F1D1D",      // Very deep red
-    border: "#991B1B",    // Deep dark red
-    label: "Missed End Overtime"
+    bg: "#FFF7ED",      // Red-orange warning
+    text: "#9A3412",
+    border: "#EA580C",
+    label: "Missed End Overtime",
   },
-  
   // ============================================
   // SPECIAL STATES - Purple/Orange Family
   // ============================================
@@ -158,29 +162,30 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
     label: "Overtime"
   },
   overtime_started: {
-    bg: "#FFEDD5",        // Light orange
-    text: "#9A3412",      // Deep dark orange
-    border: "#EA580C",    // Medium dark orange
-    label: "Overtime Started"
+    bg: "#FED7AA",      // Strong light orange
+    text: "#9A3412",    // Deep orange
+    border: "#EA580C",  // Vibrant orange
+    label: "Overtime Started",
   },
+
   overtime_ended: {
-    bg: "#FFF7ED",        // Very light orange
-    text: "#C2410C",      // Deep orange
-    border: "#FB923C",    // Light orange
-    label: "Overtime Ended"
-  }
+    bg: "#FEF3C7",      // Light amber
+    text: "#92400E",    // Deep amber
+    border: "#D97706",  // Amber
+    label: "Overtime Ended",
+  },
 };
 
 // Helper function to get status colors
 export const getStatusColor = (status: string): StatusColor => {
   if (!status) return STATUS_COLORS.pending;
-  
+
   // Normalize status string (handle spaces, case, etc.)
   const normalizedStatus = status
     .toLowerCase()
     .trim()
     .replace(/\s+/g, '_') as StatusType;
-  
+
   return STATUS_COLORS[normalizedStatus] || STATUS_COLORS.pending;
 };
 

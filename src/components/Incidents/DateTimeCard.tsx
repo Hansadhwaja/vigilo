@@ -105,7 +105,7 @@ const DateTimeCard = ({
             <div className="space-y-2">
               <Label
                 className="
-                  text-xs
+                  text-sm
                   font-semibold
                   uppercase
                   tracking-[0.2em]
@@ -164,7 +164,7 @@ const DateTimeCard = ({
             <div className="space-y-2">
               <Label
                 className="
-                  text-xs
+                  text-sm
                   font-semibold
                   uppercase
                   tracking-[0.2em]

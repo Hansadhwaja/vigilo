@@ -63,7 +63,7 @@ const GuardActivityCard = ({
                         </div>
 
                         <Badge
-                            className="border px-3 py-1 text-xs font-semibold"
+                            className="border px-3 py-1 text-sm font-semibold"
                             style={getStatusStyle(shift.assignmentStatus)}
                         >
                             {getStatusColor(shift.assignmentStatus).label}
@@ -101,7 +101,7 @@ const GuardActivityCard = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                 <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-slate-400">
+                    <p className="text-sm uppercase tracking-wide text-slate-400">
                         Date
                     </p>
 
@@ -115,7 +115,7 @@ const GuardActivityCard = ({
                 </div>
 
                 <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-slate-400">
+                    <p className="text-sm uppercase tracking-wide text-slate-400">
                         Service Type
                     </p>
 
@@ -125,7 +125,7 @@ const GuardActivityCard = ({
                 </div>
 
                 <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-slate-400">
+                    <p className="text-sm uppercase tracking-wide text-slate-400">
                         Shift Start
                     </p>
 
@@ -139,7 +139,7 @@ const GuardActivityCard = ({
                 </div>
 
                 <div className="space-y-1">
-                    <p className="text-xs uppercase tracking-wide text-slate-400">
+                    <p className="text-sm uppercase tracking-wide text-slate-400">
                         Shift End
                     </p>
 
@@ -167,7 +167,7 @@ const GuardActivityCard = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                     <div className="rounded-xl border border-slate-200 p-4">
-                        <p className="text-xs text-slate-400">
+                        <p className="text-sm text-slate-400">
                             Clock In
                         </p>
 
@@ -177,7 +177,7 @@ const GuardActivityCard = ({
                     </div>
 
                     <div className="rounded-xl border border-slate-200 p-4">
-                        <p className="text-xs text-slate-400">
+                        <p className="text-sm text-slate-400">
                             Clock Out
                         </p>
 
@@ -191,7 +191,7 @@ const GuardActivityCard = ({
                 <div className="grid grid-cols-2 gap-4">
 
                     <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
-                        <p className="text-xs text-slate-500">
+                        <p className="text-sm text-slate-500">
                             Total Hours
                         </p>
 
@@ -201,7 +201,7 @@ const GuardActivityCard = ({
                     </div>
 
                     <div className="rounded-xl border border-orange-100 bg-orange-50 p-4">
-                        <p className="text-xs text-slate-500">
+                        <p className="text-sm text-slate-500">
                             Overtime
                         </p>
 

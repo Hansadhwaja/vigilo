@@ -1,26 +1,12 @@
 import { useMemo } from "react";
-
-import { Filter, Search, X } from "lucide-react";
-
 import { useGetAllGuardsQuery } from "@/apis/guardsApi";
 import { useGetAllOrdersQuery } from "@/apis/ordersApi";
 
-import Loader from "@/components/common/Loader";
 import AlertListModal from "./Modal/AlertListModal";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import DataFilters, { FilterItem } from "../common/Filter/DataFilters";
+import { services } from "@/constants";
 
 const SchedulingSearchFilters = () => {
   const { getParam, setMultipleParams } = useQueryParams();
@@ -32,24 +18,12 @@ const SchedulingSearchFilters = () => {
 
   const { data: guardsResponse, isLoading: isGuardsLoading } = useGetAllGuardsQuery();
 
-  const { data: ordersResponse, isLoading: isOrdersLoading } = useGetAllOrdersQuery();
+  const { data: ordersResponse, isLoading: isOrdersLoading } = useGetAllOrdersQuery({
+    status: "ongoing"
+  });
 
   const guards = guardsResponse?.data ?? [];
   const orders = ordersResponse?.data ?? [];
-
-  const roles = useMemo(
-    () => [
-      {
-        label: "Static",
-        value: "static",
-      },
-      {
-        label: "Patrol",
-        value: "patrol",
-      },
-    ],
-    []
-  );
 
   const handleSearch = (value: string) => {
     setMultipleParams({
@@ -110,7 +84,9 @@ const SchedulingSearchFilters = () => {
       width: "w-[220px]",
       onChange: handleOrderChange,
       options: orders.map((order) => ({
-        label: order.locationAddress,
+        label: (
+          <p className="truncate max-w-40">{order.locationAddress}</p>
+        ),
         value: order.id,
       })),
     },
@@ -121,7 +97,7 @@ const SchedulingSearchFilters = () => {
       value: role,
       width: "w-[160px]",
       onChange: handleRoleChange,
-      options: roles,
+      options: services,
     },
   ] satisfies FilterItem[];
 

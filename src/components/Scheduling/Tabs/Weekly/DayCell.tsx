@@ -37,13 +37,13 @@ const DayCell = ({
                         <Card
                             key={assignment.id}
                             className={cn(
-                                "group overflow-hidden border-0 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md",
+                                "group overflow-hidden border-0 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md p-0",
                                 assignment.type === "patrol"
                                     ? "bg-linear-to-br from-orange-50 to-orange-100/80"
                                     : "bg-linear-to-br from-emerald-50 to-emerald-100/80"
                             )}
                         >
-                            <CardContent className="space-y-2 p-3">
+                            <CardContent className="space-y-4 p-4">
                                 {/* Top */}
                                 <div className="flex items-start justify-between gap-2">
                                     <div className="min-w-0 flex-1">
@@ -51,7 +51,7 @@ const DayCell = ({
                                             {assignment.guardName}
                                         </h4>
 
-                                        <p className="truncate text-xs text-slate-500">
+                                        <p className="truncate text-sm text-slate-500">
                                             {assignment.orderName}
                                         </p>
                                     </div>
@@ -65,34 +65,20 @@ const DayCell = ({
                                 </div>
 
                                 {/* Time */}
-                                <div className="text-xs font-medium text-slate-600">
+                                <div className="text-sm font-medium text-slate-600">
                                     {assignment.start} - {assignment.end}
                                 </div>
+                                <Badge
+                                    variant="outline"
+                                    className="rounded-full border px-2.5 py-0.5 text-[10px] font-medium uppercase"
+                                    style={getStatusStyle(assignment.status)}
+                                >
+                                    {
+                                        getStatusColor(assignment.status)
+                                            .label
+                                    }
+                                </Badge>
 
-                                {/* Footer */}
-                                <div className="flex items-center justify-between gap-2">
-                                    <Badge
-                                        variant="outline"
-                                        className="rounded-full border px-2.5 py-0.5 text-[11px] font-medium"
-                                        style={getStatusStyle(
-                                            assignment.status
-                                        )}
-                                    >
-                                        {
-                                            getStatusColor(assignment.status)
-                                                .label
-                                        }
-                                    </Badge>
-
-                                    <div
-                                        className={cn(
-                                            "h-2 w-2 rounded-full",
-                                            assignment.type === "patrol"
-                                                ? "bg-orange-500"
-                                                : "bg-emerald-500"
-                                        )}
-                                    />
-                                </div>
                             </CardContent>
                         </Card>
                     ))}

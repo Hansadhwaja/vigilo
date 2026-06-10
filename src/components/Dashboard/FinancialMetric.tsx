@@ -29,7 +29,7 @@ const FinancialMetric = ({
                 className="h-2"
             />
 
-            <div className={`text-xs ${item.progressClass}`}>
+            <div className={`text-sm ${item.progressClass}`}>
                 {item.progressText}
             </div>
 

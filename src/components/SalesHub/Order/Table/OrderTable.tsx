@@ -115,7 +115,7 @@ const OrderTable = ({
                             )}
                         </div>
 
-                        <p className="font-mono text-xs text-slate-400">
+                        <p className="font-mono text-base text-slate-400">
                             #{row.id.slice(0, 8)}
                         </p>
                     </div>
@@ -158,7 +158,7 @@ const OrderTable = ({
                             {formatDate(row.startDate)}
                         </p>
 
-                        <p className="text-xs text-slate-500">
+                        <p className="text-sm text-slate-500">
                             to {formatDate(row.endDate)}
                         </p>
                     </div>
@@ -182,7 +182,7 @@ const OrderTable = ({
                             {row.guardsRequired}
                         </p>
 
-                        <p className="text-xs text-slate-500">
+                        <p className="text-sm text-slate-500">
                             Guards
                         </p>
                     </div>
@@ -197,7 +197,7 @@ const OrderTable = ({
 
             render: (row) => (
                 <Badge
-                    className="rounded-full border px-3 py-1 text-xs font-semibold shadow-sm"
+                    className="uppercase text-[10px]"
                     style={getStatusStyle(row.status)}
                 >
                     {getStatusColor(row.status).label}
@@ -215,7 +215,7 @@ const OrderTable = ({
                         {formatDate(row.createdAt)}
                     </p>
 
-                    <p className="text-xs text-slate-400">
+                    <p className="text-sm text-slate-400">
                         Created
                     </p>
                 </div>
@@ -259,26 +259,27 @@ const OrderTable = ({
                             align="end"
                             className="w-48 rounded-2xl"
                         >
-                            {row.status !== "completed" &&
-                                row.status !== "cancelled" && (
-                                    <>
-                                        <DropdownMenuItem>
-                                            <div
-                                                onClick={(e) =>
-                                                    e.stopPropagation()
-                                                }
-                                            >
-                                                <EditOrderModal
-                                                    order={row}
-                                                />
-                                            </div>
-                                        </DropdownMenuItem>
+                            {row.status !== "completed" ? (
+                                <>
+                                    <DropdownMenuItem>
+                                        <div
+                                            onClick={(e) =>
+                                                e.stopPropagation()
+                                            }
+                                        >
+                                            <EditOrderModal
+                                                order={row}
+                                            />
+                                        </div>
+                                    </DropdownMenuItem>
 
-                                        {row.status === "pending" && (
-                                            <DropdownMenuSeparator />
-                                        )}
-                                    </>
-                                )}
+                                    {row.status === "pending" && (
+                                        <DropdownMenuSeparator />
+                                    )}
+                                </>
+                            ) : (
+                                <Badge className="uppercase text-[10px]" style={getStatusStyle("completed")}>Completed</Badge>
+                            )}
 
                             {row.status === "pending" && (
                                 <>

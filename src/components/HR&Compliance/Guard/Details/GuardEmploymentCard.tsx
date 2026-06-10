@@ -162,7 +162,7 @@ const GuardEmploymentCard = ({
                         />
                     </div>
 
-                    <p className="text-xs text-slate-500">
+                    <p className="text-sm text-slate-500">
                         {completedShifts} of {totalShifts} shifts completed
                     </p>
 

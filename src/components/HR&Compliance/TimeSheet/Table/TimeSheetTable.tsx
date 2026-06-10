@@ -94,7 +94,7 @@ const TimeSheetTable = ({
                         {row.guard.name}
                     </p>
 
-                    <p className="text-xs font-mono text-slate-400">
+                    <p className="text-sm font-mono text-slate-400">
                         #{row.guard.id.slice(0, 8)}
                     </p>
                 </div>

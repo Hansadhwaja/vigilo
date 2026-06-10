@@ -103,7 +103,7 @@ const IncidentsTable = ({
                         {formatDate(row.createdAt)}
                     </p>
 
-                    <p className="text-xs text-slate-400">
+                    <p className="text-sm text-slate-400">
                         {formatTime(row.createdAt)}
                     </p>
                 </div>
