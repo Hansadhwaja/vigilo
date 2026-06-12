@@ -14,148 +14,123 @@ import { Client } from "@/apis/usersApi";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 
 interface ClientFormProps {
-    initialData: Client;
-    onSubmit: (v: ClientFormValues) => void;
-    onCancel: () => void;
-    isLoading: boolean;
+  initialData: Client;
+  onSubmit: (v: ClientFormValues) => void;
+  onCancel: () => void;
+  isLoading: boolean;
 }
 
 const ClientForm = ({
-    initialData,
-    onSubmit,
-    onCancel,
-    isLoading,
+  initialData,
+  onSubmit,
+  onCancel,
+  isLoading,
 }: ClientFormProps) => {
+  const form = useForm<ClientFormValues>({
+    resolver: zodResolver(clientSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: initialData.name ?? "",
+      email: initialData.email ?? "",
+      mobile: initialData.mobile ?? "",
+      address: initialData.address ?? "",
+      avatar: initialData.avatar ?? "",
+    },
+  });
 
-    const form = useForm<ClientFormValues>({
-        resolver: zodResolver(clientSchema),
-        mode: "onChange",
-        defaultValues: {
-            name: "",
-            email: "",
-            mobile: "",
-            address: "",
-            avatar: "",
-        },
-    });
+  const {
+    handleSubmit,
+    control,
+    formState: { isValid },
+  } = form;
 
-    const {
-        handleSubmit,
-        control,
-        reset,
-        formState: { isValid },
-    } = form;
+  const isEdit = !!initialData;
 
-    useEffect(() => {
-        if (initialData) {
-            reset(initialData);
-        }
-    }, [initialData]);
+  return (
+    <FormProvider {...form}>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="space-y-4">
+          <Controller
+            name="name"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel>Full Name</FieldLabel>
+                <Input {...field} placeholder="Full Name" />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-    return (
-        <FormProvider {...form}>
-            <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="space-y-6"
-            >
-                <div className="space-y-4">
+          <Controller
+            name="email"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel>Email</FieldLabel>
+                <Input
+                  disabled={isEdit}
+                  {...field}
+                  type="email"
+                  placeholder="Email"
+                />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-                    <Controller
-                        name="name"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                            <Field>
-                                <FieldLabel>Full Name</FieldLabel>
-                                <Input
-                                    {...field}
-                                    placeholder="Full Name"
-                                />
-                                {fieldState.invalid && (
-                                    <FieldError errors={[fieldState.error]} />
-                                )}
-                            </Field>
-                        )}
-                    />
+          <Controller
+            name="mobile"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel>Mobile Number</FieldLabel>
+                <Input {...field} placeholder="Mobile Number" />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-                    <Controller
-                        name="email"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                            <Field>
-                                <FieldLabel>Email</FieldLabel>
-                                <Input
-                                    {...field}
-                                    type="email"
-                                    placeholder="Email"
-                                />
-                                {fieldState.invalid && (
-                                    <FieldError errors={[fieldState.error]} />
-                                )}
-                            </Field>
-                        )}
-                    />
+          <Controller
+            name="address"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel>Address</FieldLabel>
+                <Textarea {...field} placeholder="Address" />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
 
-                    <Controller
-                        name="mobile"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                            <Field>
-                                <FieldLabel>Mobile Number</FieldLabel>
-                                <Input
-                                    {...field}
-                                    placeholder="Mobile Number"
-                                />
-                                {fieldState.invalid && (
-                                    <FieldError errors={[fieldState.error]} />
-                                )}
-                            </Field>
-                        )}
-                    />
+          <ImageUpload
+            name="avatar"
+            label="Profile Picture"
+            buttonLabel="Upload Image"
+            single
+          />
+        </div>
 
-                    <Controller
-                        name="address"
-                        control={control}
-                        render={({ field, fieldState }) => (
-                            <Field>
-                                <FieldLabel>Address</FieldLabel>
-                                <Textarea
-                                    {...field}
-                                    placeholder="Address"
-                                />
-                                {fieldState.invalid && (
-                                    <FieldError errors={[fieldState.error]} />
-                                )}
-                            </Field>
-                        )}
-                    />
+        <div className="flex justify-end gap-3">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
 
-                    <ImageUpload
-                        name="avatar"
-                        label="Profile Picture"
-                        buttonLabel="Upload Image"
-                        single
-                    />
-                </div>
-
-                <div className="flex justify-end gap-3">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onCancel}
-                    >
-                        Cancel
-                    </Button>
-
-                    <Button
-                        type="submit"
-                        disabled={!isValid || isLoading}
-                    >
-                        Save Changes
-                    </Button>
-                </div>
-            </form>
-        </FormProvider>
-    );
+          <Button type="submit" disabled={!isValid || isLoading}>
+            Save Changes
+          </Button>
+        </div>
+      </form>
+    </FormProvider>
+  );
 };
 
 export default ClientForm;

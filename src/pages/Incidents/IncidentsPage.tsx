@@ -6,7 +6,10 @@ import IncidentStats from "@/components/Incidents/IncidentStats";
 import IncidentsTable from "@/components/Incidents/Table/IncidentsTable";
 import IncidentsSearchFilters from "@/components/Incidents/IncidentsSearchFilters";
 
-import { useExportIncidentsMutation, useGetAllIncidentsQuery } from "@/apis/incidentsApi";
+import {
+  useExportIncidentsMutation,
+  useGetAllIncidentsQuery,
+} from "@/apis/incidentsApi";
 
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";
@@ -15,68 +18,40 @@ import Loader from "@/components/common/Loader";
 import { toast } from "sonner";
 
 export default function IncidentsPage() {
-  const {
-    getParam,
-    setParam,
-    setMultipleParams,
-  } = useQueryParams();
+  const { getParam, setParam, setMultipleParams } = useQueryParams();
 
-  const page = Number(
-    getParam("page", "1")
-  );
+  const page = Number(getParam("page", "1"));
 
-  const limit = Number(
-    getParam("limit", "10")
-  );
+  const limit = Number(getParam("limit", "10"));
 
-  const search = getParam(
-    "search",
-    ""
-  );
+  const search = getParam("search", "");
 
-  const status = getParam(
-    "status",
-    ""
-  );
+  const status = getParam("status", "");
 
-  const debouncedSearch =
-    useDebounce(search, 500);
+  const debouncedSearch = useDebounce(search, 500);
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-  } = useGetAllIncidentsQuery({
+  const { data, isLoading, isFetching } = useGetAllIncidentsQuery({
     search: debouncedSearch,
     page,
     limit,
     status,
   });
 
-  const {
-    data: incidents = [],
-    pagination,
-  } = data ?? {};
+  const { data: incidents = [], pagination, summary } = data ?? {};
 
-  const handlePageChange = (
-    newPage: number
-  ) => {
-    setParam(
-      "page",
-      String(newPage)
-    );
+  const handlePageChange = (newPage: number) => {
+    setParam("page", String(newPage));
   };
 
-  const handleLimitChange = (
-    value: number
-  ) => {
+  const handleLimitChange = (value: number) => {
     setMultipleParams({
       limit: String(value),
       page: "1",
     });
   };
 
-  const [exportIncidents, { isLoading: isExporting }] = useExportIncidentsMutation();
+  const [exportIncidents, { isLoading: isExporting }] =
+    useExportIncidentsMutation();
 
   const handleExport = async () => {
     try {
@@ -95,13 +70,12 @@ export default function IncidentsPage() {
       toast.success("Incidents Exported Successfully");
     } catch (error) {
       console.log(error);
-      toast.error("Error while exporting Incidents")
+      toast.error("Error while exporting Incidents");
     }
-  }
+  };
 
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
-
       <CustomHeader
         title="Incident Management"
         description="View and manage incidents raised by guards and clients"
@@ -109,19 +83,17 @@ export default function IncidentsPage() {
           <div className="flex gap-2 items-center">
             <Button
               variant="outline"
-              size="sm"
               className="cursor-pointer"
               onClick={handleExport}
               disabled={isExporting}
             >
-
-              {isExporting ? <Loader /> : (
+              {isExporting ? (
+                <Loader />
+              ) : (
                 <>
                   <Download className="h-4 w-4" />
                   Export
                 </>
-
-
               )}
             </Button>
             <div
@@ -135,7 +107,6 @@ export default function IncidentsPage() {
                 shadow-sm
               "
             >
-
               <div
                 className="
                   flex h-11 w-11 items-center
@@ -173,8 +144,7 @@ export default function IncidentsPage() {
         }
       />
 
-      <IncidentStats />
-
+      <IncidentStats summary={summary} />
 
       {/* FILTERS */}
       <IncidentsSearchFilters />

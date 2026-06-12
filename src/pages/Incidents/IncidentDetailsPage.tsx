@@ -17,14 +17,18 @@ import IncidentAssignmentCard from "@/components/Incidents/AssignmentCard";
 import { customFormatDateTime } from "@/lib/utils";
 import IncidentHeroSection from "@/components/Incidents/Details/IncidentHeroSection";
 import ImagesCard from "@/components/common/Card/ImagesCard";
+import { Badge } from "@/components/ui/badge";
+import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
 
 export default function IncidentDetailsPage() {
   const { id } = useParams<{ id: string }>();
 
-  const { data: incidentResponse, isLoading } =
-    useGetIncidentByIdQuery(id || "", {
+  const { data: incidentResponse, isLoading } = useGetIncidentByIdQuery(
+    id || "",
+    {
       skip: !id,
-    });
+    },
+  );
 
   const incident = incidentResponse?.data;
 
@@ -44,14 +48,8 @@ export default function IncidentDetailsPage() {
             Please select an incident to view details
           </p>
 
-          <Button
-            asChild
-            variant="outline"
-            className="mt-6 rounded-xl px-6"
-          >
-            <Link to="/incidents">
-              Back to Incidents
-            </Link>
+          <Button asChild variant="outline" className="mt-6 rounded-xl px-6">
+            <Link to="/incidents">Back to Incidents</Link>
           </Button>
         </div>
       </div>
@@ -66,9 +64,7 @@ export default function IncidentDetailsPage() {
     );
   }
 
-  const dateTime = customFormatDateTime(
-    incident?.createdAt
-  );
+  const dateTime = customFormatDateTime(incident?.createdAt);
 
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
@@ -76,15 +72,21 @@ export default function IncidentDetailsPage() {
         previousLink="/incidents"
         title="Incident Details"
         description="Full incident information including location and evidence documentation"
+        others={
+          <Badge
+            style={getStatusStyle(incident.priority)}
+            className="uppercase"
+          >
+            {getStatusColor(incident?.priority).label}
+          </Badge>
+        }
       />
 
       <IncidentHeroSection incident={incident} />
 
       <div className="grid grid-cols-1 items-start gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="space-y-8">
-          <IncidentInfoCard
-            incident={incident}
-          />
+          <IncidentInfoCard incident={incident} />
           <ImagesCard
             title="Evidence Images"
             description="Incident related photos and documentation"
@@ -92,32 +94,20 @@ export default function IncidentDetailsPage() {
             images={incident?.images || []}
           />
 
-          <ReporterCard
-            reporter={incident?.reporter}
-          />
+          <ReporterCard reporter={incident?.reporter} />
         </div>
 
         {/* RIGHT */}
         <div className="space-y-8 lg:sticky lg:top-6">
-          <DateTimeCard
-            date={dateTime.date}
-            time={dateTime.time}
-          />
+          <DateTimeCard date={dateTime.date} time={dateTime.time} />
 
-          <ShiftCard
-            shift={incident?.shift}
-          />
+          <ShiftCard shift={incident?.shift} />
 
           <MetaCard incident={incident} />
 
-          <IncidentAssignmentCard
-            assignedGuard={
-              incident?.assignedGuard
-            }
-          />
+          <IncidentAssignmentCard assignedGuard={incident?.assignedGuard} />
         </div>
       </div>
-
     </div>
   );
 }

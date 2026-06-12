@@ -79,54 +79,7 @@ export const incidentsApi = baseApi.injectEndpoints({
         return `/incidents/getAllIncidentsForAdmin${qs.toString() ? `?${qs.toString()}` : ""}`
 
       },
-      transformResponse: (response: any): GetAllIncidentsResponse => {
-        const mappedData = response.data.map((i: any) => ({
-          // ✅ Real API fields
-          id: i.id,
-          name: i.name,
-          location: i.location,
-          description: i.description,
-          images: i.images || [],
-          createdAt: i.createdAt,
-          updatedAt: i.updatedAt,
-          deletedAt: i.deletedAt,
-          shiftId: i.shiftId,
-          reportedBy: i.reportedBy,
-          assignedGuard: i.assignedGuard,
-          assignedGuardUser: i.assignedGuardUser,
-          reporter: i.reporter || { id: "", name: "Unknown" },
-          shift: i.shift || { id: "", type: "Unknown" },
-
-          // ✅ UI convenience fields
-          site: i.name || "Unknown Site",
-          type: i.name || "Incident",
-          severity: i.severity || "Low",
-          status: i.status || "Pending",
-          assigned: i.reporter ? i.reporter.name : "Not Assigned",
-          time: i.createdAt,
-          priorityLevel: i.priorityLevel || "Normal",
-          guardMessage: i.guardMessage || "",
-          actionsTaken: i.actionsTaken || "",
-          reporterName: i.reporter?.name || "Unknown Reporter",
-          photo: i.images?.[0] || "",
-          clientNotified: i.clientNotified || false,
-        }));
-
-        return {
-          ...response,
-          data: mappedData,
-        };
-      },
-      providesTags: (result) =>
-        result
-          ? [
-            ...result.data.map((item) => ({
-              type: "Incidents" as const,
-              id: item.id,
-            })),
-            { type: "Incidents", id: "LIST" },
-          ]
-          : [{ type: "Incidents", id: "LIST" }],
+      providesTags: ["Incidents"],
     }),
 
     getIncidentById: builder.query({
