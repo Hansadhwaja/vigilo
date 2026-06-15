@@ -270,10 +270,18 @@ export const guardSchema = z.object({
 
 export type GuardFormValues = z.infer<typeof guardSchema>;
 
-export const timeSheetSchema = z.object({
-    shiftStartTime: z.string().min(1, "Please Enter Start Time"),
-    shiftEndTime: z.string().min(1, "Please Enter End Time"),
-});
+export const timeSheetSchema = z
+    .object({
+        shiftStartTime: z.string().min(1, "Please Enter Start Time"),
+        shiftEndTime: z.string().min(1, "Please Enter End Time"),
+    })
+    .refine(
+        (data) => data.shiftEndTime > data.shiftStartTime,
+        {
+            message: "End time must be after start time",
+            path: ["shiftEndTime"],
+        }
+    );
 
 export type TimeSheetFormValues = z.infer<typeof timeSheetSchema>;
 

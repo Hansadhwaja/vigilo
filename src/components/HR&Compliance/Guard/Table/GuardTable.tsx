@@ -134,7 +134,7 @@ const GuardTable = ({
             render: (row) => (
                 <div className="flex items-center justify-center gap-2">
                     <Link
-                        to={`/guard-details/${row.id}`}
+                        to={`/hr/guard-details/${row.id}`}
                         className="
                             rounded-xl border border-slate-200
                             p-2 text-slate-500 transition-all

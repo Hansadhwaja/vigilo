@@ -146,8 +146,8 @@ export interface GetAllPatrolSitesResponse {
 }
 
 export interface CreateCheckpointRequest {
-  siteId?: string;      // optional
-  subSiteId?: string;   // optional
+  siteId?: string; // optional
+  subSiteId?: string; // optional
   name: string;
   latitude: number;
   longitude: number;
@@ -190,9 +190,9 @@ export interface Patrol {
   completedSites: number;
   completedSubSites: number;
   completedCheckpoints: number;
-  unitPrice: number;         // ✅ added
-  totalHours: number;        // ✅ added
-  totalPatrolCost: number;   // ✅ added
+  unitPrice: number; // ✅ added
+  totalHours: number; // ✅ added
+  totalPatrolCost: number; // ✅ added
   perGuardPayment: number;
 }
 
@@ -329,7 +329,7 @@ export interface GetAllPatrolRunsForAdminResponse {
     active: number;
     pending: number;
     completion: number;
-  }
+  };
 }
 
 export interface GetPatrolParams {
@@ -338,7 +338,6 @@ export interface GetPatrolParams {
   status?: string;
   search?: string;
 }
-
 
 /* =====================================================
    📌 GET PATROL RUN BY ID (ADMIN)
@@ -494,7 +493,10 @@ export interface GetAllPatrolCheckpointsResponse {
 
 export const patrollingApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    createPatrolSite: builder.mutation<CreatePatrolSiteResponse, CreatePatrolSiteRequest>({
+    createPatrolSite: builder.mutation<
+      CreatePatrolSiteResponse,
+      CreatePatrolSiteRequest
+    >({
       query: (data) => ({
         url: "/patrolling/createPatrolSite",
         method: "POST",
@@ -502,7 +504,10 @@ export const patrollingApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
-    createSubSite: builder.mutation<CreateSubSiteResponse, CreateSubSiteRequest>({
+    createSubSite: builder.mutation<
+      CreateSubSiteResponse,
+      CreateSubSiteRequest
+    >({
       query: (body) => ({
         url: "/patrolling/createPatrolSubSite", // adjust if route differs
         method: "POST",
@@ -535,7 +540,10 @@ export const patrollingApi = baseApi.injectEndpoints({
 
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
-    getAllPatrolSites: builder.query<GetAllPatrolSitesResponse, { page?: number; limit?: number }>({
+    getAllPatrolSites: builder.query<
+      GetAllPatrolSitesResponse,
+      { page?: number; limit?: number }
+    >({
       query: ({ page = 1, limit = 10 }) => ({
         url: `/patrolling/getAllPatrolSites?page=${page}&limit=${limit}`,
         method: "GET",
@@ -543,7 +551,10 @@ export const patrollingApi = baseApi.injectEndpoints({
 
       providesTags: [{ type: "Patrol", id: "LIST" }],
     }),
-    createCheckpoint: builder.mutation<CreateCheckpointResponse, CreateCheckpointRequest>({
+    createCheckpoint: builder.mutation<
+      CreateCheckpointResponse,
+      CreateCheckpointRequest
+    >({
       query: (body) => ({
         url: "/patrolling/createCheckpoint", // adjust if needed
         method: "POST",
@@ -655,7 +666,10 @@ export const patrollingApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
 
-    getAllPatrolRunsForAdmin: builder.query<GetAllPatrolRunsForAdminResponse, GetPatrolParams>({
+    getAllPatrolRunsForAdmin: builder.query<
+      GetAllPatrolRunsForAdminResponse,
+      GetPatrolParams
+    >({
       query: (params = {}) => {
         const qs = new URLSearchParams();
 
@@ -664,7 +678,7 @@ export const patrollingApi = baseApi.injectEndpoints({
 
         if (params.status) qs.set("status", params.status);
         if (params.search) qs.set("search", params.search);
-        return `/patrolling/getAllPatrolRunsForAdmin?${qs.toString()}`
+        return `/patrolling/getAllPatrolRunsForAdmin?${qs.toString()}`;
       },
 
       providesTags: [{ type: "Patrol", id: "LIST" }],
@@ -679,9 +693,7 @@ export const patrollingApi = baseApi.injectEndpoints({
         method: "GET",
       }),
 
-      providesTags: (result, error, id) => [
-        { type: "Patrol", id },
-      ],
+      providesTags: (result, error, id) => [{ type: "Patrol", id }],
     }),
 
     editPatrolRun: builder.mutation<
@@ -708,11 +720,7 @@ export const patrollingApi = baseApi.injectEndpoints({
         siteId?: string;
       }
     >({
-      query: ({
-        page = 1,
-        limit = 10,
-        siteId,
-      }) => {
+      query: ({ page = 1, limit = 10, siteId }) => {
         const params = new URLSearchParams();
 
         params.append("page", String(page));
@@ -743,12 +751,7 @@ export const patrollingApi = baseApi.injectEndpoints({
         subSiteId?: string;
       }
     >({
-      query: ({
-        page = 1,
-        limit = 10,
-        siteId,
-        subSiteId,
-      }) => {
+      query: ({ page = 1, limit = 10, siteId, subSiteId }) => {
         const params = new URLSearchParams();
 
         params.append("page", String(page));
@@ -771,10 +774,7 @@ export const patrollingApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Patrol", id: "CHECKPOINT_LIST" }],
     }),
 
-    downloadQR: builder.query<
-      Blob,
-      { url: string; name: string }
-    >({
+    downloadQR: builder.query<Blob, { url: string; name: string }>({
       query: ({ url, name }) => ({
         url: `/patrolling/downloadQR?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`,
         method: "GET",
@@ -782,10 +782,7 @@ export const patrollingApi = baseApi.injectEndpoints({
       }),
     }),
 
-    downloadSiteQRsPdf: builder.query<
-      Blob,
-      { siteId: string }
-    >({
+    downloadSiteQRsPdf: builder.query<Blob, { siteId: string }>({
       query: ({ siteId }) => ({
         url: `/patrolling/downloadSiteQRsPdf/${siteId}`,
         method: "GET",
@@ -800,7 +797,7 @@ export const patrollingApi = baseApi.injectEndpoints({
         responseHandler: (response) => response.blob(),
       }),
       invalidatesTags: ["Patrol"],
-    })
+    }),
   }),
 });
 
@@ -825,5 +822,5 @@ export const {
   useGetAllPatrolCheckpointsQuery,
   useLazyDownloadQRQuery,
   useLazyDownloadSiteQRsPdfQuery,
-  useExportPatrolsMutation
+  useExportPatrolsMutation,
 } = patrollingApi;

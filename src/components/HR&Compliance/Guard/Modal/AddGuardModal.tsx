@@ -15,7 +15,7 @@ const AddGuardModal = () => {
     const handleSubmit = async (data: GuardFormValues) => {
         try {
             await createGuard(data).unwrap();
-            toast.success("Guard added Successfully");
+            toast.success("New Guard successfully added");
             setOpen(false);
         } catch (error) {
             console.log(error);
