@@ -3,7 +3,7 @@
 import {
     Activity,
     Guard,
-} from "@/apis/guardsApi";
+} from "@/store/apis/guardsApi";
 
 import {
     Activity as ActivityIcon,

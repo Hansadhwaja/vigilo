@@ -1,7 +1,4 @@
-import {
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -32,19 +29,13 @@ const TablePagination = ({
 }: TablePaginationProps) => {
   const safeTotalPages = Math.max(1, totalPages);
 
-  const safeCurrentPage = Math.min(
-    Math.max(1, currentPage),
-    safeTotalPages
-  );
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), safeTotalPages);
 
   const generatePages = () => {
     const pages: (number | string)[] = [];
 
     if (safeTotalPages <= 7) {
-      return Array.from(
-        { length: safeTotalPages },
-        (_, i) => i + 1
-      );
+      return Array.from({ length: safeTotalPages }, (_, i) => i + 1);
     }
 
     pages.push(1);
@@ -54,10 +45,7 @@ const TablePagination = ({
     }
 
     const start = Math.max(2, safeCurrentPage - 1);
-    const end = Math.min(
-      safeTotalPages - 1,
-      safeCurrentPage + 1
-    );
+    const end = Math.min(safeTotalPages - 1, safeCurrentPage + 1);
 
     for (let i = start; i <= end; i++) {
       pages.push(i);
@@ -90,15 +78,11 @@ const TablePagination = ({
         <div className="hidden h-5 w-px bg-border sm:block" />
 
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            Rows
-          </span>
+          <span className="text-sm text-muted-foreground">Rows</span>
 
           <Select
             value={String(limit)}
-            onValueChange={(value) =>
-              onLimitChange(Number(value))
-            }
+            onValueChange={(value) => onLimitChange(Number(value))}
           >
             <SelectTrigger className="h-9 w-[80px] rounded-xl border-muted shadow-none">
               <SelectValue />
@@ -106,10 +90,7 @@ const TablePagination = ({
 
             <SelectContent>
               {[6, 10, 20, 50].map((size) => (
-                <SelectItem
-                  key={size}
-                  value={String(size)}
-                >
+                <SelectItem key={size} value={String(size)}>
                   {size}
                 </SelectItem>
               ))}
@@ -125,9 +106,7 @@ const TablePagination = ({
           size="icon"
           className="h-9 w-9 rounded-xl"
           disabled={safeCurrentPage === 1}
-          onClick={() =>
-            onPageChange(safeCurrentPage - 1)
-          }
+          onClick={() => onPageChange(safeCurrentPage - 1)}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -144,23 +123,16 @@ const TablePagination = ({
             ) : (
               <Button
                 key={page}
-                variant={
-                  safeCurrentPage === page
-                    ? "default"
-                    : "ghost"
-                }
+                variant={safeCurrentPage === page ? "default" : "ghost"}
                 size="icon"
-                className={`h-9 w-9 rounded-xl text-sm ${safeCurrentPage === page
-                  ? "shadow-sm"
-                  : ""
-                  }`}
-                onClick={() =>
-                  onPageChange(page as number)
-                }
+                className={`h-9 w-9 rounded-xl text-sm ${
+                  safeCurrentPage === page ? "shadow-sm" : ""
+                }`}
+                onClick={() => onPageChange(page as number)}
               >
                 {page}
               </Button>
-            )
+            ),
           )}
         </div>
 
@@ -168,12 +140,8 @@ const TablePagination = ({
           variant="outline"
           size="icon"
           className="h-9 w-9 rounded-xl"
-          disabled={
-            safeCurrentPage === safeTotalPages
-          }
-          onClick={() =>
-            onPageChange(safeCurrentPage + 1)
-          }
+          disabled={safeCurrentPage === safeTotalPages}
+          onClick={() => onPageChange(safeCurrentPage + 1)}
         >
           <ChevronRight className="h-4 w-4" />
         </Button>

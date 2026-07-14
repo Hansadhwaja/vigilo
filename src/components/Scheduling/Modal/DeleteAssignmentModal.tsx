@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useDeleteScheduleMutation } from "@/apis/schedulingAPI";
+import { useDeleteScheduleMutation } from "@/store/apis/schedulingAPI";
 
 import {
     Dialog,

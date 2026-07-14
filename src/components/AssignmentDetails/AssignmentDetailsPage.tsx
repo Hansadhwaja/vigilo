@@ -23,7 +23,7 @@ import {
 import {
   useGetStaticShiftDetailsForAdminQuery,
   useDeleteScheduleMutation
-} from "@/apis/schedulingAPI";
+} from "@/store/apis/schedulingAPI";
 import { toast } from "sonner";
 import EditAssignmentModal from "../Scheduling/Modal/EditAssignmentModal";
 

@@ -1,8 +1,8 @@
 import TimeSheetSearchFilters from "./TimeSheetSearchFilters";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";
-import { useGetAllTimeSheetsQuery } from "@/apis/schedulingAPI";
-import { useGetAllGuardsQuery } from "@/apis/guardsApi";
+import { useGetAllTimeSheetsQuery } from "@/store/apis/schedulingAPI";
+import { useGetAllGuardsQuery } from "@/store/apis/guardsApi";
 import TimeSheetTable from "./Table/TimeSheetTable";
 
 const TimeSheetsTab = () => {

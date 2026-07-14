@@ -1,4 +1,4 @@
-import { MessageItem } from "@/apis/messagesAPI";
+import { MessageItem } from "@/store/apis/messagesAPI";
 
 import {
     BaseMessageProps,

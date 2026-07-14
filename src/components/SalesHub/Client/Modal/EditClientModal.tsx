@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import ClientForm from "../Form/ClientForm";
-import { Client, useEditClientMutation } from "@/apis/usersApi";
+import { Client, useEditClientMutation } from "@/store/apis/usersApi";
 import { ClientFormValues } from "@/schemas";
 import { toast } from "sonner";
 

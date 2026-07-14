@@ -1,6 +1,6 @@
 "use client";
 
-import { Guard } from "@/apis/guardsApi";
+import { Guard } from "@/store/apis/guardsApi";
 
 import {
     Mail,

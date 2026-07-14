@@ -6,7 +6,7 @@ import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Loader from "../common/Loader";
 import { toast } from "sonner";
-import { useExportInvoicesMutation } from "@/apis/invoiceApis";
+import { useExportInvoicesMutation } from "@/store/apis/invoiceApis";
 
 const InvoiceSearchFilters = () => {
     const { getParam, setMultipleParams } = useQueryParams();

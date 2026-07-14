@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Schedule, useCreateScheduleMutation, useEditScheduleMutation } from "@/apis/schedulingAPI";
+import { Schedule, useCreateScheduleMutation, useEditScheduleMutation } from "@/store/apis/schedulingAPI";
 
 import {
   Dialog,

@@ -7,14 +7,14 @@ import Loader from "@/components/common/Loader";
 import { Button } from "@/components/ui/button";
 import { InvoiceFormValues, invoiceSchema } from "@/schemas";
 import InvoiceDetailsForm from "./InvoiceDetailsForm";
-import { Client } from "@/apis/usersApi";
+import { Client } from "@/store/apis/usersApi";
 import SyncedOrdersForm from "./SyncedOrdersForm";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ResolvedAlarmsForm from "./ResolvedAlarmsForm";
 import InvoicePreview from "../New/InvoicePreview";
-import { useGetAllOrdersQuery } from "@/apis/ordersApi";
-import { useGetAllAlarmsQuery } from "@/apis/alarmsAPI";
+import { useGetAllOrdersQuery } from "@/store/apis/ordersApi";
+import { useGetAllAlarmsQuery } from "@/store/apis/alarmsAPI";
 
 interface InvoiceFormProps {
     isLoading: boolean;

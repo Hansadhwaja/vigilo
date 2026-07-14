@@ -1,175 +1,108 @@
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
+import {
+  type ControllerRenderProps,
+  type Path,
+  useForm,
+} from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMemo } from "react";
+import { LogIn } from "lucide-react";
+
+import { FormField } from "@/components/common/Form/FormField";
+import PasswordInput from "@/components/common/Input/PasswordInput";
+import Loader from "@/components/common/Loader";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import {
-    Field,
-    FieldLabel,
-    FieldError,
-} from "@/components/ui/field";
+  LoginFormValues,
+  loginSchema,
+} from "@/schemas/auth/auth.schemas";
 
-import {
-    Eye,
-    EyeOff,
-    Mail,
-    Lock,
-    LogIn,
-} from "lucide-react";
-
-const loginSchema = z.object({
-    email: z.email("Enter a valid email"),
-    password: z.string().min(6, "Minimum 6 characters"),
-});
-
-export type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginField = {
+  name: Path<LoginFormValues>;
+  label: string;
+  render: (
+    field: ControllerRenderProps<LoginFormValues, Path<LoginFormValues>>,
+  ) => React.ReactNode;
+};
 
 interface Props {
-    onSubmit: (values: LoginFormValues) => Promise<void>;
-    isLoading?: boolean;
+  onSubmit: (values: LoginFormValues) => void | Promise<void>;
+  isLoading?: boolean;
 }
 
-export function LoginForm({
-    onSubmit,
-    isLoading,
-}: Props) {
-    const [showPassword, setShowPassword] =
-        useState(false);
+export const LoginForm = ({ onSubmit, isLoading = false }: Props) => {
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: "onChange",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-    const {
-        control,
-        handleSubmit,
-    } = useForm<LoginFormValues>({
-        resolver: zodResolver(loginSchema),
-        defaultValues: {
-            email: "",
-            password: "",
-        },
-    });
+  const {
+    control,
+    handleSubmit,
+    formState: { isValid },
+  } = form;
 
-    return (
-        <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="space-y-5"
-        >
-            {/* EMAIL */}
-            <Controller
-                name="email"
-                control={control}
-                render={({ field, fieldState }) => (
-                    <Field>
-                        <FieldLabel>
-                            Email Address
-                        </FieldLabel>
+  const fields: LoginField[] = useMemo(
+    () => [
+      {
+        name: "email",
+        label: "Email Address",
+        render: (field) => (
+          <Input
+            {...field}
+            type="email"
+            placeholder="admin@vigilo.com"
+            autoComplete="email"
+          />
+        ),
+      },
+      {
+        name: "password",
+        label: "Password",
+        render: (field) => (
+          <PasswordInput
+            {...field}
+            placeholder="Enter your password"
+            autoComplete="current-password"
+          />
+        ),
+      },
+    ],
+    [],
+  );
 
-                        <div className="relative">
-                            <Mail
-                                className="
-                                    absolute left-3 top-1/2
-                                    h-4 w-4
-                                    -translate-y-1/2
-                                    text-slate-400
-                                "
-                            />
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      {fields.map((field) => (
+        <FormField
+          key={field.name}
+          control={control}
+          name={field.name}
+          label={field.label}
+          render={field.render}
+        />
+      ))}
 
-                            <Input
-                                {...field}
-                                placeholder="admin@vigilo.com"
-                                className="pl-10"
-                            />
-                        </div>
-
-                        {fieldState.error && (
-                            <FieldError
-                                errors={[fieldState.error]}
-                            />
-                        )}
-                    </Field>
-                )}
-            />
-
-            {/* PASSWORD */}
-            <Controller
-                name="password"
-                control={control}
-                render={({ field, fieldState }) => (
-                    <Field>
-                        <FieldLabel>
-                            Password
-                        </FieldLabel>
-
-                        <div className="relative">
-                            <Lock
-                                className="
-                                    absolute left-3 top-1/2
-                                    h-4 w-4
-                                    -translate-y-1/2
-                                    text-slate-400
-                                "
-                            />
-
-                            <Input
-                                {...field}
-                                type={
-                                    showPassword
-                                        ? "text"
-                                        : "password"
-                                }
-                                className="pl-10 pr-10"
-                                placeholder="Enter your password"
-                            />
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setShowPassword(
-                                        (prev) => !prev
-                                    )
-                                }
-                                className="
-                                    absolute right-3 top-1/2
-                                    -translate-y-1/2
-                                    text-slate-400
-                                    hover:text-slate-600
-                                "
-                            >
-                                {showPassword ? (
-                                    <Eye className="h-4 w-4" />
-                                ) : (
-                                    <EyeOff className="h-4 w-4" />
-                                )}
-                            </button>
-                        </div>
-
-                        {fieldState.error && (
-                            <FieldError
-                                errors={[fieldState.error]}
-                            />
-                        )}
-                    </Field>
-                )}
-            />
-
-            <Button
-                type="submit"
-                disabled={isLoading}
-                className="
-                    h-11
-                    w-full
-                    gap-2
-                    bg-blue-600
-                    hover:bg-blue-700
-                "
-            >
-                <LogIn className="h-4 w-4" />
-
-                {isLoading
-                    ? "Signing In..."
-                    : "Sign In"}
-            </Button>
-        </form>
-    );
-}
+      <Button
+        type="submit"
+        disabled={!isValid || isLoading}
+        className="h-11 w-full gap-2"
+      >
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <>
+            <LogIn className="size-4" />
+            Sign In
+          </>
+        )}
+      </Button>
+    </form>
+  );
+};

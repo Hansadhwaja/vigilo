@@ -14,7 +14,7 @@ import {
 
 import { cn } from "@/lib/utils";
 
-import { useUploadImageMutation } from "@/apis/usersApi";
+import { useUploadImageMutation } from "@/store/apis/usersApi";
 
 interface ImageUploadProps {
     name: string;

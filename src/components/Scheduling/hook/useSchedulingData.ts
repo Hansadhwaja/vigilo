@@ -1,6 +1,6 @@
 import { useMemo, useCallback, useState } from "react";
 
-import { useGetAllSchedulesQuery } from "@/apis/schedulingAPI";
+import { useGetAllSchedulesQuery } from "@/store/apis/schedulingAPI";
 
 import {
     formatDateKey,

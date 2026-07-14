@@ -1,13 +1,13 @@
 import { RefObject } from "react";
 import { MessageCircle, Sparkles } from "lucide-react";
 
-import { PresenceItem } from "@/apis/messagesAPI";
+import { PresenceItem } from "@/store/apis/messagesAPI";
 import { Separator } from "@/components/ui/separator";
 
 import CustomHeader from "../common/Header/CustomHeader";
 import MessageTabs from "./Tabs";
 
-import { Guard } from "@/apis/guardsApi";
+import { Guard } from "@/store/apis/guardsApi";
 
 interface LeftSideProps {
     guards: Guard[];

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 import {
     useMarkMessagesReadMutation,
-} from "@/apis/messagesAPI";
+} from "@/store/apis/messagesAPI";
 
 interface Props {
     socketRef: React.MutableRefObject<any>;

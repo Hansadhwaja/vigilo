@@ -2,7 +2,7 @@ import GuardSearchFilters from './GuardSearchFilters'
 import GuardTable from './Table/GuardTable'
 import { useQueryParams } from '@/lib/hooks/useQueryParams';
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { useGetAllGuardsQuery } from '@/apis/guardsApi';
+import { useGetAllGuardsQuery } from '@/store/apis/guardsApi';
 import GuardStats from './GuardStats';
 
 const GuardsTab = () => {

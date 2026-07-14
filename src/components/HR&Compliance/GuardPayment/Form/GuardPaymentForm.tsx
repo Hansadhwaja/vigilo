@@ -14,10 +14,10 @@ import {
     GuardPaymentFormValues,
     guardPaymentSchema,
 } from "@/schemas";
-import { useGetAllGuardsQuery } from "@/apis/guardsApi";
+import { useGetAllGuardsQuery } from "@/store/apis/guardsApi";
 import {
     useGetGuardTimeSheetSummaryQuery,
-} from "@/apis/schedulingAPI";
+} from "@/store/apis/schedulingAPI";
 import {
     Select,
     SelectContent,

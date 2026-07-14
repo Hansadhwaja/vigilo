@@ -10,7 +10,7 @@ import {
 import EditClientModal from "../Modal/EditClientModal";
 import { Edit, EllipsisVertical } from "lucide-react";
 import { useState } from "react";
-import { Client } from "@/apis/usersApi";
+import { Client } from "@/store/apis/usersApi";
 import { Button } from "@/components/ui/button";
 
 const ClientTableActions = ({ row }: { row: Client }) => {

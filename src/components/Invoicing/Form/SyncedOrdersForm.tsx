@@ -1,7 +1,7 @@
 "use client";
 
-import { Order } from "@/apis/ordersApi";
-import { RootState } from "@/apis/store";
+import { Order } from "@/store/apis/ordersApi";
+import { RootState } from "@/store/apis/store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

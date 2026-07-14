@@ -3,7 +3,7 @@ import ClientOperationsTabs from "@/components/SalesHub/Tabs/ClientOperationsTab
 
 export default function SalesPage() {
   return (
-    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
+    <div className="space-y-6">
 
       <CustomHeader
         title="Sales Management"

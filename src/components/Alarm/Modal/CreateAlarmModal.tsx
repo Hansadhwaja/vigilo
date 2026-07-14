@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Plus } from "lucide-react";
 import AlarmForm from "../Form/AlarmForm";
 import { AlarmFormValues } from "@/schemas";
-import { useCreateAlarmMutation } from "@/apis/alarmsAPI";
+import { useCreateAlarmMutation } from "@/store/apis/alarmsAPI";
 import { toast } from "sonner";
 
 const CreateAlarmModal = () => {

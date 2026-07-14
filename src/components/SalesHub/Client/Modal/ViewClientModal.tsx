@@ -1,4 +1,4 @@
-import { Client } from "@/apis/usersApi";
+import { Client } from "@/store/apis/usersApi";
 
 import { Button } from "@/components/ui/button";
 

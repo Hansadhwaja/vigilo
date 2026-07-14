@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
-import { PresenceItem } from "@/apis/messagesAPI";
+import { PresenceItem } from "@/store/apis/messagesAPI";
 import { PresenceUpdateEvent } from "@/types";
-import { Guard } from "@/apis/guardsApi";
+import { Guard } from "@/store/apis/guardsApi";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
 import MessageList from "./List/MessageList";

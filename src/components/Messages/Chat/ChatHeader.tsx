@@ -5,8 +5,8 @@ import {
     Video,
 } from "lucide-react";
 
-import { Guard } from "@/apis/guardsApi";
-import { PresenceItem } from "@/apis/messagesAPI";
+import { Guard } from "@/store/apis/guardsApi";
+import { PresenceItem } from "@/store/apis/messagesAPI";
 
 import UserAvatar from "@/components/common/Avatar/UserAvatar";
 

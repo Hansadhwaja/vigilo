@@ -1,6 +1,6 @@
 import { ShieldCheck, Users } from "lucide-react";
-import { PresenceItem } from "@/apis/messagesAPI";
-import { Guard } from "@/apis/guardsApi";
+import { PresenceItem } from "@/store/apis/messagesAPI";
+import { Guard } from "@/store/apis/guardsApi";
 import MessageSearchFilters from "./MessageSearchFilters";
 import GuardListCard from "./GuardListCard";
 

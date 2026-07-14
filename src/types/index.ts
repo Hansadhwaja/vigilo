@@ -1,5 +1,5 @@
-import { Guard } from "@/apis/guardsApi";
-import { MessageItem } from "@/apis/messagesAPI";
+import { Guard } from "@/store/apis/guardsApi";
+import { MessageItem } from "@/store/apis/messagesAPI";
 import { InvoiceAlarmsFormValues, InvoiceOrdersFormValues } from "@/schemas";
 
 //Messages

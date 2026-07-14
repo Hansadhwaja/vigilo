@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 
 import { Edit, FilePenLine } from "lucide-react";
 
-import { Order, useEditOrderMutation } from "@/apis/ordersApi";
+import { Order, useEditOrderMutation } from "@/store/apis/ordersApi";
 
 import { OrderFormValues } from "@/schemas";
 

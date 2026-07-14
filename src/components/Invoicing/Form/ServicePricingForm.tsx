@@ -28,8 +28,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { RootState } from "@/apis/store";
-import { setServicePricing } from "@/apis/slices/servicePricingSlice";
+import { RootState } from "@/store/apis/store";
+import { setServicePricing } from "@/store/slices/servicePricingSlice";
 import { services } from "@/constants";
 
 const ServicePricingForm = ({

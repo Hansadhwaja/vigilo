@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import InvoicingTabs from "@/components/Invoicing/Tabs/InvoicingTabs";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import { Plus } from "lucide-react";
-import { useGetAllInvoiceQuery } from "@/apis/invoiceApis";
+import { useGetAllInvoiceQuery } from "@/store/apis/invoiceApis";
 import Loader from "@/components/common/Loader";
 import InvoiceSearchFilters from "@/components/Invoicing/InvoiceSearchFilters";
 import InvoiceStats from "@/components/Invoicing/InvoiceStats";

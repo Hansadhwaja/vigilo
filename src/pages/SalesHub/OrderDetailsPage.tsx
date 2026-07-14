@@ -2,7 +2,7 @@ import { Badge as BadgeIcon, ClipboardList } from "lucide-react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
-import { useGetAdminOrderByIdQuery } from "@/apis/ordersApi";
+import { useGetAdminOrderByIdQuery } from "@/store/apis/ordersApi";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import EditOrderModal from "@/components/SalesHub/Order/Modal/EditOrderModal";
 import ServiceInformationCard from "@/components/SalesHub/Order/Details/ServiceInformationCard";

@@ -8,7 +8,7 @@ import {
     Target,
 } from "lucide-react";
 
-import { AdminPatrolRun, useDeletePatrolRunMutation } from "@/apis/patrollingAPI";
+import { AdminPatrolRun, useDeletePatrolRunMutation } from "@/store/apis/patrollingAPI";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

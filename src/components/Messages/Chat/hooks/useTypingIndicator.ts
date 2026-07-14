@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { Guard } from "@/apis/guardsApi";
+import { Guard } from "@/store/apis/guardsApi";
 
 import {
     TypingEvent,

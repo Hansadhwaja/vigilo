@@ -9,7 +9,7 @@ import IncidentsSearchFilters from "@/components/Incidents/IncidentsSearchFilter
 import {
   useExportIncidentsMutation,
   useGetAllIncidentsQuery,
-} from "@/apis/incidentsApi";
+} from "@/store/apis/incidentsApi";
 
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";

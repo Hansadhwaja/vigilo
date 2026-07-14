@@ -1,15 +1,20 @@
-import { Order } from "@/apis/ordersApi";
-import { Schedule } from "@/apis/schedulingAPI";
 import { avatarColors, TIMEZONE } from "@/constants";
 import { ServicePricingFormValues } from "@/schemas";
-import { CalculateGrandTotalProps, OrganizedAssignment, OrganizedShifts, TimeSlot } from "@/types";
+import { Order } from "@/store/apis/ordersApi";
+import { Schedule } from "@/store/apis/schedulingAPI";
+import {
+  CalculateGrandTotalProps,
+  OrganizedAssignment,
+  OrganizedShifts,
+  TimeSlot,
+} from "@/types";
 import { getStatusColor } from "@/utils/statusColors";
-import { clsx, type ClassValue } from "clsx"
+import { clsx, type ClassValue } from "clsx";
 import { format, parse } from "date-fns";
-import { twMerge } from "tailwind-merge"
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export const getInitials = (name: string) => {
@@ -21,22 +26,34 @@ export const getInitials = (name: string) => {
 
 export const resolveUserId = (row: any): string | number | null => {
   if (!row || typeof row !== "object") return null;
-  if (row.userId !== undefined && row.userId !== null && String(row.userId).trim()) return row.userId;
-  if (row.id !== undefined && row.id !== null && String(row.id).trim()) return row.id;
-  if (row._id !== undefined && row._id !== null && String(row._id).trim()) return row._id;
+  if (
+    row.userId !== undefined &&
+    row.userId !== null &&
+    String(row.userId).trim()
+  )
+    return row.userId;
+  if (row.id !== undefined && row.id !== null && String(row.id).trim())
+    return row.id;
+  if (row._id !== undefined && row._id !== null && String(row._id).trim())
+    return row._id;
   return null;
 };
 
-export const getAvatarColor = (name: string) => avatarColors[name.charCodeAt(0) % avatarColors.length];
+export const getAvatarColor = (name: string) =>
+  avatarColors[name.charCodeAt(0) % avatarColors.length];
 
-export const fileToDataUrl = (file: File) => new Promise<string>((res, rej) => {
-  const reader = new FileReader();
-  reader.onload = () => res(String(reader.result || ""));
-  reader.onerror = () => rej(new Error("Failed to read file"));
-  reader.readAsDataURL(file);
-});
+export const fileToDataUrl = (file: File) =>
+  new Promise<string>((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(String(reader.result || ""));
+    reader.onerror = () => rej(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
 
-export const formatPresence = (isOnline: boolean, lastSeenAt: string | null) => {
+export const formatPresence = (
+  isOnline: boolean,
+  lastSeenAt: string | null,
+) => {
   if (isOnline) return "online";
   if (!lastSeenAt) return "offline";
   const date = new Date(lastSeenAt);
@@ -55,13 +72,7 @@ export const formatMessageTime = (dateStr: string) => {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
-export const getDateTime = ({
-  date,
-  time,
-}: {
-  date: string;
-  time: string;
-}) => {
+export const getDateTime = ({ date, time }: { date: string; time: string }) => {
   const d = new Date(date);
 
   // Extract UTC parts to avoid timezone shift
@@ -79,7 +90,7 @@ export const calculateWork = (
   startDate: string,
   startTime: string,
   endDate: string,
-  endTime: string
+  endTime: string,
 ) => {
   const start = getDateTime({ date: startDate, time: startTime });
   const end = getDateTime({ date: endDate, time: endTime });
@@ -107,10 +118,9 @@ export const formatCurrency = (val: number) =>
     currency: "USD",
   }).format(val);
 
-
 export const formatDate = (
   date: string | Date,
-  options?: Intl.DateTimeFormatOptions
+  options?: Intl.DateTimeFormatOptions,
 ) => {
   if (!date) return "—";
 
@@ -155,9 +165,11 @@ export const generateWeekDays = (selectedDate: Date) => {
   return days;
 };
 
-export const toLocalTime = (isoString: string | number | Date) => new Date(isoString);
+export const toLocalTime = (isoString: string | number | Date) =>
+  new Date(isoString);
 
-export const getTimeHHMM = (dateObj: Date) => dateObj.toTimeString().slice(0, 5);
+export const getTimeHHMM = (dateObj: Date) =>
+  dateObj.toTimeString().slice(0, 5);
 
 export const getDuration = (
   start: string | number | Date,
@@ -170,7 +182,7 @@ export const getDuration = (
 
 export const organizeShifts = (
   scheduleList: Schedule[],
-  timeSlots: TimeSlot[]
+  timeSlots: TimeSlot[],
 ): OrganizedShifts => {
   const organized: OrganizedShifts = {};
 
@@ -183,68 +195,41 @@ export const organizeShifts = (
   scheduleList.forEach((shift) => {
     /* ---------------- LOCAL DATES ---------------- */
 
-    const startDateObj = new Date(
-      shift.startTime
-    );
+    const startDateObj = new Date(shift.startTime);
 
-    const endDateObj = new Date(
-      shift.endTime
-    );
+    const endDateObj = new Date(shift.endTime);
 
     startDateObj.setHours(0, 0, 0, 0);
     endDateObj.setHours(0, 0, 0, 0);
 
     /* ---------------- LOCAL TIMES ---------------- */
 
-    const start = toLocalTime(
-      shift.startTime
-    );
+    const start = toLocalTime(shift.startTime);
 
-    const end = toLocalTime(
-      shift.endTime
-    );
+    const end = toLocalTime(shift.endTime);
 
     /* ---------------- DAYS DIFF ---------------- */
 
     const daysDiff = Math.floor(
-      (endDateObj.getTime() -
-        startDateObj.getTime()) /
-      (1000 * 60 * 60 * 24)
+      (endDateObj.getTime() - startDateObj.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     /* ---------------- SLOT MATCH ---------------- */
 
-    const shiftStartHHMM =
-      getTimeHHMM(start);
+    const shiftStartHHMM = getTimeHHMM(start);
 
-    const shiftStartMin =
-      toMinutes(shiftStartHHMM);
+    const shiftStartMin = toMinutes(shiftStartHHMM);
 
-    let matchedSlot: string | null =
-      null;
+    let matchedSlot: string | null = null;
 
-    for (
-      let i = 0;
-      i < timeSlots.length;
-      i++
-    ) {
-      const curr = toMinutes(
-        timeSlots[i].time
-      );
+    for (let i = 0; i < timeSlots.length; i++) {
+      const curr = toMinutes(timeSlots[i].time);
 
       const next =
-        i < timeSlots.length - 1
-          ? toMinutes(
-            timeSlots[i + 1].time
-          )
-          : 9999;
+        i < timeSlots.length - 1 ? toMinutes(timeSlots[i + 1].time) : 9999;
 
-      if (
-        shiftStartMin >= curr &&
-        shiftStartMin < next
-      ) {
-        matchedSlot =
-          timeSlots[i].time;
+      if (shiftStartMin >= curr && shiftStartMin < next) {
+        matchedSlot = timeSlots[i].time;
 
         break;
       }
@@ -254,39 +239,25 @@ export const organizeShifts = (
 
     /* ---------------- LOOP DAYS ---------------- */
 
-    for (
-      let dayOffset = 0;
-      dayOffset <= daysDiff;
-      dayOffset++
-    ) {
-      const currentDateObj =
-        new Date(startDateObj);
+    for (let dayOffset = 0; dayOffset <= daysDiff; dayOffset++) {
+      const currentDateObj = new Date(startDateObj);
 
-      currentDateObj.setDate(
-        currentDateObj.getDate() +
-        dayOffset
-      );
+      currentDateObj.setDate(currentDateObj.getDate() + dayOffset);
 
-      const dateKey =
-        formatDateKey(currentDateObj);
+      const dateKey = formatDateKey(currentDateObj);
 
       if (!organized[dateKey]) {
         organized[dateKey] = {};
       }
 
-      if (
-        !organized[dateKey][matchedSlot]
-      ) {
-        organized[dateKey][
-          matchedSlot
-        ] = [];
+      if (!organized[dateKey][matchedSlot]) {
+        organized[dateKey][matchedSlot] = [];
       }
 
       /* ---------------- ASSIGNMENTS ---------------- */
 
       shift.guards.forEach((guard) => {
-        const assignment: OrganizedAssignment =
-        {
+        const assignment: OrganizedAssignment = {
           shiftId: shift.id,
 
           guardId: guard.id,
@@ -297,79 +268,48 @@ export const organizeShifts = (
 
           guardEmail: guard.email,
 
-          guardStatus:
-            guard.StaticGuards
-              ?.status ||
-            shift.status,
+          guardStatus: guard.StaticGuards?.status || shift.status,
 
           orderId: shift.orderId,
 
-          orderLocationName:
-            shift.orderLocationName ||
-            "Unknown Location",
+          orderLocationName: shift.orderLocationName || "Unknown Location",
 
-          orderName:
-            shift.orderLocationName ||
-            "Unknown Location",
+          orderName: shift.orderLocationName || "Unknown Location",
 
-          orderAddress:
-            shift.orderLocationAddress ||
-            "Address not available",
+          orderAddress: shift.orderLocationAddress || "Address not available",
 
-          description:
-            shift.description,
+          description: shift.description,
 
           type: shift.type,
 
           status: shift.status,
 
-          statusColors:
-            getStatusColor(
-              shift.status
-            ),
+          statusColors: getStatusColor(shift.status),
 
           timeSlot: matchedSlot,
 
-          start:
-            start.toLocaleTimeString(
-              "en-IN",
-              {
-                hour: "2-digit",
-                minute: "2-digit",
-              }
-            ),
+          start: start.toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
 
-          end:
-            end.toLocaleTimeString(
-              "en-IN",
-              {
-                hour: "2-digit",
-                minute: "2-digit",
-              }
-            ),
+          end: end.toLocaleTimeString("en-IN", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
 
-          duration: getDuration(
-            shift.startTime,
-            shift.endTime
-          ),
+          duration: getDuration(shift.startTime, shift.endTime),
 
           displayDate: dateKey,
 
-          originalStartDate:
-            shift.startTime,
+          originalStartDate: shift.startTime,
 
-          originalEndDate:
-            shift.endTime,
+          originalEndDate: shift.endTime,
 
-          allGuardIdsForShift:
-            shift.guards.map(
-              (g) => g.id
-            ),
+          allGuardIdsForShift: shift.guards.map((g) => g.id),
         };
 
-        organized[dateKey][
-          matchedSlot
-        ].push(assignment);
+        organized[dateKey][matchedSlot].push(assignment);
       });
     }
   });
@@ -425,12 +365,9 @@ export const calculateGrandTotal = ({
     if (!service) continue;
 
     const price =
-      service.priceType === "daily"
-        ? service.dailyPrice
-        : service.hourlyPrice;
+      service.priceType === "daily" ? service.dailyPrice : service.hourlyPrice;
 
-    const duration =
-      service.priceType === "daily" ? o.days : o.hours;
+    const duration = service.priceType === "daily" ? o.days : o.hours;
 
     total += (duration || 0) * Number(price || 0);
   }
@@ -448,7 +385,10 @@ export const calculateGrandTotal = ({
   return total;
 };
 
-export const getOrderPricing = (o: Order, serviceData: Record<string, ServicePricingFormValues>) => {
+export const getOrderPricing = (
+  o: Order,
+  serviceData: Record<string, ServicePricingFormValues>,
+) => {
   const service = serviceData?.[o.serviceType];
   if (!service) return null;
 
@@ -456,25 +396,20 @@ export const getOrderPricing = (o: Order, serviceData: Record<string, ServicePri
     o.startDate,
     o.startTime,
     o.endDate,
-    o.endTime
+    o.endTime,
   );
 
   const price =
-    service.priceType === "daily"
-      ? service.dailyPrice
-      : service.hourlyPrice;
+    service.priceType === "daily" ? service.dailyPrice : service.hourlyPrice;
 
-  const durationValue =
-    service.priceType === "daily" ? days : hours;
+  const durationValue = service.priceType === "daily" ? days : hours;
 
   return {
     price,
-    duration: service.priceType === "daily"
-      ? `${days} days`
-      : `${hours} hrs`,
+    duration: service.priceType === "daily" ? `${days} days` : `${hours} hrs`,
     total: (durationValue || 0) * Number(price || 0),
     hours,
-    days
+    days,
   };
 };
 
@@ -514,14 +449,11 @@ export const mapAssignmentToForm = (a: OrganizedAssignment) => {
 };
 
 export const formatTime = (date: string) => {
-  return new Date(date).toLocaleTimeString(
-    "en-US",
-    {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    }
-  );
+  return new Date(date).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 };
 
 export const formatTimeForInput = (date: string) => {
@@ -551,36 +483,16 @@ export const convertTo24Hour = (time: string) => {
   return `${hours.padStart(2, "0")}:${minutes}`;
 };
 
-export const combineDateAnd12HourTime = (
-  date: string,
-  time: string
-) => {
-
+export const combineDateAnd12HourTime = (date: string, time: string) => {
   // "09 May 2026"
-  const parsedDate = parse(
-    date,
-    "dd MMM yyyy",
-    new Date()
-  );
+  const parsedDate = parse(date, "dd MMM yyyy", new Date());
 
   // "13:16"
-  const parsedTime = parse(
-    time,
-    "HH:mm",
-    new Date()
-  );
+  const parsedTime = parse(time, "HH:mm", new Date());
 
-  parsedDate.setHours(
-    parsedTime.getHours(),
-    parsedTime.getMinutes(),
-    0,
-    0
-  );
+  parsedDate.setHours(parsedTime.getHours(), parsedTime.getMinutes(), 0, 0);
 
-  return format(
-    parsedDate,
-    "yyyy-MM-dd'T'HH:mm:ssxxx"
-  );
+  return format(parsedDate, "yyyy-MM-dd'T'HH:mm:ssxxx");
 };
 
 export const customFormatDateTime = (iso?: string) => {
@@ -614,19 +526,19 @@ export const checkSLABreach = (alarm: any) => {
     return {
       level: "CRITICAL_BREACH",
       message: `SLA CRITICAL BREACH: ${alarm.sinceMins - alarm.slaTargetMins} minutes overdue`,
-      action: "ESCALATE_TO_MANAGEMENT"
+      action: "ESCALATE_TO_MANAGEMENT",
     };
   } else if (breachPercentage >= 90) {
     return {
       level: "WARNING",
       message: `SLA WARNING: ${Math.round(breachPercentage)}% of SLA time elapsed`,
-      action: "NOTIFY_SUPERVISOR"
+      action: "NOTIFY_SUPERVISOR",
     };
   } else if (breachPercentage >= 75) {
     return {
       level: "CAUTION",
       message: `SLA CAUTION: ${Math.round(breachPercentage)}% of SLA time elapsed`,
-      action: "PRIORITY_ASSIGNMENT"
+      action: "PRIORITY_ASSIGNMENT",
     };
   }
 

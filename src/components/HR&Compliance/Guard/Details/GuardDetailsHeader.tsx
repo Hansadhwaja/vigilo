@@ -1,4 +1,4 @@
-import { Guard } from "@/apis/guardsApi";
+import { Guard } from "@/store/apis/guardsApi";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone } from "lucide-react";

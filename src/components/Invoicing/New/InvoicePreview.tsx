@@ -1,7 +1,7 @@
 "use client";
 
-import { RootState } from "@/apis/store";
-import { Client } from "@/apis/usersApi";
+import { RootState } from "@/store/apis/store";
+import { Client } from "@/store/apis/usersApi";
 import {
   Card,
   CardContent,

@@ -19,7 +19,7 @@ import { toast } from "sonner";
 
 import { RejectOrderFormValues } from "@/schemas";
 
-import { useCancelOrderMutation } from "@/apis/ordersApi";
+import { useCancelOrderMutation } from "@/store/apis/ordersApi";
 
 const RejectOrderModal = ({ id }: { id: string }) => {
     const [open, setOpen] = useState(false);

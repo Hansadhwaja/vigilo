@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { ChevronDown, Pencil, Trash2 } from "lucide-react";
-import { MessageItem } from "@/apis/messagesAPI";
+import { MessageItem } from "@/store/apis/messagesAPI";
 
 interface MessageMenuProps {
     isMine: boolean;

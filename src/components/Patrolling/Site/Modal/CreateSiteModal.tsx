@@ -3,7 +3,7 @@ import { useState } from 'react'
 import SiteForm from '../Form/SiteForm';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { useCreatePatrolSiteMutation } from '@/apis/patrollingAPI';
+import { useCreatePatrolSiteMutation } from '@/store/apis/patrollingAPI';
 import { toast } from 'sonner';
 import { SiteFormValues } from '@/schemas';
 

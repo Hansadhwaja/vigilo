@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Patrol } from "@/apis/patrollingAPI";
+import { Patrol } from "@/store/apis/patrollingAPI";
 
 import {
     Dialog,

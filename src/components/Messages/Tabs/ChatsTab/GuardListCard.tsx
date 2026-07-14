@@ -1,5 +1,5 @@
-import { Guard } from '@/apis/guardsApi';
-import { PresenceItem } from '@/apis/messagesAPI';
+import { Guard } from '@/store/apis/guardsApi';
+import { PresenceItem } from '@/store/apis/messagesAPI';
 import UserAvatar from '@/components/common/Avatar/UserAvatar';
 import { cn } from '@/lib/utils';
 import { ShieldCheck } from 'lucide-react';

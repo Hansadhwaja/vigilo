@@ -8,9 +8,9 @@ import {
   useDeleteMessageForMeMutation,
   useEditMessageMutation,
   useGetMessagesQuery,
-} from "@/apis/messagesAPI";
+} from "@/store/apis/messagesAPI";
 
-import { Guard } from "@/apis/guardsApi";
+import { Guard } from "@/store/apis/guardsApi";
 
 import { useSocket } from "@/lib/hooks/useSocket";
 

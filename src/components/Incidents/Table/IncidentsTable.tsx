@@ -1,4 +1,4 @@
-import { IncidentType } from "@/apis/incidentsApi";
+import { IncidentType } from "@/store/apis/incidentsApi";
 import UserAvatar from "@/components/common/Avatar/UserAvatar";
 import {
     Column,

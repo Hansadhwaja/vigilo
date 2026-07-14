@@ -2,7 +2,7 @@ import ClientSearchFilters from './ClientSearchFilters'
 import ClientTable from './Table/ClientTable'
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { useQueryParams } from '@/lib/hooks/useQueryParams';
-import { useGetAllClientsQuery } from '@/apis/ordersApi';
+import { useGetAllClientsQuery } from '@/store/apis/ordersApi';
 import ClientStats from './ClientStats';
 
 const ClientTabSection = () => {

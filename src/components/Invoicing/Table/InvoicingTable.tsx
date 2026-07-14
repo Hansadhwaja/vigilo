@@ -20,7 +20,7 @@ import {
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { InvoiceType } from "@/types";
 
-import { useGenerateInvoicePDFMutation } from "@/apis/invoiceApis";
+import { useGenerateInvoicePDFMutation } from "@/store/apis/invoiceApis";
 import { useState } from "react";
 import Loader from "@/components/common/Loader";
 import { toast } from "sonner";

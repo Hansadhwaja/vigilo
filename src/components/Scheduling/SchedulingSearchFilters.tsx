@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { useGetAllGuardsQuery } from "@/apis/guardsApi";
-import { useGetAllOrdersQuery } from "@/apis/ordersApi";
+import { useGetAllGuardsQuery } from "@/store/apis/guardsApi";
+import { useGetAllOrdersQuery } from "@/store/apis/ordersApi";
 
 import AlertListModal from "./Modal/AlertListModal";
 

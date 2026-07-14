@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/field";
 
 import { siteSchema, SiteFormValues } from "@/schemas";
-import { useGetAllClientsQuery } from "@/apis/usersApi";
+import { useGetAllClientsQuery } from "@/store/apis/usersApi";
 
 interface SiteFormProps {
     initialData?: SiteFormValues;

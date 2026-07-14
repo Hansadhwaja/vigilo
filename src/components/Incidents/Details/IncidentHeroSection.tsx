@@ -1,4 +1,4 @@
-import { IncidentType } from '@/apis/incidentsApi';
+import { IncidentType } from '@/store/apis/incidentsApi';
 import { customFormatDateTime } from '@/lib/utils';
 import { AlertTriangle } from 'lucide-react'
 

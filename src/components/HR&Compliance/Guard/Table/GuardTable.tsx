@@ -13,7 +13,7 @@ import {
 
 import { Link } from "react-router-dom";
 import { formatDate } from "@/lib/utils";
-import { Guard } from "@/apis/guardsApi";
+import { Guard } from "@/store/apis/guardsApi";
 
 import { Badge } from "@/components/ui/badge";
 

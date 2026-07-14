@@ -2,7 +2,7 @@ import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useParams } from "react-router-dom";
 
-import { useGetIncidentByIdQuery } from "@/apis/incidentsApi";
+import { useGetIncidentByIdQuery } from "@/store/apis/incidentsApi";
 
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import Loader from "@/components/common/Loader";

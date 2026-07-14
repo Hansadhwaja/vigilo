@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { GuardPaymentFormValues } from '@/schemas';
 import { Button } from '@/components/ui/button';
 import GuardPaymentForm from '../Form/GuardPaymentForm';
-import { useGenerateGuardPaymentMutation } from '@/apis/invoiceApis';
+import { useGenerateGuardPaymentMutation } from '@/store/apis/invoiceApis';
 
 const GeneratePaymentModal = () => {
     const [open, setOpen] = useState(false);

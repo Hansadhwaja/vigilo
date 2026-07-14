@@ -5,7 +5,7 @@ import { ServicePricingFormValues } from "@/schemas";
 import { toast } from "sonner";
 import ServicePricingForm from "../../Form/ServicePricingForm";
 import { useDispatch } from "react-redux";
-import { setServicePricing } from "@/apis/slices/servicePricingSlice";
+import { setServicePricing } from "@/store/slices/servicePricingSlice";
 import { useState } from "react";
 
 const EditServicePricingModal = () => {

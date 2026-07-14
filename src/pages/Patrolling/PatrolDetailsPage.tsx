@@ -42,8 +42,8 @@ import {
   useGetAllPatrolSitesQuery,
   useGetPatrolRunByIdForAdminQuery,
   useLazyDownloadSiteQRsPdfQuery,
-} from "@/apis/patrollingAPI";
-import { useGetAllGuardsQuery } from "@/apis/guardsApi";
+} from "@/store/apis/patrollingAPI";
+import { useGetAllGuardsQuery } from "@/store/apis/guardsApi";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import { cn } from "@/lib/utils";
 

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { sampleGuards } from "@/data/sampleData";
 import { toast } from "sonner";
-import { Alarm, useDeleteAlarmMutation, useExportAlarmsMutation, useGetAllAlarmsQuery } from "@/apis/alarmsAPI";
+import { Alarm, useDeleteAlarmMutation, useExportAlarmsMutation, useGetAllAlarmsQuery } from "@/store/apis/alarmsAPI";
 import { getStatusStyle, getStatusColor } from "@/utils/statusColors";
 import CreateAlarmModal from "../../components/Alarm/Modal/CreateAlarmModal";
 import CustomHeader from "@/components/common/Header/CustomHeader";

@@ -2,7 +2,7 @@
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import ReactSelect from "react-select";
 import { Controller, useFormContext } from 'react-hook-form'
-import { useGetAllPatrolSitesQuery } from '@/apis/patrollingAPI';
+import { useGetAllPatrolSitesQuery } from '@/store/apis/patrollingAPI';
 import CreateSiteModal from '../Site/Modal/CreateSiteModal';
 import SiteCard from '../Site/SiteCard';
 

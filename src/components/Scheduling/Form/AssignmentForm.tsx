@@ -27,8 +27,8 @@ import Loader from "@/components/common/Loader";
 
 import { AssignmentFormValues, assignmentSchema } from "@/schemas";
 
-import { useGetAllOrdersQuery } from "@/apis/ordersApi";
-import { useGetAllGuardsQuery } from "@/apis/guardsApi";
+import { useGetAllOrdersQuery } from "@/store/apis/ordersApi";
+import { useGetAllGuardsQuery } from "@/store/apis/guardsApi";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { getStatusColor, getStatusStyle } from "@/utils/statusColors";

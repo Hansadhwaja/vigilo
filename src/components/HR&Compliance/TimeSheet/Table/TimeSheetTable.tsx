@@ -26,7 +26,7 @@ import { toast } from "sonner";
 
 import {
     useEditTimeSheetMutation,
-} from "@/apis/schedulingAPI";
+} from "@/store/apis/schedulingAPI";
 
 import EditTimeSheetModal from "../Modal/EditTimeSheetModal";
 import Loader from "@/components/common/Loader";

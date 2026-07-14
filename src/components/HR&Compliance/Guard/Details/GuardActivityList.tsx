@@ -1,4 +1,4 @@
-import { Activity } from "@/apis/guardsApi";
+import { Activity } from "@/store/apis/guardsApi";
 import SectionCard from "@/components/common/Card/SectionCard";
 import { Clock } from "lucide-react";
 

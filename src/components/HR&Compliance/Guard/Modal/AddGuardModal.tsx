@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import GuardForm from '../Form/GuardForm';
 import { toast } from 'sonner';
 import { GuardFormValues } from '@/schemas';
-import { useCreateGuardByAdminMutation } from '@/apis/guardsApi';
+import { useCreateGuardByAdminMutation } from '@/store/apis/guardsApi';
 import { Button } from '@/components/ui/button';
 
 const AddGuardModal = () => {

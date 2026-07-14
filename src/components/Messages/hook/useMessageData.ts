@@ -6,9 +6,9 @@ import {
     useCreateOrGetDirectConversationMutation,
     useGetBulkPresenceQuery,
     useHeartbeatPresenceMutation,
-} from "@/apis/messagesAPI";
+} from "@/store/apis/messagesAPI";
 
-import { Guard, useGetAllGuardsQuery } from "@/apis/guardsApi";
+import { Guard, useGetAllGuardsQuery } from "@/store/apis/guardsApi";
 import { PresenceUpdateEvent } from "@/types";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";

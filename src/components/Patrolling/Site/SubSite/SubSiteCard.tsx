@@ -1,4 +1,4 @@
-import { PatrolSubSiteWithCheckpoints } from '@/apis/patrollingAPI'
+import { PatrolSubSiteWithCheckpoints } from '@/store/apis/patrollingAPI'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Crosshair, Plus, QrCode, Target, Trash2 } from 'lucide-react'

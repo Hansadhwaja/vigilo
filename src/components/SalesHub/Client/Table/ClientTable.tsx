@@ -4,7 +4,7 @@ import {
   RowWithId,
 } from "@/components/common/Table/DataTable";
 import { Building, Mail, Phone, User } from "lucide-react";
-import { Client } from "@/apis/usersApi";
+import { Client } from "@/store/apis/usersApi";
 import ViewClientModal from "../Modal/ViewClientModal";
 import ClientTableActions from "./ClientTableActions";
 

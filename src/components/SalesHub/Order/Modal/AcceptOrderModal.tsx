@@ -18,7 +18,7 @@ import {
 
 import { toast } from "sonner";
 
-import { useAcceptOrderMutation } from "@/apis/ordersApi";
+import { useAcceptOrderMutation } from "@/store/apis/ordersApi";
 
 import Loader from "@/components/common/Loader";
 

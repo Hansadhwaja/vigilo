@@ -3,7 +3,7 @@ import { useState } from 'react'
 import CheckpointForm from '../Form/CheckpointForm';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { useCreateCheckpointMutation } from '@/apis/patrollingAPI';
+import { useCreateCheckpointMutation } from '@/store/apis/patrollingAPI';
 import { toast } from 'sonner';
 import { CheckpointFormValues } from '@/schemas';
 

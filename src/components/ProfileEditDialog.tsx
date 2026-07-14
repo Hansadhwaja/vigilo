@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { useEditProfileMutation } from "@/apis/profileApi";
+import { useEditProfileMutation } from "@/store/apis/profileApi";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";

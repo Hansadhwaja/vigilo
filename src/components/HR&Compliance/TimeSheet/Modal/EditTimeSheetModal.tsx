@@ -6,7 +6,7 @@ import { TimeSheetFormValues } from '@/schemas';
 import { Button } from '@/components/ui/button';
 import { TimeSheet } from '@/types';
 import TimeSheetForm from '../Form/TimeSheetForm';
-import { useEditTimeSheetMutation } from '@/apis/schedulingAPI';
+import { useEditTimeSheetMutation } from '@/store/apis/schedulingAPI';
 import { combineDateAnd12HourTime } from '@/lib/utils';
 
 const EditTimeSheetModal = ({ timeSheet }: { timeSheet: TimeSheet }) => {

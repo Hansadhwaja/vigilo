@@ -10,7 +10,7 @@ import {
     SelectContent,
     SelectItem,
 } from "@/components/ui/select";
-import { Client } from '@/apis/usersApi';
+import { Client } from '@/store/apis/usersApi';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 const InvoiceDetailsForm = ({ clients }: { clients: Client[] }) => {

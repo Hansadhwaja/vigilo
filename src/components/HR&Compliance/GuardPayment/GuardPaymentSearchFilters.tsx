@@ -2,7 +2,7 @@
 
 import DataFilters from "@/components/common/Filter/DataFilters";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
-import { Guard } from "@/apis/guardsApi";
+import { Guard } from "@/store/apis/guardsApi";
 
 interface GuardPaymentSearchFiltersProps {
     guards: Guard[];

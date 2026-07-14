@@ -1,6 +1,6 @@
 "use client";
 
-import { Alarm } from "@/apis/alarmsAPI";
+import { Alarm } from "@/store/apis/alarmsAPI";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {

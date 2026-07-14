@@ -14,9 +14,9 @@ import {
     SelectItem,
 } from "@/components/ui/select";
 import { AlarmFormValues, alarmSchema } from "@/schemas";
-import { useGetAllPatrolRunsForAdminQuery, useGetAllPatrolSitesQuery } from "@/apis/patrollingAPI";
+import { useGetAllPatrolRunsForAdminQuery, useGetAllPatrolSitesQuery } from "@/store/apis/patrollingAPI";
 import { useMemo } from "react";
-import { useGetAllGuardsQuery } from "@/apis/guardsApi";
+import { useGetAllGuardsQuery } from "@/store/apis/guardsApi";
 
 interface AlarmFormProps {
     isLoading: boolean;

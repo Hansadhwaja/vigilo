@@ -1,9 +1,9 @@
 import AppTabs from "@/components/common/Tab/AppTabs";
 import BroadcastTab from "./BroadCast/BroadcastTab";
 import ChatsTab from "./ChatsTab/ChatsTab";
-import { PresenceItem } from "@/apis/messagesAPI";
+import { PresenceItem } from "@/store/apis/messagesAPI";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
-import { Guard } from "@/apis/guardsApi";
+import { Guard } from "@/store/apis/guardsApi";
 
 interface MessageTabsProps {
     guards: Guard[];

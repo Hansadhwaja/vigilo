@@ -10,28 +10,25 @@ export default function ShiftPage() {
   const scheduling = useSchedulingData();
 
   return (
-    <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
-      <div className="space-y-3">
-        <CustomHeader
-          title="Scheduling Calendar"
-          description="Managed Assignment & Calendar View"
-          others={
-            <div className="flex justify-end">
-              <CreateAssignmentModal />
-            </div>
-          }
-        />
+    <section className="space-y-6">
+      <CustomHeader
+        title="Scheduling Calendar"
+        description="Managed Assignment & Calendar View"
+        others={
+          <div className="flex justify-end">
+            <CreateAssignmentModal />
+          </div>
+        }
+      />
 
-        <SchedulingStats scheduling={scheduling} />
-      </div>
+      <SchedulingStats scheduling={scheduling} />
 
       <SchedulingSearchFilters />
 
-      <div className="space-y-3">
+      <div className="space-y-6">
         <SchedulingTabs scheduling={scheduling} />
         <QuickSummary scheduling={scheduling} />
       </div>
-    </div>
+    </section>
   );
 }
-

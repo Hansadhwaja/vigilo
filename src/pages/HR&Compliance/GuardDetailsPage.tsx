@@ -1,4 +1,4 @@
-import { useGetGuardByIdQuery } from "@/apis/guardsApi";
+import { useGetGuardByIdQuery } from "@/store/apis/guardsApi";
 import Loader from "@/components/common/Loader";
 import GuardActivityList from "@/components/HR&Compliance/Guard/Details/GuardActivityList";
 import GuardContactCard from "@/components/HR&Compliance/Guard/Details/GuardContactCard";

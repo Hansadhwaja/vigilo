@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { Client, useDeleteClientMutation } from "@/apis/usersApi";
+import { Client, useDeleteClientMutation } from "@/store/apis/usersApi";
 import { toast } from "sonner";
 import DeleteModal from "@/components/common/Modal/DeleteModal";
 

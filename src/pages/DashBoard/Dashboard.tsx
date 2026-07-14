@@ -1,10 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { demoTrend, revenueStreams, liveMetrics } from "@/data/sampleData";
-import { useGetAllGuardsQuery } from "@/apis/guardsApi";
-import { useGetAllSchedulesQuery } from "@/apis/schedulingAPI";
-import { useGetAllOrdersQuery } from "@/apis/ordersApi";
-import { useGetAllPatrolRunsForAdminQuery } from "@/apis/patrollingAPI";
-import { useGetAllAlarmsQuery } from "@/apis/alarmsAPI";
+import { useState, useEffect } from "react";
+import { revenueStreams, liveMetrics, demoTrend } from "@/data/sampleData";
 import LiveStatusHeader from "@/components/Dashboard/LiveStatusHeader";
 import KPICardsList from "@/components/Dashboard/KPICardsList";
 import KPIMetrics from "@/components/Dashboard/KPIMetrics";
@@ -16,118 +11,13 @@ import FinancialHealthCard from "@/components/Dashboard/FinancialHealthCard";
 export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  const { data: ordersResponse } = useGetAllOrdersQuery({
-    limit: 5000,
-    page: 1,
-  });
-
-  const allOrders = ordersResponse?.data ?? [];
-
-  const buildDateTime = (isoDate: string | null | undefined, time: string | null | undefined) => {
-    if (!isoDate || !time) return null;
-    const datePart = isoDate.split("T")[0];
-    return new Date(`${datePart}T${time}:00`);
-  };
-
-  const activeOrdersCount = useMemo(() => {
-    const now = new Date();
-
-    return allOrders.filter((order) => {
-      if (["cancelled", "completed"].includes(order.status)) {
-        return false;
-      }
-      // Skip if any date/time field is missing
-      if (!order.startDate || !order.startTime || !order.endDate || !order.endTime) {
-        return false;
-      }
-      const startDateTime = buildDateTime(order.startDate, order.startTime);
-      const endDateTime = buildDateTime(order.endDate, order.endTime);
-      if (!startDateTime || !endDateTime) return false;
-      return now >= startDateTime && now <= endDateTime;
-    }).length;
-  }, [allOrders, currentTime]);
-
-  const { data: guardsResponse } = useGetAllGuardsQuery({
-    page: 1,
-    limit: 5000,
-  });
-
-  const { data: schedulesResponse } = useGetAllSchedulesQuery();
-
-  const allGuards = guardsResponse?.data ?? [];
-  const schedules = schedulesResponse?.data ?? [];
-
-  const {
-    data: patrolResponse,
-    isFetching,
-  } = useGetAllPatrolRunsForAdminQuery({
-    limit: 10,
-  });
-
-  const Patrols = patrolResponse?.data || [];
-  const { data: alarmsResponse } = useGetAllAlarmsQuery();
-  const alarms = alarmsResponse?.data || [];
-
-  const activeAlarmsCount = useMemo(() => {
-    return alarms.filter(
-      (alarm: any) => String(alarm.status || "").toLowerCase() === "ongoing"
-    ).length;
-  }, [alarms]);
-
-  const activeShiftsCount = useMemo(() => {
-    const now = new Date();
-
-    return schedules.filter((shift: any) => {
-      // Ignore completed / cancelled
-      if (["completed", "cancelled"].includes(shift.status)) {
-        return false;
-      }
-
-      const start = new Date(shift.startTime);
-      const end = new Date(shift.endTime);
-
-      return now >= start && now <= end;
-    }).length;
-  }, [schedules, currentTime]);
-
-  const activePatrolsCount = useMemo(() => {
-    return Patrols.filter(
-      (patrol: any) => String(patrol.status || "").toLowerCase() === "ongoing"
-    ).length;
-  }, [Patrols]);
-
-  const onDutyGuardIds = useMemo(() => {
-    const ids = new Set<string>();
-
-    schedules.forEach((shift: any) => {
-      if (shift.status === "ongoing") {
-        shift.guards?.forEach((guard: any) => {
-          ids.add(guard.id);
-        });
-      }
-    });
-
-    return ids;
-  }, [schedules]);
-
-  const onDutyGuardsCount = onDutyGuardIds.size;
-
-  const availableGuardsCount = useMemo(() => {
-    return allGuards.filter(
-      (guard) => !onDutyGuardIds.has(guard.id)
-    ).length;
-  }, [allGuards, onDutyGuardIds]);
-
-  const line = demoTrend;
-
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-       <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
-
+    <section className="space-y-6">
       <LiveStatusHeader
         currentTime={currentTime}
         avgResponseTime={2}
@@ -135,12 +25,12 @@ export default function Dashboard() {
       />
 
       <KPICardsList
-        availableGuardsCount={availableGuardsCount}
-        activeAlarmsCount={activeAlarmsCount}
-        onDutyGuardsCount={onDutyGuardsCount}
-        activeShiftsCount={activeShiftsCount}
-        activeOrdersCount={activeOrdersCount}
-        activePatrolsCount={activePatrolsCount}
+        availableGuardsCount={0}
+        activeAlarmsCount={0}
+        onDutyGuardsCount={0}
+        activeShiftsCount={0}
+        activeOrdersCount={0}
+        activePatrolsCount={0}
         dailyRevenue={1000}
       />
 
@@ -148,15 +38,12 @@ export default function Dashboard() {
 
       <RevenueMetrics />
 
-      <DashboardChart
-        line={line}
-        revenueStreams={revenueStreams}
-      />
+      <DashboardChart line={demoTrend} revenueStreams={revenueStreams} />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <DashboardActivity currentTime={currentTime} />
         <FinancialHealthCard liveMetrics={liveMetrics} />
       </div>
-    </div>
+    </section>
   );
 }

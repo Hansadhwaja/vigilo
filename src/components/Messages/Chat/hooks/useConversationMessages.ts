@@ -1,6 +1,6 @@
 // hooks/messages/useConversationMessages.ts
 
-import { useGetMessagesQuery } from "@/apis/messagesAPI";
+import { useGetMessagesQuery } from "@/store/apis/messagesAPI";
 
 export const useConversationMessages = (
     activeConversationId: string

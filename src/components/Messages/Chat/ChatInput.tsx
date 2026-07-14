@@ -1,7 +1,7 @@
 import {
   useGetMessagesQuery,
   useSendMessageMutation,
-} from "@/apis/messagesAPI";
+} from "@/store/apis/messagesAPI";
 
 import { EMOJI_SET } from "@/constants";
 

@@ -10,7 +10,7 @@ import ImageUpload from "@/components/common/Image/ImageUpload";
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ClientFormValues, clientSchema } from "@/schemas";
-import { Client } from "@/apis/usersApi";
+import { Client } from "@/store/apis/usersApi";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 
 interface ClientFormProps {

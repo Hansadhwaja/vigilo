@@ -1,8 +1,8 @@
 import { cn, formatMessageTime } from "@/lib/utils";
 import MessageMenu from "../../MessageMenu";
 import { Check, CheckCheck } from "lucide-react";
-import { MessageItem } from "@/apis/messagesAPI";
-import { Guard } from "@/apis/guardsApi";
+import { MessageItem } from "@/store/apis/messagesAPI";
+import { Guard } from "@/store/apis/guardsApi";
 
 interface Props {
     msg: MessageItem;

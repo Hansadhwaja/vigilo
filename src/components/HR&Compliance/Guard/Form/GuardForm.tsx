@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { GuardFormValues, guardSchema } from "@/schemas";
-import { Client } from "@/apis/usersApi";
+import { Client } from "@/store/apis/usersApi";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import Loader from "@/components/common/Loader";
 

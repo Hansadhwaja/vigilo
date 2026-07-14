@@ -3,7 +3,7 @@ import {
     useDeleteNotificationByIdMutation,
     useGetMyNotificationsQuery,
     useMarkAllNotificationsAsReadMutation,
-} from "@/apis/notificationAPI";
+} from "@/store/apis/notificationAPI";
 
 import DeleteModal from "@/components/common/Modal/DeleteModal";
 

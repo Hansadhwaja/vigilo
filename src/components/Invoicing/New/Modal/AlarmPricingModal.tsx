@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Edit, Plus } from "lucide-react";
 import { AlarmFormValues } from "@/schemas";
-import { useCreateAlarmMutation } from "@/apis/alarmsAPI";
+import { useCreateAlarmMutation } from "@/store/apis/alarmsAPI";
 import { toast } from "sonner";
 
 const AlarmPricingModal = () => {

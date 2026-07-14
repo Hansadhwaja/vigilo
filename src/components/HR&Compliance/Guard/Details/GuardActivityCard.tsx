@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity } from "@/apis/guardsApi";
+import { Activity } from "@/store/apis/guardsApi";
 
 import {
   Building,

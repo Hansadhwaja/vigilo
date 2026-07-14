@@ -1,4 +1,4 @@
-import { useGetAllOrdersQuery } from "@/apis/ordersApi";
+import { useGetAllOrdersQuery } from "@/store/apis/ordersApi";
 
 import OrderSearchFilters from "./OrderSearchFilters";
 import OrderTable from "./Table/OrderTable";
