@@ -1,51 +1,50 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const PlanCardSkeleton = () => {
   return (
-    <Card className="relative">
+    <Card className="relative flex h-full flex-col overflow-hidden rounded-3xl">
+      {/* Badge */}
+      <Skeleton className="absolute top-5 right-5 h-7 w-28 rounded-full" />
 
-      <CardHeader className="space-y-3">
-        <div className="flex items-start justify-between">
+      <CardHeader className="space-y-6 pb-6 text-center">
+        {/* Title & Description */}
+        <div className="space-y-3">
+          <Skeleton className="mx-auto h-8 w-36" />
+
           <div className="space-y-2">
-            <Skeleton className="h-7 w-32" />
-            <Skeleton className="h-4 w-56" />
-            <Skeleton className="h-4 w-44" />
+            <Skeleton className="mx-auto h-4 w-56" />
+            <Skeleton className="mx-auto h-4 w-44" />
           </div>
-
-          <Skeleton className="h-8 w-8 rounded-md" />
         </div>
 
-        <div className="space-y-2">
-          <Skeleton className="h-10 w-28" />
-          <Skeleton className="h-4 w-16" />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-6 w-11 rounded-full" />
-          <Skeleton className="h-4 w-16" />
+        {/* Price */}
+        <div className="space-y-3">
+          <Skeleton className="mx-auto h-12 w-36" />
+          <Skeleton className="mx-auto h-4 w-28" />
         </div>
       </CardHeader>
 
-      <CardContent>
-        <div className="space-y-3">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <Skeleton className="size-4 rounded-full" />
-              <Skeleton className="h-4 flex-1" />
-            </div>
-          ))}
+      <CardContent className="flex-1">
+        <div className="border-border/60 border-t pt-6">
+          <Skeleton className="mb-5 h-5 w-32" />
+
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="flex items-start gap-3">
+                <Skeleton className="mt-0.5 size-5 rounded-full" />
+                <Skeleton className="h-4 flex-1" />
+              </div>
+            ))}
+          </div>
         </div>
       </CardContent>
 
-      <CardFooter className="border-t pt-4">
-        <div className="flex w-full items-center justify-between">
-          <Skeleton className="h-4 w-28" />
-          <Skeleton className="h-5 w-10" />
-        </div>
+      <CardFooter className="pt-8">
+        <Skeleton className="h-11 w-full rounded-xl" />
       </CardFooter>
     </Card>
-  )
-}
+  );
+};
 
-export default PlanCardSkeleton
+export default PlanCardSkeleton;
