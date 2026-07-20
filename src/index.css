@@ -148,6 +148,10 @@ html {
   font-size: var(--font-size);
 }
 
+button {
+  @apply cursor-pointer;
+}
+
 @theme inline {
   --font-sans: "Outfit Variable", sans-serif;
 

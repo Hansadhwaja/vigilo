@@ -1,393 +1,376 @@
 import { Guard } from "@/store/apis/guardsApi";
 import { MessageItem } from "@/store/apis/messagesAPI";
 import { InvoiceAlarmsFormValues, InvoiceOrdersFormValues } from "@/schemas";
+import { billingIntervals } from "@/constants";
 
 //Messages
 export type ContactRole = "guard" | "client";
 
 export interface ContactItem {
-    id: string;
-    apiUserId: string | number;
-    name: string;
-    avatar?: string;
-    role: ContactRole;
+  id: string;
+  apiUserId: string | number;
+  name: string;
+  avatar?: string;
+  role: ContactRole;
 }
 
 export interface SocketMessageEvent {
-    id: string;
-    conversationId: string;
-    senderId: string;
+  id: string;
+  conversationId: string;
+  senderId: string;
 }
 
 export interface PresenceUpdateEvent {
-    userId: string;
-    isOnline: boolean;
-    lastSeenAt: string | null;
+  userId: string;
+  isOnline: boolean;
+  lastSeenAt: string | null;
 }
 
 export interface TypingEvent {
-    userId: string;
-    conversationId: string;
+  userId: string;
+  conversationId: string;
 }
 
 export interface PendingAttachment {
-    id: string;
-    name: string;
-    type: string;
-    size: number;
-    dataUrl: string;
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  dataUrl: string;
 }
 
 export interface MessageGroupType {
-    label: string;
-    messages: MessageItem[];
+  label: string;
+  messages: MessageItem[];
 }
 
 export interface MessageController {
-    editingMessageId: string | null;
-    editDraft: string;
-    setEditDraft: (value: string) => void;
-    startEdit: (msg: MessageItem) => void;
-    cancelEdit: () => void;
-    saveEdit: () => void;
-    onDeleteForEveryone: (id: string) => void;
-    onDeleteForMe: (id: string) => void;
-    isEditingMessage: boolean;
+  editingMessageId: string | null;
+  editDraft: string;
+  setEditDraft: (value: string) => void;
+  startEdit: (msg: MessageItem) => void;
+  cancelEdit: () => void;
+  saveEdit: () => void;
+  onDeleteForEveryone: (id: string) => void;
+  onDeleteForMe: (id: string) => void;
+  isEditingMessage: boolean;
 }
 
 export interface BaseMessageProps {
-    authUserId: string;
-    selectedGuard: Guard | null;
+  authUserId: string;
+  selectedGuard: Guard | null;
 }
 
 //Broadcast Message
 export type FormValues = {
-    broadcastType: "ALL" | "SELECTED";
-    guardIds?: string[];
-    projectId: string;
-    message: string;
-    attachment?: File;
+  broadcastType: "ALL" | "SELECTED";
+  guardIds?: string[];
+  projectId: string;
+  message: string;
+  attachment?: File;
 };
-
-
 
 //Main Layout
 
 export interface Alarm {
-    id: string;
-    site: string;
-    type: string;
-    priority: string;
-    priorityLevel: number;
-    assigned?: string;
-    assignedId?: string;
-    eta?: string;
-    slaTargetMins: number;
-    sinceMins: number;
-    monitoringCompany: string;
-    license: string;
-    licenseDetails: string;
-    unitPrice: number;
-    completed: boolean;
-    completedAt: Date | undefined;
-    createdAt: Date;
-    description: string;
-    location: string;
-    resolvedAt?: Date;
-    responseTime?: number;
-    assignedAt?: Date;
+  id: string;
+  site: string;
+  type: string;
+  priority: string;
+  priorityLevel: number;
+  assigned?: string;
+  assignedId?: string;
+  eta?: string;
+  slaTargetMins: number;
+  sinceMins: number;
+  monitoringCompany: string;
+  license: string;
+  licenseDetails: string;
+  unitPrice: number;
+  completed: boolean;
+  completedAt: Date | undefined;
+  createdAt: Date;
+  description: string;
+  location: string;
+  resolvedAt?: Date;
+  responseTime?: number;
+  assignedAt?: Date;
 }
 
 export interface Incident {
-    id: string;
-    site: string;
-    location: {
-        name: string;
-        coordinates: {
-            lat: number;
-            lng: number;
-        };
+  id: string;
+  site: string;
+  location: {
+    name: string;
+    coordinates: {
+      lat: number;
+      lng: number;
     };
-    type: string;
-    severity: string;
-    status: string;
-    time: string;
-    dateTime: Date;
-    assigned?: string;
-    assignedId?: string;
-    reportedBy: string;
-    reporterName: string;
-    photo?: string;
-    guardMessage: string;
-    description: string;
-    actionsTaken: string;
-    clientNotified: boolean;
-    priorityLevel: number;
-    resolvedAt?: Date;
-    createdAt?: Date;
+  };
+  type: string;
+  severity: string;
+  status: string;
+  time: string;
+  dateTime: Date;
+  assigned?: string;
+  assignedId?: string;
+  reportedBy: string;
+  reporterName: string;
+  photo?: string;
+  guardMessage: string;
+  description: string;
+  actionsTaken: string;
+  clientNotified: boolean;
+  priorityLevel: number;
+  resolvedAt?: Date;
+  createdAt?: Date;
 }
 
 export interface KPI {
-    onDuty: number;
-    openIncidents: number;
-    openAlarms: number;
-    patrolsDue: number;
-    dailyRevenue: number;
-    revenueGrowth: number;
-    activeContracts: number;
-    avgResponseTime: number;
+  onDuty: number;
+  openIncidents: number;
+  openAlarms: number;
+  patrolsDue: number;
+  dailyRevenue: number;
+  revenueGrowth: number;
+  activeContracts: number;
+  avgResponseTime: number;
 }
-
 
 //Invoice
 export type InvoiceType = {
-    amount: number;
-    billingPeriod: string;
-    clientCode: string;
-    clientName: string;
-    dueDate: string;
-    id: string;
-    invoiceNumber: string;
-    issueDate: string;
-    paidDate: string;
-    services: {
-        alarms: number;
-        custom: number;
-        orders: number;
-    }
-    status: string;
-
-}
-
+  amount: number;
+  billingPeriod: string;
+  clientCode: string;
+  clientName: string;
+  dueDate: string;
+  id: string;
+  invoiceNumber: string;
+  issueDate: string;
+  paidDate: string;
+  services: {
+    alarms: number;
+    custom: number;
+    orders: number;
+  };
+  status: string;
+};
 
 //SummaryCard
 export type SummaryCardType = {
-    title: string;
-    value: string;
-    className?: string;
+  title: string;
+  value: string;
+  className?: string;
 };
 
 export interface CalculateGrandTotalProps {
-    orders?: InvoiceOrdersFormValues[];
-    alarms?: InvoiceAlarmsFormValues[];
-    services?: any[];
-    serviceData: any;
+  orders?: InvoiceOrdersFormValues[];
+  alarms?: InvoiceAlarmsFormValues[];
+  services?: any[];
+  serviceData: any;
 }
 
 //Scheduling
 export interface OrganizedAssignment {
-    id: string;
+  id: string;
 
-    shiftId: string;
-    guardId: string;
+  shiftId: string;
+  guardId: string;
 
-    guardName: string;
-    guardEmail: string;
-    guardStatus: string;
+  guardName: string;
+  guardEmail: string;
+  guardStatus: string;
 
-    orderId: string;
-    orderLocationName: string;
-    orderName: string;
-    orderAddress: string;
+  orderId: string;
+  orderLocationName: string;
+  orderName: string;
+  orderAddress: string;
 
-    description?: string;
-    type?: string;
-    status: string;
+  description?: string;
+  type?: string;
+  status: string;
 
-    statusColors: {
-        bg: string;
-        text: string;
-    };
+  statusColors: {
+    bg: string;
+    text: string;
+  };
 
-    timeSlot: string;
+  timeSlot: string;
 
-    start: string;
-    end: string;
-    duration: string;
+  start: string;
+  end: string;
+  duration: string;
 
-    displayDate: string;
+  displayDate: string;
 
-    originalStartDate: string;
-    originalEndDate: string;
+  originalStartDate: string;
+  originalEndDate: string;
 
-    allGuardIdsForShift: string[];
+  allGuardIdsForShift: string[];
 }
 
 export type OrganizedShifts = {
-    [date: string]: {
-        [time: string]: OrganizedAssignment[];
-    };
+  [date: string]: {
+    [time: string]: OrganizedAssignment[];
+  };
 };
 
 export interface TimeSlot {
-    time: string;   // "08:00"
-    label: string;  // "8 AM"
+  time: string; // "08:00"
+  label: string; // "8 AM"
 }
 
 //HR&Compliance
 //TimeSheets
 export interface TimeSheet {
-    changeShiftStatus: string | null;
-    approvedStatus:
-    | "pending"
-    | "approved"
-    | "rejected";
+  changeShiftStatus: string | null;
+  approvedStatus: "pending" | "approved" | "rejected";
 
-    clockInTime: string | null;
+  clockInTime: string | null;
 
-    clockOutTime: string | null;
+  clockOutTime: string | null;
 
-    date: string;
+  date: string;
 
-    description: string;
+  description: string;
 
-    guard: {
-        id: string;
-        name: string;
-        email: string;
-    };
+  guard: {
+    id: string;
+    name: string;
+    email: string;
+  };
 
-    guardShiftStatus:
-    | "pending"
-    | "accepted"
-    | "rejected"
-    | "completed"
-    | string;
+  guardShiftStatus: "pending" | "accepted" | "rejected" | "completed" | string;
 
-    images: string[];
+  images: string[];
 
-    locationAddress: string;
+  locationAddress: string;
 
-    locationName: string;
+  locationName: string;
 
-    orderId: string;
+  orderId: string;
 
-    overtimeEndTime: string | null;
+  overtimeEndTime: string | null;
 
-    overtimeHours: number;
+  overtimeHours: number;
 
-    overtimeStartTime: string | null;
+  overtimeStartTime: string | null;
 
-    requestOffStatus:
-    | "none"
-    | "pending"
-    | "approved"
-    | "rejected"
-    | string;
+  requestOffStatus: "none" | "pending" | "approved" | "rejected" | string;
 
-    serviceType: string;
+  serviceType: string;
 
-    shiftEndTime: string;
+  shiftEndTime: string;
 
-    shiftId: string;
+  shiftId: string;
 
-    shiftStartTime: string;
+  shiftStartTime: string;
 
-    shiftStatus:
-    | "pending"
-    | "ongoing"
-    | "completed"
-    | "cancelled"
-    | string;
+  shiftStatus: "pending" | "ongoing" | "completed" | "cancelled" | string;
 
-    shiftTotalHours: number;
+  shiftTotalHours: number;
 
-    shiftType: string;
+  shiftType: string;
 
-    totalHours: number;
+  totalHours: number;
 }
 
 //Guard Payment
 export interface GuardPaymentResponse {
-    success: boolean;
-    data: {
-        pagination: Pagination;
-        payments: GuardPayment[];
-    };
+  success: boolean;
+  data: {
+    pagination: Pagination;
+    payments: GuardPayment[];
+  };
 }
 
 export interface Pagination {
-    currentPage: number;
-    totalPages: number;
-    totalItems: number;
-    itemsPerPage: number;
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
 }
 
 export interface GuardPayment {
-    id: string;
+  id: string;
 
-    guardId: string;
+  guardId: string;
 
-    hourlyRate: string;
-    overtimeHourlyRate: string;
+  hourlyRate: string;
+  overtimeHourlyRate: string;
 
-    regularHours: string;
-    overtimeHours: string;
-    totalHours: string;
+  regularHours: string;
+  overtimeHours: string;
+  totalHours: string;
 
-    taxDeduction: string;
-    otherDeductions: string;
+  taxDeduction: string;
+  otherDeductions: string;
 
-    basePay: string;
-    overtimePay: string;
-    totalPay: string;
+  basePay: string;
+  overtimePay: string;
+  totalPay: string;
 
-    paymentDate: string | null;
+  paymentDate: string | null;
 
-    status:
-    | "pending"
-    | "approved"
-    | "paid"
-    | "processing";
+  status: "pending" | "approved" | "paid" | "processing";
 
-    createdAt: string;
-    updatedAt: string;
-    deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
 
-    guard: Guard;
+  guard: Guard;
 
-    statics: GuardStatic[];
+  statics: GuardStatic[];
 }
 
 export interface GuardStatic {
-    id: string;
+  id: string;
 
-    date: string;
+  date: string;
 
-    startTime: string;
-    endTime: string;
+  startTime: string;
+  endTime: string;
 
-    shiftTotalHours: number;
+  shiftTotalHours: number;
 
-    status:
-    | "completed"
-    | "cancelled"
-    | "ended_early"
-    | "overtime_ended";
+  status: "completed" | "cancelled" | "ended_early" | "overtime_ended";
 }
 
 //Settings
 //User
 export interface UserType {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    status: string;
-    lastLogin: string;
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+  lastLogin: string;
 }
 
-export type VehicleStatus =
-    | "Active"
-    | "Maintenance"
-    | "Inactive";
+export type VehicleStatus = "Active" | "Maintenance" | "Inactive";
 
 export interface VehicleType {
-    id: string;
-    type: string;
-    registration: string;
-    status: VehicleStatus;
-    assignedPatrols: string[];
-    nextMaintenance: string;
-    fuelUsage: string;
+  id: string;
+  type: string;
+  registration: string;
+  status: VehicleStatus;
+  assignedPatrols: string[];
+  nextMaintenance: string;
+  fuelUsage: string;
 }
+
+//Plans
+
+export type Plan = {
+  id: string;
+  name: string;
+  description: string;
+  amount: number | null;
+  interval: BillingInterval;
+  popular?: boolean;
+  isActive: boolean;
+  tenants?: number;
+  features: string[];
+};
+
+export type BillingInterval = (typeof billingIntervals)[number]["value"];

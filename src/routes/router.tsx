@@ -28,6 +28,7 @@ import GuestRoute from "@/components/Auth/Routes/GuestRoute";
 import RegisterPage from "@/pages/Auth/RegisterPage";
 import LoginPage from "@/pages/Auth/LoginPage";
 import AuthLayout from "@/layouts/AuthLayout";
+import PlansPage from "@/pages/Plans";
 
 export const router = createBrowserRouter([
   {
@@ -83,6 +84,10 @@ export const router = createBrowserRouter([
                 element: <OrderDetailsPage />,
               },
             ],
+          },
+          {
+            path: "plans",
+            element: <PlansPage />,
           },
           {
             path: "incidents",
