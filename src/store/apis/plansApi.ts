@@ -13,7 +13,14 @@ export const plansApi = baseApi.injectEndpoints({
       },
       providesTags: ["Plans"],
     }),
+    subscribePlan: builder.mutation({
+      query: (data) => ({
+        url: "/plans/subscribe",
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { useGetPlansQuery } = plansApi;
+export const { useGetPlansQuery, useSubscribePlanMutation } = plansApi;

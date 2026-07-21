@@ -9,9 +9,26 @@ import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import type { Plan } from "@/types";
 import { Check, Crown } from "lucide-react";
+import { useSubscribePlanMutation } from "@/store/apis/plansApi";
+import { toast } from "sonner";
+import Loader from "../common/Loader";
 
 const PlanCard = ({ plan }: { plan: Plan }) => {
   const popularPlan = plan.interval === "year";
+  const [subscribePlan, { isLoading }] = useSubscribePlanMutation();
+
+  const handleSubscribe = async () => {
+    try {
+      const res = await subscribePlan({ planId: plan.id }).unwrap();
+      if (res?.success) {
+        toast.success("Checkout Session Created");
+        window.location.href = res?.data?.url;
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Error while trying to subscribe");
+    }
+  };
 
   return (
     <Card
@@ -108,6 +125,8 @@ const PlanCard = ({ plan }: { plan: Plan }) => {
 
       <CardFooter className="pt-8">
         <Button
+          onClick={handleSubscribe}
+          disabled={isLoading}
           className={cn(
             "h-11 w-full rounded-xl text-base font-semibold transition-all",
             popularPlan
@@ -115,7 +134,13 @@ const PlanCard = ({ plan }: { plan: Plan }) => {
               : "",
           )}
         >
-          {plan.amount ? "Choose Plan" : "Contact Sales"}
+          {isLoading ? (
+            <Loader />
+          ) : plan.amount ? (
+            "Choose Plan"
+          ) : (
+            "Contact Sales"
+          )}
         </Button>
       </CardFooter>
     </Card>
