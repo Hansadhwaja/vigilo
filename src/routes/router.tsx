@@ -29,6 +29,8 @@ import RegisterPage from "@/pages/Auth/RegisterPage";
 import LoginPage from "@/pages/Auth/LoginPage";
 import AuthLayout from "@/layouts/AuthLayout";
 import PlansPage from "@/pages/Plans";
+import PaymentSuccess from "@/pages/Plans/PaymentSuccess";
+import PaymentFailed from "@/pages/Plans/PaymentFailed";
 
 export const router = createBrowserRouter([
   {
@@ -86,8 +88,21 @@ export const router = createBrowserRouter([
             ],
           },
           {
-            path: "plans",
-            element: <PlansPage />,
+            path: "plan",
+            children: [
+              {
+                index: true,
+                element: <PlansPage />,
+              },
+              {
+                path: "success",
+                element: <PaymentSuccess />,
+              },
+              {
+                path: "cancel",
+                element: <PaymentFailed />,
+              },
+            ],
           },
           {
             path: "incidents",

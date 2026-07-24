@@ -67,7 +67,7 @@ const PlanCard = ({ plan }: { plan: Plan }) => {
                       : "text-foreground",
                   )}
                 >
-                  ${plan.amount}
+                  ${plan.amount / 100}
                 </span>
 
                 <span className="pb-2 text-muted-foreground">

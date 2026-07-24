@@ -36,7 +36,7 @@ export const navLinks = [
   {
     icon: CreditCard,
     label: "Plans",
-    link: "/plans",
+    link: "/plan",
   },
   {
     icon: TriangleAlert,
