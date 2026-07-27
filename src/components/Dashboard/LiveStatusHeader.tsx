@@ -9,7 +9,7 @@ interface LiveStatusHeaderProps {
 
 const LiveStatusHeader = ({ currentTime, avgResponseTime, hourlyRevenue }: LiveStatusHeaderProps) => {
     return (
-        <Card className="border bg-linear-to-r from-indigo-50 via-blue-50 to-purple-50 p-0">
+        <Card className="border bg-linear-to-r from-indigo-50 via-blue-50 to-purple-50 p-0 rounded-lg">
             <CardContent className="p-2">
                 <div className="flex gap-2 justify-between items-center">
 
