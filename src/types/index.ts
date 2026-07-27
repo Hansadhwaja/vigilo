@@ -374,3 +374,24 @@ export type Plan = {
 };
 
 export type BillingInterval = (typeof billingIntervals)[number]["value"];
+
+//Billing->Transactions
+export interface Transaction {
+  id: string;
+  stripeInvoiceId: string;
+  stripePaymentIntentId: string | null;
+  subscriptionId: string;
+  userId: string;
+  amount: number;
+  currency: string;
+  status: "paid" | "pending" | "failed";
+  description: string;
+  metadata: {
+    invoice_number: string;
+    hosted_invoice_url: string;
+  };
+  paidAt: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+}
