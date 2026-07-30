@@ -1,6 +1,6 @@
 "use client";
 
-import { RootState } from "@/store/apis/store";
+import { RootState } from "@/store/store";
 import { Client } from "@/store/apis/usersApi";
 import {
   Card,
@@ -20,9 +20,7 @@ interface InvoicePreviewProps {
   clients: Client[];
 }
 
-const InvoicePreview = ({
-  clients
-}: InvoicePreviewProps) => {
+const InvoicePreview = ({ clients }: InvoicePreviewProps) => {
   const { control } = useFormContext();
 
   const serviceData = useSelector((s: RootState) => s.servicePricing.data);
@@ -51,18 +49,16 @@ const InvoicePreview = ({
   }) as any;
 
   const client = clients.find((c) => c.id === clientId);
-const grandTotal = useMemo(() => 
-  calculateGrandTotal({ orders, alarms, services, serviceData }),
-  [orders, alarms, services, serviceData]
-);
+  const grandTotal = useMemo(
+    () => calculateGrandTotal({ orders, alarms, services, serviceData }),
+    [orders, alarms, services, serviceData],
+  );
 
   return (
     <Card className="p-0 shadow-md">
       <CardContent className="p-0">
-        <div className="bg-black p-4 text-white">
-          <CardHeader className="px-0 heading">
-            VIGILO
-          </CardHeader>
+        <div className="bg-primary p-4 text-white">
+          <CardHeader className="px-0 heading">VIGILO</CardHeader>
           <CardDescription className="text-gray-200">
             Security Management Services
           </CardDescription>
@@ -94,38 +90,36 @@ const grandTotal = useMemo(() =>
 
           <Separator />
 
-
           <div className="space-y-3">
             <h3 className="font-semibold">Line Items</h3>
 
             {orders.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold text-gray-600">
-                  Orders
-                </h4>
+                <h4 className="text-sm font-semibold text-gray-600">Orders</h4>
 
                 {orders.map((o: InvoiceOrdersFormValues) => {
-
                   const service = serviceData?.[o.title];
                   if (!service) return null;
-                  const price = service.priceType == "daily" ? service.dailyPrice : service.hourlyPrice;
-                  const duration = service.priceType == "daily" ? `${o.days} days` : `${o.hours} hrs`;
-                  const durationValue = service.priceType == "daily" ? o.days : o.hours;
+                  const price =
+                    service.priceType == "daily"
+                      ? service.dailyPrice
+                      : service.hourlyPrice;
+                  const duration =
+                    service.priceType == "daily"
+                      ? `${o.days} days`
+                      : `${o.hours} hrs`;
+                  const durationValue =
+                    service.priceType == "daily" ? o.days : o.hours;
                   const total = (durationValue || 0) * Number(price);
                   return (
-                    <div
-                      key={o.id}
-                      className="flex justify-between py-2"
-                    >
+                    <div key={o.id} className="flex justify-between py-2">
                       <div>
                         <p className="font-medium">{o.title}</p>
                         <p className="text-sm text-gray-500">
-                          {duration} × ₹{price}
+                          {duration} × {formatCurrency(Number(price))}
                         </p>
                       </div>
-                      <p className="font-semibold">
-                        {formatCurrency(total)}
-                      </p>
+                      <p className="font-semibold">{formatCurrency(total)}</p>
                     </div>
                   );
                 })}
@@ -134,25 +128,18 @@ const grandTotal = useMemo(() =>
 
             {alarms.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold text-gray-600">
-                  Alarms
-                </h4>
+                <h4 className="text-sm font-semibold text-gray-600">Alarms</h4>
 
                 {alarms.map((a: InvoiceAlarmsFormValues) => {
                   return (
-                    <div
-                      key={a.id}
-                      className="flex justify-between py-2"
-                    >
+                    <div key={a.id} className="flex justify-between py-2">
                       <div>
                         <p>{a.alarmType}</p>
                         <p className="text-sm text-gray-500">
-                          ₹{a.price}
+                          {formatCurrency(a.price)}
                         </p>
                       </div>
-                      <p className="font-semibold">
-                        {formatCurrency(a.price)}
-                      </p>
+                      <p className="font-semibold">{formatCurrency(a.price)}</p>
                     </div>
                   );
                 })}
@@ -168,19 +155,14 @@ const grandTotal = useMemo(() =>
                 {services.map((s: any, i: number) => {
                   const total = (s.days || 0) * (s.price || 0);
                   return (
-                    <div
-                      key={i}
-                      className="flex justify-between py-2"
-                    >
+                    <div key={i} className="flex justify-between py-2">
                       <div>
                         <p>{s.title}</p>
                         <p className="text-sm text-gray-500">
-                          {Number(s.days)} days × ₹{Number(s.price)}
+                          {Number(s.days)} days × {formatCurrency(s.price)}
                         </p>
                       </div>
-                      <p className="font-semibold">
-                        {formatCurrency(total)}
-                      </p>
+                      <p className="font-semibold">{formatCurrency(total)}</p>
                     </div>
                   );
                 })}

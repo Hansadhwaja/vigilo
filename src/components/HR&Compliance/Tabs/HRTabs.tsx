@@ -47,7 +47,7 @@ const HRTabs = () => {
             value={activeTab}
             onValueChange={handleTabChange}
             tabs={tabs}
-            tabsListClassName="w-full overflow-x-auto"
+            tabsListClassName="w-full"
         />
     );
 };

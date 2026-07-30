@@ -34,7 +34,7 @@ const PaymentCard = ({ payment }: { payment: GuardPayment }) => {
                     <AccordionItem value="details" className="border-none">
 
                         {/* HEADER ONLY SUMMARY */}
-                        <AccordionTrigger className="hover:no-underline p-0 flex justify-center items-center">
+                        <AccordionTrigger className="hover:no-underline p-2 flex justify-center items-center">
 
                             <div className="flex items-center justify-between w-full gap-4">
 

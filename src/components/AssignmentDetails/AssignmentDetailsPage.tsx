@@ -1,16 +1,13 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   User,
   MapPin,
   Clock,
   Calendar,
-  FileText,
-  Phone,
   Mail,
   Edit,
   Trash2,
@@ -19,13 +16,15 @@ import {
   Bell,
   Users,
   AlertTriangle,
+  Phone,
 } from "lucide-react";
 import {
   useGetStaticShiftDetailsForAdminQuery,
-  useDeleteScheduleMutation
+  useDeleteScheduleMutation,
 } from "@/store/apis/schedulingAPI";
 import { toast } from "sonner";
 import EditAssignmentModal from "../Scheduling/Modal/EditAssignmentModal";
+import CustomBadge from "../common/Badge/CustomBadge";
 
 export default function AssignmentDetailsPage() {
   const { id } = useParams();
@@ -35,8 +34,14 @@ export default function AssignmentDetailsPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   // ✅ API HOOKS
-  const { data: response, isLoading, isError, refetch } = useGetStaticShiftDetailsForAdminQuery(id || "");
-  const [deleteSchedule, { isLoading: isDeleting }] = useDeleteScheduleMutation();
+  const {
+    data: response,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetStaticShiftDetailsForAdminQuery(id || "");
+  const [deleteSchedule, { isLoading: isDeleting }] =
+    useDeleteScheduleMutation();
 
   // ✅ DYNAMIC CALCULATIONS
   const calculations = useMemo(() => {
@@ -46,17 +51,27 @@ export default function AssignmentDetailsPage() {
 
     // Calculate status distribution
     const statusCounts = {
-      accepted: guards.filter(g => g.assignmentStatus.toLowerCase() === 'accepted').length,
-      pending: guards.filter(g => g.assignmentStatus.toLowerCase() === 'pending').length,
-      active: guards.filter(g => g.assignmentStatus.toLowerCase().includes('active')).length,
-      completed: guards.filter(g => g.assignmentStatus.toLowerCase() === 'completed').length,
-      overtime_ended: guards.filter(g => g.assignmentStatus.toLowerCase() === 'overtime_ended').length,
+      accepted: guards.filter(
+        (g) => g.assignmentStatus.toLowerCase() === "accepted",
+      ).length,
+      pending: guards.filter(
+        (g) => g.assignmentStatus.toLowerCase() === "pending",
+      ).length,
+      active: guards.filter((g) =>
+        g.assignmentStatus.toLowerCase().includes("active"),
+      ).length,
+      completed: guards.filter(
+        (g) => g.assignmentStatus.toLowerCase() === "completed",
+      ).length,
+      overtime_ended: guards.filter(
+        (g) => g.assignmentStatus.toLowerCase() === "overtime_ended",
+      ).length,
     };
 
     // Calculate guard types
     const guardTypes = {
-      patrol: shift.type.toLowerCase() === 'patrol' ? guards.length : 0,
-      static: shift.type.toLowerCase() === 'static' ? guards.length : 0,
+      patrol: shift.type.toLowerCase() === "patrol" ? guards.length : 0,
+      static: shift.type.toLowerCase() === "static" ? guards.length : 0,
     };
 
     // Generate shift code from ID
@@ -85,7 +100,8 @@ export default function AssignmentDetailsPage() {
         <div className="flex-1">
           <div className="font-semibold text-red-900">Delete Schedule?</div>
           <div className="text-sm text-red-700 mt-1">
-            This will permanently delete shift {calculations?.shiftCode}. This action cannot be undone.
+            This will permanently delete shift {calculations?.shiftCode}. This
+            action cannot be undone.
           </div>
         </div>
         <div className="flex gap-2">
@@ -136,13 +152,10 @@ export default function AssignmentDetailsPage() {
       upcoming: "bg-purple-500 text-white",
       overtime_ended: "bg-orange-500 text-white",
     };
-    return statusMap[status?.toLowerCase().replace(/\s+/g, '_')] || "bg-gray-500 text-white";
-  };
-
-  const getTypeBadge = (type: string) => {
-    return type?.toLowerCase() === "patrol"
-      ? "bg-orange-100 text-orange-700"
-      : "bg-blue-100 text-blue-700";
+    return (
+      statusMap[status?.toLowerCase().replace(/\s+/g, "_")] ||
+      "bg-gray-500 text-white"
+    );
   };
 
   const formatDate = (dateString: string) => {
@@ -188,8 +201,12 @@ export default function AssignmentDetailsPage() {
         </Button>
         <Card className="border-red-200 bg-red-50">
           <CardContent className="p-8 text-center">
-            <p className="text-red-600 font-semibold text-lg mb-2">Failed to load shift details</p>
-            <p className="text-gray-600">Shift not found or an error occurred</p>
+            <p className="text-red-600 font-semibold text-lg mb-2">
+              Failed to load shift details
+            </p>
+            <p className="text-gray-600">
+              Shift not found or an error occurred
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -232,8 +249,12 @@ export default function AssignmentDetailsPage() {
               Back
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Shift Details</h1>
-              <p className="text-xl text-gray-500 mt-1">{calculations?.shiftCode}</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Shift Details
+              </h1>
+              <p className="text-xl text-gray-500 mt-1">
+                {calculations?.shiftCode}
+              </p>
             </div>
           </div>
 
@@ -278,15 +299,13 @@ export default function AssignmentDetailsPage() {
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-xl font-semibold text-gray-900">Shift Information</CardTitle>
+                    <CardTitle className="text-xl font-semibold text-gray-900">
+                      Shift Information
+                    </CardTitle>
                   </div>
                   <div className="flex gap-2">
-                    <Badge className={`${getTypeBadge(shift.type)} text-xl px-3 py-1 capitalize`}>
-                      {shift.type}
-                    </Badge>
-                    <Badge className={`${getStatusColor(shift.status)} text-xl px-3 py-1`}>
-                      {shift.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </Badge>
+                    <CustomBadge status={shift.type} />
+                    <CustomBadge status={shift.status} />
                   </div>
                 </div>
               </CardHeader>
@@ -294,18 +313,25 @@ export default function AssignmentDetailsPage() {
                 {/* Shift Date & Times */}
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <p className="text-lg font-semibold text-gray-900 mb-1">Shift Date</p>
+                    <p className="text-lg font-semibold text-gray-900 mb-1">
+                      Shift Date
+                    </p>
                     <div className="flex items-center gap-2">
                       <Calendar className="h-5 w-5 text-gray-400" />
-                      <p className="text-lg text-gray-500">{formatDate(shift.date)}</p>
+                      <p className="text-lg text-gray-500">
+                        {formatDate(shift.date)}
+                      </p>
                     </div>
                   </div>
                   <div>
-                    <p className="text-lg font-semibold text-gray-900 mb-1">Guards Assigned</p>
+                    <p className="text-lg font-semibold text-gray-900 mb-1">
+                      Guards Assigned
+                    </p>
                     <div className="flex items-center gap-2">
                       <Users className="h-5 w-5 text-gray-400" />
                       <p className="text-lg text-gray-500">
-                        {guards.length} {guards.length === 1 ? 'Guard' : 'Guards'}
+                        {guards.length}{" "}
+                        {guards.length === 1 ? "Guard" : "Guards"}
                       </p>
                     </div>
                   </div>
@@ -313,24 +339,36 @@ export default function AssignmentDetailsPage() {
 
                 {/* Shift Times */}
                 <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Shift Times</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-3">
+                    Shift Times
+                  </h4>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <p className="text-lg font-semibold text-gray-900 mb-1">Start</p>
+                      <p className="text-lg font-semibold text-gray-900 mb-1">
+                        Start
+                      </p>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-gray-400" />
-                        <p className="text-lg text-gray-500">{formatTime(shift.startTime)}</p>
+                        <p className="text-lg text-gray-500">
+                          {formatTime(shift.startTime)}
+                        </p>
                       </div>
                     </div>
                     <div>
-                      <p className="text-lg font-semibold text-gray-900 mb-1">End</p>
+                      <p className="text-lg font-semibold text-gray-900 mb-1">
+                        End
+                      </p>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-gray-400" />
-                        <p className="text-lg text-gray-500">{formatTime(shift.endTime)}</p>
+                        <p className="text-lg text-gray-500">
+                          {formatTime(shift.endTime)}
+                        </p>
                       </div>
                     </div>
                     <div>
-                      <p className="text-lg font-semibold text-gray-900 mb-1">Duration</p>
+                      <p className="text-lg font-semibold text-gray-900 mb-1">
+                        Duration
+                      </p>
                       <p className="text-lg text-gray-500">
                         {calculations?.durationHours.toFixed(1)}h
                       </p>
@@ -341,8 +379,12 @@ export default function AssignmentDetailsPage() {
                 {/* Description */}
                 {shift.description && (
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
-                    <p className="text-lg text-gray-500 leading-relaxed">{shift.description}</p>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                      Description
+                    </h4>
+                    <p className="text-lg text-gray-500 leading-relaxed">
+                      {shift.description}
+                    </p>
                   </div>
                 )}
               </CardContent>
@@ -351,17 +393,25 @@ export default function AssignmentDetailsPage() {
             {/* Client Information Card */}
             <Card className="shadow-sm">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-bold text-gray-900">Client Information</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  Client Information
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-start gap-4">
-                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                     <span className="text-blue-600 font-semibold text-lg">
-                      {client.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                      {client.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .slice(0, 2)}
                     </span>
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-lg">{client.name}</h3>
+                    <h3 className="font-semibold text-gray-900 text-lg">
+                      {client.name}
+                    </h3>
                     <div className="space-y-2 mt-3">
                       <div className="flex items-center gap-2 text-gray-600">
                         <Mail className="h-4 w-4 text-gray-400" />
@@ -380,7 +430,9 @@ export default function AssignmentDetailsPage() {
             {/* Location Details Card */}
             <Card className="shadow-sm">
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl font-bold text-gray-900">Location Details</CardTitle>
+                <CardTitle className="text-xl font-bold text-gray-900">
+                  Location Details
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
@@ -388,22 +440,25 @@ export default function AssignmentDetailsPage() {
                     <p className="text-lg text-gray-900 mb-1">Location Name</p>
                     <div className="flex items-start gap-3">
                       <MapPin className="h-5 w-5 text-green-600 mt-1 shrink-0" />
-                      <h3 className="font-semibold text-gray-900 text-lg">{order.locationName}</h3>
+                      <h3 className="font-semibold text-gray-900 text-lg">
+                        {order.locationName}
+                      </h3>
                     </div>
                   </div>
                   <div>
-                    <p className="text-lg text-gray-900 mb-1">Location Address</p>
+                    <p className="text-lg text-gray-900 mb-1">
+                      Location Address
+                    </p>
                     <p className="text-gray-700">{order.locationAddress}</p>
                   </div>
                 </div>
 
                 <div className="flex gap-3 flex-wrap">
-                  <Badge variant="outline" className="px-3 py-1 capitalize">
-                    {order.serviceType}
-                  </Badge>
-                  <Badge variant="outline" className="px-3 py-1">
-                    {order.guardsRequired} Guard{order.guardsRequired > 1 ? 's' : ''} Required
-                  </Badge>
+                  <CustomBadge status={order.serviceType} />
+                  <CustomBadge
+                    status={`${order.guardsRequired} Guard
+                    ${order.guardsRequired > 1 ? "s" : ""} Required`}
+                  />
                 </div>
 
                 {order.description && (
@@ -426,17 +481,18 @@ export default function AssignmentDetailsPage() {
                   <div key={guard.id} className="bg-gray-50 rounded-lg p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                        <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center shrink-0">
                           <User className="h-5 w-5 text-green-600" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900">{guard.name}</h4>
+                          <h4 className="font-semibold text-gray-900">
+                            {guard.name}
+                          </h4>
                           <p className="text-xl text-gray-600">{guard.email}</p>
                         </div>
                       </div>
-                      <Badge className={`${getStatusColor(guard.assignmentStatus)}`}>
-                        {guard.assignmentStatus.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      </Badge>
+
+                      <CustomBadge status={guard.assignmentStatus} />
                     </div>
 
                     <div className="flex items-center gap-2 text-gray-600 mb-4">
@@ -446,7 +502,9 @@ export default function AssignmentDetailsPage() {
 
                     {/* Timesheet Section */}
                     <div className="border-t pt-3">
-                      <p className="text-xl font-semibold text-gray-700 mb-3">Timesheet</p>
+                      <p className="text-xl font-semibold text-gray-700 mb-3">
+                        Timesheet
+                      </p>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-lg text-gray-500 mb-1">Clock In</p>
@@ -457,7 +515,9 @@ export default function AssignmentDetailsPage() {
                           </p>
                         </div>
                         <div>
-                          <p className="text-lg text-gray-500 mb-1">Clock Out</p>
+                          <p className="text-lg text-gray-500 mb-1">
+                            Clock Out
+                          </p>
                           <p className="font-medium text-gray-900 text-xl">
                             {guard.timesheet.clockOutTime
                               ? formatTime(guard.timesheet.clockOutTime)
@@ -465,9 +525,12 @@ export default function AssignmentDetailsPage() {
                           </p>
                         </div>
                         <div>
-                          <p className="text-lg text-gray-500 mb-1">Total Hours</p>
+                          <p className="text-lg text-gray-500 mb-1">
+                            Total Hours
+                          </p>
                           <p className="font-medium text-gray-900 text-xl">
-                            {Math.abs(guard.timesheet.totalHours).toFixed(2)} hrs
+                            {Math.abs(guard.timesheet.totalHours).toFixed(2)}{" "}
+                            hrs
                           </p>
                         </div>
                         <div>
@@ -496,8 +559,13 @@ export default function AssignmentDetailsPage() {
                 </CardHeader>
                 <CardContent>
                   {incidents.map((incident: any, idx: number) => (
-                    <div key={idx} className="bg-orange-50 rounded-lg p-4 mb-3 last:mb-0">
-                      <p className="text-gray-900">{incident.description || 'No description'}</p>
+                    <div
+                      key={idx}
+                      className="bg-orange-50 rounded-lg p-4 mb-3 last:mb-0"
+                    >
+                      <p className="text-gray-900">
+                        {incident.description || "No description"}
+                      </p>
                     </div>
                   ))}
                 </CardContent>
@@ -512,7 +580,9 @@ export default function AssignmentDetailsPage() {
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
-                  <CardTitle className="text-lg font-bold text-gray-900">Real-Time Status</CardTitle>
+                  <CardTitle className="text-lg font-bold text-gray-900">
+                    Real-Time Status
+                  </CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -551,24 +621,34 @@ export default function AssignmentDetailsPage() {
             {/* Shift Summary */}
             <Card className="shadow-sm">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold text-gray-900">Shift Summary</CardTitle>
+                <CardTitle className="text-lg font-bold text-gray-900">
+                  Shift Summary
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600 text-xl">Total Guards</span>
-                  <span className="font-semibold text-gray-900">{guards.length}</span>
+                  <span className="font-semibold text-gray-900">
+                    {guards.length}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600 text-xl">Patrol Guards</span>
-                  <span className="font-semibold text-gray-900">{calculations?.guardTypes.patrol || 0}</span>
+                  <span className="font-semibold text-gray-900">
+                    {calculations?.guardTypes.patrol || 0}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600 text-xl">Static Guards</span>
-                  <span className="font-semibold text-gray-900">{calculations?.guardTypes.static || 0}</span>
+                  <span className="font-semibold text-gray-900">
+                    {calculations?.guardTypes.static || 0}
+                  </span>
                 </div>
                 <div className="flex justify-between py-2">
                   <span className="text-gray-600 text-xl">Guards Required</span>
-                  <span className="font-semibold text-gray-900">{order.guardsRequired}</span>
+                  <span className="font-semibold text-gray-900">
+                    {order.guardsRequired}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -579,7 +659,9 @@ export default function AssignmentDetailsPage() {
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-2">
                     <ImageIcon className="h-5 w-5 text-gray-600" />
-                    <CardTitle className="text-lg font-bold text-gray-900">Location Images</CardTitle>
+                    <CardTitle className="text-lg font-bold text-gray-900">
+                      Location Images
+                    </CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -592,7 +674,8 @@ export default function AssignmentDetailsPage() {
                             alt={`Location ${idx + 1}`}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                             onError={(e) => {
-                              e.currentTarget.src = 'https://via.placeholder.com/200?text=No+Image';
+                              e.currentTarget.src =
+                                "https://via.placeholder.com/200?text=No+Image";
                             }}
                           />
                         </div>
@@ -609,14 +692,22 @@ export default function AssignmentDetailsPage() {
             {/* Quick Actions */}
             <Card className="shadow-sm">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-bold text-gray-900">Quick Actions</CardTitle>
+                <CardTitle className="text-lg font-bold text-gray-900">
+                  Quick Actions
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start gap-2 hover:bg-gray-50">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2 hover:bg-gray-50"
+                >
                   <Bell className="h-4 w-4" />
                   Notify All Guards
                 </Button>
-                <Button variant="outline" className="w-full justify-start gap-2 hover:bg-gray-50">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start gap-2 hover:bg-gray-50"
+                >
                   <Phone className="h-4 w-4" />
                   Contact Client
                 </Button>

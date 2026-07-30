@@ -1,26 +1,27 @@
-import { useGenerateInvoiceMutation } from '@/store/apis/invoiceApis'
-import { RootState } from '@/store/apis/store'
-import { useGetAllClientsQuery } from '@/store/apis/usersApi'
-import CustomHeader from '@/components/common/Header/CustomHeader'
-import InvoiceForm from '@/components/Invoicing/Form/InvoiceForm'
-import AlarmPricingModal from '@/components/Invoicing/New/Modal/AlarmPricingModal'
-import EditServicePricingModal from '@/components/Invoicing/New/Modal/EditServicePricingModal'
-import { calculateGrandTotal } from '@/lib/utils'
-import { InvoiceFormValues } from '@/schemas'
-import { useSelector } from 'react-redux'
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'sonner'
-
+import { useGenerateInvoiceMutation } from "@/store/apis/invoiceApis";
+import { RootState } from "@/store/store";
+import { useGetAllClientsQuery } from "@/store/apis/usersApi";
+import CustomHeader from "@/components/common/Header/CustomHeader";
+import InvoiceForm from "@/components/Invoicing/Form/InvoiceForm";
+import AlarmPricingModal from "@/components/Invoicing/New/Modal/AlarmPricingModal";
+import EditServicePricingModal from "@/components/Invoicing/New/Modal/EditServicePricingModal";
+import { calculateGrandTotal } from "@/lib/utils";
+import { InvoiceFormValues } from "@/schemas";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const GenerateInvoicePage = () => {
-  const [generateInvoice, { isLoading: isGeneratingInvoice }] = useGenerateInvoiceMutation();
+  const [generateInvoice, { isLoading: isGeneratingInvoice }] =
+    useGenerateInvoiceMutation();
 
   const { data, isLoading } = useGetAllClientsQuery();
   const clients = data?.data ?? [];
   const navigate = useNavigate();
 
-
-  const serviceData = useSelector((state: RootState) => state.servicePricing.data);
+  const serviceData = useSelector(
+    (state: RootState) => state.servicePricing.data,
+  );
 
   const handleSubmit = async (data: InvoiceFormValues) => {
     console.log("Invoice Data", data);
@@ -29,37 +30,37 @@ const GenerateInvoicePage = () => {
       orders: data.orders,
       alarms: data.alarms,
       services: data.services,
-      serviceData
-    })
+      serviceData,
+    });
 
     try {
       await generateInvoice({
         ...data,
-        orders: data.orders.map(o => ({
+        orders: data.orders.map((o) => ({
           ...o,
           dailyPrice: Number(serviceData[o.title].dailyPrice),
           hourlyPrice: Number(serviceData[o.title].hourlyPrice),
-          renewalDate: serviceData[o.title].renewalDate
+          renewalDate: serviceData[o.title].renewalDate,
         })),
         subTotal: grandTotal,
         tax: 0,
-        totalAmount: grandTotal
+        totalAmount: grandTotal,
       }).unwrap();
-      navigate("/invoicing")
+      navigate("/invoicing");
       toast.success("Invoice Created Successfully");
     } catch (error) {
       toast.error("Error while Creating Invoice");
     }
-  }
+  };
 
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
       <CustomHeader
         title="Generate Client Invoice"
         description="Create new invoice with flexible service pricing"
-        previousLink='/invoicing'
+        previousLink="/invoicing"
         others={
-          <div className='flex gap-2 items-center justify-end'>
+          <div className="flex gap-2 items-center justify-end">
             <AlarmPricingModal />
             <EditServicePricingModal />
           </div>
@@ -71,7 +72,7 @@ const GenerateInvoicePage = () => {
         clients={clients}
       />
     </div>
-  )
-}
+  );
+};
 
-export default GenerateInvoicePage
+export default GenerateInvoicePage;

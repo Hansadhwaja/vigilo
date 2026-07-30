@@ -3,9 +3,7 @@ import {
     DataTable,
     RowWithId,
 } from "@/components/common/Table/DataTable";
-
 import { Badge } from "@/components/ui/badge";
-
 import {
     Building,
     Calendar,
@@ -16,9 +14,7 @@ import {
 } from "lucide-react";
 
 import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
-
-import { Order } from "@/apis/ordersApi";
-
+import { Order } from "@/store/apis/ordersApi";
 import { Link } from "react-router-dom";
 
 import EditOrderModal from "../Modal/EditOrderModal";
