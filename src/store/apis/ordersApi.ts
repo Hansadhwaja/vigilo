@@ -116,31 +116,6 @@ export interface EditOrderResponse {
   data: Order;
 }
 
-export type Client = {
-  id: string;
-  name: string;
-  email: string;
-  mobile: string;
-  address: string;
-  avatar?: string;
-}
-export interface GetAllClientResponse {
-  success: boolean;
-  message: string;
-  data: Client[];
-  pagination?: Pagination;
-  summary: {
-    total: number;
-    active: number;
-  }
-}
-
-export interface GetAllClientParams {
-  search?: string;
-  page?: number;
-  limit?: number
-}
-
 export const ordersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all orders with pagination and filters
@@ -203,38 +178,6 @@ export const ordersApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Orders"]
     }),
-
-
-    // Get all clients
-    // Get all clients with search support
-    getAllClients: builder.query<GetAllClientResponse, GetAllClientParams | void>({
-      query: (params = {}) => {
-        const queryParams = new URLSearchParams();
-
-        if (params) {
-          if (params.search) queryParams.append('search', params.search);
-          if (params.page) queryParams.append('page', params.page.toString());
-          if (params.limit) queryParams.append('limit', params.limit.toString());
-        }
-
-        return {
-          url: `/users/getAllClients${queryParams.toString() ? `?${queryParams.toString()}` : ''}`,
-          method: "GET",
-        };
-      },
-      providesTags: ["Clients"],
-    }),
-
-    // Delete client
-    deleteClient: builder.mutation<{ success: boolean; message: string }, { id: string }>({
-      query: (body) => ({
-        url: `/users/deleteClient`,
-        method: "POST",
-        body, // contains { id }
-      }),
-      invalidatesTags: ["Clients"],
-    }),
-
   }),
 });
 
@@ -244,6 +187,5 @@ export const {
   useCancelOrderMutation,
   useAcceptOrderMutation,
   useEditOrderMutation,
-  useGetAllClientsQuery,
-  useDeleteClientMutation,
+
 } = ordersApi;

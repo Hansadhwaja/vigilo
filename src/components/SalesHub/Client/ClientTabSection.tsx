@@ -1,45 +1,35 @@
-import ClientSearchFilters from './ClientSearchFilters'
-import ClientTable from './Table/ClientTable'
-import { useDebounce } from '@/lib/hooks/useDebounce';
-import { useQueryParams } from '@/lib/hooks/useQueryParams';
-import { useGetAllClientsQuery } from '@/store/apis/ordersApi';
-import ClientStats from './ClientStats';
+import ClientSearchFilters from "./ClientSearchFilters";
+import ClientTable from "./Table/ClientTable";
+import { useDebounce } from "@/lib/hooks/useDebounce";
+import { useQueryParams } from "@/lib/hooks/useQueryParams";
+import { useGetAllClientsQuery } from "@/store/apis/usersApi";
+import ClientStats from "./ClientStats";
 
 const ClientTabSection = () => {
-  const {
-    getParam,
-    setParam,
-    setMultipleParams,
-  } = useQueryParams();
+  const { getParam, setParam, setMultipleParams } = useQueryParams();
 
   const page = Number(getParam("page", "1"));
   const limit = Number(getParam("limit", "10"));
   const search = getParam("search");
   const debouncedSearch = useDebounce(search, 500);
 
-  const { data, isLoading, isError, isFetching, error } = useGetAllClientsQuery({
-    search: debouncedSearch,
-    page,
-    limit,
-  });
+  const { data, isLoading, isError, isFetching, error } = useGetAllClientsQuery(
+    {
+      search: debouncedSearch,
+      page,
+      limit,
+    },
+  );
 
-  const {
-    data: clients = [],
-    pagination,
-    summary
-  } = data ?? {};
+  const { data: clients = [], pagination, summary } = data ?? {};
 
   // Pagination
-  const handlePageChange = (
-    newPage: number
-  ) => {
+  const handlePageChange = (newPage: number) => {
     setParam("page", String(newPage));
   };
 
   // Limit
-  const handleLimitChange = (
-    value: number
-  ) => {
+  const handleLimitChange = (value: number) => {
     setMultipleParams({
       limit: String(value),
       page: "1",
@@ -65,7 +55,7 @@ const ClientTabSection = () => {
         error={error}
       />
     </div>
-  )
-}
+  );
+};
 
-export default ClientTabSection
+export default ClientTabSection;

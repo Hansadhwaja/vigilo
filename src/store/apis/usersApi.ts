@@ -1,5 +1,6 @@
 // usersApi.ts
 import { baseApi } from "./baseApi";
+import { Pagination } from "./ordersApi";
 
 // ===== INTERFACES =====
 export interface Client {
@@ -52,23 +53,55 @@ export interface UploadImageResponse {
   message: string;
   imageUrl: string;
 }
+export interface GetAllClientResponse {
+  success: boolean;
+  message: string;
+  data: Client[];
+  pagination?: Pagination;
+  summary: {
+    total: number;
+    active: number;
+  };
+}
+
+export interface GetAllClientParams {
+  search?: string;
+  page?: number;
+  limit?: number;
+}
 
 // ===== API ENDPOINTS =====
 export const usersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all clients
-    getAllClients: builder.query<GetAllClientsResponse, void>({
-      query: () => ({
-        url: `/users/getAllClients`,
-        method: "GET",
+    getAllClients: builder.query<
+      GetAllClientResponse,
+      GetAllClientParams | void
+    >({
+      query: (params = {}) => {
+        const queryParams = new URLSearchParams();
+
+        if (params) {
+          if (params.search) queryParams.append("search", params.search);
+          if (params.page) queryParams.append("page", params.page.toString());
+          if (params.limit)
+            queryParams.append("limit", params.limit.toString());
+        }
+
+        return {
+          url: `/users/getAllClients${queryParams.toString() ? `?${queryParams.toString()}` : ""}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["Clients"],
+    }),
+    createUserByAdmin: builder.mutation({
+      query: (body) => ({
+        url: "/users/createUserByAdmin",
+        method: "POST",
+        body,
       }),
-      providesTags: (result) =>
-        result
-          ? [
-            ...result.data.map(({ id }) => ({ type: 'Clients' as const, id })),
-            { type: 'Clients', id: 'LIST' },
-          ]
-          : [{ type: 'Clients', id: 'LIST' }],
+      invalidatesTags: ["Clients"],
     }),
 
     // Get single client by ID
@@ -81,7 +114,10 @@ export const usersApi = baseApi.injectEndpoints({
     }),
 
     // Edit client
-    editClient: builder.mutation<EditClientResponse, { id: string; body: EditClientPayload }>({
+    editClient: builder.mutation<
+      EditClientResponse,
+      { id: string; body: EditClientPayload }
+    >({
       query: ({ id, body }) => ({
         url: `/users/editClient/${id}`,
         method: "PUT",
@@ -139,5 +175,6 @@ export const {
   useDeleteClientMutation,
   useUploadImageMutation,
   useExportUsersMutation,
-  useExportGuardsMutation
+  useExportGuardsMutation,
+  useCreateUserByAdminMutation,
 } = usersApi;

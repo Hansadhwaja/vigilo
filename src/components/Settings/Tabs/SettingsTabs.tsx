@@ -40,20 +40,20 @@ const SettingsTabs = () => {
       content: <UsersTab />,
       activeColor: "data-[state=active]:bg-blue-500",
     },
-    {
-      value: "security",
-      label: "Security",
-      icon: Lock,
-      content: <SecurityTab />,
-      activeColor: "data-[state=active]:bg-red-500",
-    },
-    {
-      value: "integrations",
-      label: "Integrations",
-      icon: Webhook,
-      content: <IntegrationsTab />,
-      activeColor: "data-[state=active]:bg-violet-500",
-    },
+    // {
+    //   value: "security",
+    //   label: "Security",
+    //   icon: Lock,
+    //   content: <SecurityTab />,
+    //   activeColor: "data-[state=active]:bg-red-500",
+    // },
+    // {
+    //   value: "integrations",
+    //   label: "Integrations",
+    //   icon: Webhook,
+    //   content: <IntegrationsTab />,
+    //   activeColor: "data-[state=active]:bg-violet-500",
+    // },
     {
       value: "billing",
       label: "Billing",
@@ -61,13 +61,13 @@ const SettingsTabs = () => {
       content: <BillingTab />,
       activeColor: "data-[state=active]:bg-amber-500",
     },
-    {
-      value: "system",
-      label: "System",
-      icon: Server,
-      content: <SystemTab />,
-      activeColor: "data-[state=active]:bg-slate-700",
-    },
+    // {
+    //   value: "system",
+    //   label: "System",
+    //   icon: Server,
+    //   content: <SystemTab />,
+    //   activeColor: "data-[state=active]:bg-slate-700",
+    // },
   ];
 
   return (

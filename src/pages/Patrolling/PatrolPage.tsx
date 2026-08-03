@@ -1,16 +1,20 @@
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AdminPatrolRun, useExportPatrolsMutation, useGetAllPatrolRunsForAdminQuery } from "@/store/apis/patrollingAPI";
+import {
+  AdminPatrolRun,
+  useExportPatrolsMutation,
+  useGetAllPatrolRunsForAdminQuery,
+} from "@/store/apis/patrollingAPI";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import PatrollingStats from "@/components/Patrolling/PatrollingStats";
 import PatrollingSearchFilters from "@/components/Patrolling/PatrollingSearchFilers";
 import CreatePatrolModal from "@/components/Patrolling/Modal/CreatePatrolModal";
-import PatrolCard from "../../components/Patrolling/PatrolCard";
 import Loader from "@/components/common/Loader";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";
 import { toast } from "sonner";
+import PatrolList from "@/components/Patrolling/PatrolList";
 
 export default function PatrolPage() {
   const { getParam } = useQueryParams();
@@ -27,7 +31,7 @@ export default function PatrolPage() {
     search: debouncedSearch,
   });
 
-  const { data: patrols = [], summary } = data ?? {};
+  const { data: patrols = [], summary, pagination } = data ?? {};
 
   const [exportPatrol, { isLoading: isExporting }] = useExportPatrolsMutation();
 
@@ -48,9 +52,9 @@ export default function PatrolPage() {
       toast.success("Patrols Exported Successfully");
     } catch (error) {
       console.log(error);
-      toast.error("Error while exporting Patrols")
+      toast.error("Error while exporting Patrols");
     }
-  }
+  };
 
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
@@ -66,14 +70,13 @@ export default function PatrolPage() {
               onClick={handleExport}
               disabled={isExporting}
             >
-
-              {isExporting ? <Loader /> : (
+              {isExporting ? (
+                <Loader />
+              ) : (
                 <>
                   <Download className="h-4 w-4" />
                   Export
                 </>
-
-
               )}
             </Button>
 
@@ -93,16 +96,13 @@ export default function PatrolPage() {
           <CardTitle className="text-lg">Patrol Operations</CardTitle>
         </CardHeader>
         <CardContent className="p-4">
-          {isLoading || isFetching ? <Loader /> :
-            patrols.length > 0 ? (
-              <div className="space-y-3">
-                {patrols.map((patrol: AdminPatrolRun) => (
-                  <PatrolCard key={patrol.id} patrol={patrol} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-center font-semibold">No Patrol found</p>
-            )}
+          {isLoading || isFetching ? (
+            <Loader />
+          ) : patrols.length > 0 ? (
+            <PatrolList patrols={patrols} pagination={pagination} />
+          ) : (
+            <p className="text-center font-semibold">No Patrol found</p>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -237,6 +237,7 @@ export const clientSchema = z.object({
   mobile: z.string().min(1, "Please Enter Mobile"),
   address: z.string().min(1, "Please Enter Address"),
   avatar: z.string().optional(),
+  password: z.string().min(1, "Please Enter Password"),
 });
 
 export type ClientFormValues = z.infer<typeof clientSchema>;

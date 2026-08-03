@@ -32,7 +32,7 @@ const CreatePatrolModal = () => {
                     Create Patrol
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-6xl w-[95vw] max-h-[95vh] p-8 overflow-y-auto">
+            <DialogContent className="min-w-2xl max-sm:w-[95vw] max-h-[95vh] p-8 overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Create New Patrol Run</DialogTitle>
                     <DialogDescription>

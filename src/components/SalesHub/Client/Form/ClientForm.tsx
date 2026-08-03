@@ -12,9 +12,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ClientFormValues, clientSchema } from "@/schemas";
 import { Client } from "@/store/apis/usersApi";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import PasswordInput from "@/components/common/Input/PasswordInput";
 
 interface ClientFormProps {
-  initialData: Client;
+  initialData?: Client;
   onSubmit: (v: ClientFormValues) => void;
   onCancel: () => void;
   isLoading: boolean;
@@ -30,11 +31,12 @@ const ClientForm = ({
     resolver: zodResolver(clientSchema),
     mode: "onChange",
     defaultValues: {
-      name: initialData.name ?? "",
-      email: initialData.email ?? "",
-      mobile: initialData.mobile ?? "",
-      address: initialData.address ?? "",
-      avatar: initialData.avatar ?? "",
+      name: initialData?.name ?? "",
+      email: initialData?.email ?? "",
+      mobile: initialData?.mobile ?? "",
+      address: initialData?.address ?? "",
+      avatar: initialData?.avatar ?? "",
+      password: "",
     },
   });
 
@@ -90,6 +92,20 @@ const ClientForm = ({
               <Field>
                 <FieldLabel>Mobile Number</FieldLabel>
                 <Input {...field} placeholder="Mobile Number" />
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
+              </Field>
+            )}
+          />
+
+          <Controller
+            name="password"
+            control={control}
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel>Password</FieldLabel>
+                <PasswordInput {...field} placeholder="Password" />
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}

@@ -24,7 +24,7 @@ const ClientOperationsTabs = () => {
         <AppTabs
             defaultValue="order"
             tabs={tabs}
-            tabsListClassName="w-200 overflow-x-auto"
+            tabsListClassName="w-200"
         />
     );
 };
