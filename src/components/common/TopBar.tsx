@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Edit, Loader2, LogOut } from "lucide-react";
+import { Search, Edit, Loader2, LogOut, CreditCard } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -26,7 +26,8 @@ import UserAvatar from "./Avatar/UserAvatar";
 import NotificationModal from "../Notification/Modal/NotificationModal";
 import LogoutModal from "@/components/Auth/Modal/LogoutModal";
 import IconInput from "./Input/IconInput";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "../ui/button";
 
 interface TopBarProps {
   search: string;
@@ -54,19 +55,12 @@ export default function TopBar({ search, onSearchChange }: TopBarProps) {
         />
 
         <div className="ml-auto flex items-center gap-2">
-          <div className="max-md:hidden">
-            <Select defaultValue="melbourne">
-              <SelectTrigger className="h-9 w-40 rounded-xl bg-background border border-border">
-                <SelectValue placeholder="Region" />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value="melbourne">Melbourne</SelectItem>
-                <SelectItem value="sydney">Sydney</SelectItem>
-                <SelectItem value="perth">Perth</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Button asChild>
+            <Link to="plan">
+              <CreditCard />
+              Plans
+            </Link>
+          </Button>
 
           <NotificationModal />
 

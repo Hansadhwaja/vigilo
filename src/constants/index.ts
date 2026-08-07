@@ -4,7 +4,6 @@ import {
   Building2,
   Car,
   CheckCircle2,
-  CreditCard,
   Euro,
   LayoutDashboard,
   Map,
@@ -32,11 +31,6 @@ export const navLinks = [
     icon: Building2,
     label: "Sales Hub",
     link: "/sales",
-  },
-  {
-    icon: CreditCard,
-    label: "Plans",
-    link: "/plan",
   },
   {
     icon: TriangleAlert,
