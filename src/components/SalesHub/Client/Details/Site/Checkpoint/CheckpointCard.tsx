@@ -2,7 +2,7 @@ import type { PatrolCheckpoint } from "@/store/apis/patrollingAPI";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, QrCode } from "lucide-react";
 import DeleteCheckpointModal from "./Modal/DeleteCheckpointModal";
-import ViewQRCodeModal from "./Modal/ViewQrCodeModal";
+import ViewQRCodeModal from "./Modal/ViewQRCodeModal";
 
 interface CheckpointCardProps {
   checkpoint: PatrolCheckpoint;
