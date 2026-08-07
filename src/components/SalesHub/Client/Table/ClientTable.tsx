@@ -3,10 +3,11 @@ import {
   DataTable,
   RowWithId,
 } from "@/components/common/Table/DataTable";
-import { Building, Mail, Phone, User } from "lucide-react";
+import { Building, Eye, Mail, Phone, User } from "lucide-react";
 import { Client } from "@/store/apis/usersApi";
 import ViewClientModal from "../Modal/ViewClientModal";
 import ClientTableActions from "./ClientTableActions";
+import { Link } from "react-router-dom";
 
 interface ClientTableProps {
   page: number;
@@ -126,7 +127,12 @@ const ClientTable = ({
 
       render: (row) => (
         <div className="flex items-center justify-center gap-2">
-          <ViewClientModal client={row} />
+          <Link
+            to={`/sales/clients/${row.id}`}
+            className="  rounded-xl border border-slate-200  p-2 text-slate-500 transition-all  hover:border-orange-200 hover:bg-orange-50 hover:text-orange-600"
+          >
+            <Eye className="h-4 w-4" />
+          </Link>
           <ClientTableActions row={row} />
         </div>
       ),

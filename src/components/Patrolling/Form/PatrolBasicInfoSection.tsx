@@ -76,7 +76,7 @@ const PatrolBasicInfoSection = () => {
                     <SelectItem key={order.id} value={order.id}>
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />
-                        <span>{order.locationName}</span>
+                        <span className="capitalize">{order.locationName}</span>
                       </div>
                     </SelectItem>
                   ))}

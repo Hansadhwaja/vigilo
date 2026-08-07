@@ -1,14 +1,14 @@
+
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { LucideIcon } from "lucide-react";
+import { ComponentProps } from "react";
 
-interface Props {
+interface Props extends Omit<ComponentProps<typeof Input>, "onChange"> {
   Icon: LucideIcon;
-  placeholder?: string;
-  value: string;
   className?: string;
   inputClassName?: string;
-  onChange: (v: string) => void;
+  onChange: (value: string) => void;
 }
 
 const IconInput = ({
@@ -18,15 +18,14 @@ const IconInput = ({
   className,
   inputClassName,
   onChange,
+  ...props
 }: Props) => {
   return (
     <div className={cn("relative", className)}>
-      <Icon
-        size={16}
-        className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
-      />
+      <Icon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
       <Input
+        {...props}
         placeholder={placeholder}
         className={cn("rounded-xl pl-9", inputClassName)}
         value={value}
@@ -37,3 +36,4 @@ const IconInput = ({
 };
 
 export default IconInput;
+

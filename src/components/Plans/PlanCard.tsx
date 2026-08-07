@@ -12,9 +12,16 @@ import { Check, Crown } from "lucide-react";
 import { useSubscribePlanMutation } from "@/store/apis/plansApi";
 import { toast } from "sonner";
 import Loader from "../common/Loader";
+import { useGetProfileQuery } from "@/store/apis/profileApi";
 
 const PlanCard = ({ plan }: { plan: Plan }) => {
   const popularPlan = plan.interval === "year";
+
+  const { data: profileResponse, isLoading: isProfileLoading } =
+    useGetProfileQuery();
+
+  const profile = profileResponse?.data;
+
   const [subscribePlan, { isLoading }] = useSubscribePlanMutation();
 
   const handleSubscribe = async () => {
@@ -30,6 +37,18 @@ const PlanCard = ({ plan }: { plan: Plan }) => {
     }
   };
 
+  const isCurrentPlan = profile?.planId === plan.id;
+
+  const isExpired =
+    isCurrentPlan &&
+    !!profile?.subscriptionEnd &&
+    new Date(profile.subscriptionEnd) < new Date();
+
+  const isActive =
+    isCurrentPlan && profile?.subscriptionStatus === "active" && !isExpired;
+
+  const isCancellingSubscription = false;
+  const handleCancel = () => {};
   return (
     <Card
       className={cn(
@@ -124,24 +143,46 @@ const PlanCard = ({ plan }: { plan: Plan }) => {
       </CardContent>
 
       <CardFooter className="pt-8">
-        <Button
-          onClick={handleSubscribe}
-          disabled={isLoading}
-          className={cn(
-            "h-11 w-full rounded-xl text-base font-semibold transition-all",
-            popularPlan
-              ? "bg-amber-500 text-black hover:bg-amber-600 shadow-sm shadow-amber-300/40"
-              : "",
-          )}
-        >
-          {isLoading ? (
-            <Loader />
-          ) : plan.amount ? (
-            "Choose Plan"
-          ) : (
-            "Contact Sales"
-          )}
-        </Button>
+        {isActive ? (
+          <Button
+            variant="outline"
+            className="h-11 w-full rounded-xl text-base font-semibold text-destructive hover:text-destructive"
+            onClick={handleCancel}
+            disabled={isCancellingSubscription}
+          >
+            {isCancellingSubscription ? <Loader /> : "Cancel Subscription"}
+          </Button>
+        ) : isExpired ? (
+          <Button
+            onClick={handleSubscribe}
+            disabled={isLoading}
+            className={cn(
+              "h-11 w-full rounded-xl text-base font-semibold",
+              popularPlan &&
+                "bg-amber-500 text-black hover:bg-amber-600 shadow-sm shadow-amber-300/40",
+            )}
+          >
+            {isLoading ? <Loader /> : "Renew Subscription"}
+          </Button>
+        ) : (
+          <Button
+            onClick={handleSubscribe}
+            disabled={isLoading}
+            className={cn(
+              "h-11 w-full rounded-xl text-base font-semibold transition-all",
+              popularPlan &&
+                "bg-amber-500 text-black hover:bg-amber-600 shadow-sm shadow-amber-300/40",
+            )}
+          >
+            {isLoading ? (
+              <Loader />
+            ) : plan.amount ? (
+              "Choose Plan"
+            ) : (
+              "Contact Sales"
+            )}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

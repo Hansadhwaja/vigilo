@@ -542,12 +542,20 @@ export const patrollingApi = baseApi.injectEndpoints({
     }),
     getAllPatrolSites: builder.query<
       GetAllPatrolSitesResponse,
-      { page?: number; limit?: number }
+      { page?: string; limit?: string; clientId?: string }
     >({
-      query: ({ page = 1, limit = 10 }) => ({
-        url: `/patrolling/getAllPatrolSites?page=${page}&limit=${limit}`,
-        method: "GET",
-      }),
+      query: (params = {}) => {
+        const { page, limit, clientId } = params;
+        const qs = new URLSearchParams();
+
+        if (page) qs.set("page", page);
+        if (limit) qs.set("limit", limit);
+        if (clientId) qs.set("clientId", clientId);
+
+        return qs.toString()
+          ? `/patrolling/getAllPatrolSites?${qs.toString()}`
+          : "/patrolling/getAllPatrolSites";
+      },
 
       providesTags: [{ type: "Patrol", id: "LIST" }],
     }),

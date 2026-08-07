@@ -31,6 +31,7 @@ import AuthLayout from "@/layouts/AuthLayout";
 import PlansPage from "@/pages/Plans";
 import PaymentSuccess from "@/pages/Plans/PaymentSuccess";
 import PaymentFailed from "@/pages/Plans/PaymentFailed";
+import ClientDetailsPage from "@/pages/SalesHub/ClientDetailsPage";
 
 export const router = createBrowserRouter([
   {
@@ -82,8 +83,12 @@ export const router = createBrowserRouter([
                 element: <SalesPage />,
               },
               {
-                path: ":id",
+                path: "orders/:orderId",
                 element: <OrderDetailsPage />,
+              },
+              {
+                path: "clients/:clientId",
+                element: <ClientDetailsPage />,
               },
             ],
           },

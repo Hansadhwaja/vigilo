@@ -16,9 +16,7 @@ import ImagesCard from "@/components/common/Card/ImagesCard";
 export default function OrderDetailsPage() {
   const navigate = useNavigate();
 
-  const { id } = useParams<{
-    id: string;
-  }>();
+  const { orderId: id } = useParams();
 
   const { data: orderResponse, isLoading } = useGetAdminOrderByIdQuery(
     id || "",

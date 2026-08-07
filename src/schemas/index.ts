@@ -344,6 +344,15 @@ export const subSiteSchema = z.object({
 
 export type SubSiteFormValues = z.infer<typeof subSiteSchema>;
 
+const subSiteSelectionSchema = z.object({
+  checkpointIds: z.array(z.string()),
+});
+
+const siteSelectionSchema = z.object({
+  checkpointIds: z.array(z.string()),
+  subSites: z.record(z.string(), subSiteSelectionSchema),
+});
+
 export const patrolSchema = z.object({
   patrolName: z.string().min(1, "Patrol Name is required"),
 
@@ -354,6 +363,8 @@ export const patrolSchema = z.object({
   orderId: z.string().min(1, "Order is required"),
 
   siteIds: z.array(z.string()).min(1, "Select at least one site"),
+
+  siteSelections: z.record(z.string(), siteSelectionSchema),
 
   startDateTime: z.string().min(1, "Start date & time is required"),
 
@@ -372,9 +383,6 @@ export const siteSchema = z.object({
   address: z.string().min(1, "Address is required"),
 
   description: z.string().optional(),
-
-  clientId: z.string().min(1, "Client is required"),
-
   coordinates: z.object({
     lat: z.string().min(1, "Latitude is required"),
 
