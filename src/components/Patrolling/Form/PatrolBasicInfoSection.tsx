@@ -1,9 +1,14 @@
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import ReactSelect from "react-select";
-import { Controller, useFormContext } from 'react-hook-form'
-import { useGetAllGuardsQuery } from '@/store/apis/guardsApi';
-import { useGetAllOrdersQuery } from '@/store/apis/ordersApi';
+import { Controller, useFormContext } from "react-hook-form";
+import { useGetAllGuardsQuery } from "@/store/apis/guardsApi";
+import { useGetAllOrdersQuery } from "@/store/apis/ordersApi";
 import {
   Select,
   SelectContent,
@@ -11,9 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { dummyVehicles } from '@/constants';
-import { MapPin } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
+import { dummyVehicles } from "@/constants";
+import { MapPin } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 const PatrolBasicInfoSection = () => {
   const { control } = useFormContext();
@@ -23,7 +28,7 @@ const PatrolBasicInfoSection = () => {
   const guards = guardsResponse?.data ?? [];
 
   const { data: ordersResponse } = useGetAllOrdersQuery({
-    serviceType: "patrol"
+    serviceType: "patrol",
   });
 
   const orders = ordersResponse?.data || [];
@@ -46,20 +51,11 @@ const PatrolBasicInfoSection = () => {
           control={control}
           render={({ field, fieldState }) => (
             <Field>
-              <FieldLabel>
-                Patrol Name
-              </FieldLabel>
+              <FieldLabel>Patrol Name</FieldLabel>
 
-              <Input
-                {...field}
-                placeholder="Enter Patrol Name"
-              />
+              <Input {...field} placeholder="Enter Patrol Name" />
 
-              {fieldState.invalid && (
-                <FieldError
-                  errors={[fieldState.error]}
-                />
-              )}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
@@ -68,41 +64,26 @@ const PatrolBasicInfoSection = () => {
           control={control}
           render={({ field, fieldState }) => (
             <Field>
-              <FieldLabel>
-                Assign Order
-              </FieldLabel>
+              <FieldLabel>Assign Order Name</FieldLabel>
 
-              <Select
-                value={field.value}
-                onValueChange={field.onChange}
-              >
+              <Select value={field.value} onValueChange={field.onChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select order" />
                 </SelectTrigger>
 
                 <SelectContent>
-
                   {orders.map((order) => (
-                    <SelectItem
-                      key={order.id}
-                      value={order.id}
-                    >
+                    <SelectItem key={order.id} value={order.id}>
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />
-                        <span>
-                          {order.locationName}
-                        </span>
+                        <span>{order.locationName}</span>
                       </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
-              {fieldState.invalid && (
-                <FieldError
-                  errors={[fieldState.error]}
-                />
-              )}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
@@ -112,9 +93,7 @@ const PatrolBasicInfoSection = () => {
           control={control}
           render={({ field, fieldState }) => (
             <Field>
-              <FieldLabel>
-                Assign Guards
-              </FieldLabel>
+              <FieldLabel>Assign Guards</FieldLabel>
 
               <ReactSelect
                 isMulti
@@ -131,28 +110,20 @@ const PatrolBasicInfoSection = () => {
                   label: guard.name,
                 }))}
                 value={guards
-                  .filter((guard) =>
-                    field.value.includes(guard.id)
-                  )
+                  .filter((guard) => field.value.includes(guard.id))
                   .map((guard) => ({
                     value: guard.id,
                     label: guard.name,
                   }))}
                 onChange={(selected) => {
-                  field.onChange(
-                    selected.map((item) => item.value)
-                  );
+                  field.onChange(selected.map((item) => item.value));
                 }}
                 placeholder="Select guards"
                 className="text-sm"
                 classNamePrefix="select"
               />
 
-              {fieldState.invalid && (
-                <FieldError
-                  errors={[fieldState.error]}
-                />
-              )}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
@@ -162,9 +133,7 @@ const PatrolBasicInfoSection = () => {
           control={control}
           render={({ field, fieldState }) => (
             <Field>
-              <FieldLabel>
-                Assign Vehicles
-              </FieldLabel>
+              <FieldLabel>Assign Vehicles</FieldLabel>
 
               <ReactSelect
                 isMulti
@@ -181,53 +150,34 @@ const PatrolBasicInfoSection = () => {
                   label: v.callsign,
                 }))}
                 value={dummyVehicles
-                  .filter((v) =>
-                    field.value.includes(v.id)
-                  )
+                  .filter((v) => field.value.includes(v.id))
                   .map((v) => ({
                     value: v.id,
                     label: v.callsign,
                   }))}
                 onChange={(selected) => {
-                  field.onChange(
-                    selected.map((item) => item.value)
-                  );
+                  field.onChange(selected.map((item) => item.value));
                 }}
                 placeholder="Select vehicles"
                 className="text-sm"
                 classNamePrefix="select"
               />
 
-              {fieldState.invalid && (
-                <FieldError
-                  errors={[fieldState.error]}
-                />
-              )}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
-
-
 
         <Controller
           name="startDateTime"
           control={control}
           render={({ field, fieldState }) => (
             <Field>
-              <FieldLabel>
-                Start Date & Time
-              </FieldLabel>
+              <FieldLabel>Start Date & Time</FieldLabel>
 
-              <Input
-                type="datetime-local"
-                {...field}
-              />
+              <Input type="datetime-local" {...field} />
 
-              {fieldState.invalid && (
-                <FieldError
-                  errors={[fieldState.error]}
-                />
-              )}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
@@ -237,20 +187,11 @@ const PatrolBasicInfoSection = () => {
           control={control}
           render={({ field, fieldState }) => (
             <Field>
-              <FieldLabel>
-                Estimated Completion
-              </FieldLabel>
+              <FieldLabel>End Date & Time</FieldLabel>
 
-              <Input
-                type="datetime-local"
-                {...field}
-              />
+              <Input type="datetime-local" {...field} />
 
-              {fieldState.invalid && (
-                <FieldError
-                  errors={[fieldState.error]}
-                />
-              )}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
@@ -260,26 +201,16 @@ const PatrolBasicInfoSection = () => {
           control={control}
           render={({ field, fieldState }) => (
             <Field>
-              <FieldLabel>
-                Unit Price ($ / hour)
-              </FieldLabel>
+              <FieldLabel>Unit Price ($ / hour)</FieldLabel>
 
               <Input
                 type="number"
                 min="0"
                 value={field.value}
-                onChange={(e) =>
-                  field.onChange(
-                    Number(e.target.value)
-                  )
-                }
+                onChange={(e) => field.onChange(Number(e.target.value))}
               />
 
-              {fieldState.invalid && (
-                <FieldError
-                  errors={[fieldState.error]}
-                />
-              )}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
@@ -288,27 +219,20 @@ const PatrolBasicInfoSection = () => {
           control={control}
           render={({ field, fieldState }) => (
             <Field>
-              <FieldLabel>
-                Additional Notes
-              </FieldLabel>
+              <FieldLabel>Additional Notes</FieldLabel>
 
               <Textarea
                 placeholder="Additional patrol instructions..."
                 {...field}
               />
 
-              {fieldState.invalid && (
-                <FieldError
-                  errors={[fieldState.error]}
-                />
-              )}
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
-
       </FieldGroup>
     </div>
-  )
-}
+  );
+};
 
-export default PatrolBasicInfoSection
+export default PatrolBasicInfoSection;

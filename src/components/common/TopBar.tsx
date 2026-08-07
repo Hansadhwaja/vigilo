@@ -26,6 +26,7 @@ import UserAvatar from "./Avatar/UserAvatar";
 import NotificationModal from "../Notification/Modal/NotificationModal";
 import LogoutModal from "@/components/Auth/Modal/LogoutModal";
 import IconInput from "./Input/IconInput";
+import { useNavigate } from "react-router-dom";
 
 interface TopBarProps {
   search: string;

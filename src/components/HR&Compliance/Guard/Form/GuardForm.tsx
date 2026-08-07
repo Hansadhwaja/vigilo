@@ -10,121 +10,108 @@ import { GuardFormValues, guardSchema } from "@/schemas";
 import { Client } from "@/store/apis/usersApi";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import Loader from "@/components/common/Loader";
+import PasswordInput from "@/components/common/Input/PasswordInput";
 
 interface GuardFormProps {
-    initialData?: Client;
-    onSubmit: (v: GuardFormValues) => void;
-    onCancel: () => void;
-    isLoading: boolean;
+  initialData?: Client;
+  onSubmit: (v: GuardFormValues) => void;
+  onCancel: () => void;
+  isLoading: boolean;
 }
 
 const GuardForm = ({
-    initialData,
-    onSubmit,
-    onCancel,
-    isLoading,
+  initialData,
+  onSubmit,
+  onCancel,
+  isLoading,
 }: GuardFormProps) => {
+  const form = useForm<GuardFormValues>({
+    resolver: zodResolver(guardSchema),
+    mode: "onChange",
+    defaultValues: {
+      name: "",
+      email: "",
+      mobile: "",
+      password:""
+    },
+  });
 
-    const form = useForm<GuardFormValues>({
-        resolver: zodResolver(guardSchema),
-        mode: "onChange",
-        defaultValues: {
-            name: "",
-            email: "",
-            mobile: "",
-        },
-    });
+  const {
+    handleSubmit,
+    control,
+    reset,
+    formState: { isValid },
+  } = form;
 
-    const {
-        handleSubmit,
-        control,
-        reset,
-        formState: { isValid },
-    } = form;
+  useEffect(() => {
+    if (initialData) {
+      reset(initialData);
+    }
+  }, [initialData]);
 
-    useEffect(() => {
-        if (initialData) {
-            reset(initialData);
-        }
-    }, [initialData]);
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="space-y-4">
+        <Controller
+          name="name"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel>Full Name</FieldLabel>
+              <Input {...field} placeholder="Full Name" />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
 
-    return (
-        <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="space-y-6"
-        >
-            <div className="space-y-4">
-                <Controller
-                    name="name"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                        <Field>
-                            <FieldLabel>Full Name</FieldLabel>
-                            <Input
-                                {...field}
-                                placeholder="Full Name"
-                            />
-                            {fieldState.invalid && (
-                                <FieldError errors={[fieldState.error]} />
-                            )}
-                        </Field>
-                    )}
-                />
+        <Controller
+          name="email"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel>Email</FieldLabel>
+              <Input {...field} type="email" placeholder="Email" />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
 
-                <Controller
-                    name="email"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                        <Field>
-                            <FieldLabel>Email</FieldLabel>
-                            <Input
-                                {...field}
-                                type="email"
-                                placeholder="Email"
-                            />
-                            {fieldState.invalid && (
-                                <FieldError errors={[fieldState.error]} />
-                            )}
-                        </Field>
-                    )}
-                />
+        <Controller
+          name="mobile"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel>Mobile Number</FieldLabel>
+              <Input {...field} placeholder="Mobile Number" />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
 
-                <Controller
-                    name="mobile"
-                    control={control}
-                    render={({ field, fieldState }) => (
-                        <Field>
-                            <FieldLabel>Mobile Number</FieldLabel>
-                            <Input
-                                {...field}
-                                placeholder="Mobile Number"
-                            />
-                            {fieldState.invalid && (
-                                <FieldError errors={[fieldState.error]} />
-                            )}
-                        </Field>
-                    )}
-                />
-            </div>
+        <Controller
+          name="password"
+          control={control}
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel>Password</FieldLabel>
+              <PasswordInput {...field} placeholder="Password" />
+              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+      </div>
 
-            <div className="flex justify-end gap-3">
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onCancel}
-                >
-                    Cancel
-                </Button>
+      <div className="flex justify-end gap-3">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
 
-                <Button
-                    type="submit"
-                    disabled={!isValid || isLoading}
-                >
-                    {isLoading ? <Loader /> : initialData ? "Edit Guard" : "Add Guard"}
-                </Button>
-            </div>
-        </form>
-    );
+        <Button type="submit" disabled={!isValid || isLoading}>
+          {isLoading ? <Loader /> : initialData ? "Edit Guard" : "Add Guard"}
+        </Button>
+      </div>
+    </form>
+  );
 };
 
 export default GuardForm;

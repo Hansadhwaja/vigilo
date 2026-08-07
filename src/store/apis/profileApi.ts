@@ -14,6 +14,17 @@ export interface UserProfile {
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
+
+  cancelAtPeriodEnd: boolean;
+  companyAdminId: string | null;
+  notificationsEnabled: boolean;
+  plan: string | null;
+  planId: string | null;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+  subscriptionEnd: string | null;
+  subscriptionStart: string | null;
+  subscriptionStatus: string | null;
 }
 
 export interface GetProfileResponse {
@@ -44,7 +55,7 @@ export const profileApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Profile"],
     }),
-    
+
     editProfile: builder.mutation<EditProfileResponse, EditProfileRequest>({
       query: (data) => ({
         url: "/users/edit-profile",

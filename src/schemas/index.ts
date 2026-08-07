@@ -247,6 +247,7 @@ export const guardSchema = z.object({
   name: z.string().min(1, "Please Enter Name"),
   email: z.string().min(1, "Please Enter Email"),
   mobile: z.string().min(1, "Please Enter Mobile"),
+  password: z.string().min(1, "Please Enter Password"),
 });
 
 export type GuardFormValues = z.infer<typeof guardSchema>;
