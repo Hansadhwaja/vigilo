@@ -3,20 +3,12 @@ import ReactSelect, { MultiValue } from "react-select";
 import { Controller, useFormContext } from "react-hook-form";
 import { useGetAllPatrolSitesQuery } from "@/store/apis/patrollingAPI";
 import { Building2, MapPin } from "lucide-react";
+import { PatrolFormValues } from "@/schemas";
 
 type SelectOption = {
   value: string;
   label: string;
 };
-interface SiteSelection {
-  subSiteIds: string[];
-  checkpointIds: string[];
-}
-
-interface PatrolFormValues {
-  siteIds: string[];
-  siteSelections: Record<string, SiteSelection>;
-}
 
 const PatrolSiteSelectionSection = () => {
   const { control, watch, setValue } = useFormContext<PatrolFormValues>();
@@ -38,19 +30,19 @@ const PatrolSiteSelectionSection = () => {
   const handleSiteChange = (selected: MultiValue<SelectOption>) => {
     const newSiteIds = selected.map((item) => item.value);
 
-    const currentSelections = { ...siteSelections };
+    const currentSelections = {
+      ...siteSelections,
+    };
 
-    // Create selection state for newly selected sites
     newSiteIds.forEach((siteId) => {
       if (!currentSelections[siteId]) {
         currentSelections[siteId] = {
-          subSiteIds: [],
           checkpointIds: [],
+          subSites: {},
         };
       }
     });
 
-    // Remove selections for sites that were unselected
     Object.keys(currentSelections).forEach((siteId) => {
       if (!newSiteIds.includes(siteId)) {
         delete currentSelections[siteId];
@@ -68,12 +60,57 @@ const PatrolSiteSelectionSection = () => {
     });
   };
 
-  const updateSiteSelection = (
+  const updateSiteCheckpoints = (siteId: string, checkpointIds: string[]) => {
+    setValue(`siteSelections.${siteId}.checkpointIds`, checkpointIds, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  };
+
+  const updateSubSiteCheckpoints = (
     siteId: string,
-    field: keyof SiteSelection,
-    value: string[],
+    subSiteId: string,
+    checkpointIds: string[],
   ) => {
-    setValue(`siteSelections.${siteId}.${field}`, value, {
+    setValue(
+      `siteSelections.${siteId}.subSites.${subSiteId}.checkpointIds`,
+      checkpointIds,
+      {
+        shouldValidate: true,
+        shouldDirty: true,
+      },
+    );
+  };
+
+  const handleSubSiteChange = (
+    siteId: string,
+    selectedSubSites: MultiValue<SelectOption>,
+  ) => {
+    const selectedIds = selectedSubSites.map((item) => item.value);
+
+    const currentSubSites = siteSelections[siteId]?.subSites ?? {};
+
+    const updatedSubSites = {
+      ...currentSubSites,
+    };
+
+    // Create state for newly selected sub-sites
+    selectedIds.forEach((subSiteId) => {
+      if (!updatedSubSites[subSiteId]) {
+        updatedSubSites[subSiteId] = {
+          checkpointIds: [],
+        };
+      }
+    });
+
+    // Remove unselected sub-sites
+    Object.keys(updatedSubSites).forEach((subSiteId) => {
+      if (!selectedIds.includes(subSiteId)) {
+        delete updatedSubSites[subSiteId];
+      }
+    });
+
+    setValue(`siteSelections.${siteId}.subSites`, updatedSubSites, {
       shouldValidate: true,
       shouldDirty: true,
     });
@@ -144,12 +181,14 @@ const PatrolSiteSelectionSection = () => {
 
           {selectedSites.map((site) => {
             const selection = siteSelections[site.id] ?? {
-              subSiteIds: [],
               checkpointIds: [],
+              subSites: {},
             };
 
             const subSites = site.subSites ?? [];
             const checkpoints = site.checkpoints ?? [];
+
+            const selectedSubSiteIds = Object.keys(selection.subSites ?? {});
 
             return (
               <div
@@ -176,7 +215,51 @@ const PatrolSiteSelectionSection = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="space-y-6">
+                  {/* Site-level Checkpoints */}
+                  <div>
+                    <FieldLabel>Site Checkpoints</FieldLabel>
+
+                    <ReactSelect
+                      isMulti
+                      options={checkpoints.map((checkpoint) => ({
+                        value: checkpoint.id,
+                        label: checkpoint.name,
+                      }))}
+                      value={checkpoints
+                        .filter((checkpoint) =>
+                          selection.checkpointIds.includes(checkpoint.id),
+                        )
+                        .map((checkpoint) => ({
+                          value: checkpoint.id,
+                          label: checkpoint.name,
+                        }))}
+                      onChange={(selected) =>
+                        updateSiteCheckpoints(
+                          site.id,
+                          selected.map((item) => item.value),
+                        )
+                      }
+                      placeholder={
+                        checkpoints.length
+                          ? "Select site checkpoints..."
+                          : "No checkpoints available"
+                      }
+                      isDisabled={!checkpoints.length}
+                      className="mt-2 text-sm"
+                      classNamePrefix="select"
+                      styles={{
+                        control: (base) => ({
+                          ...base,
+                          minHeight: "42px",
+                          borderRadius: "10px",
+                          borderColor: "#e5e7eb",
+                          boxShadow: "none",
+                        }),
+                      }}
+                    />
+                  </div>
+
                   {/* Sub-sites */}
                   <div>
                     <FieldLabel>Sub-sites</FieldLabel>
@@ -189,18 +272,14 @@ const PatrolSiteSelectionSection = () => {
                       }))}
                       value={subSites
                         .filter((subSite) =>
-                          selection.subSiteIds.includes(subSite.id),
+                          selectedSubSiteIds.includes(subSite.id),
                         )
                         .map((subSite) => ({
                           value: subSite.id,
                           label: subSite.name,
                         }))}
                       onChange={(selected) =>
-                        updateSiteSelection(
-                          site.id,
-                          "subSiteIds",
-                          selected.map((item) => item.value),
-                        )
+                        handleSubSiteChange(site.id, selected)
                       }
                       placeholder={
                         subSites.length
@@ -222,50 +301,87 @@ const PatrolSiteSelectionSection = () => {
                     />
                   </div>
 
-                  {/* Checkpoints */}
-                  <div>
-                    <FieldLabel>Checkpoints</FieldLabel>
+                  {/* Selected Sub-sites */}
+                  {selectedSubSiteIds.length > 0 && (
+                    <div className="space-y-4">
+                      <p className="text-sm font-semibold text-slate-800">
+                        Configure Sub-site Checkpoints
+                      </p>
 
-                    <ReactSelect
-                      isMulti
-                      options={checkpoints.map((checkpoint) => ({
-                        value: checkpoint.id,
-                        label: checkpoint.name,
-                      }))}
-                      value={checkpoints
-                        .filter((checkpoint) =>
-                          selection.checkpointIds.includes(checkpoint.id),
+                      {subSites
+                        .filter((subSite) =>
+                          selectedSubSiteIds.includes(subSite.id),
                         )
-                        .map((checkpoint) => ({
-                          value: checkpoint.id,
-                          label: checkpoint.name,
-                        }))}
-                      onChange={(selected) =>
-                        updateSiteSelection(
-                          site.id,
-                          "checkpointIds",
-                          selected.map((item) => item.value),
-                        )
-                      }
-                      placeholder={
-                        checkpoints.length
-                          ? "Select checkpoints..."
-                          : "No checkpoints available"
-                      }
-                      isDisabled={!checkpoints.length}
-                      className="mt-2 text-sm"
-                      classNamePrefix="select"
-                      styles={{
-                        control: (base) => ({
-                          ...base,
-                          minHeight: "42px",
-                          borderRadius: "10px",
-                          borderColor: "#e5e7eb",
-                          boxShadow: "none",
-                        }),
-                      }}
-                    />
-                  </div>
+                        .map((subSite) => {
+                          const subSiteSelection = selection.subSites?.[
+                            subSite.id
+                          ] ?? {
+                            checkpointIds: [],
+                          };
+
+                          const subSiteCheckpoints = subSite.checkpoints ?? [];
+
+                          return (
+                            <div
+                              key={subSite.id}
+                              className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                            >
+                              <div className="mb-3">
+                                <h5 className="text-sm font-semibold text-slate-900">
+                                  {subSite.name}
+                                </h5>
+                              </div>
+
+                              <FieldLabel>Checkpoints</FieldLabel>
+
+                              <ReactSelect
+                                isMulti
+                                options={subSiteCheckpoints.map(
+                                  (checkpoint) => ({
+                                    value: checkpoint.id,
+                                    label: checkpoint.name,
+                                  }),
+                                )}
+                                value={subSiteCheckpoints
+                                  .filter((checkpoint) =>
+                                    subSiteSelection.checkpointIds.includes(
+                                      checkpoint.id,
+                                    ),
+                                  )
+                                  .map((checkpoint) => ({
+                                    value: checkpoint.id,
+                                    label: checkpoint.name,
+                                  }))}
+                                onChange={(selected) =>
+                                  updateSubSiteCheckpoints(
+                                    site.id,
+                                    subSite.id,
+                                    selected.map((item) => item.value),
+                                  )
+                                }
+                                placeholder={
+                                  subSiteCheckpoints.length
+                                    ? "Select checkpoints..."
+                                    : "No checkpoints available"
+                                }
+                                isDisabled={!subSiteCheckpoints.length}
+                                className="mt-2 text-sm"
+                                classNamePrefix="select"
+                                styles={{
+                                  control: (base) => ({
+                                    ...base,
+                                    minHeight: "42px",
+                                    borderRadius: "10px",
+                                    borderColor: "#e5e7eb",
+                                    boxShadow: "none",
+                                  }),
+                                }}
+                              />
+                            </div>
+                          );
+                        })}
+                    </div>
+                  )}
                 </div>
               </div>
             );

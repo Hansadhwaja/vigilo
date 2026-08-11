@@ -1,3 +1,4 @@
+import { Plan } from "@/types";
 import { baseApi } from "./baseApi";
 
 export interface UserProfile {
@@ -18,7 +19,7 @@ export interface UserProfile {
   cancelAtPeriodEnd: boolean;
   companyAdminId: string | null;
   notificationsEnabled: boolean;
-  plan: string | null;
+  plan: Plan | null;
   planId: string | null;
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;

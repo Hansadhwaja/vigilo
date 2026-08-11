@@ -75,6 +75,7 @@ const SettingsTabs = () => {
       defaultValue="general"
       tabs={tabs}
       tabsListClassName="w-full no-scrollbar"
+      className="p-2"
     />
   );
 };

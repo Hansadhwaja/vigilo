@@ -370,6 +370,7 @@ export type Plan = {
   popular?: boolean;
   isActive: boolean;
   tenants?: number;
+  currency?: string;
   features: string[];
 };
 
