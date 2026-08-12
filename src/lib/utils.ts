@@ -10,7 +10,8 @@ import {
 } from "@/types";
 import { getStatusColor } from "@/utils/statusColors";
 import { clsx, type ClassValue } from "clsx";
-import { format, parse } from "date-fns";
+import { format, parse, parseISO } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -414,10 +415,9 @@ export const getOrderPricing = (
 };
 
 export const formatDateTime = (dateTime: string) => {
-  const date = new Date(dateTime);
   return {
-    date: date.toLocaleDateString(),
-    time: date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    date: formatInTimeZone(dateTime, "UTC", "dd MMM yyyy"),
+    time: formatInTimeZone(dateTime, "UTC", "hh:mm a"),
   };
 };
 
@@ -450,6 +450,7 @@ export const mapAssignmentToForm = (a: OrganizedAssignment) => {
 
 export const formatTime = (date: string) => {
   return new Date(date).toLocaleTimeString("en-US", {
+    timeZone: "UTC",
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
@@ -463,6 +464,19 @@ export const formatTimeForInput = (date: string) => {
   const minutes = String(d.getMinutes()).padStart(2, "0");
 
   return `${hours}:${minutes}`;
+};
+
+export const formatDateTimeForInput = (date: string) => {
+  const d = new Date(date);
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
 export const convertTo24Hour = (time: string) => {

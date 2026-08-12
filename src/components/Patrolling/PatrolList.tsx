@@ -32,8 +32,8 @@ const PatrolList = ({ patrols, pagination }: Props) => {
     });
   };
   return (
-    <div>
-      <div className="space-y-3">
+    <div className="space-y-4">
+      <div className="space-y-4">
         {patrols.map((patrol: AdminPatrolRun) => (
           <PatrolCard key={patrol.id} patrol={patrol} />
         ))}

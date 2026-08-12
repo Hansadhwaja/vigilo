@@ -39,7 +39,7 @@ const PatrolForm = ({
   const {
     handleSubmit,
     reset,
-    formState: { isValid,errors },
+    formState: { isValid, errors },
   } = form;
 
   const onFormSubmit = async (data: PatrolFormValues) => {
@@ -50,7 +50,7 @@ const PatrolForm = ({
     }
   };
 
-  console.log(errors)
+  console.log(errors);
 
   return (
     <FormProvider {...form}>
@@ -64,7 +64,13 @@ const PatrolForm = ({
           </Button>
 
           <Button type="submit" disabled={!isValid || isLoading}>
-            {isLoading ? <Loader className="h-4 w-4" /> : "Create Patrol"}
+            {isLoading ? (
+              <Loader className="h-4 w-4" />
+            ) : initialData ? (
+              "Update Patrol"
+            ) : (
+              "Create Patrol"
+            )}
           </Button>
         </div>
       </form>

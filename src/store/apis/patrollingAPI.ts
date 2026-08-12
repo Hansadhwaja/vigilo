@@ -1,611 +1,117 @@
-// patrollingAPI.ts
+import {
+  AdminPatrolRunDetailsResponse,
+  ApiMessageResponse,
+  CreateCheckpointRequest,
+  CreateCheckpointResponse,
+  CreatePatrolRunRequest,
+  CreatePatrolRunResponse,
+  CreatePatrolSiteRequest,
+  CreatePatrolSiteResponse,
+  CreateSubSiteRequest,
+  CreateSubSiteResponse,
+  DownloadQRParams,
+  DownloadSiteQRsPdfParams,
+  EditPatrolRunArgs,
+  EditPatrolRunResponse,
+  GetAllPatrolCheckpointsParams,
+  GetAllPatrolCheckpointsResponse,
+  GetAllPatrolRunsForAdminResponse,
+  GetAllPatrolSitesResponse,
+  GetAllPatrolSubSitesParams,
+  GetAllPatrolSubSitesResponse,
+  GetPatrolParams,
+} from "@/types/patrolling/patrolling.types";
 import { baseApi } from "./baseApi";
-
-/* =====================================================
-   📌 INTERFACES
-===================================================== */
-
-// ---- Create Patrol Site Request ----
-export interface CreatePatrolSiteRequest {
-  name: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  clientId: string;
-  description?: string;
-}
-
-// ---- Patrol Site Response Structure ----
-export interface PatrolSite {
-  id: string;
-  status: string;
-  isActive: boolean;
-  isCompleted: boolean;
-  totalSubSites: number;
-  totalCheckpoints: number;
-  createdBy: string;
-  clientId: string;
-  name: string;
-  address: string;
-  latitude: string; // API returns string
-  longitude: string; // API returns string
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-}
-
-// ---- API Response ----
-export interface CreatePatrolSiteResponse {
-  success: boolean;
-  message: string;
-  data: PatrolSite;
-}
-
-/* =====================================================
-   📌 CREATE SUB-SITE INTERFACES
-===================================================== */
-
-// ---- Create SubSite Request ----
-export interface CreateSubSiteRequest {
-  siteId: string;
-  name: string;
-  unitPrice: number;
-  estimatedDuration: number;
-  description?: string;
-}
-
-// ---- SubSite Response Structure ----
-export interface SubSite {
-  id: string;
-  status: string;
-  isCompleted: boolean;
-  totalCheckpoints: number;
-  siteId: string;
-  name: string;
-  unitPrice: string; // backend returns string "150.00"
-  estimatedDuration: number;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-}
-
-// ---- API Response ----
-export interface CreateSubSiteResponse {
-  success: boolean;
-  message: string;
-  data: SubSite;
-}
-
-export interface QRData {
-  id: string;
-  qrUrl: string;
-  latitude: string;
-  longitude: string;
-  createdAt: string;
-}
-
-export interface PatrolCheckpoint {
-  id: string;
-  name: string;
-  latitude: string;
-  longitude: string;
-  verificationRange: number;
-  priorityLevel: "low" | "medium" | "high";
-  status: string;
-  createdAt: string;
-  qr?: QRData | null;
-}
-
-export interface PatrolSubSiteWithCheckpoints {
-  id: string;
-  name: string;
-  unitPrice: string;
-  estimatedDuration: number;
-  status: string;
-  createdAt: string;
-  checkpoints: PatrolCheckpoint[];
-}
-
-export interface PatrolClient {
-  id: string;
-  name: string;
-  email: string;
-}
-
-export interface PatrolSiteFull {
-  id: string;
-  createdBy: string;
-  clientId: string;
-  name: string;
-  address: string;
-  status: string;
-  latitude: string;
-  longitude: string;
-  description: string;
-  isActive: boolean;
-  isCompleted: boolean;
-  totalSubSites: number;
-  totalCheckpoints: number;
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-
-  subSites: PatrolSubSiteWithCheckpoints[];
-  checkpoints: PatrolCheckpoint[];
-  client: PatrolClient;
-}
-
-export interface GetAllPatrolSitesResponse {
-  success: boolean;
-  total: number;
-  page: number;
-  totalPages: number;
-  data: PatrolSiteFull[];
-}
-
-export interface CreateCheckpointRequest {
-  siteId?: string; // optional
-  subSiteId?: string; // optional
-  name: string;
-  latitude: number;
-  longitude: number;
-  verificationRange: number;
-  priorityLevel: "low" | "medium" | "high";
-  description?: string;
-}
-
-export interface CreateCheckpointResponse {
-  success: boolean;
-  message: string;
-  data: {
-    checkpoint: PatrolCheckpoint;
-    qr: QRData;
-  };
-}
-
-export interface CreatePatrolRunResponse {
-  success: boolean;
-  type: string;
-  data: {
-    patrol: Patrol;
-    order: PatrolOrder;
-    guards: PatrolGuard[];
-    sites: PatrolSite[];
-  };
-}
-
-export interface Patrol {
-  id: string;
-  patrolId: string;
-  vehicleId: string;
-  description: string;
-  status: string;
-  startTime: string;
-  endTime: string;
-  totalSites: number;
-  totalSubSites: number;
-  totalCheckpoints: number;
-  completedSites: number;
-  completedSubSites: number;
-  completedCheckpoints: number;
-  unitPrice: number; // ✅ added
-  totalHours: number; // ✅ added
-  totalPatrolCost: number; // ✅ added
-  perGuardPayment: number;
-}
-
-export interface PatrolOrder {
-  id: string;
-  serviceType: string;
-  locationName: string;
-  locationAddress: string;
-  guardsRequired: number;
-  description: string;
-  startDate: string;
-  endDate: string;
-  startTime: string;
-  endTime: string;
-  status: string;
-  images: string[];
-  userId: string;
-  createdAt?: string;
-  updatedAt?: string;
-  deletedAt?: string | null;
-}
-
-export interface PatrolGuard {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  mobile: string;
-  isVerified: boolean;
-  blocked: boolean;
-  avatar?: string | null;
-}
-
-export interface PatrolCheckpoint {
-  id: string;
-  name: string;
-  latitude: string;
-  longitude: string;
-  verificationRange: number;
-  priorityLevel: "low" | "medium" | "high";
-  description: string;
-  status: string;
-  scannedAt: string | null;
-  scannedBy: string | null;
-}
-
-export interface PatrolSubSite {
-  id: string;
-  name: string;
-  unitPrice: string;
-  estimatedDuration: number;
-  description: string;
-  status: string;
-  checkpoints: PatrolCheckpoint[];
-}
-
-export interface PatrolSite {
-  id: string;
-  name: string;
-  address: string;
-  latitude: string;
-  longitude: string;
-  description: string;
-  status: string;
-  subSites: PatrolSubSite[];
-  checkpoints: PatrolCheckpoint[];
-}
-
-/* =====================================================
-   📌 CREATE PATROL RUN INTERFACES
-===================================================== */
-
-export interface CreatePatrolRunRequest {
-  patrolName: string;
-  patrolId: string;
-  orderId: string;
-  guardIds: string[];
-  unitPrice: number;
-  vehicleIds: string[];
-  startDateTime: string;
-  estimatedCompletion: string;
-  notes?: string;
-  siteIds: string[];
-}
-
-export interface AdminPatrolGuard {
-  id: string;
-  name: string;
-  status: string;
-  clockInTime: string | null;
-  clockOutTime: string | null;
-  totalHours: number | null;
-}
-
-export interface AdminPatrolRun {
-  guardIds: any;
-  id: string;
-  patrolId: string;
-  status: string;
-  vehicleId: string;
-  clientName: string;
-  clientEmail: string;
-  locationName: string;
-  orderStartTime: string;
-  orderStartDate: string;
-  orderStatus: string;
-
-  totalSites: number;
-  completedSites: number;
-  totalSubSites: number;
-  completedSubSites: number;
-  totalCheckpoints: number;
-  completedCheckpoints: number;
-  completionPercentage: number;
-  hasDeviation: boolean;
-
-  startDateTime: string;
-  estimatedCompletion: string;
-
-  guards: AdminPatrolGuard[];
-}
-
-export interface GetAllPatrolRunsForAdminResponse {
-  success: boolean;
-  data: AdminPatrolRun[];
-  message?: string;
-  pagination: {
-    total: number;
-    page: number;
-    totalPages: number;
-    limit: number;
-  };
-  summary: {
-    active: number;
-    pending: number;
-    completion: number;
-  };
-}
-
-export interface GetPatrolParams {
-  page?: string;
-  limit?: string;
-  status?: string;
-  search?: string;
-}
-
-/* =====================================================
-   📌 GET PATROL RUN BY ID (ADMIN)
-===================================================== */
-
-export interface AdminPatrolRunDetailsResponse {
-  success: boolean;
-  type: string;
-  data: {
-    patrol: {
-      id: string;
-      patrolId: string;
-      vehicleId: string;
-      description: string | null;
-      notes: string | null;
-      status: string;
-      startTime: string;
-      estimatedCompletion: string;
-      completionPercentage: number;
-      totalSites: number;
-      completedSites: number;
-      totalSubSites: number;
-      completedSubSites: number;
-      totalCheckpoints: number;
-      completedCheckpoints: number;
-      missedCheckpoints: number;
-      hasDeviation: boolean;
-      createdAt: string;
-      updatedAt: string;
-    };
-
-    order: {
-      id: string;
-      locationName: string;
-      locationAddress: string;
-      images: string[];
-      serviceType: string;
-      startDate: string;
-      startTime: string;
-      status: string;
-      user: {
-        id: string;
-        name: string;
-        email: string;
-        mobile: string;
-      };
-    };
-
-    client: {
-      id: string;
-      name: string;
-      email: string;
-      mobile: string;
-      avatar?: string | null;
-    };
-
-    guards: {
-      id: string;
-      name: string;
-      email: string;
-      guardStatus: string;
-      clockInTime: string | null;
-      clockOutTime: string | null;
-      overtimeStartTime: string | null;
-      overtimeEndTime: string | null;
-      overtimeHours: number | null;
-      totalHours: number | null;
-      assignedAt: string;
-    }[];
-
-    sites: PatrolSite[];
-  };
-}
-
-/* =====================================================
-   📌 EDIT PATROL RUN
-===================================================== */
-
-export interface EditPatrolRunRequest {
-  startDateTime?: string;
-  estimatedCompletion?: string;
-  addSites?: string[];
-  removeSiteIds?: string[];
-  addSubSites?: Array<{
-    parentSiteId: string;
-    subSiteId: string;
-  }>;
-  removeSubSiteIds?: string[];
-  addCheckpoints?: Array<{
-    parentType: "site" | "subSite";
-    parentId: string;
-    checkpointId: string;
-  }>;
-  removeCheckpointIds?: string[];
-  updateSites?: Array<{
-    siteId?: string;
-    id?: string;
-    name?: string;
-    address?: string;
-    latitude?: string | number;
-    longitude?: string | number;
-    description?: string;
-    status?: string;
-  }>;
-  updateSubSites?: Array<{
-    subSiteId?: string;
-    id?: string;
-    name?: string;
-    description?: string;
-    status?: string;
-    unitPrice?: string | number;
-    estimatedDuration?: string | number;
-    latitude?: string | number;
-    longitude?: string | number;
-  }>;
-  updateCheckpoints?: Array<{
-    checkpointId?: string;
-    id?: string;
-    name?: string;
-    latitude?: string | number;
-    longitude?: string | number;
-    verificationRange?: string | number;
-    priorityLevel?: "low" | "medium" | "high";
-    description?: string;
-    status?: string;
-  }>;
-  guardIds?: string[];
-}
-
-export interface EditPatrolRunResponse {
-  success: boolean;
-  message: string;
-}
-
-export interface GetAllPatrolSubSitesResponse {
-  success: boolean;
-  total: number;
-  page: number;
-  totalPages: number;
-  data: any[]; // you can strongly type this later
-}
-
-export interface GetAllPatrolCheckpointsResponse {
-  success: boolean;
-  total: number;
-  page: number;
-  totalPages: number;
-  data: any[];
-}
-/* =====================================================
-   🚓 PATROLLING API
-===================================================== */
 
 export const patrollingApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    /* =================================================
+       CREATE SITE
+    ================================================= */
+
     createPatrolSite: builder.mutation<
       CreatePatrolSiteResponse,
       CreatePatrolSiteRequest
     >({
-      query: (data) => ({
+      query: (body) => ({
         url: "/patrolling/createPatrolSite",
         method: "POST",
-        body: data,
+        body,
       }),
+
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
+
+    /* =================================================
+       CREATE SUB-SITE
+    ================================================= */
+
     createSubSite: builder.mutation<
       CreateSubSiteResponse,
       CreateSubSiteRequest
     >({
       query: (body) => ({
-        url: "/patrolling/createPatrolSubSite", // adjust if route differs
+        url: "/patrolling/createPatrolSubSite",
         method: "POST",
         body,
       }),
 
-      transformResponse: (response: any): CreateSubSiteResponse => {
-        const subSite = response.data;
-
-        const mapped: SubSite = {
-          id: subSite.id,
-          status: subSite.status,
-          isCompleted: subSite.isCompleted,
-          totalCheckpoints: subSite.totalCheckpoints,
-          siteId: subSite.siteId,
-          name: subSite.name,
-          unitPrice: subSite.unitPrice,
-          estimatedDuration: subSite.estimatedDuration,
-          description: subSite.description,
-          createdAt: subSite.createdAt,
-          updatedAt: subSite.updatedAt,
-          deletedAt: subSite.deletedAt,
-        };
-
-        return {
-          ...response,
-          data: mapped,
-        };
-      },
-
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
+
+    /* =================================================
+       GET ALL SITES
+    ================================================= */
+
     getAllPatrolSites: builder.query<
       GetAllPatrolSitesResponse,
-      { page?: string; limit?: string; clientId?: string }
+      {
+        page?: string;
+        limit?: string;
+        clientId?: string;
+      }
     >({
-      query: (params = {}) => {
-        const { page, limit, clientId } = params;
-        const qs = new URLSearchParams();
+      query: ({ page, limit, clientId } = {}) => {
+        const params = new URLSearchParams();
 
-        if (page) qs.set("page", page);
-        if (limit) qs.set("limit", limit);
-        if (clientId) qs.set("clientId", clientId);
+        if (page) params.set("page", page);
+        if (limit) params.set("limit", limit);
+        if (clientId) params.set("clientId", clientId);
 
-        return qs.toString()
-          ? `/patrolling/getAllPatrolSites?${qs.toString()}`
+        const queryString = params.toString();
+
+        return queryString
+          ? `/patrolling/getAllPatrolSites?${queryString}`
           : "/patrolling/getAllPatrolSites";
       },
 
       providesTags: [{ type: "Patrol", id: "LIST" }],
     }),
+
+    /* =================================================
+       CREATE CHECKPOINT
+    ================================================= */
+
     createCheckpoint: builder.mutation<
       CreateCheckpointResponse,
       CreateCheckpointRequest
     >({
       query: (body) => ({
-        url: "/patrolling/createCheckpoint", // adjust if needed
+        url: "/patrolling/createCheckpoint",
         method: "POST",
         body,
       }),
 
-      transformResponse: (response: any): CreateCheckpointResponse => {
-        const checkpoint = response.data.checkpoint;
-        const qr = response.data.qr;
-
-        const mappedCheckpoint: PatrolCheckpoint = {
-          id: checkpoint.id,
-          name: checkpoint.name,
-          latitude: checkpoint.latitude,
-          longitude: checkpoint.longitude,
-          verificationRange: checkpoint.verificationRange,
-          priorityLevel: checkpoint.priorityLevel,
-          status: checkpoint.status,
-          createdAt: checkpoint.createdAt,
-          description: checkpoint.description || "",
-          scannedAt: checkpoint.scannedAt || null,
-          scannedBy: checkpoint.scannedBy || null,
-          qr: {
-            id: qr.id,
-            qrUrl: qr.qrUrl,
-            latitude: qr.latitude,
-            longitude: qr.longitude,
-            createdAt: qr.createdAt,
-          },
-        };
-
-        return {
-          success: response.success,
-          message: response.message,
-          data: {
-            checkpoint: mappedCheckpoint,
-            qr: mappedCheckpoint.qr!,
-          },
-        };
-      },
+      transformResponse: (
+        response: CreateCheckpointResponse,
+      ): CreateCheckpointResponse => response,
 
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
+
+    /* =================================================
+       CREATE PATROL RUN
+    ================================================= */
 
     createPatrolRun: builder.mutation<
       CreatePatrolRunResponse,
@@ -616,81 +122,88 @@ export const patrollingApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
+
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
-    // ===============================
-    // 🔴 DELETE PATROL SITE
-    // ===============================
-    deletePatrolSite: builder.mutation<
-      { success: boolean; message: string },
-      string
-    >({
+
+    /* =================================================
+       DELETE SITE
+    ================================================= */
+
+    deletePatrolSite: builder.mutation<ApiMessageResponse, string>({
       query: (siteId) => ({
         url: `/patrolling/deletePatrolSite/${siteId}`,
         method: "DELETE",
       }),
+
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
 
-    // ===============================
-    // 🔴 DELETE PATROL SUB SITE
-    // ===============================
-    deletePatrolSubSite: builder.mutation<
-      { success: boolean; message: string },
-      string
-    >({
+    /* =================================================
+       DELETE SUB-SITE
+    ================================================= */
+
+    deletePatrolSubSite: builder.mutation<ApiMessageResponse, string>({
       query: (subSiteId) => ({
         url: `/patrolling/deletePatrolSubSite/${subSiteId}`,
         method: "DELETE",
       }),
+
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
 
-    // ===============================
-    // 🔴 DELETE CHECKPOINT
-    // ===============================
-    deleteCheckpoint: builder.mutation<
-      { success: boolean; message: string },
-      string
-    >({
+    /* =================================================
+       DELETE CHECKPOINT
+    ================================================= */
+
+    deleteCheckpoint: builder.mutation<ApiMessageResponse, string>({
       query: (checkpointId) => ({
         url: `/patrolling/deleteCheckpoint/${checkpointId}`,
         method: "DELETE",
       }),
+
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
 
-    // ===============================
-    // 🔴 DELETE PATROL RUN
-    // ===============================
-    deletePatrolRun: builder.mutation<
-      { success: boolean; message: string },
-      string
-    >({
+    /* =================================================
+       DELETE PATROL RUN
+    ================================================= */
+
+    deletePatrolRun: builder.mutation<ApiMessageResponse, string>({
       query: (patrolId) => ({
         url: `/patrolling/deletePatrolRun/${patrolId}`,
         method: "DELETE",
       }),
+
       invalidatesTags: [{ type: "Patrol", id: "LIST" }],
     }),
+
+    /* =================================================
+       GET ALL PATROL RUNS - ADMIN
+    ================================================= */
 
     getAllPatrolRunsForAdmin: builder.query<
       GetAllPatrolRunsForAdminResponse,
       GetPatrolParams
     >({
-      query: (params = {}) => {
-        const qs = new URLSearchParams();
+      query: ({ page = 1, limit = 10, status, search } = {}) => {
+        const params = new URLSearchParams();
 
-        qs.append("page", String(params.page));
-        qs.append("limit", String(params.limit));
+        params.set("page", String(page));
+        params.set("limit", String(limit));
 
-        if (params.status) qs.set("status", params.status);
-        if (params.search) qs.set("search", params.search);
-        return `/patrolling/getAllPatrolRunsForAdmin?${qs.toString()}`;
+        if (status) params.set("status", status);
+        if (search) params.set("search", search);
+
+        return `/patrolling/getAllPatrolRunsForAdmin?${params.toString()}`;
       },
 
       providesTags: [{ type: "Patrol", id: "LIST" }],
     }),
+
+    /* =================================================
+       GET PATROL RUN BY ID - ADMIN
+    ================================================= */
 
     getPatrolRunByIdForAdmin: builder.query<
       AdminPatrolRunDetailsResponse,
@@ -701,41 +214,42 @@ export const patrollingApi = baseApi.injectEndpoints({
         method: "GET",
       }),
 
-      providesTags: (result, error, id) => [{ type: "Patrol", id }],
+      providesTags: (_result, _error, id) => [{ type: "Patrol", id }],
     }),
 
-    editPatrolRun: builder.mutation<
-      EditPatrolRunResponse,
-      { patrolRunId: string; body: EditPatrolRunRequest }
-    >({
-      query: ({ patrolRunId, body }) => ({
-        url: `/patrolling/editPatrolRun/${patrolRunId}`,
+    /* =================================================
+       EDIT PATROL RUN
+    ================================================= */
+
+    editPatrolRun: builder.mutation<EditPatrolRunResponse, EditPatrolRunArgs>({
+      query: ({ id, data }) => ({
+        url: `/patrolling/editPatrolRun/${id}`,
         method: "PUT",
-        body,
+        body: data,
       }),
 
-      invalidatesTags: (result, error, arg) => [
-        { type: "Patrol", id: arg.patrolRunId },
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "Patrol", id },
         { type: "Patrol", id: "LIST" },
       ],
     }),
 
+    /* =================================================
+       GET ALL SUB-SITES
+    ================================================= */
+
     getAllPatrolSubSites: builder.query<
       GetAllPatrolSubSitesResponse,
-      {
-        page?: number;
-        limit?: number;
-        siteId?: string;
-      }
+      GetAllPatrolSubSitesParams
     >({
-      query: ({ page = 1, limit = 10, siteId }) => {
+      query: ({ page = 1, limit = 10, siteId } = {}) => {
         const params = new URLSearchParams();
 
-        params.append("page", String(page));
-        params.append("limit", String(limit));
+        params.set("page", String(page));
+        params.set("limit", String(limit));
 
         if (siteId) {
-          params.append("siteId", siteId);
+          params.set("siteId", siteId);
         }
 
         return {
@@ -747,30 +261,26 @@ export const patrollingApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Patrol", id: "SUBSITE_LIST" }],
     }),
 
-    // ===============================
-    // 🟢 GET ALL PATROL CHECKPOINTS
-    // ===============================
+    /* =================================================
+       GET ALL CHECKPOINTS
+    ================================================= */
+
     getAllPatrolCheckpoints: builder.query<
       GetAllPatrolCheckpointsResponse,
-      {
-        page?: number;
-        limit?: number;
-        siteId?: string;
-        subSiteId?: string;
-      }
+      GetAllPatrolCheckpointsParams
     >({
-      query: ({ page = 1, limit = 10, siteId, subSiteId }) => {
+      query: ({ page = 1, limit = 10, siteId, subSiteId } = {}) => {
         const params = new URLSearchParams();
 
-        params.append("page", String(page));
-        params.append("limit", String(limit));
+        params.set("page", String(page));
+        params.set("limit", String(limit));
 
         if (siteId) {
-          params.append("siteId", siteId);
+          params.set("siteId", siteId);
         }
 
         if (subSiteId) {
-          params.append("subSiteId", subSiteId);
+          params.set("subSiteId", subSiteId);
         }
 
         return {
@@ -782,36 +292,49 @@ export const patrollingApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Patrol", id: "CHECKPOINT_LIST" }],
     }),
 
-    downloadQR: builder.query<Blob, { url: string; name: string }>({
+    /* =================================================
+       DOWNLOAD QR
+    ================================================= */
+
+    downloadQR: builder.query<Blob, DownloadQRParams>({
       query: ({ url, name }) => ({
-        url: `/patrolling/downloadQR?url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`,
+        url: `/patrolling/downloadQR?url=${encodeURIComponent(
+          url,
+        )}&name=${encodeURIComponent(name)}`,
+
         method: "GET",
+
         responseHandler: async (response) => response.blob(),
       }),
     }),
 
-    downloadSiteQRsPdf: builder.query<Blob, { siteId: string }>({
+    /* =================================================
+       DOWNLOAD SITE QRS PDF
+    ================================================= */
+
+    downloadSiteQRsPdf: builder.query<Blob, DownloadSiteQRsPdfParams>({
       query: ({ siteId }) => ({
         url: `/patrolling/downloadSiteQRsPdf/${siteId}`,
         method: "GET",
+
         responseHandler: async (response) => response.blob(),
       }),
     }),
 
-    exportPatrols: builder.mutation({
+    /* =================================================
+       EXPORT PATROLS
+    ================================================= */
+
+    exportPatrols: builder.mutation<Blob, void>({
       query: () => ({
         url: "/patrolling/export",
         method: "GET",
-        responseHandler: (response) => response.blob(),
+
+        responseHandler: async (response) => response.blob(),
       }),
-      invalidatesTags: ["Patrol"],
     }),
   }),
 });
-
-/* =====================================================
-   📦 EXPORT HOOK
-===================================================== */
 
 export const {
   useCreatePatrolSiteMutation,
@@ -819,16 +342,22 @@ export const {
   useGetAllPatrolSitesQuery,
   useCreateCheckpointMutation,
   useCreatePatrolRunMutation,
+
   useDeletePatrolSiteMutation,
   useDeletePatrolSubSiteMutation,
   useDeleteCheckpointMutation,
   useDeletePatrolRunMutation,
+
   useGetAllPatrolRunsForAdminQuery,
   useGetPatrolRunByIdForAdminQuery,
+
   useEditPatrolRunMutation,
+
   useGetAllPatrolSubSitesQuery,
   useGetAllPatrolCheckpointsQuery,
+
   useLazyDownloadQRQuery,
   useLazyDownloadSiteQRsPdfQuery,
+
   useExportPatrolsMutation,
 } = patrollingApi;

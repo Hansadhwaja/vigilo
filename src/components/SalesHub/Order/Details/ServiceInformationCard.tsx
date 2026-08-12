@@ -1,10 +1,4 @@
-import {
-  FileText,
-  MapPin,
-  Shield,
-  Users,
-  Navigation,
-} from "lucide-react";
+import { FileText, MapPin, Shield, Users, Navigation } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
 
@@ -15,15 +9,11 @@ interface Props {
   order: any;
 }
 
-const ServiceInformationCard = ({
-  order,
-}: Props) => {
+const ServiceInformationCard = ({ order }: Props) => {
   return (
     <SectionCard
       title="Service Information"
-      icon={
-        <FileText className="h-5 w-5" />
-      }
+      icon={<FileText className="h-5 w-5" />}
     >
       <div className="space-y-8">
         {/* HERO */}
@@ -58,9 +48,7 @@ const ServiceInformationCard = ({
               </div>
 
               <div>
-                <p className="text-sm text-slate-300">
-                  Security Service
-                </p>
+                <p className="text-sm text-slate-300">Security Service</p>
 
                 <h3
                   className="
@@ -68,12 +56,7 @@ const ServiceInformationCard = ({
                     tracking-tight
                   "
                 >
-                  {order.serviceType
-                    ?.replace(
-                      /([A-Z])/g,
-                      " $1"
-                    )
-                    .trim()}
+                  {order.serviceType?.replace(/([A-Z])/g, " $1").trim()}
                 </h3>
               </div>
             </div>
@@ -87,15 +70,9 @@ const ServiceInformationCard = ({
                 backdrop-blur
               "
             >
-              <p className="text-sm text-slate-300">
-                Guards
-              </p>
+              <p className="text-sm text-slate-300">Guards</p>
 
-              <p className="text-2xl font-bold">
-                {
-                  order.guardsRequired
-                }
-              </p>
+              <p className="text-2xl font-bold">{order.guardsRequired}</p>
             </div>
           </div>
         </div>
@@ -109,38 +86,23 @@ const ServiceInformationCard = ({
         >
           <InfoItem
             label="Service Type"
-            value={order.serviceType
-              ?.replace(
-                /([A-Z])/g,
-                " $1"
-              )
-              .trim()}
-            icon={
-              <Shield className="h-4 w-4" />
-            }
+            value={order.serviceType?.replace(/([A-Z])/g, " $1").trim()}
+            icon={<Shield className="h-4 w-4" />}
             direction="row"
           />
 
           <InfoItem
             label="Guards Required"
-            value={
-              order.guardsRequired
-            }
-            icon={
-              <Users className="h-4 w-4" />
-            }
+            value={order.guardsRequired}
+            icon={<Users className="h-4 w-4" />}
             direction="row"
           />
 
           <div className="md:col-span-2">
             <InfoItem
               label="Location Name"
-              value={
-                order.locationName
-              }
-              icon={
-                <MapPin className="h-4 w-4" />
-              }
+              value={order.locationName}
+              icon={<MapPin className="h-4 w-4" />}
               direction="row"
             />
           </div>
@@ -148,12 +110,8 @@ const ServiceInformationCard = ({
           <div className="md:col-span-2">
             <InfoItem
               label="Location Address"
-              value={
-                order.locationAddress
-              }
-              icon={
-                <Navigation className="h-4 w-4" />
-              }
+              value={order.locationAddress}
+              icon={<Navigation className="h-4 w-4" />}
               direction="row"
             />
           </div>
@@ -224,9 +182,7 @@ const ServiceInformationCard = ({
                       text-sm text-slate-800
                     "
                   >
-                    {order.siteService
-                      ?.coordinates?.[1] ??
-                      "—"}
+                    {order.siteService?.coordinates?.[1] ?? "—"}
                   </p>
                 </div>
               </div>
@@ -273,9 +229,7 @@ const ServiceInformationCard = ({
                       text-sm text-slate-800
                     "
                   >
-                    {order.siteService
-                      ?.coordinates?.[0] ??
-                      "—"}
+                    {order.siteService?.coordinates?.[0] ?? "—"}
                   </p>
                 </div>
               </div>
@@ -318,8 +272,7 @@ const ServiceInformationCard = ({
                 text-slate-600
               "
             >
-              {order.description ||
-                "No description provided"}
+              {order.description || "No description provided"}
             </p>
           </div>
         </div>
