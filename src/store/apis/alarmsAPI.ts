@@ -1,3 +1,4 @@
+import { Alarm } from "@/types";
 import { baseApi } from "./baseApi";
 export interface AlarmGuardPivot {
   id: string;
@@ -16,61 +17,18 @@ export interface AlarmGuard {
   AlarmGuards: AlarmGuardPivot;
 }
 
-export interface Alarm {
-  id: string;
-  title: string;
-  description?: string;
-
-  alarmType:
-  | "intrusion"
-  | "panic"
-  | "fire"
-  | "medical"
-  | "motion"
-  | "other";
-
-  priority: "low" | "medium" | "high" | "critical";
-
-  patrolRunId?: string;
-  patrolId?: string;
-
-  siteId?: string;
-  siteName?: string;
-  siteAddress?: string;
-
-  vehicleId?: string;
-
-  specificLocation?: string;
-
-  guardIds: string[];
-
-  etaMinutes?: number;
-  slaTimeMinutes: number;
-  totalTimeMinutes?: number;
-
-  unitPrice: number;
-  price: number;
-
-  status: string;
-
-  monitoringCompany?: string;
-  license?: string;
-
-
-  breach: boolean;
-
-  createdAt: string;
-  updatedAt: string;
-  guards: AlarmGuard[];
-}
+export type AlarmSummary = {
+  active: number;
+  critical: number;
+  monthlyBilling: number;
+  slaBreach: number;
+};
 
 export interface GetAllAlarmsResponse {
   success: boolean;
   count: number;
   data: Alarm[];
-  summary: {
-
-  }
+  summary: AlarmSummary;
 }
 
 export interface CreateAlarmResponse {
@@ -142,7 +100,7 @@ export const alarmsApi = baseApi.injectEndpoints({
         if (params.status) qs.set("status", params.status);
         if (params.priority) qs.set("priority", params.priority);
 
-        return `/alarm/getAllAlarms?${qs.toString()}`
+        return `/alarm/getAllAlarms?${qs.toString()}`;
       },
 
       providesTags: [{ type: "Alarms", id: "LIST" }],
@@ -161,7 +119,7 @@ export const alarmsApi = baseApi.injectEndpoints({
         responseHandler: (response) => response.blob(),
       }),
       invalidatesTags: ["Alarms"],
-    })
+    }),
   }),
 });
 
@@ -169,5 +127,5 @@ export const {
   useCreateAlarmMutation,
   useGetAllAlarmsQuery,
   useDeleteAlarmMutation,
-  useExportAlarmsMutation
+  useExportAlarmsMutation,
 } = alarmsApi;

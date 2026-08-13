@@ -29,9 +29,10 @@ const PatrolBasicInfoSection = () => {
 
   const { data: ordersResponse } = useGetAllOrdersQuery({
     serviceType: "patrol",
+    status: "upcoming",
   });
 
-  const orders = ordersResponse?.data || [];
+  const orders = ordersResponse?.data ?? [];
 
   return (
     <div className="rounded-2xl border bg-white p-6 space-y-5">
@@ -66,9 +67,17 @@ const PatrolBasicInfoSection = () => {
             <Field>
               <FieldLabel>Assign Order Name</FieldLabel>
 
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select order" />
+              <Select
+                value={field.value ?? ""}
+                onValueChange={field.onChange}
+                disabled={orders.length === 0}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue
+                    placeholder={
+                      orders.length === 0 ? "No orders found" : "Select order"
+                    }
+                  />
                 </SelectTrigger>
 
                 <SelectContent>

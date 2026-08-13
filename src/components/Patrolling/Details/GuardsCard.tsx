@@ -36,7 +36,7 @@ const GuardsCard = ({ guards }: GuardsCardProps) => {
               </div>
             </div>
 
-            <Badge>{guard.guardStatus}</Badge>
+            <Badge className="capitalize">{guard.guardStatus}</Badge>
           </div>
         ))}
       </div>

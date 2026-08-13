@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import AlarmForm from "../Form/AlarmForm";
 import { AlarmFormValues } from "@/schemas";
@@ -7,70 +14,61 @@ import { useCreateAlarmMutation } from "@/store/apis/alarmsAPI";
 import { toast } from "sonner";
 
 const CreateAlarmModal = () => {
-    const [createAlarm, { isLoading }] = useCreateAlarmMutation();
+  const [createAlarm, { isLoading }] = useCreateAlarmMutation();
 
-    const handleSubmit = async (data: AlarmFormValues) => {
-        try {
+  const handleSubmit = async (data: AlarmFormValues) => {
+    try {
+      const payload = {
+        title: data.title,
+        alarmType: data.type,
+        priority: data.priority,
+        siteId: data.siteId,
+        specificLocation: data.location,
+        guardIds: data.guardIds,
+        etaMinutes: Number(data.eta) ?? 0,
+        slaTimeMinutes: Number(data.slaTime),
+        unitPrice: Number(data.unitPrice),
+        price: Number(data.unitPrice),
+        description: data.description ?? "",
+        monitoringCompany: data.monitoringCompany,
+        license: data.license,
+      };
 
-            const payload = {
-                title: data.title,
-                alarmType: data.type,
-                priority: data.priority,
-                siteId: data.siteId,
-                specificLocation: data.location,
-                guardIds: data.guardIds,
-                etaMinutes: Number(data.eta) ?? 0,
-                slaTimeMinutes: Number(data.slaTime),
-                unitPrice: Number(data.unitPrice),
-                price: Number(data.unitPrice),
-                description: data.description ?? "",
-                monitoringCompany: data.monitoringCompany,
-                license: data.license,
+      await createAlarm(payload).unwrap();
 
-            };
+      toast.success("Alarm created successfully");
+    } catch (err: any) {
+      console.error(err);
 
-            await createAlarm(payload).unwrap();
+      const message =
+        err?.data?.message || err?.error || "Failed to create alarm";
 
-            toast.success("Alarm created successfully");
+      toast.error(message);
+    }
+  };
 
-        } catch (err: any) {
-            console.error(err);
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button className="rounded-full bg-linear-to-r from-rose-500 via-pink-600 to-rose-700">
+          <Plus className="h-4 w-4" />
+          Create Alarm
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="w-full md:min-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">
+            Create New Alarm
+          </DialogTitle>
+          <DialogDescription>
+            Register a new security alarm and assign response parameters
+          </DialogDescription>
+        </DialogHeader>
 
-            const message =
-                err?.data?.message ||
-                err?.error ||
-                "Failed to create alarm";
+        <AlarmForm isLoading={isLoading} onSubmit={handleSubmit} />
+      </DialogContent>
+    </Dialog>
+  );
+};
 
-            toast.error(message);
-        }
-    };
-    return (
-        <Dialog>
-            <DialogTrigger asChild>
-                <Button className="rounded-full bg-linear-to-r from-rose-500 via-pink-600 to-rose-700">
-                    <Plus className="h-4 w-4" />
-                    Create Alarm
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="w-full lg:min-w-2xl max-h-[90vh] overflow-y-auto">
-
-                <DialogHeader>
-                    <DialogTitle className="text-xl font-semibold">
-                        Create New Alarm
-                    </DialogTitle>
-                    <DialogDescription>
-                        Register a new security alarm and assign response parameters
-                    </DialogDescription>
-                </DialogHeader>
-
-                <AlarmForm
-                    isLoading={isLoading}
-                    onSubmit={handleSubmit}
-                />
-
-            </DialogContent>
-        </Dialog>
-    )
-}
-
-export default CreateAlarmModal
+export default CreateAlarmModal;

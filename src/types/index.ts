@@ -2,6 +2,7 @@ import { Guard } from "@/store/apis/guardsApi";
 import { MessageItem } from "@/store/apis/messagesAPI";
 import { InvoiceAlarmsFormValues, InvoiceOrdersFormValues } from "@/schemas";
 import { billingIntervals } from "@/constants";
+import { AlarmGuard } from "@/store/apis/alarmsAPI";
 
 //Messages
 export type ContactRole = "guard" | "client";
@@ -74,27 +75,43 @@ export type FormValues = {
 
 export interface Alarm {
   id: string;
-  site: string;
-  type: string;
-  priority: string;
-  priorityLevel: number;
-  assigned?: string;
-  assignedId?: string;
-  eta?: string;
-  slaTargetMins: number;
-  sinceMins: number;
-  monitoringCompany: string;
-  license: string;
-  licenseDetails: string;
+  title: string;
+  description?: string;
+
+  alarmType: "intrusion" | "panic" | "fire" | "medical" | "motion" | "other";
+
+  priority: "low" | "medium" | "high" | "critical";
+
+  patrolRunId?: string;
+  patrolId?: string;
+
+  siteId?: string;
+  siteName?: string;
+  siteAddress?: string;
+
+  vehicleId?: string;
+
+  specificLocation?: string;
+
+  guardIds: string[];
+
+  etaMinutes?: number;
+  slaTimeMinutes: number;
+  totalTimeMinutes?: number;
+
   unitPrice: number;
-  completed: boolean;
-  completedAt: Date | undefined;
-  createdAt: Date;
-  description: string;
-  location: string;
-  resolvedAt?: Date;
-  responseTime?: number;
-  assignedAt?: Date;
+  price: number;
+
+  status: string;
+
+  monitoringCompany?: string;
+  license?: string;
+
+  breach: boolean;
+
+  createdAt: string;
+  updatedAt: string;
+  guards: AlarmGuard[];
 }
 
 export interface Incident {

@@ -12,9 +12,9 @@ const CheckpointCard = ({ checkpoint }: CheckpointCardProps) => {
         <p className="text-base font-medium">{checkpoint.name}</p>
 
         <div className="mt-1 flex gap-2">
-          <Badge variant="outline">{checkpoint.priorityLevel}</Badge>
+          <Badge variant="outline" className="capitalize">{checkpoint.priorityLevel}</Badge>
 
-          <Badge>
+          <Badge className="capitalize">
             {checkpoint.status}
           </Badge>
         </div>

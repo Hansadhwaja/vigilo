@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import CheckpointCard from "./CheckpointCard";
+import { formatCurrency } from "@/lib/utils";
 
 interface SiteCardProps {
   site: any;
@@ -55,7 +56,7 @@ const SiteCard = ({
             Download QR
           </Button>
 
-          <Badge>{site.status}</Badge>
+          <Badge className="capitalize">{site.status}</Badge>
 
           <span className="hidden text-sm text-muted-foreground md:block">
             0/{totalCheckpoints} completed
@@ -123,12 +124,12 @@ const SubSites = ({ subSites = [] }: { subSites?: any[] }) => {
               )}
 
               <div className="mt-2 flex gap-4 text-sm text-muted-foreground">
-                <span>₹ {subSite.unitPrice}</span>
+                <span>{formatCurrency(subSite.unitPrice)}</span>
                 <span>{subSite.estimatedDuration} min</span>
               </div>
             </div>
 
-            <Badge>{subSite.status}</Badge>
+            <Badge className="capitalize">{subSite.status}</Badge>
           </div>
 
           {subSite.checkpoints?.map((checkpoint: any) => (

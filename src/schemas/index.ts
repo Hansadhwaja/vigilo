@@ -32,6 +32,7 @@ export type BroadCastFormValues = z.infer<typeof broadcastSchema>;
 //Alarm
 export const alarmSchema = z.object({
   title: z.string().min(1, "Title is required"),
+  patrolId: z.string().min(1, "Patrol is required"),
   siteId: z.string().min(1, "Site is required"),
   type: z.string().min(1, "Type is required"),
   priority: z.string().min(1, "Priority is required"),
