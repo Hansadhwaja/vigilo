@@ -12,8 +12,10 @@ import AlarmForm from "../Form/AlarmForm";
 import { AlarmFormValues } from "@/schemas";
 import { useCreateAlarmMutation } from "@/store/apis/alarmsAPI";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const CreateAlarmModal = () => {
+  const [open, setOpen] = useState(false);
   const [createAlarm, { isLoading }] = useCreateAlarmMutation();
 
   const handleSubmit = async (data: AlarmFormValues) => {
@@ -35,7 +37,7 @@ const CreateAlarmModal = () => {
       };
 
       await createAlarm(payload).unwrap();
-
+      setOpen(false);
       toast.success("Alarm created successfully");
     } catch (err: any) {
       console.error(err);
@@ -48,7 +50,7 @@ const CreateAlarmModal = () => {
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="rounded-full bg-linear-to-r from-rose-500 via-pink-600 to-rose-700">
           <Plus className="h-4 w-4" />
@@ -65,7 +67,11 @@ const CreateAlarmModal = () => {
           </DialogDescription>
         </DialogHeader>
 
-        <AlarmForm isLoading={isLoading} onSubmit={handleSubmit} />
+        <AlarmForm
+          isLoading={isLoading}
+          onSubmit={handleSubmit}
+          onCancel={() => setOpen(false)}
+        />
       </DialogContent>
     </Dialog>
   );

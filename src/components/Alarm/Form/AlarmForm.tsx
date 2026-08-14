@@ -25,9 +25,10 @@ import ReactSelect from "react-select";
 interface AlarmFormProps {
   isLoading: boolean;
   onSubmit: (data: AlarmFormValues) => void;
+  onCancel: () => void;
 }
 
-const AlarmForm = ({ isLoading, onSubmit }: AlarmFormProps) => {
+const AlarmForm = ({ isLoading, onSubmit, onCancel }: AlarmFormProps) => {
   const { data: patrolData, isLoading: isPatrolsLoading } =
     useGetAllPatrolRunsForAdminQuery({
       status: "ongoing",
@@ -392,7 +393,7 @@ const AlarmForm = ({ isLoading, onSubmit }: AlarmFormProps) => {
 
       {/* ACTIONS */}
       <div className="flex justify-end gap-3 pt-6 border-t mt-4">
-        <Button type="button" variant="outline">
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
 

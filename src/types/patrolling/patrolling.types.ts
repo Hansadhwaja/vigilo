@@ -333,6 +333,7 @@ export interface AdminPatrolRun {
 
   guardIds: string[];
   guards: AdminPatrolGuard[];
+  sites: PatrolSite[];
 }
 
 export interface GetAllPatrolRunsForAdminResponse {

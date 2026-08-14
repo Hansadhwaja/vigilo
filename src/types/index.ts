@@ -364,8 +364,6 @@ export interface UserType {
   lastLogin: string;
 }
 
-
-
 //Plans
 
 export type Plan = {
