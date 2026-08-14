@@ -364,17 +364,7 @@ export interface UserType {
   lastLogin: string;
 }
 
-export type VehicleStatus = "Active" | "Maintenance" | "Inactive";
 
-export interface VehicleType {
-  id: string;
-  type: string;
-  registration: string;
-  status: VehicleStatus;
-  assignedPatrols: string[];
-  nextMaintenance: string;
-  fuelUsage: string;
-}
 
 //Plans
 

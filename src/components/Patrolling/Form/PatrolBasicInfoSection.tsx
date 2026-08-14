@@ -16,9 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { dummyVehicles } from "@/constants";
 import { MapPin } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { useGetAllVehiclesQuery } from "@/store/apis/vehiclesApi";
+import { VehicleType } from "@/types/vehicle";
 
 const PatrolBasicInfoSection = () => {
   const { control } = useFormContext();
@@ -33,6 +34,11 @@ const PatrolBasicInfoSection = () => {
   });
 
   const orders = ordersResponse?.data ?? [];
+
+  const { data, isLoading } = useGetAllVehiclesQuery({
+    status: "active",
+  });
+  const vehicles = data?.data ?? [];
 
   return (
     <div className="rounded-2xl border bg-white p-6 space-y-5">
@@ -154,15 +160,15 @@ const PatrolBasicInfoSection = () => {
                     boxShadow: "none",
                   }),
                 }}
-                options={dummyVehicles.map((v) => ({
+                options={vehicles.map((v: VehicleType) => ({
                   value: v.id,
-                  label: v.callsign,
+                  label: v.name,
                 }))}
-                value={dummyVehicles
-                  .filter((v) => field.value.includes(v.id))
-                  .map((v) => ({
+                value={vehicles
+                  .filter((v: VehicleType) => field.value.includes(v.id))
+                  .map((v: VehicleType) => ({
                     value: v.id,
-                    label: v.callsign,
+                    label: v.name,
                   }))}
                 onChange={(selected) => {
                   field.onChange(selected.map((item) => item.value));

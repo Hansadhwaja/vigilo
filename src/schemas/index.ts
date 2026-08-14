@@ -392,3 +392,14 @@ export const siteSchema = z.object({
 });
 
 export type SiteFormValues = z.infer<typeof siteSchema>;
+
+//Vehicle
+
+export const vehicleSchema = z.object({
+  name: z.string().min(1, "Please Enter Name"),
+  plateNumber: z.string().min(1, "Please Enter Plate Number"),
+  type: z.string().min(1, "Please Select Type"),
+  status: z.string().min(1, "Please Select Status"),
+});
+
+export type VehicleFormValues = z.infer<typeof vehicleSchema>;

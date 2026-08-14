@@ -1,3 +1,4 @@
+import { VehicleStatus, VehicleTypes } from "@/types/vehicle";
 import {
   AlertTriangle,
   Bell,
@@ -581,3 +582,23 @@ export const billingIntervals = [
     value: "year",
   },
 ] as const;
+
+//Vehicles
+
+export const vehicleTypes: {
+  value: VehicleTypes;
+  label: string;
+}[] = [
+  { value: "car", label: "Car" },
+  { value: "van", label: "Van" },
+  { value: "bus", label: "Bus" },
+];
+
+export const vehicleStatuses: {
+  value: VehicleStatus;
+  label: string;
+}[] = [
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
+  { value: "maintenance", label: "Maintenance" },
+];
