@@ -68,6 +68,7 @@ interface GetAlarmParams {
   search?: string;
   status?: string;
   priority?: string;
+  userId?: string;
 }
 
 export interface DeleteAlarmResponse {
@@ -99,6 +100,7 @@ export const alarmsApi = baseApi.injectEndpoints({
         if (params.search) qs.set("search", params.search);
         if (params.status) qs.set("status", params.status);
         if (params.priority) qs.set("priority", params.priority);
+        if (params.userId) qs.set("userId", params.userId);
 
         return `/alarm/getAllAlarms?${qs.toString()}`;
       },

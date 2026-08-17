@@ -39,7 +39,7 @@ const GuardsTab = () => {
       <GuardSearchFilters />
       <GuardStats
         activeGuards={summary?.activeGuards ?? 0}
-        totalGuards={summary?.totalGuards ?? 0}
+        totalGuards={summary?.total ?? 0}
         totalIssues={summary?.totalIssues ?? 0}
       />
       <GuardTable

@@ -38,7 +38,7 @@ export interface Order {
     id: string;
     mobile: string;
     name: string;
-  }
+  };
 }
 
 export interface Pagination {
@@ -53,7 +53,7 @@ export type OrderSummary = {
   avgvalue: number;
   total: number;
   totalRevenue: number;
-}
+};
 
 export interface GetAllOrdersResponse {
   success: boolean;
@@ -119,22 +119,28 @@ export interface EditOrderResponse {
 export const ordersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all orders with pagination and filters
-    getAllOrders: builder.query<GetAllOrdersResponse, GetAllOrdersParams | void>({
+    getAllOrders: builder.query<
+      GetAllOrdersResponse,
+      GetAllOrdersParams | void
+    >({
       query: (params) => {
         const queryParams = new URLSearchParams();
 
         if (params) {
-          if (params.limit) queryParams.append('limit', params.limit.toString());
-          if (params.page) queryParams.append('page', params.page.toString());
-          if (params.status) queryParams.append('status', params.status);
-          if (params.serviceType) queryParams.append('serviceType', params.serviceType);
-          if (params.search) queryParams.append('search', params.search);
-          if (params.userId) queryParams.append('userId', params.userId);
-          if (params.nonInvoiced) queryParams.append('nonInvoiced', String(params.nonInvoiced));
+          if (params.limit)
+            queryParams.append("limit", params.limit.toString());
+          if (params.page) queryParams.append("page", params.page.toString());
+          if (params.status) queryParams.append("status", params.status);
+          if (params.serviceType)
+            queryParams.append("serviceType", params.serviceType);
+          if (params.search) queryParams.append("search", params.search);
+          if (params.userId) queryParams.append("userId", params.userId);
+          if (params.nonInvoiced)
+            queryParams.append("nonInvoiced", String(params.nonInvoiced));
         }
 
         return {
-          url: `/orders/getAllOrders${queryParams.toString() ? `?${queryParams.toString()}` : ''}`,
+          url: `/orders/getAllOrders${queryParams.toString() ? `?${queryParams.toString()}` : ""}`,
           method: "GET",
         };
       },
@@ -151,13 +157,16 @@ export const ordersApi = baseApi.injectEndpoints({
     }),
 
     // Cancel order (Admin reject order)
-    cancelOrder: builder.mutation<CancelOrderResponse, { id: string; data: RejectOrderFormValues }>({
+    cancelOrder: builder.mutation<
+      CancelOrderResponse,
+      { id: string; data: RejectOrderFormValues }
+    >({
       query: ({ id, data }) => ({
         url: `/orders/adminCancelOrder/${id}`,
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Orders"]
+      invalidatesTags: ["Orders"],
     }),
 
     // Accept order
@@ -166,17 +175,20 @@ export const ordersApi = baseApi.injectEndpoints({
         url: `/orders/acceptOrder/${id}`,
         method: "POST",
       }),
-      invalidatesTags: ["Orders"]
+      invalidatesTags: ["Orders"],
     }),
 
     // Edit order
-    editOrder: builder.mutation<EditOrderResponse, { id: string; data: EditOrderPayload }>({
+    editOrder: builder.mutation<
+      EditOrderResponse,
+      { id: string; data: EditOrderPayload }
+    >({
       query: ({ id, data }) => ({
         url: `/orders/editOrder/${id}`,
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: ["Orders"]
+      invalidatesTags: ["Orders"],
     }),
   }),
 });
@@ -187,5 +199,4 @@ export const {
   useCancelOrderMutation,
   useAcceptOrderMutation,
   useEditOrderMutation,
-
 } = ordersApi;

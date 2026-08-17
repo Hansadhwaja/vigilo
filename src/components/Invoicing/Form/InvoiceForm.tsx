@@ -51,6 +51,7 @@ const InvoiceForm = ({ isLoading, onSubmit, clients }: InvoiceFormProps) => {
     {
       userId: clientId,
       nonInvoiced: true,
+      status: "completed",
     },
     {
       skip: !clientId,
@@ -59,7 +60,14 @@ const InvoiceForm = ({ isLoading, onSubmit, clients }: InvoiceFormProps) => {
 
   const orders = data?.data ?? [];
 
-  const { data: alarmsResponse } = useGetAllAlarmsQuery({});
+  const { data: alarmsResponse } = useGetAllAlarmsQuery(
+    {
+      userId: clientId,
+    },
+    {
+      skip: !clientId,
+    },
+  );
   const alarms = alarmsResponse?.data ?? [];
 
   const onFormSubmit = async (data: InvoiceFormValues) => {

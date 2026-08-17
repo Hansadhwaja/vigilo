@@ -58,10 +58,10 @@ export interface Pagination {
 // Response interfaces
 
 export type GuardsSummary = {
-  totalGuards: number;
+  total: number;
   activeGuards: number;
   totalIssues: number;
-}
+};
 export interface GetAllGuardsResponse {
   success: boolean;
   message: string;
@@ -102,19 +102,23 @@ export interface CreateGuardAdminResponse {
 
 export const guardsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllGuards: builder.query<GetAllGuardsResponse, GetAllGuardsParams | void>({
+    getAllGuards: builder.query<
+      GetAllGuardsResponse,
+      GetAllGuardsParams | void
+    >({
       query: (params = {}) => {
         const queryParams = new URLSearchParams();
 
         if (params) {
-          if (params.limit) queryParams.append('limit', params.limit.toString());
-          if (params.page) queryParams.append('page', params.page.toString());
-          if (params.search) queryParams.append('search', params.search);
-          if (params.guardId) queryParams.append('guardId', params.guardId);
+          if (params.limit)
+            queryParams.append("limit", params.limit.toString());
+          if (params.page) queryParams.append("page", params.page.toString());
+          if (params.search) queryParams.append("search", params.search);
+          if (params.guardId) queryParams.append("guardId", params.guardId);
         }
 
         return {
-          url: `/users/getAllGuards${queryParams.toString() ? `?${queryParams.toString()}` : ''}`,
+          url: `/users/getAllGuards${queryParams.toString() ? `?${queryParams.toString()}` : ""}`,
           method: "GET",
         };
       },
@@ -129,7 +133,10 @@ export const guardsApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, id) => [{ type: "Guards", id }],
     }),
 
-    createGuardByAdmin: builder.mutation<CreateGuardAdminResponse, CreateGuardAdminRequest>({
+    createGuardByAdmin: builder.mutation<
+      CreateGuardAdminResponse,
+      CreateGuardAdminRequest
+    >({
       query: (body) => ({
         url: "/users/createGuardByAdmin",
         method: "POST",
@@ -143,5 +150,5 @@ export const guardsApi = baseApi.injectEndpoints({
 export const {
   useGetAllGuardsQuery,
   useGetGuardByIdQuery,
-  useCreateGuardByAdminMutation
+  useCreateGuardByAdminMutation,
 } = guardsApi;

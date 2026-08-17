@@ -1,6 +1,5 @@
 "use client";
 
-import { Alarm } from "@/store/apis/alarmsAPI";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldGroup } from "@/components/ui/field";
+import { Alarm } from "@/types";
 import { Controller, useFormContext } from "react-hook-form";
 
 const ResolvedAlarmsForm = ({ alarms }: { alarms: Alarm[] }) => {
@@ -97,7 +97,9 @@ const ResolvedAlarmsForm = ({ alarms }: { alarms: Alarm[] }) => {
 
                             <div>
                               <div className="flex gap-2 items-center">
-                                <h3 className="font-semibold">{a.id}</h3>
+                                <h3 className="font-semibold uppercase">
+                                  #{a.id.slice(0, 6)}
+                                </h3>
                                 <p>{a.title}</p>
                                 <Badge>{a.alarmType}</Badge>
                               </div>
