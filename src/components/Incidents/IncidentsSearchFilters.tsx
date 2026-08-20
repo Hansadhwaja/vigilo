@@ -63,17 +63,17 @@ const IncidentsSearchFilters = () => {
         });
     };
 
-    const filters = [
-        {
-            key: "status",
-            type: "select",
-            placeholder: "Select Status",
-            value: status,
-            width: "w-[180px]",
-            onChange: handleStatusChange,
-            options: statuses,
-        },
-    ] satisfies FilterItem[];
+    // const filters = [
+    //     {
+    //         key: "status",
+    //         type: "select",
+    //         placeholder: "Select Status",
+    //         value: status,
+    //         width: "w-[180px]",
+    //         onChange: handleStatusChange,
+    //         options: statuses,
+    //     },
+    // ] satisfies FilterItem[];
 
     return (
         <DataFilters
@@ -81,7 +81,6 @@ const IncidentsSearchFilters = () => {
             searchPlaceholder="Search incidents..."
             onSearchChange={handleSearch}
             onClear={clearParams}
-            filters={filters}
         />
     );
 };

@@ -12,8 +12,6 @@ import ReporterCard from "@/components/Incidents/ReporterCard";
 import DateTimeCard from "@/components/Incidents/DateTimeCard";
 import ShiftCard from "@/components/Incidents/ShiftCard";
 import MetaCard from "@/components/Incidents/MetaCard";
-import IncidentAssignmentCard from "@/components/Incidents/AssignmentCard";
-
 import { customFormatDateTime } from "@/lib/utils";
 import IncidentHeroSection from "@/components/Incidents/Details/IncidentHeroSection";
 import ImagesCard from "@/components/common/Card/ImagesCard";
@@ -104,8 +102,6 @@ export default function IncidentDetailsPage() {
           <ShiftCard shift={incident?.shift} />
 
           <MetaCard incident={incident} />
-
-          <IncidentAssignmentCard assignedGuard={incident?.assignedGuard} />
         </div>
       </div>
     </div>
