@@ -415,9 +415,11 @@ export const getOrderPricing = (
 };
 
 export const formatDateTime = (dateTime: string) => {
+  const date = new Date(dateTime);
+
   return {
-    date: formatInTimeZone(dateTime, "UTC", "dd MMM yyyy"),
-    time: formatInTimeZone(dateTime, "UTC", "hh:mm a"),
+    date: format(date, "dd MMM yyyy"),
+    time: format(date, "hh:mm a"),
   };
 };
 
