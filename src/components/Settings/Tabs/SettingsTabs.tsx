@@ -16,13 +16,6 @@ const SettingsTabs = () => {
       activeColor: "data-[state=active]:bg-emerald-500",
     },
     {
-      value: "users",
-      label: "Users",
-      icon: User,
-      content: <UsersTab />,
-      activeColor: "data-[state=active]:bg-blue-500",
-    },
-    {
       value: "billing",
       label: "Billing",
       icon: CreditCard,
