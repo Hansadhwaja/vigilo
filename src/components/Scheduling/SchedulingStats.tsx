@@ -1,5 +1,10 @@
 import { useMemo } from "react";
-import { Calendar, Clock, MapPin, User } from "lucide-react";
+import {
+  CalendarCheck,
+  CalendarDays,
+  CircleCheckBig,
+  Radio,
+} from "lucide-react";
 import StatCards from "../common/StatCard/StatCards";
 import { useSchedulingData } from "./hook/useSchedulingData";
 
@@ -8,35 +13,33 @@ interface SchedulingStatsProps {
 }
 
 const SchedulingStats = ({ scheduling }: SchedulingStatsProps) => {
-  const {
-    summary
-  } = scheduling;
+  const { summary } = scheduling;
 
   const stats = useMemo(() => {
     return [
       {
         label: "Active Now",
         value: summary?.activeNow ?? 0,
-        Icon: Clock,
-        color: "bg-green-100 text-green-700",
+        Icon: Radio,
+        color: "bg-emerald-500/10 text-emerald-600",
       },
       {
         label: "Today",
         value: summary?.today ?? 0,
-        Icon: Calendar,
-        color: "bg-blue-100 text-blue-700",
+        Icon: CalendarCheck,
+        color: "bg-blue-500/10 text-blue-600",
       },
       {
-        label: "This Week",
+        label: "Upcoming",
         value: summary?.thisWeek ?? 0,
-        Icon: User,
-        color: "bg-purple-100 text-purple-700",
+        Icon: CalendarDays,
+        color: "bg-violet-500/10 text-violet-600",
       },
       {
-        label: "Patrols",
+        label: "Completed",
         value: summary?.patrols ?? 0,
-        Icon: MapPin,
-        color: "bg-orange-100 text-orange-700",
+        Icon: CircleCheckBig,
+        color: "bg-green-500/10 text-green-600",
       },
     ];
   }, [summary]);

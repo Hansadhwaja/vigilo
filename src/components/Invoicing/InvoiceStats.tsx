@@ -1,47 +1,40 @@
 import StatCards from "../common/StatCard/StatCards";
 import {
-    DollarSign,
-    TrendingUp,
-    Clock,
-    FileText,
-    AlertTriangle,
+  CircleCheckBig,
+  Clock3,
+  FileText,
+  AlertTriangle,
 } from "lucide-react";
 
 const InvoiceStats = () => {
-    const items = [
-        {
-            label: "Invoiced",
-            value: `$${Number(1034023).toLocaleString()}`,
-            Icon: DollarSign,
-            color: "bg-blue-100 text-blue-700",
-        },
-        {
-            label: "Collected",
-            value: `$${Number(36523).toLocaleString()}`,
-            Icon: TrendingUp,
-            color: "bg-green-100 text-green-700",
-        },
-        {
-            label: "Pending",
-            value: `$${Number(74023).toLocaleString()}`,
-            Icon: Clock,
-            color: "bg-yellow-100 text-yellow-700",
-        },
-        {
-            label: "Records",
-            value: "7",
-            Icon: FileText,
-            color: "bg-emerald-100 text-emerald-700",
-        },
-        {
-            label: "Overdue",
-            value: "1",
-            Icon: AlertTriangle,
-            color: "bg-orange-100 text-orange-700",
-        },
-    ];
+  const items = [
+    {
+      label: "Sent",
+      value: `$${Number(1034023).toLocaleString()}`,
+      Icon: FileText,
+      color: "bg-blue-500/10 text-blue-600",
+    },
+    {
+      label: "Pending",
+      value: `$${Number(36523).toLocaleString()}`,
+      Icon: Clock3,
+      color: "bg-amber-500/10 text-amber-600",
+    },
+    {
+      label: "Paid",
+      value: `$${Number(74023).toLocaleString()}`,
+      Icon: CircleCheckBig,
+      color: "bg-emerald-500/10 text-emerald-600",
+    },
+    {
+      label: "Overdue",
+      value: "1",
+      Icon: AlertTriangle,
+      color: "bg-red-500/10 text-red-600",
+    },
+  ];
 
-    return <StatCards items={items} />;
+  return <StatCards items={items} />;
 };
 
 export default InvoiceStats;

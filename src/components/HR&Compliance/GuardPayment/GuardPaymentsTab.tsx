@@ -6,7 +6,7 @@ import { useDebounce } from "@/lib/hooks/useDebounce";
 import { useGetAllGuardsQuery } from "@/store/apis/guardsApi";
 
 import GuardPaymentSearchFilters from "./GuardPaymentSearchFilters";
-import GuardPaymentStats from "./GuardPaymentStatCards";
+import GuardPaymentStats from "./GuardPaymentStats";
 import GeneratePaymentModal from "./Modal/GeneratePaymentModal";
 import PaymentList from "./PaymentList";
 import {

@@ -1,41 +1,53 @@
-
-import { AlertCircle, Shield, User } from "lucide-react";
+import {
+  BadgeCheck,
+  CircleCheckBig,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 
 import StatCards from "@/components/common/StatCard/StatCards";
 
 interface Props {
-    totalGuards: number;
-    activeGuards: number;
-    totalIssues: number;
+  totalGuards: number;
+  activeGuards: number;
+  joinedGuards: number;
+  profileCompletion: number;
 }
 
 const GuardStats = ({
-    totalGuards,
-    activeGuards,
-    totalIssues
+  totalGuards,
+  activeGuards,
+  joinedGuards,
+  profileCompletion,
 }: Props) => {
-    const stats = [
-        {
-            label: "Total",
-            value: totalGuards,
-            Icon: User,
-            color: "bg-green-100 text-green-700",
-        },
-        {
-            label: "Active Guards",
-            value: activeGuards,
-            Icon: Shield,
-            color: "bg-blue-100 text-blue-700",
-        },
-        {
-            label: "Issues",
-            value: totalIssues,
-            Icon: AlertCircle,
-            color: "bg-purple-100 text-purple-700",
-        }
-    ];
+  const stats = [
+    {
+      label: "Total Guards",
+      value: totalGuards ?? 0,
+      Icon: Users,
+      color: "bg-blue-500/10 text-blue-600",
+    },
+    {
+      label: "Active Guards",
+      value: activeGuards ?? 0,
+      Icon: ShieldCheck,
+      color: "bg-emerald-500/10 text-emerald-600",
+    },
+    {
+      label: "Joined",
+      value: joinedGuards ?? 0,
+      Icon: BadgeCheck,
+      color: "bg-violet-500/10 text-violet-600",
+    },
+    {
+      label: "Profile Completion",
+      value: profileCompletion ?? 0,
+      Icon: CircleCheckBig,
+      color: "bg-orange-500/10 text-orange-600",
+    },
+  ];
 
-    return <StatCards items={stats} />;
+  return <StatCards items={stats} />;
 };
 
 export default GuardStats;

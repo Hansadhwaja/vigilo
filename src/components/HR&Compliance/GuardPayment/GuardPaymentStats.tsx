@@ -28,12 +28,6 @@ const GuardPaymentStats = () => {
             Icon: DollarSign,
             color: "bg-orange-100 text-orange-700",
         },
-        {
-            label: "Total Paid",
-            value: 1024.54,
-            Icon: DollarSign,
-            color: "bg-orange-100 text-orange-700",
-        },
     ];
 
     return <StatCards items={stats} />;
