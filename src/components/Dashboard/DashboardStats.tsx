@@ -15,7 +15,6 @@ interface Props {
   activeShiftsCount: number;
   activeOrdersCount: number;
   activePatrolsCount: number;
-  incidentsToday: number;
 }
 
 const DashboardStats = ({
@@ -24,7 +23,6 @@ const DashboardStats = ({
   activeShiftsCount,
   activeOrdersCount,
   activePatrolsCount,
-  incidentsToday,
 }: Props) => {
   const stats = [
     {
@@ -61,13 +59,6 @@ const DashboardStats = ({
       value: activeOrdersCount,
       to: "/clients",
       color: "bg-orange-100 text-orange-700",
-    },
-    {
-      Icon: AlertTriangle,
-      label: "Incidents Today",
-      value: incidentsToday,
-      to: "/incidents",
-      color: "bg-yellow-100 text-yellow-700",
     },
   ];
   return <StatCards items={stats} />;

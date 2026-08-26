@@ -12,12 +12,12 @@ import {
 interface Props {
   data: {
     day: string;
-    total: number;
+    count: number;
   }[];
 }
 
 const chartConfig = {
-  total: {
+  count: {
     label: "Patrols Completed",
     color: "var(--primary)",
   },
@@ -55,7 +55,7 @@ const PatrolCompletionChart = ({ data }: Props) => {
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
 
             <Bar
-              dataKey="total"
+              dataKey="count"
               fill="var(--color-total)"
               radius={[6, 6, 0, 0]}
             />

@@ -1,4 +1,4 @@
-import { Bell, MapPinned, Users } from "lucide-react";
+import { AlertTriangle, Bell, MapPinned, Users } from "lucide-react";
 import StatCards from "../common/StatCard/StatCards";
 
 interface Props {
@@ -6,6 +6,7 @@ interface Props {
     patrols: number;
     alarmsResolved: number;
     guardsScheduled: number;
+    incidentsToday: number;
   };
 }
 
@@ -31,6 +32,13 @@ const TodayStats = ({ summary }: Props) => {
       value: summary.guardsScheduled,
       to: "/scheduling",
       color: "bg-purple-100 text-purple-700",
+    },
+    {
+      Icon: AlertTriangle,
+      label: "Incidents Today",
+      value: summary.incidentsToday,
+      to: "/incidents",
+      color: "bg-yellow-100 text-yellow-700",
     },
   ];
   return (
