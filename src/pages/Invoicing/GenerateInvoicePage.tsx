@@ -1,15 +1,13 @@
 import { useGenerateInvoiceMutation } from "@/store/apis/invoiceApis";
-import { RootState } from "@/store/store";
 import { useGetAllClientsQuery } from "@/store/apis/usersApi";
 import CustomHeader from "@/components/common/Header/CustomHeader";
 import InvoiceForm from "@/components/Invoicing/Form/InvoiceForm";
-import AlarmPricingModal from "@/components/Invoicing/New/Modal/AlarmPricingModal";
 import EditServicePricingModal from "@/components/Invoicing/New/Modal/EditServicePricingModal";
 import { calculateGrandTotal } from "@/lib/utils";
 import { InvoiceFormValues } from "@/schemas";
-import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAppSelector } from "@/store/hooks";
 
 const GenerateInvoicePage = () => {
   const [generateInvoice, { isLoading: isGeneratingInvoice }] =
@@ -19,9 +17,7 @@ const GenerateInvoicePage = () => {
   const clients = data?.data ?? [];
   const navigate = useNavigate();
 
-  const serviceData = useSelector(
-    (state: RootState) => state.servicePricing.data,
-  );
+  const serviceData = useAppSelector((state) => state.servicePricing.data);
 
   const handleSubmit = async (data: InvoiceFormValues) => {
     console.log("Invoice Data", data);

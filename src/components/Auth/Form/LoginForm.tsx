@@ -14,14 +14,11 @@ import Loader from "@/components/common/Loader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import {
-  LoginFormValues,
-  loginSchema,
-} from "@/schemas/auth/auth.schemas";
+import { LoginFormValues, loginSchema } from "@/schemas/auth/auth.schemas";
 
 type LoginField = {
   name: Path<LoginFormValues>;
-  label: string;
+  label: React.ReactNode;
   render: (
     field: ControllerRenderProps<LoginFormValues, Path<LoginFormValues>>,
   ) => React.ReactNode;
@@ -52,24 +49,34 @@ export const LoginForm = ({ onSubmit, isLoading = false }: Props) => {
     () => [
       {
         name: "email",
-        label: "Email Address",
+        label: (
+          <>
+            Email Address <span className="text-destructive">*</span>
+          </>
+        ),
         render: (field) => (
           <Input
             {...field}
             type="email"
             placeholder="admin@vigilo.com"
             autoComplete="email"
+            className="h-11 text-base"
           />
         ),
       },
       {
         name: "password",
-        label: "Password",
+        label: (
+          <>
+            Password <span className="text-destructive">*</span>
+          </>
+        ),
         render: (field) => (
           <PasswordInput
             {...field}
             placeholder="Enter your password"
             autoComplete="current-password"
+            className="h-11 text-base"
           />
         ),
       },
@@ -92,13 +99,13 @@ export const LoginForm = ({ onSubmit, isLoading = false }: Props) => {
       <Button
         type="submit"
         disabled={!isValid || isLoading}
-        className="h-11 w-full gap-2"
+        className="h-11 w-full gap-2 text-base"
       >
         {isLoading ? (
           <Loader />
         ) : (
           <>
-            <LogIn className="size-4" />
+            <LogIn className="size-5" />
             Sign In
           </>
         )}

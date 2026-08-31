@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 type RegisterField = {
   name: Path<RegisterFormValues>;
-  label: string;
+  label: React.ReactNode;
   className?: string;
   render: (
     field: ControllerRenderProps<RegisterFormValues, Path<RegisterFormValues>>,
@@ -50,21 +50,33 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
   const {
     control,
     handleSubmit,
-    formState: { isValid },
+    formState: { isValid, errors },
+    watch,
   } = form;
+
+  console.log("EMAIL:", JSON.stringify(watch("email")));
+  console.log("ERRORS:", errors);
 
   const fields: RegisterField[] = useMemo(
     () => [
       {
         name: "name",
-        label: "Company Name",
+        label: (
+          <>
+            Company Name <span className="text-destructive">*</span>
+          </>
+        ),
         render: (field) => (
           <Input {...field} placeholder="Enter company name" />
         ),
       },
       {
         name: "email",
-        label: "Email Address",
+        label: (
+          <>
+            Email Address <span className="text-destructive">*</span>
+          </>
+        ),
         render: (field) => (
           <Input
             {...field}
@@ -76,7 +88,11 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
       },
       {
         name: "mobile",
-        label: "Mobile Number",
+        label: (
+          <>
+            Mobile Number <span className="text-destructive">*</span>
+          </>
+        ),
         render: (field) => (
           <Input
             {...field}
@@ -88,7 +104,11 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
       },
       {
         name: "password",
-        label: "Password",
+        label: (
+          <>
+            Password <span className="text-destructive">*</span>
+          </>
+        ),
         render: (field) => (
           <PasswordInput
             {...field}
@@ -99,7 +119,11 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
       },
       {
         name: "confirmPassword",
-        label: "Confirm Password",
+        label: (
+          <>
+            Confirm Password <span className="text-destructive">*</span>
+          </>
+        ),
         render: (field) => (
           <PasswordInput
             {...field}
@@ -110,7 +134,11 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
       },
       {
         name: "address",
-        label: "Address",
+        label: (
+          <>
+            Address <span className="text-destructive">*</span>
+          </>
+        ),
         className: "sm:col-span-2",
         render: (field) => (
           <Textarea
@@ -139,7 +167,11 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
         ))}
       </div>
 
-      <Button type="submit" disabled={!isValid || isLoading} className="w-full">
+      <Button
+        type="submit"
+        disabled={!isValid || isLoading}
+        className="w-full text-base"
+      >
         {isLoading ? <Loader /> : "Create Account"}
       </Button>
     </form>

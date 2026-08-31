@@ -1,29 +1,30 @@
 import { io, Socket } from "socket.io-client";
 import { useEffect, useRef } from "react";
+import { useAppSelector } from "@/store/hooks";
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_BASE_URL;
 
 export const useSocket = () => {
-    const socketRef = useRef<Socket | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
+  useEffect(() => {
+    const token = useAppSelector((state) => state.auth.token);
+    if (!token) return;
 
-        const socket = io(SOCKET_URL, {
-            transports: ["websocket"],
-        });
+    const socket = io(SOCKET_URL, {
+      transports: ["websocket"],
+    });
 
-        socketRef.current = socket;
+    socketRef.current = socket;
 
-        socket.on("connect", () => {
-            socket.emit("register", { token });
-        });
+    socket.on("connect", () => {
+      socket.emit("register", { token });
+    });
 
-        return () => {
-            socket.disconnect();
-        };
-    }, []);
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
-    return socketRef;
+  return socketRef;
 };

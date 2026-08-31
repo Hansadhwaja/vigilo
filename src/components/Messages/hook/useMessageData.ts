@@ -2,167 +2,153 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import {
-    PresenceItem,
-    useCreateOrGetDirectConversationMutation,
-    useGetBulkPresenceQuery,
-    useHeartbeatPresenceMutation,
+  PresenceItem,
+  useCreateOrGetDirectConversationMutation,
+  useGetBulkPresenceQuery,
+  useHeartbeatPresenceMutation,
 } from "@/store/apis/messagesAPI";
 
 import { Guard, useGetAllGuardsQuery } from "@/store/apis/guardsApi";
 import { PresenceUpdateEvent } from "@/types";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { useDebounce } from "@/lib/hooks/useDebounce";
+import { useAppSelector } from "@/store/hooks";
 
 export const useMessageData = () => {
-    const [activeConversationId, setActiveConversationId] = useState<string>("");
-    const [selectedGuard, setSelectedGuard] = useState<Guard | null>(null);
-    const [openingUserId, setOpeningUserId] = useState<string>("");
-    const [emojiOpen, setEmojiOpen] = useState(false);
-    const [conversationByUserId, setConversationByUserId] = useState<Record<string, string>>({});
-    const [livePresenceByUserId, setLivePresenceByUserId] = useState<Record<string, PresenceUpdateEvent>>({});
-    const emojiRef = useRef<HTMLDivElement | null>(null);
+  const [activeConversationId, setActiveConversationId] = useState<string>("");
+  const [selectedGuard, setSelectedGuard] = useState<Guard | null>(null);
+  const [openingUserId, setOpeningUserId] = useState<string>("");
+  const [emojiOpen, setEmojiOpen] = useState(false);
+  const [conversationByUserId, setConversationByUserId] = useState<
+    Record<string, string>
+  >({});
+  const [livePresenceByUserId, setLivePresenceByUserId] = useState<
+    Record<string, PresenceUpdateEvent>
+  >({});
+  const emojiRef = useRef<HTMLDivElement | null>(null);
 
-    const [heartbeatPresence] = useHeartbeatPresenceMutation();
-    const { getParam } = useQueryParams();
+  const [heartbeatPresence] = useHeartbeatPresenceMutation();
+  const { getParam } = useQueryParams();
 
-    const search = getParam("search", "");
-    const debouncedSearch = useDebounce(search);
+  const search = getParam("search", "");
+  const debouncedSearch = useDebounce(search);
 
-
-    const { data: guardsResponse, isLoading: isGuardsLoading } =
-        useGetAllGuardsQuery({
-            page: 1,
-            limit: 100,
-            search: debouncedSearch
-        });
-
-    const guards = guardsResponse?.data ?? [];
-
-    const authUser = useMemo(() => {
-        try {
-            const raw = localStorage.getItem("user");
-
-            if (!raw) return null;
-
-            return JSON.parse(raw);
-        } catch {
-            return null;
-        }
-    }, []);
-
-    const authUserId = String(
-        authUser?.id || authUser?._id || ""
-    );
-
-    const presenceIds = useMemo(
-        () => guards.map((g) => g.id).filter(Boolean),
-        [guards]
-    );
-
-    const [
-        createOrGetConversation,
-        { isLoading: isOpeningConversation },
-    ] = useCreateOrGetDirectConversationMutation();
-
-    const { data: presenceRows = [] } = useGetBulkPresenceQuery(presenceIds, {
-        skip: presenceIds.length === 0,
-        pollingInterval: 15000,
+  const { data: guardsResponse, isLoading: isGuardsLoading } =
+    useGetAllGuardsQuery({
+      page: 1,
+      limit: 100,
+      search: debouncedSearch,
     });
 
-    const presenceMap = useMemo(() => {
-        const map = new Map(
-            presenceRows.map((row: PresenceItem) => [
-                String(row.userId),
-                row,
-            ])
-        );
+  const guards = guardsResponse?.data ?? [];
 
-        Object.values(livePresenceByUserId).forEach((row) => {
-            map.set(String(row.userId), row);
-        });
+  const authUser = useMemo(() => {
+    try {
+      const raw = useAppSelector((state) => state.auth.user);
 
-        return map;
-    }, [livePresenceByUserId, presenceRows]);
+      if (!raw) return null;
 
-    const openGuardChat = async (guard: Guard) => {
-        setSelectedGuard(guard);
+      return raw;
+    } catch {
+      return null;
+    }
+  }, []);
 
-        const targetUserId = guard.id;
+  const authUserId = String(authUser?.id || "");
 
-        if (!targetUserId || !String(targetUserId).trim()) {
-            toast.error("Missing user id");
-            return;
-        }
+  const presenceIds = useMemo(
+    () => guards.map((g) => g.id).filter(Boolean),
+    [guards],
+  );
 
-        if (String(targetUserId) === authUserId) {
-            toast.error("Cannot create conversation with yourself");
-            return;
-        }
+  const [createOrGetConversation, { isLoading: isOpeningConversation }] =
+    useCreateOrGetDirectConversationMutation();
 
-        const knownConversation =
-            conversationByUserId[String(targetUserId)];
+  const { data: presenceRows = [] } = useGetBulkPresenceQuery(presenceIds, {
+    skip: presenceIds.length === 0,
+    pollingInterval: 15000,
+  });
 
-        if (knownConversation) {
-            setActiveConversationId(knownConversation);
-            return;
-        }
+  const presenceMap = useMemo(() => {
+    const map = new Map(
+      presenceRows.map((row: PresenceItem) => [String(row.userId), row]),
+    );
 
-        try {
-            setOpeningUserId(String(targetUserId));
+    Object.values(livePresenceByUserId).forEach((row) => {
+      map.set(String(row.userId), row);
+    });
 
-            const response = await createOrGetConversation({
-                userId: String(targetUserId),
-            }).unwrap();
+    return map;
+  }, [livePresenceByUserId, presenceRows]);
 
-            setConversationByUserId((prev) => ({
-                ...prev,
-                [String(targetUserId)]:
-                    response.conversationId,
-            }));
+  const openGuardChat = async (guard: Guard) => {
+    setSelectedGuard(guard);
 
-            setActiveConversationId(
-                response.conversationId
-            );
-        } catch (error: any) {
-            toast.error(
-                error?.data?.message ||
-                "Unable to open conversation"
-            );
-        } finally {
-            setOpeningUserId("");
-        }
-    };
+    const targetUserId = guard.id;
 
-    useEffect(() => {
-        const heartbeat = () =>
-            heartbeatPresence().catch(() => undefined);
+    if (!targetUserId || !String(targetUserId).trim()) {
+      toast.error("Missing user id");
+      return;
+    }
 
-        heartbeat();
+    if (String(targetUserId) === authUserId) {
+      toast.error("Cannot create conversation with yourself");
+      return;
+    }
 
-        const timer = window.setInterval(
-            heartbeat,
-            45000
-        );
+    const knownConversation = conversationByUserId[String(targetUserId)];
 
-        return () => window.clearInterval(timer);
-    }, [heartbeatPresence]);
+    if (knownConversation) {
+      setActiveConversationId(knownConversation);
+      return;
+    }
 
-    return {
-        activeConversationId,
-        selectedGuard,
-        openingUserId,
-        emojiOpen,
-        emojiRef,
-        guards,
-        isGuardsLoading,
-        conversationByUserId,
-        presenceMap,
-        authUserId,
-        isOpeningConversation,
+    try {
+      setOpeningUserId(String(targetUserId));
 
-        setEmojiOpen,
-        setLivePresenceByUserId,
+      const response = await createOrGetConversation({
+        userId: String(targetUserId),
+      }).unwrap();
 
-        openGuardChat,
-    };
+      setConversationByUserId((prev) => ({
+        ...prev,
+        [String(targetUserId)]: response.conversationId,
+      }));
+
+      setActiveConversationId(response.conversationId);
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Unable to open conversation");
+    } finally {
+      setOpeningUserId("");
+    }
+  };
+
+  useEffect(() => {
+    const heartbeat = () => heartbeatPresence().catch(() => undefined);
+
+    heartbeat();
+
+    const timer = window.setInterval(heartbeat, 45000);
+
+    return () => window.clearInterval(timer);
+  }, [heartbeatPresence]);
+
+  return {
+    activeConversationId,
+    selectedGuard,
+    openingUserId,
+    emojiOpen,
+    emojiRef,
+    guards,
+    isGuardsLoading,
+    conversationByUserId,
+    presenceMap,
+    authUserId,
+    isOpeningConversation,
+
+    setEmojiOpen,
+    setLivePresenceByUserId,
+
+    openGuardChat,
+  };
 };

@@ -31,6 +31,11 @@ const LoginPage = () => {
     try {
       const response = await login(values).unwrap();
 
+      if (!response.success) {
+        toast.error(response.error.message);
+        return;
+      }
+
       dispatch(
         setCredentials({
           token: response.token,
@@ -67,9 +72,9 @@ const LoginPage = () => {
               </div>
 
               <div className="flex items-center justify-center gap-2 text-foreground">
-                <ShieldCheck className="size-4" />
+                <ShieldCheck className="size-5" />
 
-                <span className="text-xs font-semibold uppercase tracking-widest">
+                <span className="text-sm font-semibold uppercase tracking-widest">
                   Vigilo Security
                 </span>
               </div>
@@ -77,11 +82,11 @@ const LoginPage = () => {
 
             {/* Page Heading */}
             <div className="space-y-2">
-              <CardTitle className="text-2xl text-foreground">
-                Welcome back
+              <CardTitle className="text-3xl text-foreground">
+                Welcome Back
               </CardTitle>
 
-              <CardDescription className="text-muted-foreground">
+              <CardDescription className="text-base text-muted-foreground">
                 Enter your credentials to access your dashboard
               </CardDescription>
             </div>
@@ -95,14 +100,14 @@ const LoginPage = () => {
                 <span className="w-full border-t border-border" />
               </div>
 
-              <div className="relative flex justify-center text-xs uppercase">
+              <div className="relative flex justify-center text-sm uppercase">
                 <span className="bg-card px-2 text-muted-foreground">
                   New to Vigilo?
                 </span>
               </div>
             </div>
 
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-base text-muted-foreground">
               Don't have an account?{" "}
               <Link
                 to="/register"
@@ -114,7 +119,7 @@ const LoginPage = () => {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-center text-sm text-muted-foreground">
           © {year} VIGILO Security Platform. All rights reserved.
         </p>
       </div>

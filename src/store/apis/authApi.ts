@@ -12,12 +12,21 @@ interface RegisterRequest {
   password: string;
 }
 
-interface AuthResponse {
-  success: boolean;
+interface AuthSuccessResponse {
+  success: true;
   message: string;
   token: string;
   user: AuthUser;
 }
+
+interface AuthErrorResponse {
+  success: false;
+  error: {
+    message: string;
+  };
+}
+
+type AuthResponse = AuthSuccessResponse | AuthErrorResponse;
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({

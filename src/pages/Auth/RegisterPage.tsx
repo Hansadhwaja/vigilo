@@ -27,6 +27,11 @@ const RegisterPage = () => {
   const handleRegister = async (values: RegisterFormValues) => {
     try {
       const response = await register(values).unwrap();
+      
+      if (!response.success) {
+        toast.error(response.error.message);
+        return;
+      }
 
       toast.success(response.message || "Account created successfully!");
 
@@ -57,9 +62,9 @@ const RegisterPage = () => {
               </div>
 
               <div className="flex items-center justify-center gap-2 text-foreground">
-                <ShieldCheck className="size-4" />
+                <ShieldCheck className="size-5" />
 
-                <span className="text-xs font-semibold uppercase tracking-widest">
+                <span className="text-sm font-semibold uppercase tracking-widest">
                   Vigilo Security
                 </span>
               </div>
@@ -67,11 +72,11 @@ const RegisterPage = () => {
 
             {/* Page Heading */}
             <div className="space-y-2">
-              <CardTitle className="text-2xl text-foreground">
+              <CardTitle className="text-3xl text-foreground">
                 Create Account
               </CardTitle>
 
-              <CardDescription>
+              <CardDescription className="text-base text-muted-foreground">
                 Register to start managing your security operations
               </CardDescription>
             </div>
@@ -85,14 +90,14 @@ const RegisterPage = () => {
                 <span className="w-full border-t border-border" />
               </div>
 
-              <div className="relative flex justify-center text-xs uppercase">
+              <div className="relative flex justify-center text-sm uppercase">
                 <span className="bg-card px-2 text-muted-foreground">
                   Already registered?
                 </span>
               </div>
             </div>
 
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-base text-muted-foreground">
               Already have an account?{" "}
               <Link
                 to="/login"
@@ -104,7 +109,7 @@ const RegisterPage = () => {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-muted-foreground lg:hidden">
+        <p className="text-center text-sm text-muted-foreground lg:hidden">
           © {year} VIGILO Security Platform. All rights reserved.
         </p>
       </div>

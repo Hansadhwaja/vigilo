@@ -1,6 +1,5 @@
 "use client";
 
-import { RootState } from "@/store/store";
 import { Client } from "@/store/apis/usersApi";
 import {
   Card,
@@ -14,7 +13,7 @@ import { InvoiceAlarmsFormValues, InvoiceOrdersFormValues } from "@/schemas";
 import { useMemo } from "react";
 
 import { useFormContext, useWatch } from "react-hook-form";
-import { useSelector } from "react-redux";
+import { useAppSelector } from "@/store/hooks";
 
 interface InvoicePreviewProps {
   clients: Client[];
@@ -23,7 +22,7 @@ interface InvoicePreviewProps {
 const InvoicePreview = ({ clients }: InvoicePreviewProps) => {
   const { control } = useFormContext();
 
-  const serviceData = useSelector((s: RootState) => s.servicePricing.data);
+  const serviceData = useAppSelector((s) => s.servicePricing.data);
 
   const [
     invoiceDate,

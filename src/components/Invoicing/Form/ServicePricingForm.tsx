@@ -2,7 +2,7 @@
 
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 import Loader from "@/components/common/Loader";
 import { Button } from "@/components/ui/button";
@@ -24,9 +24,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RootState } from "@/store/store";
 import { setServicePricing } from "@/store/slices/servicePricingSlice";
 import { services } from "@/constants";
+import { useAppSelector } from "@/store/hooks";
 
 const ServicePricingForm = ({
   isLoading,
@@ -37,9 +37,7 @@ const ServicePricingForm = ({
 }) => {
   const dispatch = useDispatch();
 
-  const serviceData = useSelector(
-    (state: RootState) => state.servicePricing.data,
-  );
+  const serviceData = useAppSelector((state) => state.servicePricing.data);
 
   const form = useForm<ServicePricingFormValues>({
     resolver: zodResolver(servicePricingSchema),

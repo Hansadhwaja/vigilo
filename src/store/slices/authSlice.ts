@@ -17,8 +17,8 @@ interface SetCredentialsPayload {
   user: AuthUser;
 }
 
-const token = localStorage.getItem("token");
-const storedUser = localStorage.getItem("user");
+const token = localStorage.getItem("vigilo-admin-token");
+const storedUser = localStorage.getItem("vigilo-admin-user");
 
 const initialState: AuthState = {
   token,
@@ -35,16 +35,16 @@ const authSlice = createSlice({
       state.token = token;
       state.user = user;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("vigilo-admin-token", token);
+      localStorage.setItem("vigilo-admin-user", JSON.stringify(user));
     },
 
     clearCredentials: (state) => {
       state.token = null;
       state.user = null;
 
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      localStorage.removeItem("vigilo-admin-token");
+      localStorage.removeItem("vigilo-admin-user");
     },
   },
 });

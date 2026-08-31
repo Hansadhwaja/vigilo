@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface LogoutModalProps {
   children: ReactNode;
@@ -27,6 +28,7 @@ const LogoutModal = ({ children }: LogoutModalProps) => {
 
   const handleLogout = () => {
     dispatch(clearCredentials());
+    toast.success("Logout Successful");
     navigate("/login", { replace: true });
   };
 

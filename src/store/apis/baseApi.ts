@@ -12,7 +12,7 @@ const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
 const baseQuery = fetchBaseQuery({
   baseUrl,
   prepareHeaders: (headers) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("vigilo-admin-token");
 
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
@@ -29,10 +29,12 @@ const baseQueryWithAuth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const result = await baseQuery(args, api, extraOptions);
 
-  if (result.error?.status === 401) {
-    api.dispatch(clearCredentials());
+  const url = typeof args === "string" ? args : args.url;
 
-    // Redirect to login
+  const isAuthRequest = url.includes("/users/login");
+
+  if (result.error?.status === 401 && !isAuthRequest) {
+    api.dispatch(clearCredentials());
     window.location.replace("/login");
   }
 

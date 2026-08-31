@@ -16,9 +16,8 @@ import { Separator } from "@/components/ui/separator";
 import { formatCurrency, formatDate, getOrderPricing } from "@/lib/utils";
 import { Info, Trash2 } from "lucide-react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store/store";
 import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
+import { useAppSelector } from "@/store/hooks";
 
 const SyncedOrdersForm = ({ orders }: { orders: Order[] }) => {
   const { control } = useFormContext();
@@ -28,7 +27,7 @@ const SyncedOrdersForm = ({ orders }: { orders: Order[] }) => {
     name: "services",
   });
 
-  const serviceData = useSelector((s: RootState) => s.servicePricing.data);
+  const serviceData = useAppSelector((s) => s.servicePricing.data);
 
   return (
     <Card className="p-0">
@@ -165,48 +164,53 @@ const SyncedOrdersForm = ({ orders }: { orders: Order[] }) => {
           </div>
 
           <div className="space-y-2 mt-2">
-            {fields.length>0?fields.map((item, index) => (
-              <div key={item.id} className="grid grid-cols-12 gap-2 items-end">
-                <Controller
-                  control={control}
-                  name={`services.${index}.title`}
-                  render={({ field }) => (
-                    <Field className="col-span-6">
-                      <FieldLabel>Title</FieldLabel>
-                      <Input {...field} placeholder="Service Title" />
-                    </Field>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name={`services.${index}.days`}
-                  render={({ field }) => (
-                    <Field className="col-span-2">
-                      <FieldLabel>Days</FieldLabel>
-                      <Input type="number" {...field} />
-                    </Field>
-                  )}
-                />
-                <Controller
-                  control={control}
-                  name={`services.${index}.price`}
-                  render={({ field }) => (
-                    <Field className="col-span-3">
-                      <FieldLabel>Price</FieldLabel>
-                      <Input type="number" {...field} />
-                    </Field>
-                  )}
-                />
-                <Button
-                  size="icon-sm"
-                  variant="destructive"
-                  onClick={() => remove(index)}
-                  className="col-span-1"
+            {fields.length > 0 ? (
+              fields.map((item, index) => (
+                <div
+                  key={item.id}
+                  className="grid grid-cols-12 gap-2 items-end"
                 >
-                  <Trash2 />
-                </Button>
-              </div>
-            )):(
+                  <Controller
+                    control={control}
+                    name={`services.${index}.title`}
+                    render={({ field }) => (
+                      <Field className="col-span-6">
+                        <FieldLabel>Title</FieldLabel>
+                        <Input {...field} placeholder="Service Title" />
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name={`services.${index}.days`}
+                    render={({ field }) => (
+                      <Field className="col-span-2">
+                        <FieldLabel>Days</FieldLabel>
+                        <Input type="number" {...field} />
+                      </Field>
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name={`services.${index}.price`}
+                    render={({ field }) => (
+                      <Field className="col-span-3">
+                        <FieldLabel>Price</FieldLabel>
+                        <Input type="number" {...field} />
+                      </Field>
+                    )}
+                  />
+                  <Button
+                    size="icon-sm"
+                    variant="destructive"
+                    onClick={() => remove(index)}
+                    className="col-span-1"
+                  >
+                    <Trash2 />
+                  </Button>
+                </div>
+              ))
+            ) : (
               <div className="text-center">No services added</div>
             )}
           </div>
