@@ -6,44 +6,40 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo } from "react";
 
-import {
-  registerSchema,
-  type RegisterFormValues,
-} from "@/schemas/auth/auth.schemas";
-
 import { FormField } from "@/components/common/Form/FormField";
 import Loader from "@/components/common/Loader";
-import PasswordInput from "@/components/common/Input/PasswordInput";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  ProfileFormValues,
+  profileSchema,
+} from "@/schemas/profile/profile.schema";
 
-type RegisterField = {
-  name: Path<RegisterFormValues>;
+type ProfileField = {
+  name: Path<ProfileFormValues>;
   label: React.ReactNode;
   className?: string;
   render: (
-    field: ControllerRenderProps<RegisterFormValues, Path<RegisterFormValues>>,
+    field: ControllerRenderProps<ProfileFormValues, Path<ProfileFormValues>>,
   ) => React.ReactNode;
 };
 
-interface RegisterFormProps {
-  onSubmit: (values: RegisterFormValues) => void | Promise<void>;
+interface Props {
+  onSubmit: (values: ProfileFormValues) => void | Promise<void>;
   isLoading: boolean;
+  initialData: ProfileFormValues;
 }
 
-const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
-  const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+const ProfileForm = ({ onSubmit, isLoading, initialData }: Props) => {
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileSchema),
     mode: "onChange",
     defaultValues: {
-      name: "",
-      email: "",
-      mobile: "",
-      address: "",
-      password: "",
-      confirmPassword: "",
+      name: initialData?.name ?? "",
+      mobile: initialData?.mobile ?? "",
+      address: initialData?.address ?? "",
     },
   });
 
@@ -53,7 +49,7 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
     formState: { isValid },
   } = form;
 
-  const fields: RegisterField[] = useMemo(
+  const fields: ProfileField[] = useMemo(
     () => [
       {
         name: "name",
@@ -64,22 +60,6 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
         ),
         render: (field) => (
           <Input {...field} placeholder="Enter company name" />
-        ),
-      },
-      {
-        name: "email",
-        label: (
-          <>
-            Email Address <span className="text-destructive">*</span>
-          </>
-        ),
-        render: (field) => (
-          <Input
-            {...field}
-            type="email"
-            placeholder="admin@company.com"
-            autoComplete="email"
-          />
         ),
       },
       {
@@ -95,36 +75,6 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
             type="tel"
             placeholder="Enter mobile number"
             autoComplete="tel"
-          />
-        ),
-      },
-      {
-        name: "password",
-        label: (
-          <>
-            Password <span className="text-destructive">*</span>
-          </>
-        ),
-        render: (field) => (
-          <PasswordInput
-            {...field}
-            placeholder="Create a password"
-            autoComplete="new-password"
-          />
-        ),
-      },
-      {
-        name: "confirmPassword",
-        label: (
-          <>
-            Confirm Password <span className="text-destructive">*</span>
-          </>
-        ),
-        render: (field) => (
-          <PasswordInput
-            {...field}
-            placeholder="Confirm your password"
-            autoComplete="new-password"
           />
         ),
       },
@@ -168,10 +118,10 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
         disabled={!isValid || isLoading}
         className="w-full text-base"
       >
-        {isLoading ? <Loader /> : "Create Account"}
+        {isLoading ? <Loader /> : "Edit Profile"}
       </Button>
     </form>
   );
 };
 
-export default RegisterForm;
+export default ProfileForm;

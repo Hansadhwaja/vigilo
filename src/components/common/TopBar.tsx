@@ -20,14 +20,13 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { useGetProfileQuery } from "@/store/apis/profileApi";
-
-import ProfileEditDialog from "@/components/ProfileEditDialog";
 import UserAvatar from "./Avatar/UserAvatar";
 import NotificationModal from "../Notification/Modal/NotificationModal";
 import LogoutModal from "@/components/Auth/Modal/LogoutModal";
 import IconInput from "./Input/IconInput";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
+import EditProfileModal from "../Profile/Modal/EditProfileModal";
 
 interface TopBarProps {
   search: string;
@@ -135,7 +134,7 @@ export default function TopBar({ search, onSearchChange }: TopBarProps) {
       </header>
 
       {profile && (
-        <ProfileEditDialog
+        <EditProfileModal
           open={showEditDialog}
           onOpenChange={setShowEditDialog}
           profile={{

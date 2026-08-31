@@ -19,8 +19,20 @@ export const plansApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Plans"],
+    }),
+    cancelPlan: builder.mutation({
+      query: () => ({
+        url: "/plans/cancel",
+        method: "POST",
+      }),
+      invalidatesTags: ["Plans"],
     }),
   }),
 });
 
-export const { useGetPlansQuery, useSubscribePlanMutation } = plansApi;
+export const {
+  useGetPlansQuery,
+  useSubscribePlanMutation,
+  useCancelPlanMutation,
+} = plansApi;
