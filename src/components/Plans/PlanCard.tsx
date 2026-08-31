@@ -68,7 +68,7 @@ const PlanCard = ({ plan }: { plan: Plan }) => {
 
   const handleCancel = async () => {
     try {
-      const res = await cancelPlan(undefined).unwrap();
+      const res = await cancelPlan({ planId: plan.id }).unwrap();
 
       toast.success(res?.data?.message ?? "Plan Cancelled Successfully");
     } catch (error: any) {

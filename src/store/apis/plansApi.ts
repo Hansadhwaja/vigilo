@@ -22,9 +22,10 @@ export const plansApi = baseApi.injectEndpoints({
       invalidatesTags: ["Plans"],
     }),
     cancelPlan: builder.mutation({
-      query: () => ({
+      query: (data) => ({
         url: "/plans/cancel",
         method: "POST",
+        body: data,
       }),
       invalidatesTags: ["Plans"],
     }),
