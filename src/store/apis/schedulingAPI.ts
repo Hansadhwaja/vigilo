@@ -28,8 +28,8 @@ export interface Guard {
   email: string;
 
   StaticGuards: {
-    status: string;           // "pending"
-    createdAt: string;        // ISO date string
+    status: string; // "pending"
+    createdAt: string; // ISO date string
   };
 }
 
@@ -109,7 +109,6 @@ export interface ShiftDetailsResponse {
   };
 }
 
-
 export interface CreateScheduleDto {
   description: string;
   date: string;
@@ -121,11 +120,10 @@ export interface CreateScheduleDto {
 
 export type ScheduleSummary = {
   activeNow: number;
-  patrols: number;
-  thisWeek: number;
+  completed: number;
+  upcoming: number;
   today: number;
-}
-
+};
 
 export interface GetAllSchedulesResponse {
   success: boolean;
@@ -144,7 +142,6 @@ export interface DeleteScheduleResponse {
   message: string;
 }
 
-
 export interface UpdateScheduleDto {
   description?: string;
   startTime?: string;
@@ -162,8 +159,6 @@ export interface UpdateScheduleResponse {
 
 export interface DeleteScheduleDto {
   id: string;
-
-
 }
 
 export interface GetScheduleParams {
@@ -177,31 +172,34 @@ export interface GetScheduleParams {
 
 export const schedulingApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-
-    getAllSchedules: builder.query<GetAllSchedulesResponse, GetScheduleParams | void>({
+    getAllSchedules: builder.query<
+      GetAllSchedulesResponse,
+      GetScheduleParams | void
+    >({
       query: (params = {}) => {
         const qs = new URLSearchParams();
         if (params) {
-          if (params.limit) qs.set('limit', params.limit.toString());
-          if (params.page) qs.set('page', params.page.toString());
-          if (params.search) qs.set('search', params.search);
-          if (params.guardId) qs.set('guardId', params.guardId);
-          if (params.orderId) qs.set('orderId', params.orderId);
-          if (params.role) qs.set('role', params.role);
-
+          if (params.limit) qs.set("limit", params.limit.toString());
+          if (params.page) qs.set("page", params.page.toString());
+          if (params.search) qs.set("search", params.search);
+          if (params.guardId) qs.set("guardId", params.guardId);
+          if (params.orderId) qs.set("orderId", params.orderId);
+          if (params.role) qs.set("role", params.role);
         }
-        return `/scheduling/getAllSchedules?${qs.toString()}`
+        return `/scheduling/getAllSchedules?${qs.toString()}`;
       },
       providesTags: ["Schedules"],
     }),
-    createSchedule: builder.mutation<CreateScheduleResponse, CreateScheduleDto>({
-      query: (body) => ({
-        url: `/scheduling/createSchedule`,
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["Schedules"],
-    }),
+    createSchedule: builder.mutation<CreateScheduleResponse, CreateScheduleDto>(
+      {
+        query: (body) => ({
+          url: `/scheduling/createSchedule`,
+          method: "POST",
+          body,
+        }),
+        invalidatesTags: ["Schedules"],
+      },
+    ),
 
     getStaticShiftDetailsForAdmin: builder.query<ShiftDetailsResponse, string>({
       query: (id: string) => ({
@@ -211,7 +209,10 @@ export const schedulingApi = baseApi.injectEndpoints({
       providesTags: (_result, _error, id) => [{ type: "Schedules", id }],
     }),
 
-    editSchedule: builder.mutation<UpdateScheduleResponse, { id: string; data: UpdateScheduleDto }>({
+    editSchedule: builder.mutation<
+      UpdateScheduleResponse,
+      { id: string; data: UpdateScheduleDto }
+    >({
       query: ({ id, data }) => ({
         url: `/scheduling/editSchedule/${id}`,
         method: "PUT",
@@ -223,14 +224,16 @@ export const schedulingApi = baseApi.injectEndpoints({
       ],
     }),
 
-    deleteSchedule: builder.mutation<DeleteScheduleResponse, DeleteScheduleDto>({
-      query: (body) => ({
-        url: `/scheduling/deleteSchedule`,
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["Schedules"],
-    }),
+    deleteSchedule: builder.mutation<DeleteScheduleResponse, DeleteScheduleDto>(
+      {
+        query: (body) => ({
+          url: `/scheduling/deleteSchedule`,
+          method: "POST",
+          body,
+        }),
+        invalidatesTags: ["Schedules"],
+      },
+    ),
 
     getAllTimeSheets: builder.query({
       query: (params = {}) => {
@@ -242,7 +245,7 @@ export const schedulingApi = baseApi.injectEndpoints({
         if (search) qs.set("search", search);
         if (page) qs.set("page", page);
         if (limit) qs.set("limit", limit);
-        return `/scheduling/getTimeSheets?${qs.toString()}`
+        return `/scheduling/getTimeSheets?${qs.toString()}`;
       },
 
       providesTags: ["Schedules"],
@@ -252,10 +255,9 @@ export const schedulingApi = baseApi.injectEndpoints({
       query: ({ id, data }) => ({
         url: `/scheduling/timesheet/${id}`,
         method: "PUT",
-        body: data
+        body: data,
       }),
       invalidatesTags: ["Schedules"],
-
     }),
 
     getGuardTimeSheetSummary: builder.query({
@@ -266,7 +268,7 @@ export const schedulingApi = baseApi.injectEndpoints({
         if (params.toDate) qs.set("toDate", params.toDate);
         if (params.details) qs.set("details", params.details);
 
-        return `/scheduling/getGuardTimeSheetSummary?${qs.toString()}`
+        return `/scheduling/getGuardTimeSheetSummary?${qs.toString()}`;
       },
       providesTags: ["Schedules"],
     }),
@@ -290,5 +292,5 @@ export const {
   useGetAllTimeSheetsQuery,
   useEditTimeSheetMutation,
   useGetGuardTimeSheetSummaryQuery,
-  useExportTimeSheetsMutation
+  useExportTimeSheetsMutation,
 } = schedulingApi;

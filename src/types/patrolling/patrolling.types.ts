@@ -351,13 +351,14 @@ export interface GetAllPatrolRunsForAdminResponse {
   summary: {
     active: number;
     pending: number;
-    completion: number;
+    completed: number;
+    upcoming: number;
   };
 }
 
 export interface GetPatrolParams {
-  page?: number;
-  limit?: number;
+  page?: string;
+  limit?: string;
   status?: string;
   search?: string;
 }

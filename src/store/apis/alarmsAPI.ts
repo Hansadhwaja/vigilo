@@ -20,8 +20,9 @@ export interface AlarmGuard {
 export type AlarmSummary = {
   active: number;
   critical: number;
-  monthlyBilling: number;
   slaBreach: number;
+  highPriority: number;
+  resolved: number;
 };
 
 export interface GetAllAlarmsResponse {

@@ -173,6 +173,13 @@ export type InvoiceType = {
   status: string;
 };
 
+export type InvoiceSummary = {
+  overdue: { count: number; totalAmount: number };
+  paid: { count: number; totalAmount: number };
+  pending: { count: number; totalAmount: number };
+  sent: { count: number; totalAmount: number };
+};
+
 //SummaryCard
 export type SummaryCardType = {
   title: string;

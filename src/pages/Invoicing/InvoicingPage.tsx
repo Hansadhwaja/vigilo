@@ -24,13 +24,18 @@ export default function InvoicingPage() {
     month,
     search: debouncedSearch,
     page,
-    limit: limit
+    limit: limit,
   });
   const invoices = data?.data ?? [];
+  const summary = data?.summary ?? {
+    overdue: { count: 0, totalAmount: 0 },
+    paid: { count: 0, totalAmount: 0 },
+    pending: { count: 0, totalAmount: 0 },
+    sent: { count: 0, totalAmount: 0 },
+  };
 
   return (
     <div className="space-y-6 overflow-y-auto min-w-0 min-h-0 h-full no-scrollbar">
-
       <CustomHeader
         title="Invoicing & Payments"
         description="Manage billing, payments, and financial tracking"
@@ -48,17 +53,15 @@ export default function InvoicingPage() {
         }
       />
 
-
       <InvoiceSearchFilters />
-      {isLoading || isFetching ? <Loader /> : (
+      {isLoading || isFetching ? (
+        <Loader />
+      ) : (
         <>
-          <InvoiceStats />
-          <InvoicingTable
-            invoices={invoices}
-          />
+          <InvoiceStats summary={summary} />
+          <InvoicingTable invoices={invoices} />
         </>
       )}
-
     </div>
   );
 }

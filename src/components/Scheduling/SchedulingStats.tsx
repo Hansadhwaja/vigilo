@@ -31,13 +31,13 @@ const SchedulingStats = ({ scheduling }: SchedulingStatsProps) => {
       },
       {
         label: "Upcoming",
-        value: summary?.thisWeek ?? 0,
+        value: summary?.upcoming ?? 0,
         Icon: CalendarDays,
         color: "bg-violet-500/10 text-violet-600",
       },
       {
         label: "Completed",
-        value: summary?.patrols ?? 0,
+        value: summary?.completed ?? 0,
         Icon: CircleCheckBig,
         color: "bg-green-500/10 text-green-600",
       },

@@ -61,10 +61,8 @@ export interface GetIncidentByIdResponse {
   data: IncidentType;
 }
 
-
 export const incidentsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-
     getAllIncidents: builder.query({
       query: (params) => {
         const qs = new URLSearchParams();
@@ -76,8 +74,7 @@ export const incidentsApi = baseApi.injectEndpoints({
           if (params.search) qs.append("search", params.search);
         }
 
-        return `/incidents/getAllIncidentsForAdmin${qs.toString() ? `?${qs.toString()}` : ""}`
-
+        return `/incidents/getAllIncidentsForAdmin${qs.toString() ? `?${qs.toString()}` : ""}`;
       },
       providesTags: ["Incidents"],
     }),
@@ -87,9 +84,7 @@ export const incidentsApi = baseApi.injectEndpoints({
         url: `/incidents/getIncidentByIdForAdmin/${id}`,
         method: "GET",
       }),
-      providesTags: (_result, _error, id) => [
-        { type: "Incidents", id },
-      ],
+      providesTags: (_result, _error, id) => [{ type: "Incidents", id }],
     }),
 
     exportIncidents: builder.mutation({
@@ -99,12 +94,12 @@ export const incidentsApi = baseApi.injectEndpoints({
         responseHandler: (response) => response.blob(),
       }),
       invalidatesTags: ["Incidents"],
-    })
+    }),
   }),
 });
 
 export const {
   useGetAllIncidentsQuery,
   useGetIncidentByIdQuery,
-  useExportIncidentsMutation
+  useExportIncidentsMutation,
 } = incidentsApi;

@@ -2,7 +2,6 @@ import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  AdminPatrolRun,
   useExportPatrolsMutation,
   useGetAllPatrolRunsForAdminQuery,
 } from "@/store/apis/patrollingAPI";
@@ -87,8 +86,8 @@ export default function PatrolPage() {
       <PatrollingStats
         active={summary?.active ?? 0}
         pending={summary?.pending ?? 0}
-        completed={summary?.completion ?? 0}
-        revenue={0}
+        completed={summary?.completed ?? 0}
+        upcoming={summary?.upcoming ?? 0}
       />
       <PatrollingSearchFilters />
       <Card className="p-0 flex flex-col gap-0">

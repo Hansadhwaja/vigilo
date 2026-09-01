@@ -41,6 +41,12 @@ const GuardPaymentsTab = () => {
   });
 
   const guardPayments = data?.data?.payments ?? [];
+  const summary = data?.summary ?? {
+    approved: 0,
+    paid: 0,
+    pending: 0,
+    processing: 0,
+  };
 
   const [exportGuardPayment, { isLoading: isExporting }] =
     useExportGuardPaymentsMutation();
@@ -94,7 +100,7 @@ const GuardPaymentsTab = () => {
       }
     >
       <div className="space-y-4">
-        <GuardPaymentStats />
+        <GuardPaymentStats summary={summary} />
 
         <GuardPaymentSearchFilters
           guards={guards}

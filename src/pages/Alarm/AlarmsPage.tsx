@@ -36,7 +36,8 @@ export default function AlarmsPage() {
   const summary = data?.summary ?? {
     active: 0,
     critical: 0,
-    monthlyBilling: 0,
+    highPriority: 0,
+    resolved: 0,
     slaBreach: 0,
   };
 

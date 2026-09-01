@@ -6,10 +6,10 @@ interface Props {
   active: number;
   pending: number;
   completed: number;
-  revenue: number;
+  upcoming: number;
 }
 
-const PatrollingStats = ({ active, pending, completed, revenue }: Props) => {
+const PatrollingStats = ({ active, pending, completed, upcoming }: Props) => {
   const stats = [
     {
       label: "Active",
@@ -25,7 +25,7 @@ const PatrollingStats = ({ active, pending, completed, revenue }: Props) => {
     },
     {
       label: "Upcoming",
-      value: revenue ?? 0,
+      value: upcoming ?? 0,
       Icon: CalendarClock,
       color: "bg-blue-500/10 text-blue-600",
     },

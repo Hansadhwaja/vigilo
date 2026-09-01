@@ -57,10 +57,18 @@ export interface Pagination {
 
 // Response interfaces
 
+export type GuardPaymentSummary = {
+  approved: number;
+  paid: number;
+  pending: number;
+  processing: number;
+};
+
 export type GuardsSummary = {
   total: number;
-  activeGuards: number;
-  totalIssues: number;
+  active: number;
+  joined: number;
+  profileCompleted: number;
 };
 export interface GetAllGuardsResponse {
   success: boolean;

@@ -50,9 +50,9 @@ export interface Pagination {
 
 export type OrderSummary = {
   active: number;
-  avgvalue: number;
-  total: number;
-  totalRevenue: number;
+  completed: number;
+  pending: number;
+  totalOrders: number;
 };
 
 export interface GetAllOrdersResponse {

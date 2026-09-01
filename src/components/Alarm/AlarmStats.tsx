@@ -1,9 +1,4 @@
-import {
-  Bell,
-  CircleCheckBig,
-  Siren,
-  Zap,
-} from "lucide-react";
+import { AlertTriangle, Bell, CircleCheckBig, Siren, Zap } from "lucide-react";
 
 import StatCards from "@/components/common/StatCard/StatCards";
 import { AlarmSummary } from "@/store/apis/alarmsAPI";
@@ -21,10 +16,16 @@ const AlarmStats = ({ summary }: Props) => {
       color: "bg-blue-500/10 text-blue-600",
     },
     {
-      label: "High Priority",
+      label: "Critical",
       value: summary?.critical ?? 0,
       Icon: Siren,
       color: "bg-red-500/10 text-red-600",
+    },
+    {
+      label: "High Priority",
+      value: summary?.highPriority ?? 0,
+      Icon: AlertTriangle,
+      color: "bg-orange-500/10 text-orange-600",
     },
     {
       label: "SLA Breach",
@@ -34,7 +35,7 @@ const AlarmStats = ({ summary }: Props) => {
     },
     {
       label: "Resolved",
-      value: summary?.monthlyBilling ?? 0,
+      value: summary?.resolved ?? 0,
       Icon: CircleCheckBig,
       color: "bg-green-500/10 text-green-600",
     },

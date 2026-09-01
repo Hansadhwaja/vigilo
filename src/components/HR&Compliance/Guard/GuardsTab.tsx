@@ -38,9 +38,10 @@ const GuardsTab = () => {
     <div className="space-y-4">
       <GuardSearchFilters />
       <GuardStats
-        activeGuards={summary?.activeGuards ?? 0}
+        activeGuards={summary?.active ?? 0}
         totalGuards={summary?.total ?? 0}
-        totalIssues={summary?.totalIssues ?? 0}
+        joinedGuards={summary?.joined ?? 0}
+        profileCompletion={summary?.profileCompleted ?? 0}
       />
       <GuardTable
         guards={guards}

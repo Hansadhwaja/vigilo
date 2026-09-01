@@ -61,10 +61,10 @@ const OrderTabSection = () => {
     return (
         <div className="space-y-4">
             <OrderStats
-                totalOrders={summary?.total ?? 0}
+                totalOrders={summary?.totalOrders ?? 0}
                 activeOrders={summary?.active ?? 0}
-                totalRevenue={summary?.totalRevenue ?? 0}
-                avgOrderValue={summary?.avgvalue ?? 0}
+                pendingOrders={summary?.pending ?? 0}
+                completedOrders={summary?.completed ?? 0}
             />
             <OrderSearchFilters />
 
