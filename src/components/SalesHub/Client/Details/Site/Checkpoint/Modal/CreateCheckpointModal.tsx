@@ -46,14 +46,14 @@ const CreateCheckpointModal = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" size="sm" variant="secondary">
+        <Button type="button" size="sm">
           <Plus />
-          Add Checkpoint
+          Add {subSiteId ? "Sub-Site" : "Site"} Checkpoint
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Create Checkpoint</DialogTitle>
+          <DialogTitle>Create {subSiteId ? "Sub-Site" : "Site"} Checkpoint</DialogTitle>
           <DialogDescription>
             Add a checkpoint to with GPS coordinates and QR code
           </DialogDescription>

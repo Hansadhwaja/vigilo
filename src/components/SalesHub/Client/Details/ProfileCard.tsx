@@ -12,9 +12,7 @@ interface Props {
 const ProfileCard = ({ client }: Props) => {
   return (
     <Card className="overflow-hidden rounded-3xl border-slate-200 shadow-sm p-0">
-      <div className="h-32 bg-linear-to-r from-primary/15 via-primary/5 to-transparent" />
-
-      <CardContent className="-mt-12 relative px-6 pb-6 sm:px-8">
+      <CardContent className="p-4">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
             <UserAvatar

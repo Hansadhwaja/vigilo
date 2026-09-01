@@ -57,22 +57,14 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
     () => [
       {
         name: "name",
-        label: (
-          <>
-            Company Name <span className="text-destructive">*</span>
-          </>
-        ),
+        label: "Company Name",
         render: (field) => (
           <Input {...field} placeholder="Enter company name" />
         ),
       },
       {
         name: "email",
-        label: (
-          <>
-            Email Address <span className="text-destructive">*</span>
-          </>
-        ),
+        label: "Email Address",
         render: (field) => (
           <Input
             {...field}
@@ -84,11 +76,7 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
       },
       {
         name: "mobile",
-        label: (
-          <>
-            Mobile Number <span className="text-destructive">*</span>
-          </>
-        ),
+        label: "Mobile Number",
         render: (field) => (
           <Input
             {...field}
@@ -100,11 +88,7 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
       },
       {
         name: "password",
-        label: (
-          <>
-            Password <span className="text-destructive">*</span>
-          </>
-        ),
+        label: "Password",
         render: (field) => (
           <PasswordInput
             {...field}
@@ -115,11 +99,7 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
       },
       {
         name: "confirmPassword",
-        label: (
-          <>
-            Confirm Password <span className="text-destructive">*</span>
-          </>
-        ),
+        label: "Confirm Password",
         render: (field) => (
           <PasswordInput
             {...field}
@@ -130,17 +110,14 @@ const RegisterForm = ({ onSubmit, isLoading }: RegisterFormProps) => {
       },
       {
         name: "address",
-        label: (
-          <>
-            Address <span className="text-destructive">*</span>
-          </>
-        ),
+        label: "Address",
         className: "sm:col-span-2",
         render: (field) => (
           <Textarea
             {...field}
             placeholder="Enter company address"
             autoComplete="street-address"
+            className="h-28 resize-none overflow-y-auto"
           />
         ),
       },

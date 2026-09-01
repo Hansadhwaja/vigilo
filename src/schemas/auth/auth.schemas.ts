@@ -1,28 +1,15 @@
 import { z } from "zod";
-
-const passwordSchema = z
-  .string()
-  .min(6, "Password must be at least 6 characters")
-  .regex(/^\S+$/, "Password must not contain spaces")
-  .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-  .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-  .regex(/[0-9]/, "Password must contain at least one number")
-  .regex(
-    /[^A-Za-z0-9]/,
-    "Password must contain at least one special character",
-  );
+import { addressSchema, emailSchema, mobileSchema, passwordSchema } from "../common.schemas";
 
 export const registerSchema = z
   .object({
     name: z.string().min(1, "Company name is required"),
 
-    email: z.email("Please enter a valid email address"),
+    email: emailSchema,
 
-    mobile: z
-      .string()
-      .regex(/^04\d{8}$/, "Enter a valid Australian mobile number"),
+    mobile: mobileSchema,
 
-    address: z.string().min(1, "Address is required"),
+    address: addressSchema,
 
     password: passwordSchema,
 
@@ -36,7 +23,7 @@ export const registerSchema = z
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export const loginSchema = z.object({
-  email: z.email("Please enter a valid email address"),
+  email: emailSchema,
   password: passwordSchema,
 });
 

@@ -3,12 +3,15 @@ import { Button } from "@/components/ui/button";
 import {
   ChevronDown,
   ChevronRight,
+  Clock3,
+  DollarSign,
   MapPin,
 } from "lucide-react";
 import { useState } from "react";
 import CheckpointCard from "../Checkpoint/CheckpointCard";
 import CreateCheckpointModal from "../Checkpoint/Modal/CreateCheckpointModal";
 import DeleteSubSiteModal from "./Modal/DeleteSubSiteModal";
+import { formatCurrency } from "@/lib/utils";
 
 interface SubSiteCardProps {
   subSite: {
@@ -18,13 +21,15 @@ interface SubSiteCardProps {
     status?: string;
     isActive?: boolean;
     isCompleted?: boolean;
+    unitPrice?: number;
+    estimatedDuration?: number;
     totalCheckpoints?: number;
     checkpoints?: any[];
   };
   siteId: string;
 }
 
-const SubSiteCard = ({ subSite, siteId }: SubSiteCardProps) => {
+const SubSiteCard = ({ subSite }: SubSiteCardProps) => {
   const [open, setOpen] = useState(true);
 
   return (
@@ -56,9 +61,9 @@ const SubSiteCard = ({ subSite, siteId }: SubSiteCardProps) => {
           </div>
 
           {subSite.address && (
-            <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-              <MapPin className="size-3.5" />
-              {subSite.address}
+            <div className="mt-1 flex items-start gap-1.5 text-xs text-slate-500">
+              <MapPin className="mt-0.5 size-3.5 shrink-0" />
+              <span>{subSite.address}</span>
             </div>
           )}
         </div>
@@ -68,6 +73,42 @@ const SubSiteCard = ({ subSite, siteId }: SubSiteCardProps) => {
         </div>
       </div>
 
+      {/* Sub-site Details */}
+      <div className="mt-4 ml-11 grid grid-cols-2 gap-3">
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <div className="flex items-center gap-2">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-50">
+              <DollarSign className="size-3.5 text-emerald-600" />
+            </div>
+
+            <div>
+              <p className="text-[11px] text-slate-500">Unit Price</p>
+
+              <p className="text-sm font-semibold text-slate-800">
+                {formatCurrency(subSite.unitPrice ?? 0)}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <div className="flex items-center gap-2">
+            <div className="flex size-7 items-center justify-center rounded-lg bg-blue-50">
+              <Clock3 className="size-3.5 text-blue-600" />
+            </div>
+
+            <div>
+              <p className="text-[11px] text-slate-500">Est. Duration</p>
+
+              <p className="text-sm font-semibold text-slate-800">
+                {subSite.estimatedDuration ?? 0} mins
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Checkpoints */}
       {open && (
         <div className="mt-4 ml-11 border-l-2 border-slate-200 pl-4">
           <div className="mb-3 flex items-center justify-between">

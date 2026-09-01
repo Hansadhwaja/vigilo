@@ -15,11 +15,7 @@ import type { ProfileFormValues } from "@/schemas/profile/profile.schema";
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  profile: {
-    name: string;
-    mobile: string;
-    address: string;
-  };
+  profile: ProfileFormValues;
 }
 
 export default function EditProfileModal({

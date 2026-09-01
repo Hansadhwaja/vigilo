@@ -1,4 +1,11 @@
 import { z } from "zod";
+import {
+  addressSchema,
+  descriptionSchema,
+  emailSchema,
+  mobileSchema,
+  passwordSchema,
+} from "./common.schemas";
 
 const dateString = z
   .string()
@@ -234,11 +241,11 @@ export type RejectOrderFormValues = z.infer<typeof rejectOrderSchema>;
 
 export const clientSchema = z.object({
   name: z.string().min(1, "Please Enter Name"),
-  email: z.string().min(1, "Please Enter Email"),
-  mobile: z.string().min(1, "Please Enter Mobile"),
-  address: z.string().min(1, "Please Enter Address"),
+  email: emailSchema,
+  mobile: mobileSchema,
+  address: addressSchema,
   avatar: z.string().optional(),
-  password: z.string().min(1, "Please Enter Password"),
+  password: passwordSchema,
 });
 
 export type ClientFormValues = z.infer<typeof clientSchema>;
@@ -246,9 +253,9 @@ export type ClientFormValues = z.infer<typeof clientSchema>;
 //HR & Compliance
 export const guardSchema = z.object({
   name: z.string().min(1, "Please Enter Name"),
-  email: z.string().min(1, "Please Enter Email"),
-  mobile: z.string().min(1, "Please Enter Mobile"),
-  password: z.string().min(1, "Please Enter Password"),
+  email: emailSchema,
+  mobile: mobileSchema,
+  password: passwordSchema,
 });
 
 export type GuardFormValues = z.infer<typeof guardSchema>;
@@ -322,10 +329,7 @@ export const checkpointSchema = z.object({
 
   priority: z.enum(["high", "medium", "low"]),
 
-  checkpointDescription: z
-    .string()
-    .min(5, "Description must be at least 5 characters")
-    .max(500, "Description cannot exceed 500 characters"),
+  checkpointDescription: descriptionSchema,
 });
 
 export type CheckpointFormValues = z.infer<typeof checkpointSchema>;
@@ -337,10 +341,7 @@ export const subSiteSchema = z.object({
 
   estimatedDuration: z.number().min(1, "Duration must be at least 1 minute"),
 
-  description: z
-    .string()
-    .min(10, "Description must be at least 10 characters")
-    .max(500, "Description is too long"),
+  description: descriptionSchema,
 });
 
 export type SubSiteFormValues = z.infer<typeof subSiteSchema>;
@@ -381,7 +382,7 @@ export type PatrolFormValues = z.infer<typeof patrolSchema>;
 export const siteSchema = z.object({
   name: z.string().min(1, "Site name is required"),
 
-  address: z.string().min(1, "Address is required"),
+  address: addressSchema,
 
   description: z.string().optional(),
   coordinates: z.object({

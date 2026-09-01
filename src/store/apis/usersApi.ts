@@ -110,7 +110,7 @@ export const usersApi = baseApi.injectEndpoints({
         url: `/users/getClientById/${id}`,
         method: "GET",
       }),
-      providesTags: (_result, _error, id) => [{ type: "Clients", id }],
+      providesTags:["Clients"]
     }),
 
     // Edit client
@@ -123,10 +123,7 @@ export const usersApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: (_result, _error, { id }) => [
-        { type: "Clients", id },
-        { type: "Clients", id: "LIST" },
-      ],
+      invalidatesTags: ["Clients"]
     }),
 
     // Delete client
@@ -136,7 +133,7 @@ export const usersApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: [{ type: "Clients", id: "LIST" }],
+      invalidatesTags: ["Clients"]
     }),
 
     // Upload single image

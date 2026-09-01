@@ -8,16 +8,12 @@ import {
   MapPin,
 } from "lucide-react";
 import { useState } from "react";
-
-import type {
-  PatrolSiteFull,
-  PatrolSubSiteWithCheckpoints,
-} from "@/store/apis/patrollingAPI";
 import CheckpointCard from "./Checkpoint/CheckpointCard";
 import SubSiteCard from "./SubSite/SubSiteCard";
 import CreateSubSiteModal from "./SubSite/Modal/CreateSubSiteModal";
 import CreateCheckpointModal from "./Checkpoint/Modal/CreateCheckpointModal";
 import DeleteSiteModal from "./Modal/DeleteSiteModal";
+import { PatrolSiteFull } from "@/types/patrolling/patrolling.types";
 
 const SiteCard = ({ site }: { site: PatrolSiteFull }) => {
   const [open, setOpen] = useState(true);
@@ -51,10 +47,9 @@ const SiteCard = ({ site }: { site: PatrolSiteFull }) => {
                 </Badge>
               )}
             </div>
-
-            <div className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
-              <MapPin className="size-3.5" />
-              {site.address}
+            <div className="mt-1 flex items-start gap-1.5 text-sm text-slate-500">
+              <MapPin className="mt-0.5 size-3.5 shrink-0" />
+              <span>{site.address}</span>
             </div>
           </div>
 
@@ -74,6 +69,23 @@ const SiteCard = ({ site }: { site: PatrolSiteFull }) => {
             </Button>
           </div>
         </div>
+
+        {site.description && (
+          <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+            <div className="mb-2">
+              <h4 className="text-sm font-semibold text-slate-800">
+                Site Description
+              </h4>
+              <p className="text-xs text-slate-500">
+                Additional information and requirements for this site.
+              </p>
+            </div>
+
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
+              {site.description}
+            </p>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -153,7 +165,7 @@ const SiteCard = ({ site }: { site: PatrolSiteFull }) => {
             </div>
 
             <div className="space-y-3">
-              {subSites.map((subSite: PatrolSubSiteWithCheckpoints) => (
+              {subSites.map((subSite) => (
                 <SubSiteCard
                   key={subSite.id}
                   subSite={subSite}

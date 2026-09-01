@@ -12,8 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import ClientForm from "../Form/ClientForm";
-import {  useCreateUserByAdminMutation,
-} from "@/store/apis/usersApi";
+import { useCreateUserByAdminMutation } from "@/store/apis/usersApi";
 import { ClientFormValues } from "@/schemas";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -27,10 +26,13 @@ const AddClientModal = () => {
       await createUserByAdmin(data).unwrap();
       setOpen(false);
       toast.success("Client added successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
-
-      toast.error("Failed to add client");
+      const message =
+        error?.data?.error?.message ||
+        error?.data?.message ||
+        "Failed to add client";
+      toast.error(message);
     }
   };
 

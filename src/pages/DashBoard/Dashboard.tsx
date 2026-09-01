@@ -24,7 +24,6 @@ export default function Dashboard() {
         <>
           <DashboardStats
             activeAlarmsCount={dashboardData?.activeAlarms ?? 0}
-            onDutyGuardsCount={dashboardData?.onDutyGuards ?? 0}
             activeShiftsCount={dashboardData?.activeShifts ?? 0}
             activeOrdersCount={dashboardData?.activeOrders ?? 0}
             activePatrolsCount={dashboardData?.activePatrols ?? 0}

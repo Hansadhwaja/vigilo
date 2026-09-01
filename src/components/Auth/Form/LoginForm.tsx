@@ -49,11 +49,7 @@ export const LoginForm = ({ onSubmit, isLoading = false }: Props) => {
     () => [
       {
         name: "email",
-        label: (
-          <>
-            Email Address <span className="text-destructive">*</span>
-          </>
-        ),
+        label: "Email Address",
         render: (field) => (
           <Input
             {...field}
@@ -66,11 +62,7 @@ export const LoginForm = ({ onSubmit, isLoading = false }: Props) => {
       },
       {
         name: "password",
-        label: (
-          <>
-            Password <span className="text-destructive">*</span>
-          </>
-        ),
+        label: "Password",
         render: (field) => (
           <PasswordInput
             {...field}

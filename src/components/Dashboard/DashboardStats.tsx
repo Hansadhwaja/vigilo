@@ -1,17 +1,13 @@
 import {
-  AlertTriangle,
   Bell,
   Briefcase,
   Clock,
-  DollarSign,
   MapPinned,
-  Users,
 } from "lucide-react";
 import StatCards from "../common/StatCard/StatCards";
 
 interface Props {
   activeAlarmsCount: number;
-  onDutyGuardsCount: number;
   activeShiftsCount: number;
   activeOrdersCount: number;
   activePatrolsCount: number;
@@ -19,19 +15,11 @@ interface Props {
 
 const DashboardStats = ({
   activeAlarmsCount,
-  onDutyGuardsCount,
   activeShiftsCount,
   activeOrdersCount,
   activePatrolsCount,
 }: Props) => {
   const stats = [
-    {
-      Icon: Users,
-      label: "On Duty Guards",
-      value: onDutyGuardsCount,
-      to: "/hr",
-      color: "bg-blue-100 text-blue-700",
-    },
     {
       Icon: Clock,
       label: "Active Shifts",
@@ -57,7 +45,7 @@ const DashboardStats = ({
       Icon: Briefcase,
       label: "Active Orders",
       value: activeOrdersCount,
-      to: "/clients",
+      to: "/sales",
       color: "bg-orange-100 text-orange-700",
     },
   ];

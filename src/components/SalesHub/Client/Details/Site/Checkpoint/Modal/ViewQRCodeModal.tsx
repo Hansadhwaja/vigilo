@@ -10,8 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Copy, Download, MapPin, QrCode, Shield, Wifi } from "lucide-react";
 import { toast } from "sonner";
-
-import type { PatrolCheckpoint } from "@/store/apis/patrollingAPI";
+import { PatrolCheckpoint } from "@/types/patrolling/patrolling.types";
 
 interface ViewQRCodeModalProps {
   selectedCheckpoint: PatrolCheckpoint;
@@ -34,17 +33,35 @@ const ViewQRCodeModal = ({ selectedCheckpoint }: ViewQRCodeModalProps) => {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!selectedCheckpoint?.qr?.qrUrl) {
       toast.error("QR code is not available");
       return;
     }
 
-    const link = document.createElement("a");
-    link.href = selectedCheckpoint.qr.qrUrl;
-    link.download = `${selectedCheckpoint.name}-qr.svg`;
-    link.target = "_blank";
-    link.click();
+    try {
+      const response = await fetch(selectedCheckpoint.qr.qrUrl);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch QR code");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${selectedCheckpoint.name}-qr.svg`;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("QR download failed:", error);
+      toast.error("Failed to download QR code");
+    }
   };
 
   return (
@@ -63,7 +80,7 @@ const ViewQRCodeModal = ({ selectedCheckpoint }: ViewQRCodeModalProps) => {
 
       <DialogContent className="max-w-md rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 w-[80%]">
             <QrCode className="size-5" />
             QR Code: {selectedCheckpoint.name}
           </DialogTitle>

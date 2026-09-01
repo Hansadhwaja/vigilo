@@ -1,6 +1,12 @@
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 import {
   ChartConfig,
@@ -19,7 +25,7 @@ interface Props {
 const chartConfig = {
   count: {
     label: "Patrols Completed",
-    color: "var(--primary)",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 
@@ -52,7 +58,25 @@ const PatrolCompletionChart = ({ data }: Props) => {
               tickMargin={8}
             />
 
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+            <ChartTooltip
+              cursor={false}
+              content={
+                <ChartTooltipContent
+                  formatter={(value, name) => (
+                    <div className="flex w-full items-center justify-between gap-8">
+                      <span className="text-muted-foreground">
+                        {chartConfig[name as keyof typeof chartConfig]?.label ??
+                          name}
+                      </span>
+
+                      <span className="font-semibold tabular-nums">
+                        {value}
+                      </span>
+                    </div>
+                  )}
+                />
+              }
+            />
 
             <Bar
               dataKey="count"

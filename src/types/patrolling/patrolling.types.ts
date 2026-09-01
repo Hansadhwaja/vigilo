@@ -43,7 +43,7 @@ export interface PatrolCheckpoint {
 export interface PatrolSubSite {
   id: string;
   name: string;
-  unitPrice: string;
+  unitPrice: number;
   estimatedDuration: number;
   description: string;
   status: string;

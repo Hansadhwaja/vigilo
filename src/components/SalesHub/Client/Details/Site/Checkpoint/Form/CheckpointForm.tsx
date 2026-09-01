@@ -1,4 +1,4 @@
-import { FormProvider, useForm, Controller } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import Loader from "@/components/common/Loader";
@@ -7,13 +7,7 @@ import IconInput from "@/components/common/Input/IconInput";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { FieldDescription, FieldGroup } from "@/components/ui/field";
 
 import {
   Select,
@@ -26,6 +20,7 @@ import {
 import { MapPin, Wifi } from "lucide-react";
 
 import { checkpointSchema, CheckpointFormValues } from "@/schemas";
+import { FormField } from "@/components/common/Form/FormField";
 
 interface CheckpointFormProps {
   isLoading: boolean;
@@ -72,90 +67,65 @@ const CheckpointForm = ({
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(onFormSubmit)}>
         <FieldGroup className="space-y-5">
-          {/* Checkpoint Name */}
-          <Controller
+          <FormField
             name="name"
             control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel>Checkpoint Name</FieldLabel>
-
-                <IconInput
-                  Icon={MapPin}
-                  placeholder="e.g., Main Gate Security Point"
-                  value={field.value}
-                  onChange={field.onChange}
-                />
-
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+            label="Checkpoint Name"
+            render={(field) => (
+              <IconInput
+                Icon={MapPin}
+                placeholder="e.g., Main Gate Security Point"
+                value={field.value}
+                onChange={field.onChange}
+              />
             )}
           />
 
-          {/* Coordinates */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Controller
+            <FormField
               name="checkpointLat"
               control={control}
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel>GPS Latitude</FieldLabel>
-
-                  <IconInput
-                    Icon={MapPin}
-                    type="number"
-                    step="0.000001"
-                    placeholder="-37.8136"
-                    value={field.value}
-                    onChange={(value) =>
-                      field.onChange(value === "" ? 0 : Number(value))
-                    }
-                  />
-
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
+              label="GPS Latitude"
+              render={(field) => (
+                <IconInput
+                  Icon={MapPin}
+                  type="number"
+                  step="0.000001"
+                  placeholder="-37.8136"
+                  value={field.value}
+                  onChange={(value) =>
+                    field.onChange(value === "" ? 0 : Number(value))
+                  }
+                />
               )}
             />
 
-            <Controller
+            <FormField
               name="checkpointLng"
               control={control}
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel>GPS Longitude</FieldLabel>
-
-                  <IconInput
-                    Icon={MapPin}
-                    type="number"
-                    step="0.000001"
-                    placeholder="144.9631"
-                    value={field.value}
-                    onChange={(value) =>
-                      field.onChange(value === "" ? 0 : Number(value))
-                    }
-                  />
-
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
+              label="GPS Longitude"
+              render={(field) => (
+                <IconInput
+                  Icon={MapPin}
+                  type="number"
+                  step="0.000001"
+                  placeholder="144.9631"
+                  value={field.value}
+                  onChange={(value) =>
+                    field.onChange(value === "" ? 0 : Number(value))
+                  }
+                />
               )}
             />
           </div>
 
-          {/* Range + Priority */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <Controller
+            <FormField
               name="range"
               control={control}
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel>Verification Range (meters)</FieldLabel>
-
+              label="Verification Range (meters)"
+              render={(field) => (
+                <>
                   <IconInput
                     Icon={Wifi}
                     type="number"
@@ -170,66 +140,46 @@ const CheckpointForm = ({
                   <FieldDescription>
                     GPS tolerance for QR scan verification.
                   </FieldDescription>
-
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
+                </>
               )}
             />
 
-            <Controller
+            <FormField
               name="priority"
               control={control}
-              render={({ field, fieldState }) => (
-                <Field>
-                  <FieldLabel>Priority Level</FieldLabel>
+              label="Priority Level"
+              render={(field) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
 
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High Priority</SelectItem>
 
-                    <SelectContent>
-                      <SelectItem value="high">High Priority</SelectItem>
+                    <SelectItem value="medium">Medium Priority</SelectItem>
 
-                      <SelectItem value="medium">Medium Priority</SelectItem>
-
-                      <SelectItem value="low">Low Priority</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
+                    <SelectItem value="low">Low Priority</SelectItem>
+                  </SelectContent>
+                </Select>
               )}
             />
           </div>
 
-          {/* Description */}
-          <Controller
+          <FormField
             name="checkpointDescription"
             control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel>Description</FieldLabel>
-
-                <Textarea
-                  {...field}
-                  rows={4}
-                  placeholder="Specific instructions or details for this checkpoint..."
-                />
-
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+            label="Description"
+            render={(field) => (
+              <Textarea
+                {...field}
+                className="h-28 resize-none overflow-y-auto"
+                placeholder="Specific instructions or details for this checkpoint..."
+              />
             )}
           />
         </FieldGroup>
 
-        {/* Actions */}
         <div className="flex justify-end gap-3 pt-6">
           <Button
             type="button"

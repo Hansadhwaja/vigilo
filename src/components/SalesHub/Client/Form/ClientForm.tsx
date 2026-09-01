@@ -1,18 +1,18 @@
 "use client";
 
-import { FormProvider, useForm, Controller } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 import ImageUpload from "@/components/common/Image/ImageUpload";
-import { useEffect } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import PasswordInput from "@/components/common/Input/PasswordInput";
+import { FormField } from "@/components/common/Form/FormField";
+
 import { ClientFormValues, clientSchema } from "@/schemas";
 import { Client } from "@/store/apis/usersApi";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import PasswordInput from "@/components/common/Input/PasswordInput";
 
 interface ClientFormProps {
   initialData?: Client;
@@ -52,78 +52,54 @@ const ClientForm = ({
     <FormProvider {...form}>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="space-y-4">
-          <Controller
+          <FormField
+            control={control}
             name="name"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel>Full Name</FieldLabel>
-                <Input {...field} placeholder="Full Name" />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
+            label="Full Name"
+            render={(field) => <Input {...field} placeholder="Full Name" />}
           />
 
-          <Controller
+          <FormField
+            control={control}
             name="email"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel>Email</FieldLabel>
-                <Input
-                  disabled={isEdit}
-                  {...field}
-                  type="email"
-                  placeholder="Email"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+            label="Email"
+            render={(field) => (
+              <Input
+                {...field}
+                disabled={isEdit}
+                type="email"
+                placeholder="Email"
+              />
             )}
           />
 
-          <Controller
+          <FormField
+            control={control}
             name="mobile"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel>Mobile Number</FieldLabel>
-                <Input {...field} placeholder="Mobile Number" />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
+            label="Mobile Number"
+            render={(field) => <Input {...field} placeholder="Mobile Number" />}
           />
 
-          <Controller
+          <FormField
+            control={control}
             name="password"
-            control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel>Password</FieldLabel>
-                <PasswordInput {...field} placeholder="Password" />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+            label="Password"
+            required={!isEdit}
+            render={(field) => (
+              <PasswordInput {...field} placeholder="Password" />
             )}
           />
 
-          <Controller
-            name="address"
+          <FormField
             control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel>Address</FieldLabel>
-                <Textarea {...field} placeholder="Address" />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+            name="address"
+            label="Address"
+            render={(field) => (
+              <Textarea
+                {...field}
+                placeholder="Address"
+                className="h-28 resize-none overflow-y-auto"
+              />
             )}
           />
 

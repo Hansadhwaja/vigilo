@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+
 import Loader from "@/components/common/Loader";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+
 import { siteSchema, SiteFormValues } from "@/schemas";
+import { FormField } from "@/components/common/Form/FormField";
 
 interface SiteFormProps {
   initialData?: SiteFormValues;
@@ -58,97 +61,69 @@ const SiteForm = ({
   return (
     <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
       <div className="space-y-4">
-        <Controller
+        <FormField
           name="name"
           control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Site Name</FieldLabel>
-
-              <Input {...field} placeholder="e.g., Airport Terminal Complex" />
-
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          label="Site Name"
+          render={(field) => (
+            <Input {...field} placeholder="e.g., Airport Terminal Complex" />
           )}
         />
 
-        <Controller
+        <FormField
           name="address"
           control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Address</FieldLabel>
-
-              <Textarea
-                {...field}
-                placeholder="Full address of the site..."
-                rows={2}
-              />
-
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          label="Address"
+          render={(field) => (
+            <Textarea
+              {...field}
+              placeholder="Full address of the site..."
+              className="h-28 resize-none overflow-y-auto"
+            />
           )}
         />
 
         <div className="grid grid-cols-2 gap-4">
-          <Controller
+          <FormField
             name="coordinates.lat"
             control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel>Latitude</FieldLabel>
-
-                <Input
-                  {...field}
-                  type="number"
-                  step="any"
-                  placeholder="-37.8136"
-                />
-
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+            label="Latitude"
+            render={(field) => (
+              <Input
+                {...field}
+                type="number"
+                step="any"
+                placeholder="-37.8136"
+              />
             )}
           />
 
-          <Controller
+          <FormField
             name="coordinates.lng"
             control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel>Longitude</FieldLabel>
-
-                <Input
-                  {...field}
-                  type="number"
-                  step="any"
-                  placeholder="144.9631"
-                />
-
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+            label="Longitude"
+            render={(field) => (
+              <Input
+                {...field}
+                type="number"
+                step="any"
+                placeholder="144.9631"
+              />
             )}
           />
         </div>
 
-        <Controller
+        <FormField
           name="description"
           control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Description</FieldLabel>
-
-              <Textarea
-                {...field}
-                placeholder="Description of the site and security requirements..."
-                rows={3}
-              />
-
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          label="Description"
+          required={false}
+          render={(field) => (
+            <Textarea
+              {...field}
+              placeholder="Description of the site and security requirements..."
+              className="h-28 resize-none overflow-y-auto"
+            />
           )}
         />
       </div>
