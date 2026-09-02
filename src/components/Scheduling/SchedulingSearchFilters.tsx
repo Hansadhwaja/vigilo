@@ -1,4 +1,8 @@
-import { useMemo } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useGetAllGuardsQuery } from "@/store/apis/guardsApi";
 import { useGetAllOrdersQuery } from "@/store/apis/ordersApi";
 
@@ -16,11 +20,13 @@ const SchedulingSearchFilters = () => {
   const orderId = getParam("orderId");
   const role = getParam("role");
 
-  const { data: guardsResponse, isLoading: isGuardsLoading } = useGetAllGuardsQuery();
+  const { data: guardsResponse, isLoading: isGuardsLoading } =
+    useGetAllGuardsQuery();
 
-  const { data: ordersResponse, isLoading: isOrdersLoading } = useGetAllOrdersQuery({
-    status: "ongoing"
-  });
+  const { data: ordersResponse, isLoading: isOrdersLoading } =
+    useGetAllOrdersQuery({
+      status: "active",
+    });
 
   const guards = guardsResponse?.data ?? [];
   const orders = ordersResponse?.data ?? [];
@@ -79,13 +85,21 @@ const SchedulingSearchFilters = () => {
     {
       key: "order",
       type: "select",
-      placeholder: "Select Site",
+      placeholder: "Select Location Name",
       value: orderId,
       width: "w-[220px]",
       onChange: handleOrderChange,
       options: orders.map((order) => ({
         label: (
-          <p className="truncate max-w-40">{order.locationAddress}</p>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="truncate max-w-40 cursor-default">
+                {order.locationName}
+              </p>
+            </TooltipTrigger>
+
+            <TooltipContent>{order.locationName}</TooltipContent>
+          </Tooltip>
         ),
         value: order.id,
       })),
@@ -93,7 +107,7 @@ const SchedulingSearchFilters = () => {
     {
       key: "role",
       type: "select",
-      placeholder: "Select Role",
+      placeholder: "Select Service Type",
       value: role,
       width: "w-[160px]",
       onChange: handleRoleChange,

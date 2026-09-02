@@ -4,16 +4,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { useState } from "react";
-
 import OrderForm from "../Form/OrderForm";
-
-import { Button } from "@/components/ui/button";
-
-import { Edit, FilePenLine } from "lucide-react";
+import { FilePenLine } from "lucide-react";
 
 import { Order, useEditOrderMutation } from "@/store/apis/ordersApi";
 
@@ -23,9 +17,13 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
 
-const EditOrderModal = ({ order }: { order: Order }) => {
-  const [open, setOpen] = useState(false);
+interface Props {
+  order: Order;
+  open: boolean;
+  setOpen: (v: boolean) => void;
+}
 
+const EditOrderModal = ({ order, open, setOpen }: Props) => {
   const [editOrder, { isLoading }] = useEditOrderMutation();
 
   const [siteServiceLat, siteServiceLng] = order.siteService.coordinates;
@@ -67,23 +65,6 @@ const EditOrderModal = ({ order }: { order: Order }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="
-                        w-full justify-start rounded-xl
-                        px-3 py-2 text-slate-700
-                        transition-all
-                        hover:bg-orange-50
-                        hover:text-orange-600
-                    "
-        >
-          <Edit className="mr-2 h-4 w-4" />
-          Edit Order
-        </Button>
-      </DialogTrigger>
-
       <DialogContent
         className="
                     max-h-[92vh] w-full sm:min-w-2xl overflow-hidden
@@ -103,7 +84,7 @@ const EditOrderModal = ({ order }: { order: Order }) => {
           <div className="absolute inset-0 bg-black/5" />
 
           <DialogHeader className="relative space-y-3">
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center w-[90%]">
               <div
                 className="
                                 flex h-14 w-14 items-center

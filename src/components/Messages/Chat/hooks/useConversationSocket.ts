@@ -1,16 +1,9 @@
-import { useAppSelector } from "@/store/hooks";
-import { useEffect, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
-
-const SOCKET_BASE_URL = import.meta.env.VITE_SOCKET_BASE_URL ?? "";
-
-const SOCKET_HEARTBEAT_MS = 30000;
+import { useEffect, useRef } from "react";
+import { useSocket } from "@/lib/hooks/useSocket";
 
 interface Props {
   authUserId: string;
-
   activeConversationId: string;
-
   refetchMessages: () => unknown;
 }
 
@@ -19,54 +12,29 @@ export const useConversationSocket = ({
   activeConversationId,
   refetchMessages,
 }: Props) => {
-  const socketRef = useRef<Socket | null>(null);
+  const { socketRef, socketConnected } = useSocket();
 
   const activeConversationRef = useRef(activeConversationId);
-
-  const [socketConnected, setSocketConnected] = useState(false);
 
   useEffect(() => {
     activeConversationRef.current = activeConversationId;
   }, [activeConversationId]);
 
+  // Message listeners
   useEffect(() => {
-    const token = useAppSelector((state) => state.auth.token);
+    const socket = socketRef.current;
 
-    if (!token || !authUserId) return;
+    if (!socket || !socketConnected || !authUserId) {
+      return;
+    }
 
-    const socket = io(SOCKET_BASE_URL, {
-      transports: ["polling", "websocket"],
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      timeout: 20000,
-    });
-
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      setSocketConnected(true);
-
-      socket.emit("register", {
-        token,
-      });
-
-      if (activeConversationRef.current) {
-        socket.emit("joinConversation", activeConversationRef.current);
-      }
-    });
-
-    socket.on("disconnect", () => {
-      setSocketConnected(false);
-    });
-
-    socket.on("newMessage", (payload) => {
+    const handleNewMessage = (payload: any) => {
       if (payload?.conversationId === activeConversationRef.current) {
         refetchMessages();
       }
-    });
+    };
 
-    socket.on("receiveMessage", (payload) => {
+    const handleReceiveMessage = (payload: any) => {
       if (payload?.conversationId === activeConversationRef.current) {
         refetchMessages();
 
@@ -75,56 +43,57 @@ export const useConversationSocket = ({
           conversationId: payload.conversationId,
         });
       }
-    });
+    };
 
-    socket.on("messageUpdated", (payload) => {
+    const handleMessageUpdated = (payload: any) => {
       if (payload?.conversationId === activeConversationRef.current) {
         refetchMessages();
       }
-    });
+    };
 
-    socket.on("messageDeleted", (payload) => {
+    const handleMessageDeleted = (payload: any) => {
       if (payload?.conversationId === activeConversationRef.current) {
         refetchMessages();
       }
-    });
+    };
 
-    socket.on("messageSeen", (payload) => {
+    const handleMessageSeen = (payload: any) => {
       if (payload?.conversationId === activeConversationRef.current) {
         refetchMessages();
       }
-    });
+    };
 
-    const heartbeatTimer = window.setInterval(() => {
-      if (socket.connected) {
-        socket.emit("presence:heartbeat");
-      }
-    }, SOCKET_HEARTBEAT_MS);
+    socket.on("newMessage", handleNewMessage);
+    socket.on("receiveMessage", handleReceiveMessage);
+    socket.on("messageUpdated", handleMessageUpdated);
+    socket.on("messageDeleted", handleMessageDeleted);
+    socket.on("messageSeen", handleMessageSeen);
 
     return () => {
-      window.clearInterval(heartbeatTimer);
-
-      socket.removeAllListeners();
-
-      socket.disconnect();
-
-      socketRef.current = null;
-
-      setSocketConnected(false);
+      socket.off("newMessage", handleNewMessage);
+      socket.off("receiveMessage", handleReceiveMessage);
+      socket.off("messageUpdated", handleMessageUpdated);
+      socket.off("messageDeleted", handleMessageDeleted);
+      socket.off("messageSeen", handleMessageSeen);
     };
-  }, [authUserId, refetchMessages]);
+  }, [socketConnected, authUserId, refetchMessages, socketRef]);
 
+  // Join active conversation
   useEffect(() => {
-    if (!activeConversationId || !socketConnected || !socketRef.current) return;
+    const socket = socketRef.current;
 
-    socketRef.current.emit("joinConversation", activeConversationId);
-  }, [activeConversationId, socketConnected]);
+    if (!socket || !socketConnected || !activeConversationId) {
+      return;
+    }
+
+    console.log("[ConversationSocket] Joining:", activeConversationId);
+
+    socket.emit("joinConversation", activeConversationId);
+  }, [activeConversationId, socketConnected, socketRef]);
 
   return {
     socketRef,
-
     socketConnected,
-
     activeConversationRef,
   };
 };

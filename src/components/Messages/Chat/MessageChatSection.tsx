@@ -12,143 +12,95 @@ import { useMessageSeen } from "./hooks/useMessageSeen";
 import { usePresenceSync } from "./hooks/usePresenceSync";
 
 interface MessageChatSectionProps {
-    activeConversationId: string;
+  activeConversationId: string;
 
-    selectedGuard: Guard | null;
+  selectedGuard: Guard | null;
 
-    authUserId: string;
+  authUserId: string;
 
-    isOpeningConversation: boolean;
+  isOpeningConversation: boolean;
 
-    presenceMap: Map<string, PresenceItem>;
+  presenceMap: Map<string, PresenceItem>;
 
-    setLivePresenceByUserId:
-    Dispatch<
-        SetStateAction<
-            Record<
-                string,
-                PresenceUpdateEvent
-            >
-        >
-    >;
+  setLivePresenceByUserId: Dispatch<
+    SetStateAction<Record<string, PresenceUpdateEvent>>
+  >;
 }
 
 const MessageChatSection = ({
-    activeConversationId,
-    selectedGuard,
-    authUserId,
-    presenceMap,
-    setLivePresenceByUserId,
-    isOpeningConversation,
+  activeConversationId,
+  selectedGuard,
+  authUserId,
+  presenceMap,
+  setLivePresenceByUserId,
+  isOpeningConversation,
 }: MessageChatSectionProps) => {
-    // messages
-    const {
-        messageList,
-        refetchMessages,
-        isMessagesFetching,
-    } = useConversationMessages(
-        activeConversationId
-    );
+  // messages
+  const { messageList, refetchMessages, isMessagesFetching } =
+    useConversationMessages(activeConversationId);
 
-    // socket
-    const {
-        socketRef,
-        activeConversationRef,
-    } = useConversationSocket({
-        authUserId,
-        activeConversationId,
-        refetchMessages,
+  // socket
+  const { socketRef, activeConversationRef } = useConversationSocket({
+    authUserId,
+    activeConversationId,
+    refetchMessages,
+  });
+
+  // typing
+  const { isOtherTyping, shouldEmitTypingRef, typingTimeoutRef } =
+    useTypingIndicator({
+      socketRef,
+      activeConversationId,
+      selectedGuard,
     });
 
-    // typing
-    const {
-        isOtherTyping,
-        shouldEmitTypingRef,
-        typingTimeoutRef,
-    } = useTypingIndicator({
-        socketRef,
-        activeConversationId,
-        selectedGuard,
-    });
+  // seen
+  useMessageSeen({
+    socketRef,
+    activeConversationId,
+    messageList,
+  });
 
-    // seen
-    useMessageSeen({
-        socketRef,
-        activeConversationId,
-        messageList,
-    });
+  // presence sync
+  usePresenceSync({
+    socketRef,
+    setLivePresenceByUserId,
+  });
 
-    // presence sync
-    usePresenceSync({
-        socketRef,
-        setLivePresenceByUserId,
-    });
+  // selected user presence
+  const selectedPresence = selectedGuard
+    ? presenceMap.get(selectedGuard.id)
+    : null;
 
-    // selected user presence
-    const selectedPresence =
-        selectedGuard
-            ? presenceMap.get(
-                selectedGuard.id
-            )
-            : null;
+  return (
+    <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
+      <ChatHeader
+        selectedGuard={selectedGuard}
+        isOtherTyping={isOtherTyping}
+        selectedPresence={selectedPresence}
+      />
 
-    return (
-        <div className="flex flex-1 min-h-0 flex-col overflow-hidden">
-            <ChatHeader
-                selectedGuard={
-                    selectedGuard
-                }
-                isOtherTyping={
-                    isOtherTyping
-                }
-                selectedPresence={
-                    selectedPresence
-                }
-            />
+      <MessageList
+        activeConversationId={activeConversationId}
+        authUserId={authUserId}
+        isMessagesFetching={isMessagesFetching}
+        messageList={messageList}
+        selectedGuard={selectedGuard}
+        refetchMessages={refetchMessages}
+        socketRef={socketRef}
+      />
 
-            <MessageList
-                activeConversationId={
-                    activeConversationId
-                }
-                authUserId={
-                    authUserId
-                }
-                isMessagesFetching={
-                    isMessagesFetching
-                }
-                messageList={
-                    messageList
-                }
-                selectedGuard={
-                    selectedGuard
-                }
-                refetchMessages={
-                    refetchMessages
-                }
-            />
-
-            <ChatInput
-                activeConversationId={
-                    activeConversationId
-                }
-                activeConversationRef={
-                    activeConversationRef
-                }
-                shouldEmitTypingRef={
-                    shouldEmitTypingRef
-                }
-                typingTimeoutRef={
-                    typingTimeoutRef
-                }
-                isOpeningConversation={
-                    isOpeningConversation
-                }
-                refetchMessages={
-                    refetchMessages
-                }
-            />
-        </div>
-    );
+      <ChatInput
+        activeConversationId={activeConversationId}
+        activeConversationRef={activeConversationRef}
+        shouldEmitTypingRef={shouldEmitTypingRef}
+        typingTimeoutRef={typingTimeoutRef}
+        isOpeningConversation={isOpeningConversation}
+        refetchMessages={refetchMessages}
+        socketRef={socketRef}
+      />
+    </div>
+  );
 };
 
 export default MessageChatSection;

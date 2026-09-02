@@ -147,7 +147,7 @@ export type ServicePricingFormValues = z.infer<typeof servicePricingSchema>;
 //Scheduling
 export const assignmentSchema = z
   .object({
-    description: z.string().min(1, "Description is required"),
+    description: descriptionSchema,
 
     startDate: z.string().min(1, "Start date is required"),
     endDate: z.string().min(1, "End date is required"),
@@ -203,7 +203,7 @@ export const orderSchema = z
 
     guardsRequired: z.number().min(1, "At least 1 guard is required"),
 
-    description: z.string().optional(),
+    description: descriptionSchema,
 
     startDate: z.string().min(1, "Start date is required"),
 
@@ -213,7 +213,7 @@ export const orderSchema = z
 
     endTime: z.string().min(1, "End time is required"),
 
-    images: z.array(z.string()).optional(),
+    images: z.array(z.string()).min(1,"Please select at least 1 image"),
   })
   .refine((data) => new Date(data.endDate) >= new Date(data.startDate), {
     message: "End date must be after or equal to start date",

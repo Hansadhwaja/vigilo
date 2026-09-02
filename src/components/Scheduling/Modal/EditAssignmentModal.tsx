@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Schedule, useCreateScheduleMutation, useEditScheduleMutation } from "@/store/apis/schedulingAPI";
+import {
+  Schedule,
+  useCreateScheduleMutation,
+  useEditScheduleMutation,
+} from "@/store/apis/schedulingAPI";
 
 import {
   Dialog,
@@ -22,7 +26,13 @@ import { OrganizedAssignment } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
 
-const EditAssignmentModal = ({ assignment, id }: { assignment: OrganizedAssignment, id: string }) => {
+const EditAssignmentModal = ({
+  assignment,
+  id,
+}: {
+  assignment: OrganizedAssignment;
+  id: string;
+}) => {
   const [open, setOpen] = useState(false);
   const [editSchedule, { isLoading }] = useEditScheduleMutation();
 
@@ -59,13 +69,14 @@ const EditAssignmentModal = ({ assignment, id }: { assignment: OrganizedAssignme
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <div className="flex gap-4 items-center">
+      <DialogContent className="max-h-[92vh] overflow-y-auto rounded-3xl border border-slate-200 p-0 shadow-xl sm:max-w-3xl">
+        <div className="border-b border-slate-100 bg-slate-50 px-6 py-5 text-left space-y-2">
           <DialogHeader>
             <DialogTitle>Edit Guard Assignment</DialogTitle>
-            <DialogDescription>Editing shift with
-              1 guard(s)
-              assigned. You can add or remove guards from this shift.</DialogDescription>
+            <DialogDescription>
+              Editing shift with 1 guard(s) assigned. You can add or remove
+              guards from this shift.
+            </DialogDescription>
           </DialogHeader>
           <Badge
             variant="outline"
@@ -75,12 +86,14 @@ const EditAssignmentModal = ({ assignment, id }: { assignment: OrganizedAssignme
             {getStatusColor(assignment.status).label}
           </Badge>
         </div>
-        <AssignmentForm
-          initialData={initialFormData}
-          isLoading={isLoading}
-          onSubmit={handleSubmit}
-          onCancel={() => setOpen(false)}
-        />
+        <div className="px-6">
+          <AssignmentForm
+            initialData={initialFormData}
+            isLoading={isLoading}
+            onSubmit={handleSubmit}
+            onCancel={() => setOpen(false)}
+          />
+        </div>
       </DialogContent>
     </Dialog>
   );

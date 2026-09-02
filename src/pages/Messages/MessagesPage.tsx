@@ -35,18 +35,12 @@ const MessagesPage = () => {
       <section className="flex min-h-0 flex-1 flex-col">
         {selectedGuard ? (
           <MessageChatSection
-            activeConversationId={
-              activeConversationId
-            }
+            activeConversationId={activeConversationId}
             selectedGuard={selectedGuard}
             authUserId={authUserId}
-            isOpeningConversation={
-              isOpeningConversation
-            }
+            isOpeningConversation={isOpeningConversation}
             presenceMap={presenceMap}
-            setLivePresenceByUserId={
-              setLivePresenceByUserId
-            }
+            setLivePresenceByUserId={setLivePresenceByUserId}
           />
         ) : (
           <EmptyConversion />

@@ -41,6 +41,7 @@ interface ChatInputProps {
   isOpeningConversation: boolean;
 
   refetchMessages: ReturnType<typeof useGetMessagesQuery>["refetch"];
+  socketRef: React.RefObject<any>;
 }
 
 const ChatInput = ({
@@ -50,9 +51,8 @@ const ChatInput = ({
   typingTimeoutRef,
   isOpeningConversation,
   refetchMessages,
+  socketRef,
 }: ChatInputProps) => {
-  const socketRef = useSocket();
-
   const [draftMessage, setDraftMessage] = useState("");
 
   const [pendingAttachments, setPendingAttachments] = useState<

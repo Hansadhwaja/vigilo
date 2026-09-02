@@ -2,78 +2,51 @@
 
 import { useEffect, useRef } from "react";
 
-import {
-    useMarkMessagesReadMutation,
-} from "@/store/apis/messagesAPI";
+import { useMarkMessagesReadMutation } from "@/store/apis/messagesAPI";
 
 interface Props {
-    socketRef: React.MutableRefObject<any>;
+  socketRef: React.RefObject<any>;
 
-    activeConversationId: string;
+  activeConversationId: string;
 
-    messageList: any[];
+  messageList: any[];
 }
 
 export const useMessageSeen = ({
-    socketRef,
-    activeConversationId,
-    messageList,
+  socketRef,
+  activeConversationId,
+  messageList,
 }: Props) => {
-    const [markMessagesRead] =
-        useMarkMessagesReadMutation();
+  const [markMessagesRead] = useMarkMessagesReadMutation();
 
-    const lastMarkedRef =
-        useRef("");
+  const lastMarkedRef = useRef("");
 
-    useEffect(() => {
-        if (
-            !activeConversationId ||
-            messageList.length === 0
-        )
-            return;
+  useEffect(() => {
+    if (!activeConversationId || messageList.length === 0) return;
 
-        const lastMessage =
-            messageList[
-                messageList.length - 1
-            ];
+    const lastMessage = messageList[messageList.length - 1];
 
-        if (!lastMessage) return;
+    if (!lastMessage) return;
 
-        const markKey = `${activeConversationId}:${lastMessage.id}`;
+    const markKey = `${activeConversationId}:${lastMessage.id}`;
 
-        if (
-            markKey ===
-            lastMarkedRef.current
-        )
-            return;
+    if (markKey === lastMarkedRef.current) return;
 
-        lastMarkedRef.current =
-            markKey;
+    lastMarkedRef.current = markKey;
 
-        if (socketRef.current?.connected) {
-            socketRef.current.emit(
-                "markSeen",
-                {
-                    messageId:
-                        lastMessage.id,
-                    conversationId:
-                        activeConversationId,
-                }
-            );
-        }
+    if (socketRef.current?.connected) {
+      socketRef.current.emit("markSeen", {
+        messageId: lastMessage.id,
+        conversationId: activeConversationId,
+      });
+    }
 
-        markMessagesRead({
-            conversationId:
-                activeConversationId,
+    markMessagesRead({
+      conversationId: activeConversationId,
 
-            messageId: lastMessage.id,
-        }).catch(() => {
-            lastMarkedRef.current = "";
-        });
-    }, [
-        activeConversationId,
-        markMessagesRead,
-        messageList,
-        socketRef,
-    ]);
+      messageId: lastMessage.id,
+    }).catch(() => {
+      lastMarkedRef.current = "";
+    });
+  }, [activeConversationId, markMessagesRead, messageList, socketRef]);
 };

@@ -7,29 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import {
   Building,
   Calendar,
-  EllipsisVertical,
-  Eye,
   MapPin,
   User,
 } from "lucide-react";
 
 import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
 import { Order } from "@/store/apis/ordersApi";
-import { Link } from "react-router-dom";
-
-import EditOrderModal from "../Modal/EditOrderModal";
-import AcceptOrderModal from "../Modal/AcceptOrderModal";
-import RejectOrderModal from "../Modal/RejectOrderModal";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
 import { formatDate } from "@/lib/utils";
+import OrderActions from "./OrderActions";
 
 interface OrderTableProps {
   page: number;
@@ -218,75 +203,7 @@ const OrderTable = ({
       header: "Actions",
       align: "center",
 
-      render: (row) => (
-        <div className="flex items-center justify-center gap-2">
-          <Link
-            to={`/sales/orders/${row.id}`}
-            className="
-                            rounded-xl border border-slate-200
-                            p-2 text-slate-500 transition-all
-                            hover:border-orange-200
-                            hover:bg-orange-50
-                            hover:text-orange-600
-                        "
-          >
-            <Eye className="h-4 w-4" />
-          </Link>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              className="
-                                rounded-xl border border-slate-200
-                                p-2 text-slate-500 transition-all
-                                hover:border-slate-300
-                                hover:bg-slate-50
-                                hover:text-slate-700
-                            "
-            >
-              <EllipsisVertical className="h-4 w-4" />
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end" className="w-48 rounded-2xl">
-              {row.status !== "completed" ? (
-                <>
-                  <DropdownMenuItem>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <EditOrderModal order={row} />
-                    </div>
-                  </DropdownMenuItem>
-
-                  {row.status === "pending" && <DropdownMenuSeparator />}
-                </>
-              ) : (
-                <Badge
-                  className="uppercase text-[10px]"
-                  style={getStatusStyle("completed")}
-                >
-                  Completed
-                </Badge>
-              )}
-
-              {row.status === "pending" && (
-                <>
-                  <DropdownMenuItem>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <AcceptOrderModal id={row.id} />
-                    </div>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <RejectOrderModal id={row.id} />
-                    </div>
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      ),
+      render: (row) => <OrderActions row={row} />,
     },
   ];
 

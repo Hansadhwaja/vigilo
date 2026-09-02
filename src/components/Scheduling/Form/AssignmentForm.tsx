@@ -1,20 +1,12 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-
-import {
-  Field,
-  FieldLabel,
-  FieldError,
-  FieldGroup,
-} from "@/components/ui/field";
-
 import {
   Select,
   SelectTrigger,
@@ -32,6 +24,12 @@ import { useGetAllGuardsQuery } from "@/store/apis/guardsApi";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
+import { FormField } from "@/components/common/Form/FormField";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Props {
   isLoading: boolean;
@@ -90,62 +88,70 @@ const AssignmentForm = ({
 
   return (
     <form onSubmit={handleSubmit(submitHandler)}>
-      <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Controller
-          name="description"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field className="col-span-2">
-              <FieldLabel>Description</FieldLabel>
-              <Textarea
-                {...field}
-                placeholder="Describe the assignment details..."
-              />
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
-        />
+      {/* Description */}
+      <FormField
+        control={control}
+        name="description"
+        label="Description"
+        render={(field) => (
+          <Textarea
+            {...field}
+            className="max-h-28 overflow-y-auto"
+            placeholder="Describe the assignment details..."
+          />
+        )}
+      />
 
-        <Controller
+      {/* Dates */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+        <FormField
+          control={control}
           name="startDate"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Start Date</FieldLabel>
-              <Input type="date" {...field} />
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
+          label="Start Date"
+          render={(field) => <Input type="date" {...field} />}
         />
 
-        <Controller
+        <FormField
+          control={control}
           name="endDate"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>End Date</FieldLabel>
-              <Input type="date" {...field} />
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
+          label="End Date"
+          render={(field) => <Input type="date" {...field} />}
         />
+      </div>
 
-        <Controller
-          name="orderId"
+      {/* Order */}
+      <div className="mt-4 w-full">
+        <FormField
           control={control}
-          render={({ field, fieldState }) => (
-            <Field className="col-span-2">
-              <FieldLabel>Order</FieldLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select order" />
-                </SelectTrigger>
-                <SelectContent>
-                  {orders.map((o: any) => (
-                    <SelectItem key={o.id} value={o.id}>
-                      <p className="uppercase truncate max-w-40">
-                        {o.locationName}
-                      </p>
+          name="orderId"
+          label="Order (Location Name)"
+          render={(field) => (
+            <Select
+              disabled={orders.length === 0}
+              value={field.value}
+              onValueChange={field.onChange}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={
+                    orders.length === 0 ? "No orders found" : "Select order"
+                  }
+                />
+              </SelectTrigger>
+
+              <SelectContent>
+                {orders.map((o: any) => (
+                  <SelectItem key={o.id} value={o.id}>
+                    <div className="flex items-center gap-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <p className="uppercase truncate max-w-40 cursor-default">
+                            {o.locationName}
+                          </p>
+                        </TooltipTrigger>
+
+                        <TooltipContent>{o.locationName}</TooltipContent>
+                      </Tooltip>
 
                       <Badge
                         className="rounded-full border px-3 py-1 text-[10px] uppercase font-semibold shadow-sm"
@@ -153,24 +159,27 @@ const AssignmentForm = ({
                       >
                         {getStatusColor(o.status).label}
                       </Badge>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
         />
+      </div>
 
-        <Controller
-          name="guardIds"
+      {/* Guards */}
+      <div className="mt-4">
+        <FormField
           control={control}
-          render={({ field, fieldState }) => (
-            <Field className="col-span-2">
-              <FieldLabel>Guards</FieldLabel>
-
-              <div className="border rounded p-2 max-h-40 overflow-y-auto">
-                {guards.map((g: any) => {
+          name="guardIds"
+          label="Guards"
+          render={(field) => (
+            <div className="border rounded p-2 max-h-40 overflow-y-auto">
+              {guards.length === 0 ? (
+                <p>No Guards found</p>
+              ) : (
+                guards.map((g: any) => {
                   const selected = field.value?.includes(g.id);
 
                   return (
@@ -185,47 +194,43 @@ const AssignmentForm = ({
                             field.onChange([...(field.value || []), g.id]);
                           } else {
                             field.onChange(
-                              field.value.filter((id: string) => id !== g.id),
+                              (field.value || []).filter(
+                                (id: string) => id !== g.id,
+                              ),
                             );
                           }
                         }}
                       />
+
                       <span>{g.name}</span>
                     </div>
                   );
-                })}
-              </div>
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
+                })
+              )}
+            </div>
           )}
         />
+      </div>
 
-        <Controller
+      {/* Times */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+        <FormField
+          control={control}
           name="startTime"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Start Time</FieldLabel>
-              <Input type="time" {...field} />
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
+          label="Start Time"
+          render={(field) => <Input type="time" {...field} />}
         />
 
-        <Controller
+        <FormField
+          control={control}
           name="endTime"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>End Time</FieldLabel>
-              <Input type="time" {...field} />
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
+          label="End Time"
+          render={(field) => <Input type="time" {...field} />}
         />
-      </FieldGroup>
+      </div>
 
-      <div className="flex justify-end gap-3 pt-6 border-t mt-4">
+      {/* Actions */}
+      <div className="flex justify-end gap-3 py-6 border-t mt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>

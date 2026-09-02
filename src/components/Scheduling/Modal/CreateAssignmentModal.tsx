@@ -86,7 +86,7 @@ const CreateAssignmentModal = ({ title }: CreateAssignmentModalProps) => {
         </DialogHeader>
 
         {/* Form */}
-        <div className="p-6">
+        <div className="px-6">
           <AssignmentForm
             isLoading={isLoading}
             onSubmit={handleSubmit}

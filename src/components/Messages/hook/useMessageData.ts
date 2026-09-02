@@ -42,18 +42,7 @@ export const useMessageData = () => {
 
   const guards = guardsResponse?.data ?? [];
 
-  const authUser = useMemo(() => {
-    try {
-      const raw = useAppSelector((state) => state.auth.user);
-
-      if (!raw) return null;
-
-      return raw;
-    } catch {
-      return null;
-    }
-  }, []);
-
+  const authUser = useAppSelector((state) => state.auth.user);
   const authUserId = String(authUser?.id || "");
 
   const presenceIds = useMemo(

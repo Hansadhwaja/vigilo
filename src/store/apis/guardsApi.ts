@@ -125,10 +125,9 @@ export const guardsApi = baseApi.injectEndpoints({
           if (params.guardId) queryParams.append("guardId", params.guardId);
         }
 
-        return {
-          url: `/users/getAllGuards${queryParams.toString() ? `?${queryParams.toString()}` : ""}`,
-          method: "GET",
-        };
+        return queryParams.toString()
+          ? `/users/getAllGuards?${queryParams.toString()}`
+          : "/users/getAllGuards";
       },
       providesTags: ["Guards"],
     }),

@@ -30,6 +30,7 @@ interface MessageListProps {
   messageList: MessageItem[];
 
   selectedGuard: Guard | null;
+  socketRef: React.RefObject<any>;
 }
 
 const MessageList = ({
@@ -39,9 +40,8 @@ const MessageList = ({
   messageList,
   selectedGuard,
   refetchMessages,
+  socketRef,
 }: MessageListProps) => {
-  const socketRef = useSocket();
-
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   // edit state
