@@ -1,16 +1,17 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useEffect } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { GuardFormValues, guardSchema } from "@/schemas";
-import { Client } from "@/store/apis/usersApi";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import Loader from "@/components/common/Loader";
 import PasswordInput from "@/components/common/Input/PasswordInput";
+import { FormField } from "@/components/common/Form/FormField";
+
+import { GuardFormValues, guardSchema } from "@/schemas";
+import { Client } from "@/store/apis/usersApi";
 
 interface GuardFormProps {
   initialData?: Client;
@@ -32,7 +33,7 @@ const GuardForm = ({
       name: "",
       email: "",
       mobile: "",
-      password:""
+      password: "",
     },
   });
 
@@ -45,58 +46,47 @@ const GuardForm = ({
 
   useEffect(() => {
     if (initialData) {
-      reset(initialData);
+      reset({
+        name: initialData.name ?? "",
+        email: initialData.email ?? "",
+        mobile: initialData.mobile ?? "",
+        password: "",
+      });
     }
-  }, [initialData]);
+  }, [initialData, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-4">
-        <Controller
+        <FormField
+          control={control}
           name="name"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Full Name</FieldLabel>
-              <Input {...field} placeholder="Full Name" />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
+          label="Full Name"
+          render={(field) => <Input {...field} placeholder="Full Name" />}
         />
 
-        <Controller
+        <FormField
+          control={control}
           name="email"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Email</FieldLabel>
-              <Input {...field} type="email" placeholder="Email" />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          label="Email"
+          render={(field) => (
+            <Input {...field} type="email" placeholder="Email" />
           )}
         />
 
-        <Controller
+        <FormField
+          control={control}
           name="mobile"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Mobile Number</FieldLabel>
-              <Input {...field} placeholder="Mobile Number" />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
-          )}
+          label="Mobile Number"
+          render={(field) => <Input {...field} placeholder="Mobile Number" />}
         />
 
-        <Controller
-          name="password"
+        <FormField
           control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Password</FieldLabel>
-              <PasswordInput {...field} placeholder="Password" />
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          name="password"
+          label="Password"
+          render={(field) => (
+            <PasswordInput {...field} placeholder="Password" />
           )}
         />
       </div>

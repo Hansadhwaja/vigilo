@@ -423,6 +423,10 @@ export const formatDateTime = (dateTime: string) => {
   };
 };
 
+export const formatTime = (date: string) => {
+  return format(date, "hh:mm a");
+};
+
 export const mapAssignmentToForm = (a: OrganizedAssignment) => {
   if (!a) return undefined;
 
@@ -448,15 +452,6 @@ export const mapAssignmentToForm = (a: OrganizedAssignment) => {
 
     endTime: convertTo24Hour(a.end),
   };
-};
-
-export const formatTime = (date: string) => {
-  return new Date(date).toLocaleTimeString("en-US", {
-    timeZone: "UTC",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: true,
-  });
 };
 
 export const formatTimeForInput = (date: string) => {

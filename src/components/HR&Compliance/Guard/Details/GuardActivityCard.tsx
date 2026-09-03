@@ -46,7 +46,6 @@ const GuardActivityCard = ({ shift }: { shift: Activity }) => {
               <h3 className="text-lg font-semibold text-slate-800 capitalize truncate max-w-120">
                 {shift.order.locationName}
               </h3>
-              
             </div>
 
             <Badge
@@ -60,17 +59,19 @@ const GuardActivityCard = ({ shift }: { shift: Activity }) => {
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <MapPin className="h-4 w-4 shrink-0" />
 
-            <span className="truncate max-w-100">{shift.order.locationAddress}</span>
+            <span className="truncate max-w-100">
+              {shift.order.locationAddress}
+            </span>
           </div>
         </div>
-
+        {/* 
         <Button
           variant="ghost"
           size="icon"
           onClick={() => navigate(`/scheduling/${shift.shiftId}`)}
         >
           <ExternalLink className="h-4 w-4" />
-        </Button>
+        </Button> */}
       </div>
 
       <Separator className="my-4" />
