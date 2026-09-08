@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import Loader from "@/components/common/Loader";
 import { Download, Wallet } from "lucide-react";
 import { toast } from "sonner";
+import TablePagination from "@/components/common/Table/TablePagination";
 
 const GuardPaymentsTab = () => {
   const { getParam } = useQueryParams();
@@ -25,6 +26,8 @@ const GuardPaymentsTab = () => {
   const toDate = getParam("toDate");
   const guardId = getParam("guardId");
   const search = getParam("search");
+  const page = getParam("page");
+  const limit = getParam("limit");
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -38,9 +41,12 @@ const GuardPaymentsTab = () => {
     guardId,
     fromDate,
     toDate,
+    page,
+    limit,
   });
 
   const guardPayments = data?.data?.payments ?? [];
+  const pagination = data?.data?.pagination;
   const summary = data?.summary ?? {
     approved: 0,
     paid: 0,
@@ -108,6 +114,7 @@ const GuardPaymentsTab = () => {
         />
 
         <PaymentList guardPayments={guardPayments} />
+        <TablePagination totalPages={pagination?.totalPages ?? 1} />
       </div>
     </SectionCard>
   );

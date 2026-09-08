@@ -50,34 +50,71 @@ const SyncedOrdersForm = ({ orders }: { orders: Order[] }) => {
                 <Field className="py-4 space-y-3">
                   {orders.map((o) => {
                     const pricing = getOrderPricing(o, serviceData);
+
                     if (!pricing) return null;
 
                     const { hours, days, price, duration, total } = pricing;
 
                     const selectedOrders = field.value || [];
+
                     const isChecked = selectedOrders.some(
                       (item: any) => item.id === o.id,
                     );
+
                     return (
                       <Card key={o.id} className="p-0">
-                        <CardContent className="flex justify-between items-center border bg-blue-50 p-4 rounded-md">
-                          <div className="flex gap-3 items-start">
+                        <CardContent
+                          className="
+                    flex
+                    items-start
+                    justify-between
+                    gap-4
+                    rounded-md
+                    border
+                    bg-blue-50
+                    p-4
+                  "
+                        >
+                          {/* Left Section */}
+                          <div className="flex min-w-0 items-start gap-3">
                             <Checkbox
+                              className="
+                        mt-0.5
+                        h-5
+                        w-5
+                        shrink-0
+                        rounded-md
+                        border-2
+                        border-gray-800
+                        bg-white
+                        shadow-sm
+                        transition-colors
+                        data-[state=checked]:border-blue-600
+                        data-[state=checked]:bg-blue-600
+                        data-[state=checked]:text-white
+                      "
                               checked={isChecked}
                               onCheckedChange={(checked) => {
                                 if (checked) {
                                   const service = serviceData[o.serviceType];
+
+                                  if (!service) return;
+
                                   field.onChange([
-                                    ...(field.value || []),
+                                    ...selectedOrders,
                                     {
                                       id: o.id,
                                       title: o.serviceType,
+
                                       startDate: o.startDate,
                                       startTime: o.startTime,
+
                                       endDate: o.endDate,
                                       endTime: o.endTime,
+
                                       hours,
                                       days,
+
                                       dailyPrice: service.dailyPrice,
                                       hourlyPrice: service.hourlyPrice,
                                       priceType: service.priceType,
@@ -86,7 +123,7 @@ const SyncedOrdersForm = ({ orders }: { orders: Order[] }) => {
                                   ]);
                                 } else {
                                   field.onChange(
-                                    field.value.filter(
+                                    selectedOrders.filter(
                                       (item: any) => item.id !== o.id,
                                     ),
                                   );
@@ -94,19 +131,24 @@ const SyncedOrdersForm = ({ orders }: { orders: Order[] }) => {
                               }}
                             />
 
-                            <div>
-                              <div className="flex gap-2 items-center">
+                            <div className="min-w-0">
+                              {/* Order Header */}
+                              <div className="flex flex-wrap items-center gap-2">
                                 <h3 className="font-semibold uppercase">
                                   #{o.id.slice(0, 6)}
                                 </h3>
+
                                 <p className="capitalize">{o.serviceType}</p>
                               </div>
 
+                              {/* Order Dates */}
                               <div className="text-sm text-gray-600">
                                 <p>
-                                  {formatDate(o.startDate)} {o.startTime} →{" "}
+                                  {formatDate(o.startDate)} {o.startTime}
+                                  {" → "}
                                   {formatDate(o.endDate)} {o.endTime}
                                 </p>
+
                                 <p>
                                   {days} days • {hours} hrs
                                 </p>
@@ -114,16 +156,19 @@ const SyncedOrdersForm = ({ orders }: { orders: Order[] }) => {
                             </div>
                           </div>
 
-                          <div className="text-right">
+                          {/* Right Section */}
+                          <div className="shrink-0 text-right">
                             <Badge
                               className="uppercase text-[10px]"
                               style={getStatusStyle(o.status)}
                             >
                               {getStatusColor(o.status).label}
                             </Badge>
+
                             <p className="text-sm">
                               {duration} × {formatCurrency(Number(price))}
                             </p>
+
                             <p className="font-semibold">
                               {formatCurrency(total)}
                             </p>
@@ -136,7 +181,9 @@ const SyncedOrdersForm = ({ orders }: { orders: Order[] }) => {
               )}
             />
           ) : (
-            <div className="text-center">No orders found</div>
+            <div className="py-6 text-center text-sm text-muted-foreground">
+              No orders found
+            </div>
           )}
         </FieldGroup>
 
@@ -196,7 +243,7 @@ const SyncedOrdersForm = ({ orders }: { orders: Order[] }) => {
                     render={({ field }) => (
                       <Field className="col-span-3">
                         <FieldLabel>Price</FieldLabel>
-                        <Input type="number" {...field} />
+                        <Input type="number" min={0} {...field} />
                       </Field>
                     )}
                   />

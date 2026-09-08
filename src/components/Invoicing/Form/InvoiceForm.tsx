@@ -63,6 +63,7 @@ const InvoiceForm = ({ isLoading, onSubmit, clients }: InvoiceFormProps) => {
   const { data: alarmsResponse } = useGetAllAlarmsQuery(
     {
       userId: clientId,
+      status:"resolved"
     },
     {
       skip: !clientId,

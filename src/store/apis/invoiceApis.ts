@@ -32,6 +32,7 @@ export const invoiceApis = baseApi.injectEndpoints({
         if (params.toDate) qs.set("toDate", params.toDate);
         if (params.page) qs.set("page", params.page);
         if (params.limit) qs.set("limit", params.limit);
+        
         return qs.toString()
           ? `/invoicing/getAllGuardPayments?${qs.toString()}`
           : "/invoicing/getAllGuardPayments";

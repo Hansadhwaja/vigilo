@@ -43,13 +43,7 @@ interface DataTableProps<T extends RowWithId> {
 
   isError?: boolean;
   error?: any;
-
-  page?: number;
   totalPages?: number;
-  limit?: number;
-
-  onPageChange?: (page: number) => void;
-  onLimitChange?: (limit: number) => void;
 }
 
 export function DataTable<T extends RowWithId>({
@@ -67,13 +61,7 @@ export function DataTable<T extends RowWithId>({
 
   isError,
   error,
-
-  page = 1,
   totalPages = 1,
-  limit = 10,
-
-  onPageChange,
-  onLimitChange,
 }: DataTableProps<T>) {
   /* ---------------- LOADING ---------------- */
 
@@ -216,15 +204,7 @@ export function DataTable<T extends RowWithId>({
       </div>
 
       {/* PAGINATION */}
-      {onPageChange && onLimitChange && (
-        <TablePagination
-          currentPage={page ?? 1}
-          totalPages={totalPages ?? 1}
-          limit={limit}
-          onPageChange={onPageChange}
-          onLimitChange={onLimitChange}
-        />
-      )}
+      {totalPages && <TablePagination totalPages={totalPages ?? 1} />}
     </div>
   );
 }

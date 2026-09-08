@@ -21,6 +21,7 @@ export type StatusType =
   | "request_off_pending"
   | "request_off_approved"
   | "request_off_rejected"
+  | "resolved"
   // Order Specific Statuses
   | "order_missed";
 
@@ -85,7 +86,12 @@ export const STATUS_COLORS: Record<StatusType, StatusColor> = {
     border: "#10B981", // Medium emerald
     label: "Request Off Approved",
   },
-
+  resolved: {
+    bg: "#D1FAE5", // Light emerald
+    text: "#065F46", // Deep emerald
+    border: "#10B981", // Medium emerald
+    label: "Resolved",
+  },
   // ============================================
   // REJECTED/NEGATIVE STATES - Red Family
   // ============================================
