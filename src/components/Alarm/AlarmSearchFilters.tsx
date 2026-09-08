@@ -28,8 +28,8 @@ const AlarmSearchFilters = () => {
                 value: "ongoing",
             },
             {
-                label: "Completed",
-                value: "completed",
+                label: "Resolved",
+                value: "resolved",
             },
             {
                 label: "Cancelled",

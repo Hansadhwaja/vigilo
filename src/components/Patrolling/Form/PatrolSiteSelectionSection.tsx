@@ -1,5 +1,5 @@
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
-import ReactSelect, { MultiValue } from "react-select";
+import ReactSelect, { MultiValue, StylesConfig } from "react-select";
 import { Controller, useFormContext } from "react-hook-form";
 import { useGetAllPatrolSitesQuery } from "@/store/apis/patrollingAPI";
 import { Building2, MapPin } from "lucide-react";
@@ -9,6 +9,83 @@ type SelectOption = {
   value: string;
   label: string;
 };
+
+const selectStyles: StylesConfig<SelectOption, true> = {
+  control: (base, state) => ({
+    ...base,
+    minHeight: "42px",
+    borderRadius: "10px",
+    borderColor: state.isFocused ? "hsl(var(--ring))" : "#e5e7eb",
+    boxShadow: "none",
+    "&:hover": {
+      borderColor: state.isFocused ? "hsl(var(--ring))" : "#d1d5db",
+    },
+  }),
+
+  valueContainer: (base) => ({
+    ...base,
+    minWidth: 0,
+    overflow: "hidden",
+    gap: "2px",
+  }),
+
+  multiValue: (base) => ({
+    ...base,
+    minWidth: 0,
+    maxWidth: "220px",
+    borderRadius: "6px",
+    overflow: "hidden",
+  }),
+
+  multiValueLabel: (base) => ({
+    ...base,
+    minWidth: 0,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    paddingLeft: "8px",
+    paddingRight: "4px",
+  }),
+
+  multiValueRemove: (base) => ({
+    ...base,
+    flexShrink: 0,
+  }),
+
+  input: (base) => ({
+    ...base,
+    minWidth: "60px",
+  }),
+
+  option: (base, state) => ({
+    ...base,
+    cursor: "pointer",
+    backgroundColor: state.isSelected
+      ? "hsl(var(--primary) / 0.08)"
+      : state.isFocused
+        ? "hsl(var(--muted))"
+        : "transparent",
+    color: "hsl(var(--foreground))",
+  }),
+
+  menu: (base) => ({
+    ...base,
+    zIndex: 50,
+  }),
+
+  menuList: (base) => ({
+    ...base,
+    padding: "4px",
+  }),
+};
+
+const getOptions = (
+  items: Array<{ id: string; name: string }>,
+): SelectOption[] =>
+  items.map((item) => ({
+    value: item.id,
+    label: item.name,
+  }));
 
 const PatrolSiteSelectionSection = () => {
   const { control, watch, setValue } = useFormContext<PatrolFormValues>();
@@ -94,7 +171,6 @@ const PatrolSiteSelectionSection = () => {
       ...currentSubSites,
     };
 
-    // Create state for newly selected sub-sites
     selectedIds.forEach((subSiteId) => {
       if (!updatedSubSites[subSiteId]) {
         updatedSubSites[subSiteId] = {
@@ -103,7 +179,6 @@ const PatrolSiteSelectionSection = () => {
       }
     });
 
-    // Remove unselected sub-sites
     Object.keys(updatedSubSites).forEach((subSiteId) => {
       if (!selectedIds.includes(subSiteId)) {
         delete updatedSubSites[subSiteId];
@@ -117,7 +192,7 @@ const PatrolSiteSelectionSection = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       {/* Section Header */}
       <div>
         <div className="flex items-center gap-2">
@@ -142,10 +217,7 @@ const PatrolSiteSelectionSection = () => {
             <ReactSelect
               isMulti
               isLoading={isSitesLoading}
-              options={availableSites.map((site) => ({
-                value: site.id,
-                label: site.name,
-              }))}
+              options={getOptions(availableSites)}
               value={availableSites
                 .filter((site) => field.value?.includes(site.id))
                 .map((site) => ({
@@ -154,17 +226,18 @@ const PatrolSiteSelectionSection = () => {
                 }))}
               onChange={handleSiteChange}
               placeholder="Select patrol sites..."
-              className="text-sm"
+              className="min-w-0 text-sm"
               classNamePrefix="select"
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  minHeight: "42px",
-                  borderRadius: "10px",
-                  borderColor: "#e5e7eb",
-                  boxShadow: "none",
-                }),
-              }}
+              styles={selectStyles}
+              getOptionLabel={(option) => option.label}
+              formatOptionLabel={(option) => (
+                <span
+                  className="block max-w-full truncate"
+                  title={option.label}
+                >
+                  {option.label}
+                </span>
+              )}
             />
 
             {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
@@ -174,7 +247,7 @@ const PatrolSiteSelectionSection = () => {
 
       {/* Selected Sites */}
       {selectedSites.length > 0 && (
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           <p className="text-sm font-semibold text-slate-800">
             Configure Selected Sites
           </p>
@@ -193,39 +266,42 @@ const PatrolSiteSelectionSection = () => {
             return (
               <div
                 key={site.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5"
+                className="min-w-0 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5"
               >
                 {/* Site Header */}
-                <div className="mb-5 flex items-start gap-3">
+                <div className="mb-5 flex min-w-0 items-start gap-3">
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                     <Building2 className="size-5 text-primary" />
                   </div>
 
-                  <div className="min-w-0">
-                    <h4 className="font-semibold text-slate-900">
+                  <div className="min-w-0 flex-1">
+                    <h4
+                      className="truncate font-semibold text-slate-900"
+                      title={site.name}
+                    >
                       {site.name}
                     </h4>
 
                     {site.address && (
-                      <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-                        <MapPin className="size-3" />
-                        {site.address}
+                      <div className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
+                        <MapPin className="size-3 shrink-0" />
+
+                        <span className="truncate" title={site.address}>
+                          {site.address}
+                        </span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="space-y-6">
+                <div className="min-w-0 space-y-6 overflow-y-auto">
                   {/* Site-level Checkpoints */}
-                  <div>
+                  <div className="min-w-0">
                     <FieldLabel>Site Checkpoints</FieldLabel>
 
                     <ReactSelect
                       isMulti
-                      options={checkpoints.map((checkpoint) => ({
-                        value: checkpoint.id,
-                        label: checkpoint.name,
-                      }))}
+                      options={getOptions(checkpoints)}
                       value={checkpoints
                         .filter((checkpoint) =>
                           selection.checkpointIds.includes(checkpoint.id),
@@ -246,30 +322,27 @@ const PatrolSiteSelectionSection = () => {
                           : "No checkpoints available"
                       }
                       isDisabled={!checkpoints.length}
-                      className="mt-2 text-sm"
+                      className="min-w-0 mt-2 text-sm"
                       classNamePrefix="select"
-                      styles={{
-                        control: (base) => ({
-                          ...base,
-                          minHeight: "42px",
-                          borderRadius: "10px",
-                          borderColor: "#e5e7eb",
-                          boxShadow: "none",
-                        }),
-                      }}
+                      styles={selectStyles}
+                      formatOptionLabel={(option) => (
+                        <span
+                          className="block max-w-full truncate"
+                          title={option.label}
+                        >
+                          {option.label}
+                        </span>
+                      )}
                     />
                   </div>
 
                   {/* Sub-sites */}
-                  <div>
+                  <div className="min-w-0">
                     <FieldLabel>Sub-sites</FieldLabel>
 
                     <ReactSelect
                       isMulti
-                      options={subSites.map((subSite) => ({
-                        value: subSite.id,
-                        label: subSite.name,
-                      }))}
+                      options={getOptions(subSites)}
                       value={subSites
                         .filter((subSite) =>
                           selectedSubSiteIds.includes(subSite.id),
@@ -287,23 +360,23 @@ const PatrolSiteSelectionSection = () => {
                           : "No sub-sites available"
                       }
                       isDisabled={!subSites.length}
-                      className="mt-2 text-sm"
+                      className="min-w-0 mt-2 text-sm"
                       classNamePrefix="select"
-                      styles={{
-                        control: (base) => ({
-                          ...base,
-                          minHeight: "42px",
-                          borderRadius: "10px",
-                          borderColor: "#e5e7eb",
-                          boxShadow: "none",
-                        }),
-                      }}
+                      styles={selectStyles}
+                      formatOptionLabel={(option) => (
+                        <span
+                          className="block max-w-full truncate"
+                          title={option.label}
+                        >
+                          {option.label}
+                        </span>
+                      )}
                     />
                   </div>
 
                   {/* Selected Sub-sites */}
                   {selectedSubSiteIds.length > 0 && (
-                    <div className="space-y-4">
+                    <div className="min-w-0 space-y-4">
                       <p className="text-sm font-semibold text-slate-800">
                         Configure Sub-site Checkpoints
                       </p>
@@ -324,10 +397,13 @@ const PatrolSiteSelectionSection = () => {
                           return (
                             <div
                               key={subSite.id}
-                              className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                              className="min-w-0 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-4"
                             >
-                              <div className="mb-3">
-                                <h5 className="text-sm font-semibold text-slate-900">
+                              <div className="mb-3 min-w-0">
+                                <h5
+                                  className="truncate text-sm font-semibold text-slate-900"
+                                  title={subSite.name}
+                                >
                                   {subSite.name}
                                 </h5>
                               </div>
@@ -336,12 +412,7 @@ const PatrolSiteSelectionSection = () => {
 
                               <ReactSelect
                                 isMulti
-                                options={subSiteCheckpoints.map(
-                                  (checkpoint) => ({
-                                    value: checkpoint.id,
-                                    label: checkpoint.name,
-                                  }),
-                                )}
+                                options={getOptions(subSiteCheckpoints)}
                                 value={subSiteCheckpoints
                                   .filter((checkpoint) =>
                                     subSiteSelection.checkpointIds.includes(
@@ -365,17 +436,17 @@ const PatrolSiteSelectionSection = () => {
                                     : "No checkpoints available"
                                 }
                                 isDisabled={!subSiteCheckpoints.length}
-                                className="mt-2 text-sm"
+                                className="min-w-0 mt-2 text-sm"
                                 classNamePrefix="select"
-                                styles={{
-                                  control: (base) => ({
-                                    ...base,
-                                    minHeight: "42px",
-                                    borderRadius: "10px",
-                                    borderColor: "#e5e7eb",
-                                    boxShadow: "none",
-                                  }),
-                                }}
+                                styles={selectStyles}
+                                formatOptionLabel={(option) => (
+                                  <span
+                                    className="block max-w-full truncate"
+                                    title={option.label}
+                                  >
+                                    {option.label}
+                                  </span>
+                                )}
                               />
                             </div>
                           );

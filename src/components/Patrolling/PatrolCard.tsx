@@ -10,58 +10,48 @@ import {
   Users,
 } from "lucide-react";
 
-import {
-  AdminPatrolRun,
-  useDeletePatrolRunMutation,
-} from "@/store/apis/patrollingAPI";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import { getStatusStyle } from "@/utils/statusColors";
 import { Link } from "react-router-dom";
-import DeleteModal from "../common/Modal/DeleteModal";
-import { toast } from "sonner";
 import { formatDateTime } from "@/lib/utils";
+import { AdminPatrolRun } from "@/types/patrolling/patrolling.types";
+import DeletePatrolModal from "./Modal/DeletePatrolModal";
 
 type PatrolCardProps = {
   patrol: AdminPatrolRun;
 };
 
 const PatrolCard = ({ patrol }: PatrolCardProps) => {
-  const [deletePatrolRun, { isLoading }] = useDeletePatrolRunMutation();
-
-  const handleDelete = async () => {
-    try {
-      await deletePatrolRun(patrol.id).unwrap();
-      toast.success("Patrol deleted successfully");
-    } catch (error) {
-      toast.error("Error deleting patrol");
-    }
-  };
-
   const startDateTime = formatDateTime(patrol.startDateTime);
   const estimatedCompletion = formatDateTime(patrol.estimatedCompletion);
 
-  return (
-    <Card className="border border-slate-200 bg-white p-0 shadow-sm transition-all hover:border-slate-300 hover:shadow-md">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-4">
-          {/* Icon */}
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100">
-            <QrCode className="h-5 w-5 text-slate-700" />
-          </div>
+  const completionPercentage = patrol.completionPercentage || 0;
 
-          {/* Main content */}
-          <div className="min-w-0 flex-1">
-            {/* Top row */}
-            <div className="flex items-start justify-between gap-4">
+  return (
+    <TooltipProvider>
+      <Card className="overflow-hidden border bg-card shadow-sm transition-shadow hover:shadow-md">
+        <CardContent className="p-0">
+          {/* Header */}
+          <div className="flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="flex min-w-0 items-start gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                <QrCode className="h-5 w-5 text-muted-foreground" />
+              </div>
+
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="truncate text-sm font-semibold uppercase text-slate-900">
-                    #{patrol.patrolId.slice(0, 8)}
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Patrol #{patrol.patrolId.slice(0, 8)}
                   </h3>
 
                   <Badge
@@ -72,105 +62,216 @@ const PatrolCard = ({ patrol }: PatrolCardProps) => {
                   </Badge>
                 </div>
 
-                <div className="mt-1 flex items-center gap-3 text-xs text-slate-500">
-                  <div className="flex min-w-0 items-center gap-1">
-                    <Users className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate max-w-36">
-                      {patrol.clientName}
-                    </span>
-                  </div>
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <Users className="h-3.5 w-3.5 shrink-0" />
 
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5 shrink-0" />
-                    <span className="max-w-28 truncate capitalize">
-                      {patrol.locationName}
-                    </span>
-                  </div>
+                        <span className="max-w-44 truncate">
+                          {patrol.clientName}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+
+                    <TooltipContent>
+                      <p>{patrol.clientName}</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 shrink-0" />
+
+                        <span className="max-w-44 truncate capitalize">
+                          {patrol.locationName}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+
+                    <TooltipContent>
+                      <p>{patrol.locationName}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex shrink-0 items-center gap-1">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                  asChild
-                >
-                  <Link to={`/patrol/${patrol.id}`}>
-                    <Eye className="h-4 w-4" />
-                  </Link>
-                </Button>
-
-                <DeleteModal
-                  title="Patrol"
-                  onConfirm={handleDelete}
-                  isLoading={isLoading}
-                />
               </div>
             </div>
 
-            {/* Bottom information */}
-            <div className="mt-3 flex items-end justify-between gap-6">
-              {/* Schedule */}
-              <div className="flex items-center gap-4 text-xs text-slate-500">
-                <div className="flex items-center gap-1.5">
-                  <CalendarDays className="h-3.5 w-3.5" />
-                  <span>
-                    {startDateTime.date},{startDateTime.time}
-                  </span>
+            {/* Actions */}
+            <div className="flex shrink-0 items-center gap-1 self-end sm:self-start">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                asChild
+                aria-label="View patrol"
+              >
+                <Link to={`/patrol/${patrol.id}`}>
+                  <Eye className="h-4 w-4" />
+                </Link>
+              </Button>
+
+              <DeletePatrolModal patrolId={patrol.id} />
+            </div>
+          </div>
+
+          {/* Main information */}
+          <div className="grid divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            {/* Schedule */}
+            <div className="px-5 py-4">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Schedule
+              </p>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <CalendarDays className="h-4 w-4 shrink-0 text-muted-foreground" />
+
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">Started</p>
+                    <p className="truncate font-medium text-foreground">
+                      {startDateTime.date}, {startDateTime.time}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="hidden items-center gap-1.5 sm:flex">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span>
-                    ETA {estimatedCompletion.date},{estimatedCompletion.time}
-                  </span>
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4 shrink-0 text-muted-foreground" />
+
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">
+                      Estimated completion
+                    </p>
+
+                    <p className="truncate font-medium text-foreground">
+                      {estimatedCompletion.date},{" "}
+                      {estimatedCompletion.time}
+                    </p>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {/* Stats */}
-              <div className="flex shrink-0 items-center gap-4 text-xs text-slate-500">
-                <div className="flex items-center gap-1.5">
-                  <Building className="h-3.5 w-3.5" />
-                  <span>{patrol.totalSites}</span>
+            {/* Patrol coverage */}
+            <div className="px-5 py-4">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Coverage
+              </p>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <div className="mb-1.5 flex h-8 w-8 items-center justify-center rounded-md bg-muted">
+                    <Building className="h-4 w-4 text-muted-foreground" />
+                  </div>
+
+                  <p className="text-lg font-semibold leading-none text-foreground">
+                    {patrol.totalSites}
+                  </p>
+
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Sites
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  <Target className="h-3.5 w-3.5" />
-                  <span>{patrol.totalSubSites}</span>
+                <div>
+                  <div className="mb-1.5 flex h-8 w-8 items-center justify-center rounded-md bg-muted">
+                    <Target className="h-4 w-4 text-muted-foreground" />
+                  </div>
+
+                  <p className="text-lg font-semibold leading-none text-foreground">
+                    {patrol.totalSubSites}
+                  </p>
+
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Sub-sites
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  <Car className="h-3.5 w-3.5" />
-                  <span>
-                    {patrol.completedCheckpoints}/{patrol.totalCheckpoints}
-                  </span>
+                <div>
+                  <div className="mb-1.5 flex h-8 w-8 items-center justify-center rounded-md bg-muted">
+                    <Car className="h-4 w-4 text-muted-foreground" />
+                  </div>
+
+                  <p className="text-lg font-semibold leading-none text-foreground">
+                    {patrol.completedCheckpoints}
+                    <span className="text-xs font-normal text-muted-foreground">
+                      {" "}
+                      / {patrol.totalCheckpoints}
+                    </span>
+                  </p>
+
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Checkpoints
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Progress */}
-            <div className="mt-3">
-              <div className="mb-1 flex items-center justify-between text-[10px]">
-                <span className="font-medium text-slate-500">
-                  Patrol progress
-                </span>
+            <div className="px-5 py-4">
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Progress
+              </p>
 
-                <span className="font-semibold text-slate-700">
-                  {patrol.completionPercentage || 0}%
-                </span>
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-2xl font-semibold leading-none text-foreground">
+                    {completionPercentage}%
+                  </p>
+
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Patrol completed
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Car className="h-3.5 w-3.5" />
+                  {patrol.completedCheckpoints}/
+                  {patrol.totalCheckpoints}
+                </div>
               </div>
 
               <Progress
-                value={patrol.completionPercentage || 0}
-                className="h-1"
+                value={completionPercentage}
+                className="mt-4 h-1.5"
               />
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          {/* Footer */}
+          <div className="flex flex-col gap-2 border-t bg-muted/20 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <MapPin className="h-3.5 w-3.5" />
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="max-w-60 truncate capitalize">
+                    {patrol.locationName}
+                  </span>
+                </TooltipTrigger>
+
+                <TooltipContent>
+                  <p>{patrol.locationName}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5"
+              asChild
+            >
+              <Link to={`/patrol/${patrol.id}`}>
+                <Eye className="h-3.5 w-3.5" />
+                View patrol
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </TooltipProvider>
   );
 };
 

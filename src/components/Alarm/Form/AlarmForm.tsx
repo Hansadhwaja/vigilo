@@ -1,16 +1,17 @@
-import { useForm, Controller } from "react-hook-form";
+"use client";
+
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import ReactSelect from "react-select";
 
 import Loader from "@/components/common/Loader";
+import { FormField } from "@/components/common/Form/FormField";
+
 import { Button } from "@/components/ui/button";
-import {
-  Field,
-  FieldLabel,
-  FieldError,
-  FieldGroup,
-} from "@/components/ui/field";
+import { FieldGroup } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+
 import {
   Select,
   SelectTrigger,
@@ -18,9 +19,9 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+
 import { AlarmFormValues, alarmSchema } from "@/schemas";
 import { useGetAllPatrolRunsForAdminQuery } from "@/store/apis/patrollingAPI";
-import ReactSelect from "react-select";
 
 interface AlarmFormProps {
   isLoading: boolean;
@@ -33,6 +34,7 @@ const AlarmForm = ({ isLoading, onSubmit, onCancel }: AlarmFormProps) => {
     useGetAllPatrolRunsForAdminQuery({
       status: "ongoing",
     });
+
   const patrols = patrolData?.data ?? [];
 
   const form = useForm<AlarmFormValues>({
@@ -55,11 +57,18 @@ const AlarmForm = ({ isLoading, onSubmit, onCancel }: AlarmFormProps) => {
     },
   });
 
-  const { control, handleSubmit, watch, setValue } = form;
+  const {
+    control,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { isValid },
+  } = form;
 
   const patrolId = watch("patrolId");
 
   const selectedPatrol = patrols.find((patrol) => patrol.id === patrolId);
+
   const patrolSites = selectedPatrol?.sites ?? [];
   const patrolGuards = selectedPatrol?.guards ?? [];
 
@@ -70,336 +79,296 @@ const AlarmForm = ({ isLoading, onSubmit, onCancel }: AlarmFormProps) => {
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
-      <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-2">
+      <FieldGroup className="grid grid-cols-1 gap-2 md:grid-cols-2">
         {/* TITLE */}
         <div className="col-span-2">
-          <Controller
-            name="title"
+          <FormField
             control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel>Alarm Title</FieldLabel>
-                <Input {...field} placeholder="Brief alarm description" />
-                {fieldState.error && <FieldError errors={[fieldState.error]} />}
-              </Field>
+            name="title"
+            label="Alarm Title"
+            render={(field) => (
+              <Input {...field} placeholder="Enter alarm title" />
             )}
           />
         </div>
 
-        <Controller
+        {/* ONGOING PATROL */}
+        <FormField
+          control={control}
           name="patrolId"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Ongoing Patrol</FieldLabel>
+          label="Ongoing Patrol"
+          render={(field) => (
+            <Select
+              value={field.value ?? ""}
+              onValueChange={(value) => {
+                field.onChange(value);
 
-              <Select
-                value={field.value ?? ""}
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  setValue("siteId", "");
-                  setValue("guardIds", []);
-                }}
-                disabled={isPatrolsLoading || patrols.length === 0}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue
-                    placeholder={
-                      isPatrolsLoading
-                        ? "Loading patrols..."
-                        : patrols.length === 0
-                          ? "No ongoing patrols"
-                          : "Select ongoing patrol"
-                    }
-                  />
-                </SelectTrigger>
+                setValue("siteId", "");
+                setValue("guardIds", []);
+              }}
+              disabled={isPatrolsLoading || patrols.length === 0}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue
+                  placeholder={
+                    isPatrolsLoading
+                      ? "Loading patrols..."
+                      : patrols.length === 0
+                        ? "No ongoing patrols"
+                        : "Select ongoing patrol"
+                  }
+                />
+              </SelectTrigger>
 
-                {patrols.length > 0 && (
-                  <SelectContent>
-                    {patrols.map((patrol: any) => (
-                      <SelectItem key={patrol.id} value={patrol.id}>
-                        {patrol.locationName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                )}
-              </Select>
-
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
+              {patrols.length > 0 && (
+                <SelectContent>
+                  {patrols.map((patrol) => (
+                    <SelectItem key={patrol.id} value={patrol.id}>
+                      {patrol.locationName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              )}
+            </Select>
           )}
         />
 
-        <Controller
+        {/* ALARM SITE */}
+        <FormField
+          control={control}
           name="siteId"
-          control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Alarm Site</FieldLabel>
+          label="Alarm Site"
+          render={(field) => (
+            <Select
+              value={field.value ?? ""}
+              onValueChange={(value) => {
+                field.onChange(value);
+                setValue("guardIds", []);
+              }}
+              disabled={!patrolId || patrolSites.length === 0}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue
+                  placeholder={
+                    !patrolId
+                      ? "Select patrol first"
+                      : patrolSites.length === 0
+                        ? "No sites available"
+                        : "Select site"
+                  }
+                />
+              </SelectTrigger>
 
-              <Select
-                value={field.value ?? ""}
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  setValue("guardIds", []);
-                }}
-                disabled={!patrolId || patrolSites.length === 0}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue
-                    placeholder={
-                      !patrolId
-                        ? "Select patrol first"
-                        : patrolSites.length === 0
-                          ? "No sites available"
-                          : "Select site"
-                    }
-                  />
-                </SelectTrigger>
-
-                {patrolSites.length > 0 && (
-                  <SelectContent>
-                    {patrolSites.map((site: any) => (
-                      <SelectItem key={site.id} value={site.id}>
-                        {site.name ?? site.siteName ?? site.locationName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                )}
-              </Select>
-
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
+              {patrolSites.length > 0 && (
+                <SelectContent>
+                  {patrolSites.map((site) => (
+                    <SelectItem key={site.id} value={site.id}>
+                      {site.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              )}
+            </Select>
           )}
         />
 
-        <Controller
-          name="guardIds"
+        {/* ASSIGNED GUARDS */}
+        <FormField
           control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Assigned Guards</FieldLabel>
-
-              <ReactSelect
-                isMulti
-                isDisabled={!patrolId || patrolGuards.length === 0}
-                options={patrolGuards.map((guard: any) => ({
+          name="guardIds"
+          label="Assigned Guards"
+          render={(field) => (
+            <ReactSelect
+              isMulti
+              isDisabled={!patrolId || patrolGuards.length === 0}
+              options={patrolGuards.map((guard) => ({
+                value: guard.id,
+                label: guard.name,
+              }))}
+              value={patrolGuards
+                .filter((guard) => (field.value ?? []).includes(guard.id))
+                .map((guard) => ({
                   value: guard.id,
                   label: guard.name,
                 }))}
-                value={patrolGuards
-                  .filter((guard: any) =>
-                    (field.value ?? []).includes(guard.id),
-                  )
-                  .map((guard: any) => ({
-                    value: guard.id,
-                    label: guard.name,
-                  }))}
-                onChange={(selected) => {
-                  field.onChange(selected.map((option) => option.value));
-                }}
-                placeholder={
-                  !patrolId
-                    ? "Select patrol first"
-                    : patrolGuards.length === 0
-                      ? "No guards available"
-                      : "Select guards..."
-                }
-                noOptionsMessage={() => "No guards available"}
-                className="text-sm"
-                classNamePrefix="select"
-                styles={{
-                  control: (base, state) => ({
-                    ...base,
-                    minHeight: "42px",
-                    borderRadius: "10px",
-                    borderColor: fieldState.invalid
-                      ? "#ef4444"
-                      : state.isFocused
-                        ? "#000"
-                        : "#e5e7eb",
-                    boxShadow: "none",
-                    "&:hover": {
-                      borderColor: fieldState.invalid ? "#ef4444" : "#d1d5db",
-                    },
-                  }),
-                }}
-              />
-
-              {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-            </Field>
+              onChange={(selected) => {
+                field.onChange(selected.map((option) => option.value));
+              }}
+              placeholder={
+                !patrolId
+                  ? "Select patrol first"
+                  : patrolGuards.length === 0
+                    ? "No guards available"
+                    : "Select guards..."
+              }
+              noOptionsMessage={() => "No guards available"}
+              className="text-sm"
+              classNamePrefix="select"
+              styles={{
+                control: (base, state) => ({
+                  ...base,
+                  minHeight: "42px",
+                  borderRadius: "10px",
+                  borderColor: state.isFocused ? "#000" : "#e5e7eb",
+                  boxShadow: "none",
+                  "&:hover": {
+                    borderColor: "#d1d5db",
+                  },
+                }),
+              }}
+            />
           )}
         />
 
-        {/* TYPE */}
-        <Controller
-          name="type"
+        {/* ALARM TYPE */}
+        <FormField
           control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Alarm Type</FieldLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="intrusion">Intrusion</SelectItem>
-                  <SelectItem value="fire">Fire Alarm</SelectItem>
-                  <SelectItem value="medical">Medical Emergency</SelectItem>
-                  <SelectItem value="security">Security Breach</SelectItem>
-                  <SelectItem value="technical">Technical Fault</SelectItem>
-                  <SelectItem value="environmental">Environmental</SelectItem>
-                </SelectContent>
-              </Select>
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          name="type"
+          label="Alarm Type"
+          render={(field) => (
+            <Select value={field.value ?? ""} onValueChange={field.onChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="intrusion">Intrusion</SelectItem>
+
+                <SelectItem value="fire">Fire Alarm</SelectItem>
+
+                <SelectItem value="medical">Medical Emergency</SelectItem>
+
+                <SelectItem value="security">Security Breach</SelectItem>
+
+                <SelectItem value="technical">Technical Fault</SelectItem>
+
+                <SelectItem value="environmental">Environmental</SelectItem>
+              </SelectContent>
+            </Select>
           )}
         />
 
         {/* PRIORITY */}
-        <Controller
-          name="priority"
+        <FormField
           control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Priority</FieldLabel>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="low">Low</SelectItem>
-                </SelectContent>
-              </Select>
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          name="priority"
+          label="Priority"
+          render={(field) => (
+            <Select value={field.value ?? ""} onValueChange={field.onChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select priority" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="high">High</SelectItem>
+
+                <SelectItem value="medium">Medium</SelectItem>
+
+                <SelectItem value="low">Low</SelectItem>
+              </SelectContent>
+            </Select>
           )}
         />
+
         {/* ETA */}
-        <Controller
-          name="eta"
+        <FormField
           control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>ETA (minutes)</FieldLabel>
-              <Input
-                type="number"
-                {...field}
-                onChange={(e) => field.onChange(Number(e.target.value))}
-              />
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          name="eta"
+          label="ETA (minutes)"
+          render={(field) => (
+            <Input
+              type="number"
+              {...field}
+              onChange={(e) => field.onChange(Number(e.target.value))}
+            />
           )}
         />
 
         {/* SLA */}
-        <Controller
-          name="slaTime"
+        <FormField
           control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>SLA Time</FieldLabel>
-              <Input
-                type="number"
-                {...field}
-                onChange={(e) => field.onChange(Number(e.target.value))}
-              />
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          name="slaTime"
+          label="SLA Time"
+          render={(field) => (
+            <Input
+              type="number"
+              {...field}
+              onChange={(e) => field.onChange(Number(e.target.value))}
+            />
           )}
         />
 
-        {/* PRICE */}
-        <Controller
-          name="unitPrice"
+        {/* UNIT PRICE */}
+        <FormField
           control={control}
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>Unit Price</FieldLabel>
-              <Input
-                type="number"
-                {...field}
-                onChange={(e) => field.onChange(Number(e.target.value))}
-              />
-              {fieldState.error && <FieldError errors={[fieldState.error]} />}
-            </Field>
+          name="unitPrice"
+          label="Unit Price"
+          render={(field) => (
+            <Input
+              type="number"
+              {...field}
+              onChange={(e) => field.onChange(Number(e.target.value))}
+            />
           )}
         />
 
         {/* LOCATION */}
         <div className="col-span-2">
-          <Controller
-            name="location"
+          <FormField
             control={control}
-            render={({ field }) => (
-              <Field>
-                <FieldLabel>Location</FieldLabel>
-                <Input {...field} placeholder="Exact location" />
-              </Field>
+            name="location"
+            label="Location"
+            render={(field) => (
+              <Input {...field} placeholder="Exact location" />
             )}
           />
         </div>
 
-        {/* SECTION */}
-        <div className="col-span-2 border-t pt-4 mt-2">
+        {/* MONITORING DETAILS */}
+        <div className="col-span-2 mt-2 border-t pt-4">
           <h2 className="text-base font-semibold text-gray-600">
             Monitoring Details
           </h2>
         </div>
 
         {/* MONITORING COMPANY */}
-        <Controller
-          name="monitoringCompany"
+        <FormField
           control={control}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel>Monitoring Company</FieldLabel>
-              <Input placeholder="Enter company" {...field} />
-            </Field>
-          )}
+          name="monitoringCompany"
+          label="Monitoring Company"
+          render={(field) => <Input {...field} placeholder="Enter company" />}
         />
 
         {/* LICENSE */}
-        <Controller
-          name="license"
+        <FormField
           control={control}
-          render={({ field }) => (
-            <Field>
-              <FieldLabel>License</FieldLabel>
-              <Input placeholder="Enter license" {...field} />
-            </Field>
-          )}
+          name="license"
+          label="License"
+          render={(field) => <Input {...field} placeholder="Enter license" />}
         />
 
         {/* DESCRIPTION */}
         <div className="col-span-2">
-          <Controller
-            name="description"
+          <FormField
             control={control}
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel>Description</FieldLabel>
-                <Textarea placeholder="Enter description" {...field} rows={3} />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+            name="description"
+            label="Description"
+            render={(field) => (
+              <Textarea {...field} placeholder="Enter description" rows={3} />
             )}
           />
         </div>
       </FieldGroup>
 
       {/* ACTIONS */}
-      <div className="flex justify-end gap-3 pt-6 border-t mt-4">
+      <div className="mt-4 flex justify-end gap-3 border-t pt-6">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
 
         <Button
           type="submit"
-          disabled={isLoading}
+          disabled={!isValid || isLoading}
           className="flex items-center gap-2 px-5"
         >
           {isLoading ? <Loader /> : "Create Alarm"}

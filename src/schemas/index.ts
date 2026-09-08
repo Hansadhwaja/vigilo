@@ -50,7 +50,7 @@ export const alarmSchema = z.object({
   location: z.string().optional(),
   monitoringCompany: z.string().min(1, "Monitoring Company Required"),
   license: z.string().min(1, "License Required"),
-  description: z.string().optional(),
+  description: descriptionSchema,
 });
 
 export type AlarmFormValues = z.infer<typeof alarmSchema>;

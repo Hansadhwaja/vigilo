@@ -56,7 +56,10 @@ export type NotificationFilter = "all" | "unread" | "newRequests";
 
 export const notificationsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getMyNotifications: builder.query<GetMyNotificationsResponse, { page?: number; limit?: number; filter?: NotificationFilter } | void>({
+    getMyNotifications: builder.query<
+      GetMyNotificationsResponse,
+      { page?: number; limit?: number; filter?: NotificationFilter } | void
+    >({
       query: (args) => {
         const page = args?.page ?? 1;
         const limit = args?.limit ?? 10;
@@ -71,7 +74,10 @@ export const notificationsApi = baseApi.injectEndpoints({
       providesTags: [{ type: "Notifications", id: "LIST" }],
     }),
 
-    markAllNotificationsAsRead: builder.mutation<MarkAllNotificationsReadResponse, { filter?: NotificationFilter } | void>({
+    markAllNotificationsAsRead: builder.mutation<
+      MarkAllNotificationsReadResponse,
+      { filter?: NotificationFilter } | void
+    >({
       query: (body) => ({
         url: `/notifications/markAllNotificationsAsRead`,
         method: "PATCH",
@@ -80,7 +86,10 @@ export const notificationsApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "Notifications", id: "LIST" }],
     }),
 
-    deleteAllNotifications: builder.mutation<DeleteAllNotificationsResponse, { filter?: NotificationFilter } | void>({
+    deleteAllNotifications: builder.mutation<
+      DeleteAllNotificationsResponse,
+      { filter?: NotificationFilter } | void
+    >({
       query: (body) => ({
         url: `/notifications/deleteAllNotifications`,
         method: "DELETE",
@@ -89,7 +98,10 @@ export const notificationsApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "Notifications", id: "LIST" }],
     }),
 
-    deleteNotificationById: builder.mutation<DeleteNotificationByIdResponse, string>({
+    deleteNotificationById: builder.mutation<
+      DeleteNotificationByIdResponse,
+      string
+    >({
       query: (notificationId) => ({
         url: `/notifications/deleteNotificationById/${notificationId}`,
         method: "DELETE",
