@@ -44,6 +44,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@reduxjs/toolkit": "^2.9.1",
     "@tailwindcss/vite": "^4.2.2",
+    "@tinymce/tinymce-react": "^6.3.0",
     "@tiptap/extension-link": "^3.30.2",
     "@tiptap/extension-underline": "^3.30.2",
     "@tiptap/react": "^3.30.2",

@@ -58,29 +58,11 @@ const PatrolCompletionChart = ({ data }: Props) => {
               tickMargin={8}
             />
 
-            <ChartTooltip
-              cursor={false}
-              content={
-                <ChartTooltipContent
-                  formatter={(value, name) => (
-                    <div className="flex w-full items-center justify-between gap-8">
-                      <span className="text-muted-foreground">
-                        {chartConfig[name as keyof typeof chartConfig]?.label ??
-                          name}
-                      </span>
-
-                      <span className="font-semibold tabular-nums">
-                        {value}
-                      </span>
-                    </div>
-                  )}
-                />
-              }
-            />
+            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
 
             <Bar
               dataKey="count"
-              fill="var(--color-total)"
+              fill="var(--color-count)"
               radius={[6, 6, 0, 0]}
             />
           </BarChart>

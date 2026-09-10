@@ -7,8 +7,15 @@ import CMSCard from "../CMSCard";
 import { CMSFormValue } from "../Form/CMSForm";
 import { toast } from "sonner";
 
-const PrivacyPolicyEditor = () => {
-  const { data, isLoading } = useGetCmsPageQuery("privacy_policy");
+interface Props {
+  type: string;
+}
+
+const PrivacyPolicyEditor = ({ type }: Props) => {
+  const { data, isLoading } = useGetCmsPageQuery({
+    name: "privacy_policy",
+    type,
+  });
   const content = data?.data ?? "";
   const [editCmsPage, { isLoading: isEditing }] = useEditCmsPageMutation();
 
@@ -17,6 +24,7 @@ const PrivacyPolicyEditor = () => {
       await editCmsPage({
         name: "privacy_policy",
         content: data.content,
+        type,
       }).unwrap();
       toast.success("Content Edited Successfully");
     } catch (error: unknown) {

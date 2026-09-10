@@ -3,7 +3,7 @@ import { baseApi } from "./baseApi";
 export const cmsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getCmsPage: builder.query({
-      query: (name) => `/cms/${name}`,
+      query: ({ name, type }) => `/cms/${name}?type=${type}`,
       providesTags: ["CMS"],
     }),
     editCmsPage: builder.mutation({

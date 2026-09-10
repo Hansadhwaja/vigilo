@@ -5,12 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/common/Form/FormField";
-
-import { ClientFormValues, clientSchema } from "@/schemas";
-import { Client } from "@/store/apis/usersApi";
-import RichTextEditor from "@/components/common/Editor/RichTextEditor";
 import { Save } from "lucide-react";
 import z from "zod";
+import TinyEditor from "@/components/common/Editor/TinyEditor";
 
 interface Props {
   initialData?: CMSFormValue;
@@ -46,7 +43,7 @@ const CMSForm = ({ initialData, onSubmit, isLoading }: Props) => {
         name="content"
         label="Content"
         render={(field) => (
-          <RichTextEditor value={field.value} onChange={field.onChange} />
+          <TinyEditor value={field.value} onChange={field.onChange} />
         )}
       />
 

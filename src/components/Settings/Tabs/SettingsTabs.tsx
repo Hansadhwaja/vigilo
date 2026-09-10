@@ -1,8 +1,7 @@
-import { User, CreditCard, Car, FileText } from "lucide-react";
+import { CreditCard, Car, FileText } from "lucide-react";
 
 import AppTabs from "@/components/common/Tab/AppTabs";
 import VehiclesTab from "./Vehicles/VehiclesTab";
-import UsersTab from "./Users/UsersTab";
 import BillingTab from "./Billing/BillingTab";
 import CMSTab from "./CMS/CMSTab";
 

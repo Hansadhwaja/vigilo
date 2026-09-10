@@ -7,8 +7,15 @@ import CMSCard from "../CMSCard";
 import { CMSFormValue } from "../Form/CMSForm";
 import { toast } from "sonner";
 
-const TermsAndConditionsEditor = () => {
-  const { data, isLoading } = useGetCmsPageQuery("terms_and_conditions");
+interface Props {
+  type: string;
+}
+
+const TermsAndConditionsEditor = ({ type }: Props) => {
+  const { data, isLoading } = useGetCmsPageQuery({
+    name: "terms_and_conditions",
+    type,
+  });
   const content = data?.data ?? "";
 
   const [editCmsPage, { isLoading: isEditing }] = useEditCmsPageMutation();
@@ -18,6 +25,7 @@ const TermsAndConditionsEditor = () => {
       await editCmsPage({
         name: "terms_and_conditions",
         content: data.content,
+        type,
       }).unwrap();
       toast.success("Content Edited Successfully");
     } catch (error: unknown) {
