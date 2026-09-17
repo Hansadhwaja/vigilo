@@ -75,6 +75,24 @@ export interface GuardTimesheet {
   };
 }
 
+export interface ShiftChangeRequest {
+  id: string;
+  reason: string;
+  status: string;
+  requestedStartTime?: string;
+  requestedEndTime?: string;
+  createdAt: string;
+}
+
+export interface TimeOffRequest {
+  id: string;
+  reason: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+}
+
 export interface GuardAssignment {
   id: string;
   name: string;
@@ -82,6 +100,8 @@ export interface GuardAssignment {
   phone: string;
   assignmentStatus: string;
   timesheet: GuardTimesheet;
+  changeShiftRequest: ShiftChangeRequest | null;
+  requestOffRequest: TimeOffRequest | null;
 }
 
 export interface ShiftDetails {
@@ -95,6 +115,7 @@ export interface ShiftDetails {
   startTime: string;
   endTime: string;
   createdAt: string;
+  shiftTotalHours: number;
 }
 
 export interface ShiftDetailsResponse {
@@ -106,6 +127,7 @@ export interface ShiftDetailsResponse {
     order: OrderDetails;
     guards: GuardAssignment[];
     incidents: any[];
+    shiftChangeRequests: ShiftChangeRequest[];
   };
 }
 

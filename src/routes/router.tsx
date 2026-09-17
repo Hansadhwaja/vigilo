@@ -22,8 +22,6 @@ import InvoicingPage from "@/pages/Invoicing/InvoicingPage";
 import MessagesPage from "@/pages/Messages/MessagesPage";
 import PatrolDetailsPage from "@/pages/Patrolling/PatrolDetailsPage";
 import OrderDetailsPage from "@/pages/SalesHub/OrderDetailsPage";
-
-import AssignmentDetailsPage from "@/components/AssignmentDetails/AssignmentDetailsPage";
 import GuestRoute from "@/components/Auth/Routes/GuestRoute";
 import RegisterPage from "@/pages/Auth/RegisterPage";
 import LoginPage from "@/pages/Auth/LoginPage";
@@ -32,6 +30,7 @@ import PlansPage from "@/pages/Plans";
 import PaymentSuccess from "@/pages/Plans/PaymentSuccess";
 import PaymentFailed from "@/pages/Plans/PaymentFailed";
 import ClientDetailsPage from "@/pages/SalesHub/ClientDetailsPage";
+import SchedulingDetailsPage from "@/pages/Scheduling/SchedulingDetailsPage";
 
 export const router = createBrowserRouter([
   {
@@ -71,7 +70,7 @@ export const router = createBrowserRouter([
               },
               {
                 path: ":id",
-                element: <AssignmentDetailsPage />,
+                element: <SchedulingDetailsPage />,
               },
             ],
           },

@@ -1,15 +1,12 @@
 import { cn } from "@/lib/utils";
-
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-
 import CreateAssignmentModal from "../../Modal/CreateAssignmentModal";
-import EditAssignmentModal from "../../Modal/EditAssignmentModal";
-
 import { OrganizedAssignment } from "@/types";
-
 import { getStatusColor, getStatusStyle } from "@/utils/statusColors";
-import DeleteAssignmentModal from "../../Modal/DeleteAssignmentModal";
+import { Link } from "react-router-dom";
+import { ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface DayCellProps {
   assignments: OrganizedAssignment[];
@@ -50,11 +47,11 @@ const DayCell = ({ assignments, isSelected }: DayCellProps) => {
                   </div>
 
                   <div className="lg:opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    <EditAssignmentModal
-                      id={assignment.shiftId}
-                      assignment={assignment}
-                    />
-                    <DeleteAssignmentModal id={assignment.shiftId} />
+                    <Button asChild size="icon" variant="ghost">
+                      <Link to={`/scheduling/${assignment.shiftId}`}>
+                        <ExternalLink />
+                      </Link>
+                    </Button>
                   </div>
                 </div>
 

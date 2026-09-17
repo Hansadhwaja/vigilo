@@ -33,59 +33,6 @@ const ImagesCard = ({
     <SectionCard title={title} icon={<Camera className="h-5 w-5" />}>
       {images?.length ? (
         <div className="space-y-6">
-          {/* TOP INFO */}
-          <div
-            className="
-              relative overflow-hidden
-              rounded-2xl border border-slate-200
-              bg-linear-to-br
-              from-slate-900
-              via-slate-800
-              to-slate-900
-              p-5 text-white
-              shadow-lg
-            "
-          >
-            {/* Glow */}
-            <div className="absolute right-0 top-0 h-28 w-28 rounded-full bg-violet-400/20 blur-3xl" />
-
-            <div className="relative flex items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div
-                  className="
-                    flex h-12 w-12 items-center justify-center
-                    rounded-2xl bg-white/10
-                    backdrop-blur
-                  "
-                >
-                  <ImageIcon className="h-6 w-6 text-violet-300" />
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold tracking-tight">
-                    {title}
-                  </h3>
-
-                  <p className="text-sm text-slate-300">{description}</p>
-                </div>
-              </div>
-
-              <div
-                className="
-                  rounded-full
-                  bg-white/10
-                  px-4 py-2
-                  text-sm font-semibold
-                  text-white
-                  backdrop-blur
-                "
-              >
-                {images.length} Images
-              </div>
-            </div>
-          </div>
-
-          {/* IMAGES GRID */}
           <div
             className="
               grid grid-cols-1 gap-5

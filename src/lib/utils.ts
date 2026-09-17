@@ -1,7 +1,12 @@
 import { avatarColors, TIMEZONE } from "@/constants";
 import { ServicePricingFormValues } from "@/schemas";
 import { Order } from "@/store/apis/ordersApi";
-import { Schedule } from "@/store/apis/schedulingAPI";
+import {
+  GuardAssignment,
+  OrderDetails,
+  Schedule,
+  ShiftDetails,
+} from "@/store/apis/schedulingAPI";
 import {
   CalculateGrandTotalProps,
   OrganizedAssignment,
@@ -316,6 +321,59 @@ export const organizeShifts = (
   });
 
   return organized;
+};
+
+export const mapShiftToAssignment = (
+  shift: ShiftDetails,
+  order: OrderDetails,
+  guards: GuardAssignment[],
+): OrganizedAssignment => {
+  const guard = guards[0];
+
+  const start = toLocalTime(shift.startTime);
+  const end = toLocalTime(shift.endTime);
+
+  return {
+    shiftId: shift.id,
+
+    guardId: guard?.id ?? "",
+    id: `${shift.id}-${guard?.id ?? ""}-${shift.date}`,
+
+    guardName: guard?.name ?? "",
+    guardEmail: guard?.email ?? "",
+    guardStatus: guard?.assignmentStatus ?? shift.status,
+
+    orderId: "",
+
+    orderLocationName: order.locationName,
+    orderName: order.locationName,
+    orderAddress: order.locationAddress,
+
+    description: shift.description,
+    type: shift.type,
+    status: shift.status,
+    statusColors: getStatusColor(shift.status),
+
+    timeSlot: getTimeHHMM(start),
+
+    start: start.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+
+    end: end.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+
+    duration: getDuration(shift.startTime, shift.endTime),
+
+    displayDate: shift.date,
+    originalStartDate: shift.startTime,
+    originalEndDate: shift.endTime,
+
+    allGuardIdsForShift: guards.map((guard) => guard.id),
+  };
 };
 
 export const formatDateStr = (iso: string | Date) => {
