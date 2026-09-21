@@ -125,21 +125,24 @@ export const formatCurrency = (val: number) =>
   }).format(val);
 
 export const formatDate = (
-  date: string | Date,
+  date?: string | Date | null,
   options?: Intl.DateTimeFormatOptions,
 ) => {
   if (!date) return "—";
 
-  const d = typeof date === "string" ? new Date(date) : date;
+  const formattedDate = typeof date === "string" ? new Date(date) : date;
+
+  if (Number.isNaN(formattedDate.getTime())) {
+    return "—";
+  }
 
   return new Intl.DateTimeFormat("en-IN", {
     day: "2-digit",
     month: "short",
     year: "numeric",
     ...options,
-  }).format(d);
+  }).format(formattedDate);
 };
-
 export const getCurrentWeekDates = () => {
   const today = new Date();
   const startOfWeek = new Date(today);

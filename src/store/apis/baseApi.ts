@@ -64,7 +64,8 @@ export const baseApi = createApi({
     "Transaction",
     "Vehicle",
     "Dashboard",
-    "CMS"
+    "CMS",
+    "Compliance"
   ],
   endpoints: () => ({}),
 });

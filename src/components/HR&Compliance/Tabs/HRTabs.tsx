@@ -48,6 +48,7 @@ const HRTabs = () => {
             onValueChange={handleTabChange}
             tabs={tabs}
             tabsListClassName="w-full"
+            contentClassName="p-2"
         />
     );
 };

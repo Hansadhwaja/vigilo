@@ -5,49 +5,44 @@ import ComplianceSearchFilters from "./ComplianceSearchFilters";
 import ComplianceTable from "./Table/ComplianceTable";
 import { useQueryParams } from "@/lib/hooks/useQueryParams";
 import { complianceItems } from "@/constants";
+import { useGetAllComplianceQuery } from "@/store/apis/complianceApis";
+import { useDebounce } from "@/lib/hooks/useDebounce";
 
 const ComplianceTab = () => {
-    const { getParam, setParam } = useQueryParams();
+  const { getParam, setParam } = useQueryParams();
 
-    const limit = Number(getParam("limit", "10"));
+  const limit = getParam("limit", "10");
+  const page = getParam("page", "1");
+  const search = getParam("search", "");
+  const debouncedSearch = useDebounce(search);
 
-    const pagination = {
-        page: 1,
-        totalPages: 1,
-    };
+  const { data, isLoading } = useGetAllComplianceQuery({
+    page,
+    limit,
+    search: debouncedSearch,
+  });
 
-    const handlePageChange = (newPage: number) => {
-        setParam("page", String(newPage));
-    };
+  const compliances = data?.data ?? [];
 
-    const handleLimitChange = (value: number) => {
-        setParam("limit", String(value));
-        setParam("page", "1");
-    };
+  const totalPages = data?.pagination?.totalPages ?? 1;
 
-    return (
-        <Card className="p-0">
-            <CardHeader className="p-2 space-y-3">
-                <CardTitle className="text-lg">
-                    Compliance Tracking
-                </CardTitle>
+  return (
+    <Card className="p-0">
+      <CardHeader className="p-2 space-y-3">
+        <CardTitle className="text-lg">Compliance Tracking</CardTitle>
 
-                <ComplianceSearchFilters />
-            </CardHeader>
+        <ComplianceSearchFilters />
+      </CardHeader>
 
-            <CardContent className="p-2">
-                <ComplianceTable
-                    compliances={complianceItems}
-                    page={pagination.page}
-                    totalPages={pagination.totalPages}
-                    limit={limit}
-                    onPageChange={handlePageChange}
-                    onLimitChange={handleLimitChange}
-                    isLoading={false}
-                />
-            </CardContent>
-        </Card>
-    );
+      <CardContent className="p-2">
+        <ComplianceTable
+          compliances={compliances}
+          totalPages={totalPages}
+          isLoading={isLoading}
+        />
+      </CardContent>
+    </Card>
+  );
 };
 
 export default ComplianceTab;

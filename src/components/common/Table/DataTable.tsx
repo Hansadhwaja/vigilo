@@ -204,7 +204,7 @@ export function DataTable<T extends RowWithId>({
       </div>
 
       {/* PAGINATION */}
-      {totalPages && <TablePagination totalPages={totalPages ?? 1} />}
+      {!!totalPages && <TablePagination totalPages={totalPages ?? 1} />}
     </div>
   );
 }

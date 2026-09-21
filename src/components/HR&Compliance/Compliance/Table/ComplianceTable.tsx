@@ -3,129 +3,62 @@ import {
   DataTable,
   RowWithId,
 } from "@/components/common/Table/DataTable";
-
-import { ShieldAlert, Eye } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
+import { Eye, ShieldCheck, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CustomBadge from "@/components/common/Badge/CustomBadge";
+import { Link } from "react-router-dom";
 
 interface Compliance {
   id: string;
-  guardName: string;
-  guardId: string;
-  type: string;
-  description: string;
-  dueDate: string;
-  priority: string;
-  status: string;
+  name: string;
+  email: string;
+  profileCompleted: boolean;
+  profile: any;
 }
 
 interface ComplianceTableProps {
-  page: number;
   totalPages: number;
-  limit: number;
-
   compliances: Compliance[];
-
   isLoading: boolean;
   isError?: boolean;
   error?: any;
-
-  onPageChange: (n: number) => void;
-  onLimitChange: (n: number) => void;
 }
-
-const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "high":
-      return "bg-red-100 text-red-700";
-    case "medium":
-      return "bg-yellow-100 text-yellow-700";
-    default:
-      return "bg-green-100 text-green-700";
-  }
-};
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "completed":
-      return "bg-green-100 text-green-700";
-    case "pending":
-      return "bg-yellow-100 text-yellow-700";
-    default:
-      return "bg-red-100 text-red-700";
-  }
-};
 
 const ComplianceTable = ({
   compliances,
   isLoading,
   isError,
   error,
-  page = 1,
   totalPages = 1,
-  limit,
-  onPageChange,
-  onLimitChange,
 }: ComplianceTableProps) => {
   const columns: Column<Compliance & RowWithId>[] = [
     {
       key: "guard",
       header: "Guard",
-
       render: (row) => (
-        <div className="space-y-1">
-          <p className="font-semibold text-slate-800">{row.guardName}</p>
+        <div>
+          <h2 className="truncate font-semibold text-slate-800">{row.name}</h2>
 
-          <p className="text-sm text-slate-400">{row.guardId}</p>
+          <p className="truncate text-xs text-slate-400">ID: {row.id}</p>
         </div>
       ),
     },
 
     {
-      key: "type",
-      header: "Type",
-
+      key: "email",
+      header: "Email",
       render: (row) => (
-        <p className="text-sm text-slate-700 capitalize">{row.type}</p>
-      ),
-    },
-
-    {
-      key: "description",
-      header: "Description",
-
-      render: (row) => (
-        <p
-          className="text-sm text-slate-700 line-clamp-2 max-w-72"
-          title={row.description}
-        >
-          {row.description}
+        <p className="max-w-[260px] truncate text-sm text-slate-600">
+          {row.email}
         </p>
       ),
     },
 
     {
-      key: "dueDate",
-      header: "Due Date",
-
-      render: (row) => <p className="text-sm text-slate-700">{row.dueDate}</p>,
-    },
-
-    {
-      key: "priority",
-      header: "Priority",
-
-      render: (row) => <CustomBadge status={row.priority} />,
-    },
-
-    {
       key: "status",
-      header: "Status",
-
+      header: "Profile Status",
       render: (row) => (
-        <CustomBadge status={row.status} />
+        <CustomBadge status={row.profileCompleted ? "Completed" : "Pending"} />
       ),
     },
 
@@ -133,22 +66,28 @@ const ComplianceTable = ({
       key: "actions",
       header: "Actions",
       align: "center",
-
-      render: () => (
+      render: (row) => (
         <div className="flex justify-center">
           <Button
             variant="outline"
             size="icon"
+            asChild
             className="
-                            h-8 w-8
-                            border-slate-200
-                            text-slate-500
-                            hover:bg-orange-50
-                            hover:text-orange-600
-                            hover:border-orange-200
-                        "
+              h-8 gap-1.5 rounded-lg
+              border-slate-200
+              bg-white
+              px-3
+              text-xs font-medium text-slate-600
+              shadow-none
+              transition-all
+              hover:border-orange-200
+              hover:bg-orange-50
+              hover:text-orange-600
+            "
           >
-            <Eye className="h-4 w-4" />
+            <Link to={`/hr/compliance/details/${row.id}`}>
+              <Eye className="h-3.5 w-3.5" />
+            </Link>
           </Button>
         </div>
       ),
@@ -162,14 +101,14 @@ const ComplianceTable = ({
       isLoading={isLoading}
       isError={isError}
       error={error}
-      loadingText="Loading compliances..."
-      emptyText="No compliances found"
-      emptyIcon={<ShieldAlert className="h-10 w-10 text-slate-400" />}
-      page={page}
+      loadingText="Loading compliance records..."
+      emptyText="No compliance records found"
+      emptyIcon={
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+          <ShieldAlert className="h-8 w-8 text-slate-400" />
+        </div>
+      }
       totalPages={totalPages}
-      limit={limit}
-      onPageChange={onPageChange}
-      onLimitChange={onLimitChange}
     />
   );
 };

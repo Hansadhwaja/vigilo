@@ -31,6 +31,7 @@ import PaymentSuccess from "@/pages/Plans/PaymentSuccess";
 import PaymentFailed from "@/pages/Plans/PaymentFailed";
 import ClientDetailsPage from "@/pages/SalesHub/ClientDetailsPage";
 import SchedulingDetailsPage from "@/pages/Scheduling/SchedulingDetailsPage";
+import ComplianceDetailsPage from "@/pages/HR&Compliance/ComplianceDetailsPage";
 
 export const router = createBrowserRouter([
   {
@@ -156,6 +157,10 @@ export const router = createBrowserRouter([
               {
                 path: "guard-details/:id",
                 element: <GuardDetailsPage />,
+              },
+              {
+                path: "compliance/details/:id",
+                element: <ComplianceDetailsPage />,
               },
             ],
           },

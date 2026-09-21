@@ -76,7 +76,7 @@ const TablePagination = ({ totalPages = 1 }: TablePaginationProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-4 border-t bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-4 border-t px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
       {/* Left Section */}
       <div className="flex items-center gap-3">
         <p className="text-sm text-muted-foreground">
