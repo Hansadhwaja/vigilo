@@ -33,7 +33,7 @@ const ComplianceDetailsPage = () => {
       <CustomHeader
         title="Compliance Details"
         description="Review the guard's onboarding information and compliance documents."
-        previousLink="/admin/compliance"
+        previousLink="/hr?tab=compliance"
       />
 
       <ComplianceDetailsHeader profile={profile} />
