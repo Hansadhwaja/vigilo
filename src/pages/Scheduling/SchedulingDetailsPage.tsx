@@ -9,13 +9,21 @@ import CustomHeader from "@/components/common/Header/CustomHeader";
 import CustomBadge from "@/components/common/Badge/CustomBadge";
 
 import { mapShiftToAssignment } from "@/lib/utils";
+import { useQueryParams } from "@/lib/hooks/useQueryParams";
+import { guardsApi } from "@/store/apis/guardsApi";
 
 export default function SchedulingDetailsPage() {
   const { id } = useParams<{ id: string }>();
+  const { getParam } = useQueryParams();
+  const guardId = getParam("guardId", "");
+
   const navigate = useNavigate();
 
   const { data, isLoading, isError } = useGetStaticShiftDetailsForAdminQuery(
-    id ?? "",
+    {
+      shiftId: id ?? "",
+      guardId,
+    },
     {
       skip: !id,
     },
@@ -25,7 +33,8 @@ export default function SchedulingDetailsPage() {
 
   const shift = schedulingData?.shift;
   const order = schedulingData?.order;
-  const guards = schedulingData?.guards ?? [];
+  const guards = shift?.guards ?? [];
+  const guard = schedulingData?.guard;
 
   if (isLoading) {
     return (
@@ -59,30 +68,6 @@ export default function SchedulingDetailsPage() {
     );
   }
 
-  const assignment = mapShiftToAssignment(shift, order, guards);
-  
-  const timeOffRequests = guards
-    .filter((guard) => guard.requestOffRequest !== null)
-    .map((guard) => {
-      const request = guard.requestOffRequest;
-
-      if (!request) return null;
-
-      return {
-        id: request.id ?? "",
-        guardId: guard.id,
-        guardName: guard.name,
-        reason: request.reason ?? "",
-        status: request.status ?? "pending",
-        startDate: request.startDate ?? "",
-        endDate: request.endDate ?? "",
-        createdAt: request.createdAt ?? "",
-      };
-    })
-    .filter(
-      (request): request is NonNullable<typeof request> => request !== null,
-    );
-
   return (
     <section className="space-y-6">
       <CustomHeader
@@ -92,23 +77,13 @@ export default function SchedulingDetailsPage() {
         others={
           <div className="flex items-center gap-2">
             <CustomBadge status={shift.status} />
-
-            <EditAssignmentModal
-              id={assignment.shiftId}
-              assignment={assignment}
-            />
-
-            <DeleteAssignmentModal id={assignment.shiftId} />
           </div>
         }
       />
 
       <ShiftInformation shift={shift} order={order} guards={guards} />
 
-      <GuardRequests
-        timeOffRequests={timeOffRequests}
-        shiftChangeRequests={schedulingData.shiftChangeRequests}
-      />
+      <GuardRequests guard={guard} />
     </section>
   );
 }

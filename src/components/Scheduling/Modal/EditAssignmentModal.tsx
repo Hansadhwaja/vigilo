@@ -64,7 +64,11 @@ const EditAssignmentModal = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={"secondary"} size="icon-sm">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="text-sky-500 hover:bg-white/70 hover:text-sky-800"
+        >
           <Edit />
         </Button>
       </DialogTrigger>

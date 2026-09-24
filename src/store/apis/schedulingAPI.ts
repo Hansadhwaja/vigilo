@@ -1,3 +1,4 @@
+import { Incident } from "@/types";
 import { baseApi } from "./baseApi";
 
 export interface Schedule {
@@ -105,30 +106,76 @@ export interface GuardAssignment {
 }
 
 export interface ShiftDetails {
-  orderId: any;
   id: string;
-  type: string;
+  orderId: string;
+  type: "static" | string;
   description: string;
   date: string;
-  endDate: string;
-  status: string;
   startTime: string;
   endTime: string;
-  createdAt: string;
   shiftTotalHours: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+
+  guards: ShiftGuard[];
+
+  order: OrderDetails;
+}
+
+export interface ShiftGuard {
+  id: string;
+  name: string;
+  email: string;
+  StaticGuards: StaticGuardAssignment;
 }
 
 export interface ShiftDetailsResponse {
   success: boolean;
-  message: string;
+  message?: string;
+  type: "static" | string;
+
   data: {
     shift: ShiftDetails;
-    client: Client;
     order: OrderDetails;
-    guards: GuardAssignment[];
-    incidents: any[];
-    shiftChangeRequests: ShiftChangeRequest[];
+    guard: GuardDetails;
+    incidents: Incident[];
   };
+}
+
+export interface GuardDetails {
+  id: string;
+  name: string;
+  email: string;
+  assignment: StaticGuardAssignment;
+}
+
+export interface StaticGuardAssignment {
+  id: string;
+  status: string;
+
+  clockInTime: string | null;
+  clockOutTime: string | null;
+
+  overtimeStartTime: string | null;
+  overtimeEndTime: string | null;
+  overtimeHours: number | null;
+
+  totalHours: number | null;
+
+  changeShiftStatus: string | null;
+  changeShiftDate: string | null;
+  changeShiftStartTime: string | null;
+  changeShiftEndTime: string | null;
+  changeShiftReason: string | null;
+  changeShiftRequestedAt: string | null;
+
+  requestOffStatus: string;
+  requestOffDate: string | null;
+  requestOffReason: string | null;
+
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateScheduleDto {
@@ -192,6 +239,74 @@ export interface GetScheduleParams {
   role?: string;
 }
 
+export interface ShiftChangeRequest {
+  id: string;
+  staticId: string;
+  guardId: string;
+  status: string;
+  patrolId: string | null;
+  patrolRunId: string | null;
+  shiftType: "static" | "patrol";
+
+  requestOffStatus: string;
+  requestOffDate: string | null;
+  requestOffReason: string | null;
+  requestOffNotes: string | null;
+  requestOffRequestedAt: string | null;
+  requestOffActionedAt: string | null;
+  requestOffActionedBy: string | null;
+
+  changeShiftStatus: string | null;
+  changeShiftDate: string | null;
+  changeShiftStartTime: string | null;
+  changeShiftEndTime: string | null;
+  changeShiftReason: string | null;
+  changeShiftRequestedAt: string | null;
+
+  clockInTime: string | null;
+  clockOutTime: string | null;
+  overtimeStartTime: string | null;
+  overtimeEndTime: string | null;
+  overtimeHours: number | null;
+  totalHours: number | null;
+
+  createdAt: string;
+  updatedAt: string;
+
+  guard: ShiftChangeRequestGuard;
+  static: ShiftChangeRequestStatic;
+}
+
+export interface ShiftChangeRequestGuard {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface ShiftChangeRequestStatic {
+  id: string;
+  orderId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  description: string;
+  order: ShiftChangeRequestOrder;
+}
+
+export interface ShiftChangeRequestOrder {
+  locationName: string;
+  locationAddress: string;
+}
+
+export interface ShiftChangeRequestsResponse {
+  success: boolean;
+  count: number;
+  page: number;
+  pages: number;
+  data: ShiftChangeRequest[];
+}
+
 export const schedulingApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllSchedules: builder.query<
@@ -223,12 +338,35 @@ export const schedulingApi = baseApi.injectEndpoints({
       },
     ),
 
-    getStaticShiftDetailsForAdmin: builder.query<ShiftDetailsResponse, string>({
-      query: (id: string) => ({
-        url: `/scheduling/getStaticShiftDetailsForAdmin/${id}`,
-        method: "GET",
+    getAllShiftChangeRequests: builder.query<ShiftChangeRequestsResponse, void>(
+      {
+        query: () => "/shifts/change-requests",
+        providesTags: ["Schedules"],
+      },
+    ),
+
+    getStaticShiftDetailsForAdmin: builder.query<
+      ShiftDetailsResponse,
+      { guardId: string; shiftId: string }
+    >({
+      query: (params) => {
+        const qs = new URLSearchParams();
+        const { guardId, shiftId } = params;
+
+        if (guardId) qs.set("guardId", guardId);
+        if (shiftId) qs.set("shiftId", shiftId);
+        return `/shifts/guard-shift?${qs.toString()}`;
+      },
+      providesTags: ["Schedules"],
+    }),
+
+    updateStatusOfShift: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/shifts/change-requests/${id}`,
+        method: "PATCH",
+        body: data,
       }),
-      providesTags: (_result, _error, id) => [{ type: "Schedules", id }],
+      invalidatesTags: ["Schedules"],
     }),
 
     editSchedule: builder.mutation<
@@ -309,7 +447,9 @@ export const {
   useGetAllSchedulesQuery,
   useCreateScheduleMutation,
   useDeleteScheduleMutation,
+  useGetAllShiftChangeRequestsQuery,
   useGetStaticShiftDetailsForAdminQuery,
+  useUpdateStatusOfShiftMutation,
   useEditScheduleMutation,
   useGetAllTimeSheetsQuery,
   useEditTimeSheetMutation,
