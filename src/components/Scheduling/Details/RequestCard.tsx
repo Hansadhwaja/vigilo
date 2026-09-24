@@ -1,5 +1,5 @@
 import { CalendarOff, Check, RefreshCw, X } from "lucide-react";
-import TimeBox from "./Timebox";
+import TimeBox from "./TimeBox";
 import { formatDate } from "@/lib/utils";
 import CustomBadge from "@/components/common/Badge/CustomBadge";
 import { Button } from "@/components/ui/button";
