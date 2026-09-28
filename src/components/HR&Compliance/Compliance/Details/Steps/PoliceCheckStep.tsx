@@ -1,13 +1,19 @@
-import { ComplianceProfile } from "@/types/compliance/compliance.types";
+import { ComplianceProfile, ComplianceUpdatePayload } from "@/types/compliance/compliance.types";
 import Detail from "../Detail";
-import CustomBadge from "@/components/common/Badge/CustomBadge";
+import StatusActions from "../StatusActions";
 import { formatDate } from "@/lib/utils";
 
 interface PoliceCheckStepProps {
   profile: ComplianceProfile;
+  onStatusChange: (payload: ComplianceUpdatePayload) => void;
+  loading?: boolean;
 }
 
-const PoliceCheckStep = ({ profile }: PoliceCheckStepProps) => {
+const PoliceCheckStep = ({
+  profile,
+  onStatusChange,
+  loading = false,
+}: PoliceCheckStepProps) => {
   const nationalPoliceCheckDetails = [
     {
       label: "Reference Number",
@@ -24,12 +30,6 @@ const PoliceCheckStep = ({ profile }: PoliceCheckStepProps) => {
     {
       label: "Renewal Due",
       value: formatDate(profile.policeCheckRenewalDueDate),
-    },
-    {
-      label: "Status",
-      value: (
-        <CustomBadge status={profile.policeCheckStatus || "Pending"} />
-      ),
     },
   ];
 
@@ -54,21 +54,13 @@ const PoliceCheckStep = ({ profile }: PoliceCheckStepProps) => {
       label: "Renewal Due",
       value: formatDate(profile.overseasPoliceCheckRenewalDueDate),
     },
-    {
-      label: "Status",
-      value: (
-        <CustomBadge
-          status={profile.overseasPoliceCheckStatus || "Pending"}
-        />
-      ),
-    },
   ];
 
   return (
     <div className="space-y-8">
       {/* National Police Check */}
       <section>
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h4 className="text-sm font-semibold">
               National Police Check
@@ -79,8 +71,14 @@ const PoliceCheckStep = ({ profile }: PoliceCheckStepProps) => {
             </p>
           </div>
 
-          <CustomBadge
-            status={profile.policeCheckStatus || "Pending"}
+          <StatusActions
+            status={profile.policeCheckStatus}
+            loading={loading}
+            onStatusChange={(status) =>
+              onStatusChange({
+                policeCheckStatus: status,
+              })
+            }
           />
         </div>
 
@@ -111,7 +109,7 @@ const PoliceCheckStep = ({ profile }: PoliceCheckStepProps) => {
       {/* Overseas Police Check */}
       {profile.hasOverseasPoliceCheck && (
         <section>
-          <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h4 className="text-sm font-semibold">
                 Overseas Police Check
@@ -122,9 +120,13 @@ const PoliceCheckStep = ({ profile }: PoliceCheckStepProps) => {
               </p>
             </div>
 
-            <CustomBadge
-              status={
-                profile.overseasPoliceCheckStatus || "Pending"
+            <StatusActions
+              status={profile.overseasPoliceCheckStatus}
+              loading={loading}
+              onStatusChange={(status) =>
+                onStatusChange({
+                  overseasPoliceCheckStatus: status,
+                })
               }
             />
           </div>

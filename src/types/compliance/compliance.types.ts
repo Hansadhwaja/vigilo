@@ -154,3 +154,16 @@ export interface ComplianceProfile {
   uniformAllocated?: boolean;
   uniformDetails?: UniformDetails | null;
 }
+
+export type ComplianceUpdatePayload =
+  | { primaryIdStatus: StatusAction }
+  | { secondaryIdStatus: StatusAction }
+  | { workRightsStatus: StatusAction }
+  | { securityLicenceVerificationStatus: StatusAction }
+  | { interstateLicenceVerificationStatus: StatusAction }
+  | { policeCheckStatus: StatusAction }
+  | { overseasPoliceCheckStatus: StatusAction }
+  | { qualifications: Qualification[] }
+  | { siteInductions: SiteInduction[] };
+
+export type StatusAction = "Approved" | "Rejected";

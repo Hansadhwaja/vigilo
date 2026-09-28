@@ -1,13 +1,22 @@
 import Detail from "../Detail";
-import CustomBadge from "@/components/common/Badge/CustomBadge";
+import StatusActions from "../StatusActions";
 import { formatDate } from "@/lib/utils";
-import { ComplianceProfile } from "@/types/compliance/compliance.types";
+import {
+  ComplianceProfile,
+  ComplianceUpdatePayload,
+} from "@/types/compliance/compliance.types";
 
 interface SecurityLicenseStepProps {
   profile: ComplianceProfile;
+  onStatusChange: (payload: ComplianceUpdatePayload) => void;
+  loading?: boolean;
 }
 
-const SecurityLicenseStep = ({ profile }: SecurityLicenseStepProps) => {
+const SecurityLicenseStep = ({
+  profile,
+  onStatusChange,
+  loading = false,
+}: SecurityLicenseStepProps) => {
   const primaryLicenceDetails = [
     {
       label: "Licence Number",
@@ -28,14 +37,6 @@ const SecurityLicenseStep = ({ profile }: SecurityLicenseStepProps) => {
     {
       label: "Expiry Date",
       value: formatDate(profile.securityLicenceExpiryDate),
-    },
-    {
-      label: "Verification Status",
-      value: (
-        <CustomBadge
-          status={profile.securityLicenceVerificationStatus || "Pending"}
-        />
-      ),
     },
   ];
 
@@ -64,30 +65,29 @@ const SecurityLicenseStep = ({ profile }: SecurityLicenseStepProps) => {
       label: "Expiry Date",
       value: formatDate(profile.interstateLicenceExpiryDate),
     },
-    {
-      label: "Verification Status",
-      value: (
-        <CustomBadge
-          status={profile.interstateLicenceVerificationStatus || "Pending"}
-        />
-      ),
-    },
   ];
 
   return (
     <div className="space-y-8">
       {/* Primary Licence */}
       <section>
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h4 className="text-sm font-semibold">Security Licence</h4>
+
             <p className="mt-1 text-xs text-muted-foreground">
               Primary security licence and verification details.
             </p>
           </div>
 
-          <CustomBadge
-            status={profile.securityLicenceVerificationStatus || "Pending"}
+          <StatusActions
+            status={profile.securityLicenceVerificationStatus}
+            loading={loading}
+            onStatusChange={(status) =>
+              onStatusChange({
+                securityLicenceVerificationStatus: status,
+              })
+            }
           />
         </div>
 
@@ -118,16 +118,23 @@ const SecurityLicenseStep = ({ profile }: SecurityLicenseStepProps) => {
       {/* Interstate Licence */}
       {profile.hasInterstateLicence && (
         <section>
-          <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h4 className="text-sm font-semibold">Interstate Licence</h4>
+
               <p className="mt-1 text-xs text-muted-foreground">
                 Additional security licence registered in another state.
               </p>
             </div>
 
-            <CustomBadge
-              status={profile.interstateLicenceVerificationStatus || "Pending"}
+            <StatusActions
+              status={profile.interstateLicenceVerificationStatus}
+              loading={loading}
+              onStatusChange={(status) =>
+                onStatusChange({
+                  interstateLicenceVerificationStatus: status,
+                })
+              }
             />
           </div>
 

@@ -20,8 +20,19 @@ export const complianceApis = baseApi.injectEndpoints({
       query: (id) => `/users/getGuardProfileById/${id}`,
       providesTags: ["Compliance"],
     }),
+    updateCompliance: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/guardProfile/upsertGuardProfile?userId=${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Compliance"],
+    }),
   }),
 });
 
-export const { useGetAllComplianceQuery, useGetComplianceByIdQuery } =
-  complianceApis;
+export const {
+  useGetAllComplianceQuery,
+  useGetComplianceByIdQuery,
+  useUpdateComplianceMutation,
+} = complianceApis;

@@ -12,17 +12,26 @@ import { cn } from "@/lib/utils";
 import {
   ComplianceProfile,
   ComplianceStep,
+  ComplianceUpdatePayload,
 } from "@/types/compliance/compliance.types";
 import { getStepStatus, statusLabel } from "@/utils/compliance";
 
 import ComplianceStepContent from "./ComplianceStepContent";
 import CustomBadge from "@/components/common/Badge/CustomBadge";
+import { useUpdateComplianceMutation } from "@/store/apis/complianceApis";
+import { toast } from "sonner";
+import { useParams } from "react-router-dom";
 
 interface ComplianceStepsProps {
   profile: ComplianceProfile;
 }
 
 const ComplianceSteps = ({ profile }: ComplianceStepsProps) => {
+  const [activeStep, setActiveStep] = useState(1);
+  const { id } = useParams();
+
+  const [updateCompliance, { isLoading }] = useUpdateComplianceMutation();
+
   const steps = useMemo<ComplianceStep[]>(
     () => [
       {
@@ -83,16 +92,31 @@ const ComplianceSteps = ({ profile }: ComplianceStepsProps) => {
     [profile],
   );
 
-  const [activeStep, setActiveStep] = useState(1);
-
   const active = steps.find((step) => step.id === activeStep) ?? steps[0];
-  console.log(active.status)
 
   const completedCount = steps.filter(
     (step) => step.status === "completed",
   ).length;
 
-  const attentionCount = steps.filter((step) => step.status === "attention").length;
+  const attentionCount = steps.filter(
+    (step) => step.status === "attention",
+  ).length;
+
+  const handleStatusChange = async (payload: ComplianceUpdatePayload) => {
+    try {
+      await updateCompliance({
+        id,
+        data: payload,
+      }).unwrap();
+      toast.success("Status updated successfully");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error?.message
+          : "Failed to update compliance status";
+      toast.error(message);
+    }
+  };
 
   return (
     <section className="space-y-4">
@@ -108,7 +132,6 @@ const ComplianceSteps = ({ profile }: ComplianceStepsProps) => {
       <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)]">
         {/* Step Navigation */}
         <aside className="h-fit rounded-xl border bg-card shadow-sm">
-          {/* Navigation Header */}
           <div className="border-b px-4 py-3.5">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -132,7 +155,6 @@ const ComplianceSteps = ({ profile }: ComplianceStepsProps) => {
             )}
           </div>
 
-          {/* Steps */}
           <div className="p-2">
             <div className="space-y-0.5">
               {steps.map((step) => {
@@ -150,12 +172,10 @@ const ComplianceSteps = ({ profile }: ComplianceStepsProps) => {
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                     )}
                   >
-                    {/* Active Indicator */}
                     {isActive && (
                       <span className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-primary" />
                     )}
 
-                    {/* Step Icon */}
                     <div
                       className={cn(
                         "flex size-8 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition-colors",
@@ -177,7 +197,6 @@ const ComplianceSteps = ({ profile }: ComplianceStepsProps) => {
                       )}
                     </div>
 
-                    {/* Step Information */}
                     <div className="min-w-0 flex-1">
                       <p
                         className={cn(
@@ -202,7 +221,6 @@ const ComplianceSteps = ({ profile }: ComplianceStepsProps) => {
                       </p>
                     </div>
 
-                    {/* Arrow */}
                     <ChevronRight
                       className={cn(
                         "size-4 shrink-0",
@@ -218,7 +236,6 @@ const ComplianceSteps = ({ profile }: ComplianceStepsProps) => {
 
         {/* Active Step */}
         <div className="min-w-0 overflow-hidden rounded-xl border bg-card shadow-sm">
-          {/* Content Header */}
           <div className="border-b px-5 py-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
@@ -237,6 +254,7 @@ const ComplianceSteps = ({ profile }: ComplianceStepsProps) => {
                     <h3 className="truncate text-sm font-semibold sm:text-base">
                       {active.title}
                     </h3>
+
                     <CustomBadge status={active.status} />
                   </div>
 
@@ -252,9 +270,13 @@ const ComplianceSteps = ({ profile }: ComplianceStepsProps) => {
             </div>
           </div>
 
-          {/* Step Content */}
           <div className="p-5">
-            <ComplianceStepContent step={active.id} profile={profile} />
+            <ComplianceStepContent
+              step={active.id}
+              profile={profile}
+              onStatusChange={handleStatusChange}
+              loading={isLoading}
+            />
           </div>
         </div>
       </div>

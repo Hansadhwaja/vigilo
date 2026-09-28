@@ -1,4 +1,7 @@
-import { ComplianceProfile } from "@/types/compliance/compliance.types";
+import {
+  ComplianceProfile,
+  ComplianceUpdatePayload,
+} from "@/types/compliance/compliance.types";
 
 import PersonalInformationStep from "./Steps/PersonalInformationStep";
 import WorkRightsStep from "./Steps/WorkRightsStep";
@@ -13,27 +16,61 @@ import UniformEquipmentStep from "./Steps/UniformEquipmentStep";
 interface ComplianceStepContentProps {
   step: number;
   profile: ComplianceProfile;
+  onStatusChange: (payload: ComplianceUpdatePayload) => void;
+  loading?: boolean;
 }
 
 const ComplianceStepContent = ({
   step,
   profile,
+  onStatusChange,
+  loading = false,
 }: ComplianceStepContentProps) => {
   switch (step) {
     case 1:
-      return <PersonalInformationStep profile={profile} />;
+      return (
+        <PersonalInformationStep
+          profile={profile}
+          onStatusChange={onStatusChange}
+          loading={loading}
+        />
+      );
 
     case 2:
-      return <WorkRightsStep profile={profile} />;
+      return (
+        <WorkRightsStep
+          profile={profile}
+          onStatusChange={onStatusChange}
+          loading={loading}
+        />
+      );
 
     case 3:
-      return <SecurityLicenseStep profile={profile} />;
+      return (
+        <SecurityLicenseStep
+          profile={profile}
+          onStatusChange={onStatusChange}
+          loading={loading}
+        />
+      );
 
     case 4:
-      return <PoliceCheckStep profile={profile} />;
+      return (
+        <PoliceCheckStep
+          profile={profile}
+          onStatusChange={onStatusChange}
+          loading={loading}
+        />
+      );
 
     case 5:
-      return <QualificationsStep profile={profile} />;
+      return (
+        <QualificationsStep
+          profile={profile}
+          onStatusChange={onStatusChange}
+          loading={loading}
+        />
+      );
 
     case 6:
       return <EmploymentPayrollStep profile={profile} />;

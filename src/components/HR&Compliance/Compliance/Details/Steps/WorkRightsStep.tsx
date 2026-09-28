@@ -1,13 +1,22 @@
 import Detail from "../Detail";
-import CustomBadge from "@/components/common/Badge/CustomBadge";
 import { formatDate } from "@/lib/utils";
-import { ComplianceProfile } from "@/types/compliance/compliance.types";
+import {
+  ComplianceProfile,
+  ComplianceUpdatePayload,
+} from "@/types/compliance/compliance.types";
+import StatusActions from "../StatusActions";
 
 interface WorkRightsStepProps {
   profile: ComplianceProfile;
+  onStatusChange: (payload: ComplianceUpdatePayload) => void;
+  loading?: boolean;
 }
 
-const WorkRightsStep = ({ profile }: WorkRightsStepProps) => {
+const WorkRightsStep = ({
+  profile,
+  onStatusChange,
+  loading = false,
+}: WorkRightsStepProps) => {
   const details = [
     {
       label: "Citizenship Status",
@@ -21,24 +30,29 @@ const WorkRightsStep = ({ profile }: WorkRightsStepProps) => {
       label: "Visa Expiry Date",
       value: formatDate(profile.visaExpiryDate),
     },
-    {
-      label: "Work Rights Status",
-      value: <CustomBadge status={profile.workRightsStatus || "Pending"} />,
-    },
   ];
 
   return (
     <div className="space-y-6">
       <section>
-        <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h4 className="text-sm font-semibold">Work Rights & Eligibility</h4>
+
             <p className="mt-1 text-xs text-muted-foreground">
               Citizenship, visa information and employment eligibility.
             </p>
           </div>
 
-          <CustomBadge status={profile.workRightsStatus || "Pending"} />
+          <StatusActions
+            status={profile.workRightsStatus}
+            loading={loading}
+            onStatusChange={(status) =>
+              onStatusChange({
+                workRightsStatus: status,
+              })
+            }
+          />
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

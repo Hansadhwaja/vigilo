@@ -1,13 +1,36 @@
 import CustomBadge from "@/components/common/Badge/CustomBadge";
 import Detail from "../Detail";
-import { ComplianceProfile } from "@/types/compliance/compliance.types";
+import {
+  ComplianceProfile,
+  ComplianceUpdatePayload,
+  StatusAction,
+} from "@/types/compliance/compliance.types";
 import { formatDate } from "@/lib/utils";
+import StatusActions from "../StatusActions";
 
 interface PersonalInformationStepProps {
   profile: ComplianceProfile;
+  onStatusChange: (payload: ComplianceUpdatePayload) => void;
+  loading?: boolean;
 }
 
-const PersonalInformationStep = ({ profile }: PersonalInformationStepProps) => {
+const PersonalInformationStep = ({
+  profile,
+  onStatusChange,
+  loading,
+}: PersonalInformationStepProps) => {
+  const handlePrimaryIdStatusChange = (status: StatusAction) => {
+    onStatusChange({
+      primaryIdStatus: status,
+    });
+  };
+
+  const handleSecondaryIdStatusChange = (status: StatusAction) => {
+    onStatusChange({
+      secondaryIdStatus: status,
+    });
+  };
+
   const fullName = [
     profile.title,
     profile.firstName,
@@ -50,7 +73,7 @@ const PersonalInformationStep = ({ profile }: PersonalInformationStepProps) => {
     },
     {
       label: "Gender",
-      value: <p className="capitalize">{profile.gender}</p>,
+      value: <p className="capitalize">{profile.gender || "—"}</p>,
     },
     {
       label: "Identification Points",
@@ -117,10 +140,6 @@ const PersonalInformationStep = ({ profile }: PersonalInformationStepProps) => {
       label: "Expiry Date",
       value: formatDate(profile.primaryIdExpiry),
     },
-    {
-      label: "Verification Status",
-      value: <CustomBadge status={profile.primaryIdStatus || "Pending"} />,
-    },
   ];
 
   const secondaryIdDetails = [
@@ -136,14 +155,11 @@ const PersonalInformationStep = ({ profile }: PersonalInformationStepProps) => {
       label: "Expiry Date",
       value: formatDate(profile.secondaryIdExpiry),
     },
-    {
-      label: "Verification Status",
-      value: <CustomBadge status={profile.secondaryIdStatus || "Pending"} />,
-    },
   ];
 
   return (
     <div className="space-y-8">
+      {/* Profile */}
       <div className="flex flex-col gap-5 rounded-xl border bg-muted/20 p-4 sm:flex-row sm:items-center">
         <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-muted">
           {profile.profilePhotoUrl ? (
@@ -223,10 +239,20 @@ const PersonalInformationStep = ({ profile }: PersonalInformationStepProps) => {
 
       {/* Primary ID */}
       <section>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h4 className="text-sm font-semibold">Primary Identification</h4>
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h4 className="text-sm font-semibold">Primary Identification</h4>
 
-          <CustomBadge status={profile.primaryIdStatus || "Pending"} />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Verify the primary identification document.
+            </p>
+          </div>
+
+          <StatusActions
+            status={profile.primaryIdStatus}
+            onStatusChange={handlePrimaryIdStatusChange}
+            loading={loading}
+          />
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -242,10 +268,20 @@ const PersonalInformationStep = ({ profile }: PersonalInformationStepProps) => {
 
       {/* Secondary ID */}
       <section>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h4 className="text-sm font-semibold">Secondary Identification</h4>
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h4 className="text-sm font-semibold">Secondary Identification</h4>
 
-          <CustomBadge status={profile.secondaryIdStatus || "Pending"} />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Verify the secondary identification document.
+            </p>
+          </div>
+
+          <StatusActions
+            status={profile.secondaryIdStatus}
+            onStatusChange={handleSecondaryIdStatusChange}
+            loading={loading}
+          />
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
