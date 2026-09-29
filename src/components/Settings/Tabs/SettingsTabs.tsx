@@ -1,9 +1,10 @@
-import { CreditCard, Car, FileText } from "lucide-react";
+import { Car, CreditCard, FileText, MessageSquare } from "lucide-react";
 
 import AppTabs from "@/components/common/Tab/AppTabs";
 import VehiclesTab from "./Vehicles/VehiclesTab";
 import BillingTab from "./Billing/BillingTab";
 import CMSTab from "./CMS/CMSTab";
+import EnquiriesTab from "./Enquiry/EnquiriesTab";
 
 const SettingsTabs = () => {
   const tabs = [
@@ -20,6 +21,13 @@ const SettingsTabs = () => {
       icon: CreditCard,
       content: <BillingTab />,
       activeColor: "data-[state=active]:bg-amber-500",
+    },
+    {
+      value: "enquiry",
+      label: "Enquiries",
+      icon: MessageSquare,
+      content: <EnquiriesTab />,
+      activeColor: "data-[state=active]:bg-blue-500",
     },
     {
       value: "cms",

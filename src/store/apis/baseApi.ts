@@ -65,7 +65,8 @@ export const baseApi = createApi({
     "Vehicle",
     "Dashboard",
     "CMS",
-    "Compliance"
+    "Compliance",
+    "Enquiry"
   ],
   endpoints: () => ({}),
 });
